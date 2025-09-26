@@ -1,9 +1,9 @@
-// redux/authSlice.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import type { LoginRequest, LoginResponse, UserWithPermissions } from '../types/auth';
 import { apiEndPoint } from '../services/api';
 import axiosAuth from '../services/axiosAuth';
-
 
 interface AuthState {
     user: UserWithPermissions | null;
@@ -13,17 +13,19 @@ interface AuthState {
         errorField?: 'email' | 'password';
         message: string;
     };
+    permissionMap: Record<string, Record<string, boolean>>;
 }
 
 const initialState: AuthState = {
     user: null,
     isLoginPending: false,
     isLogoutPending: false,
+    permissionMap: {},
 };
 
 // LOGIN
 export const login = createAsyncThunk<
-    string, // trả về token
+    string,
     LoginRequest,
     { rejectValue: LoginResponse['error'] }
 >('auth/login', async (credentials, { rejectWithValue }) => {
@@ -35,7 +37,6 @@ export const login = createAsyncThunk<
 
         localStorage.setItem('token', token);
         return token;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
         return rejectWithValue({ message: err.response?.data?.message || 'Lỗi kết nối server' });
     }
@@ -48,18 +49,48 @@ export const getCurrentUser = createAsyncThunk<
     { rejectValue: string }
 >('auth/getCurrentUser', async (_, { rejectWithValue }) => {
     try {
-        const res = await axiosAuth.get<UserWithPermissions>(apiEndPoint.CURRENT_USER, {
+        const res = await axiosAuth.get(apiEndPoint.CURRENT_USER, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`,
             },
         });
 
-        return res.data;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+        const { userProfile, permissionListAll } = res.data;
+
+        const user: UserWithPermissions = {
+            id: userProfile._id,
+            email: userProfile.email,
+            roleList: userProfile.roleList,
+            permissionListAll,
+        };
+
+        return user;
     } catch (err: any) {
         return rejectWithValue('Không thể tải thông tin người dùng');
     }
 });
+
+//buildPermissionMap traversing permissionListAll properly
+function buildPermissionMap(permissionListAll: any[]): Record<string, Record<string, boolean>> {
+    const result: Record<string, Record<string, boolean>> = {};
+
+    for (const block of permissionListAll) {
+        for (const module of block.permissionList || []) {
+            for (const func of module.functionList || []) {
+                const url = func.functionId?.urlFunction;
+                if (!url) continue;
+
+                if (!result[url]) result[url] = {};
+
+                for (const action of func.action || []) {
+                    result[url][action.name] = action.allowed;
+                }
+            }
+        }
+    }
+
+    return result;
+}
 
 // SLICE
 const authSlice = createSlice({
@@ -69,6 +100,7 @@ const authSlice = createSlice({
         logout: (state) => {
             localStorage.removeItem('token');
             state.user = null;
+            state.permissionMap = {};
         },
     },
     extraReducers: (builder) => {
@@ -86,9 +118,11 @@ const authSlice = createSlice({
             })
             .addCase(getCurrentUser.fulfilled, (state, action) => {
                 state.user = action.payload;
+                state.permissionMap = buildPermissionMap(action.payload.permissionListAll || []);
             })
             .addCase(getCurrentUser.rejected, (state) => {
                 state.user = null;
+                state.permissionMap = {};
             });
     },
 });

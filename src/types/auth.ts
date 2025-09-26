@@ -40,11 +40,14 @@ export interface ModulePermission {
 
 
 export interface UserWithPermissions {
-    role: string;
-    permissionListAll: { permissionList: ModulePermission[] }[];
-    email?: string;
-    name?: string;
+    id: string;
+    email: string;
+    roleList: string[];
+    permissionListAll: {
+        permissionList: ModulePermission[];
+    }[];
 }
+
 
 
 export interface AuthContextType {

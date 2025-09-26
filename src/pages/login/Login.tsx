@@ -1,7 +1,7 @@
 import { Form, Input, Button, Typography, Checkbox } from 'antd';
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { login } from '../../redux/authSlice';
+import { getCurrentUser, login } from '../../redux/authSlice';
 import { useNavigate } from 'react-router-dom';
 
 const { Title, Text, Link } = Typography;
@@ -14,15 +14,27 @@ const Login = () => {
     const [fieldError, setFieldError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (user) navigate('/');
+        if (user) navigate('/admin', { replace: true });
     }, [user, navigate]);
 
     const handleLogin = async (values: { email: string; password: string }) => {
         const result = await dispatch(login(values));
-        if (login.rejected.match(result)) {
-            setFieldError(typeof result.payload === 'string' ? result.payload : 'Login failed');
+
+        if (login.fulfilled.match(result)) {
+            await dispatch(getCurrentUser());
+            navigate('/admin');
+        } else if (login.rejected.match(result)) {
+            const error = result.payload;
+            if (typeof error === 'string') {
+                setFieldError(error);
+            } else if (error?.errorField) {
+                form.setFields([{ name: error.errorField, errors: [error.message] }]);
+            } else {
+                setFieldError(error?.message || 'Login failed');
+            }
         }
     };
+
 
     return (
         <div
