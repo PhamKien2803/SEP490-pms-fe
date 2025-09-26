@@ -1,0 +1,126 @@
+.hero-wrapper {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, #fef9f4 0%, #f4faff 100%);
+  padding: 80px 0;
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.wavy-border-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 32px;
+  background: url('/wave-top.svg') no-repeat top left;
+  background-size: cover;
+}
+
+.section-subtitle {
+  color: #29c2b4;
+  font-weight: 700;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.hero-title {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 900 !important;
+  font-size: 3.2rem !important;
+  color: #384145;
+  line-height: 1.2;
+  margin-bottom: 16px !important;
+}
+
+.hero-description {
+  font-family: 'Poppins', sans-serif;
+  color: #5a6165;
+  text-decoration: underline;
+  display: block;
+  margin-bottom: 32px;
+}
+
+.hero-button {
+  background-color: #f9a84b;
+  color: white;
+  border-radius: 50px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  padding: 8px 32px;
+  box-shadow: 0 8px 25px -8px #f9a84b;
+  transition: all 0.3s ease;
+}
+
+.hero-button:hover {
+  background-color: #f89e38 !important;
+  transform: translateY(-2px);
+}
+
+.hero-image-wrapper {
+  position: relative;
+  max-width: 500px;
+  margin: 0 auto;
+  animation: gentleBounce 2s ease-out forwards;
+}
+
+.hero-image {
+  width: 100%;
+  display: block;
+  clip-path: ellipse(70% 50% at 50% 50%);
+}
+
+.doodle {
+  position: absolute;
+  z-index: 1;
+  animation: float 4s ease-in-out infinite;
+}
+
+.doodle-blobby {
+  width: 50px;
+  height: 50px;
+  background-color: #c8f9f5;
+  border-radius: 47% 53% 69% 31% / 56% 40% 60% 44%;
+}
+
+.doodle-outline {
+  width: 60px;
+  height: 60px;
+  border: 3px solid #fdb556;
+  border-radius: 69% 31% 33% 67% / 56% 61% 39% 44%;
+}
+
+@keyframes gentleBounce {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}

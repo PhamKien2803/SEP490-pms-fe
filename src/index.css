@@ -1,0 +1,165 @@
+* {
+  font-family:
+    'ヒラギノ角ゴ ProN', 'Hiragino Kaku Gothic ProN', '游ゴシック', '游ゴシック体', YuGothic,
+    'Yu Gothic', 'メイリオ', Meiryo, 'ＭＳ ゴシック', 'MS Gothic', HiraKakuProN-W3,
+    'TakaoExゴシック', TakaoExGothic, 'MotoyaLCedar', 'Droid Sans Japanese', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+.obr002-table .ant-table-thead .ant-table-cell {
+  background-color: #fafbfe !important;
+  color: #222831 !important;
+  padding: 24px 22px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.obr002-table .ant-table-tbody td,
+.obr002-table .ant-table-thead th {
+  border-color: var(--ghost) !important;
+}
+
+.obr002-table .ant-table-tbody td:last-child,
+.obr002-table .ant-table-thead th:last-child {
+  border-right: none !important;
+}
+
+.obr002-table .ant-table-tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+.obr002-table .ant-table {
+  border: 1px solid var(--ghost) !important;
+}
+
+.obr002-table .ant-table-tbody .ant-table-cell {
+  font-size: 16px;
+  font-weight: 300;
+  padding: 12px;
+}
+
+.obr002-pagination .ant-pagination-item {
+  border: none !important;
+  /* Remove border */
+  background: transparent !important;
+  /* Make background transparent */
+  box-shadow: none !important;
+  /* Remove any shadow */
+  color: rgba(255, 255, 255, 1);
+}
+
+.obr002-pagination .ant-pagination-item-active {
+  background: #2876091f !important;
+  /* Keep the active page highlighted */
+  border-radius: 8px !important;
+  /* Optional: Round active item */
+}
+
+.obr002-pagination .ant-pagination-item-active a {
+  color: var(--primary) !important;
+  /* Ensure text is visible */
+}
+
+.ant-spin-dot i {
+  background-color: #308b0b !important;
+}
+
+.ant-table-thead .ant-table-cell {
+  background-color: #fafbfe !important;
+}
+
+.ant-table-container {
+  border: 1px solid #edf2fa;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ant-table-tbody > tr:last-child > td {
+  border-bottom-width: 0px;
+}
+
+.ant-table-tbody > tr > td {
+  height: 72px;
+}
+
+.ant-table-thead > tr > th {
+  height: 69px;
+}
+
+.ant-table-tbody .ant-table-cell {
+  font-weight: 300;
+  font-size: 16px;
+  color: #222831;
+}
+
+.ant-table-wrapper .ant-table-thead > tr > th {
+  color: #222831;
+}
+
+.table-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+  border: 1px solid var(--ghost);
+  border-radius: 8px;
+
+  table {
+    border-collapse: collapse;
+    border-radius: 8px;
+    width: 100%;
+    border-style: hidden;
+    min-height: 300px;
+    /* hide standard table (collapsed) border */
+    box-shadow: 0 0 0 1px var(--ghost);
+    /* this draws the table border  */
+  }
+}
+
+.breadcrumb-active {
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.breadcrumb {
+  color: #7f848c;
+  font-weight: 300;
+  font-size: 14px;
+}
+
+.ant-tabs-tab {
+  min-width: 200px;
+  box-shadow:
+    0px 4px 8px rgba(0, 0, 0, 0.06),
+    0px 0px 4px rgba(0, 0, 0, 0.04);
+}
+
+.ant-tabs-tab .ant-tabs-tab-btn {
+  font-weight: 300;
+  width: 100%;
+  text-align: center;
+}
+
+.ant-tabs-tab-active .ant-tabs-tab-btn {
+  font-weight: 600;
+}
+
+.ant-tabs-content-holder {
+  padding: 20px 24px;
+  background: white;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
+  box-shadow:
+    0px 4px 8px rgba(0, 0, 0, 0.06),
+    0px 0px 4px rgba(0, 0, 0, 0.04);
+}
