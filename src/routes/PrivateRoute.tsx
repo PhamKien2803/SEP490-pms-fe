@@ -1,12 +1,12 @@
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
-import { Role } from '@/types/user';
+import { useAppSelector } from '../redux/hooks';
+import { Role } from '../types/user';
 
 interface PrivateRouteProps {
-  allowRoles?: Role[];          // danh sách role được phép
-  requireFunction?: string;     // URL function: "/accounts"
-  requireAction?: string;       // action: "create" | "view" | "edit" | "delete"
+  allowRoles?: Role[];
+  requireFunction?: string;
+  requireAction?: string;
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({
@@ -14,24 +14,25 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
   requireFunction,
   requireAction,
 }) => {
-  const { user, canAction } = useAuth();
   const location = useLocation();
+  const { user, permissionMap } = useAppSelector((state) => state.auth);
 
   // 1. Chưa login
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // 2. Check role (user.role chỉ là 1 string)
-  if (allowRoles && allowRoles.length > 0) {
-    if (!user.role || !allowRoles.includes(user.role as Role)) {
-      return <Navigate to="/403" replace />;
-    }
+  // 2. Check role
+  if (allowRoles?.length && !allowRoles.includes(user.role as Role)) {
+    return <Navigate to="/403" replace />;
   }
 
-  // 3. Check permission động
-  if (requireFunction && requireAction && !canAction(requireFunction, requireAction)) {
-    return <Navigate to="/403" replace />;
+  // 3. Check permission
+  if (requireFunction && requireAction) {
+    const actions = permissionMap.get(requireFunction);
+    if (!actions || !actions[requireAction]) {
+      return <Navigate to="/403" replace />;
+    }
   }
 
   return <Outlet />;

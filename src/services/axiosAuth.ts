@@ -1,10 +1,9 @@
 import axios, { AxiosError } from 'axios';
 import { notification } from 'antd';
-import { constants } from '@/constants';
-import { CookieUtils } from '@/utils/cookies';
-import { messages } from '@/constants/message';
-import { paths } from '@/routes/paths';
-// import { apiEndPoint } from './api';
+import { CookieUtils } from '../utils/cookies';
+import { constants } from '../constants';
+import { messages } from '../constants/message';
+
 
 const axiosAuth = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
@@ -41,8 +40,8 @@ axiosAuth.interceptors.response.use(
          * which will make infinite loop of redirecting.
          */
         if (status === 401) {
-            if (error instanceof AxiosError && window.location.pathname !== paths.LOGIN) {
-                window.location.pathname = paths.LOGIN;
+            if (error instanceof AxiosError && window.location.pathname !== '/auth/login') {
+                window.location.pathname = '/auth/login';
             }
         }
         let errorMessage = messages.AN_UNKNOWN_ERROR_OCCURRED;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { SessionStorageKey } from '@/types/session-storage';
+import { SessionStorageKey } from '../types/session-storage';
 
 export const useSessionStorage = <T>(
     key: SessionStorageKey,

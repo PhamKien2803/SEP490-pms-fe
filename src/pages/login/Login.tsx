@@ -1,10 +1,126 @@
+import { Form, Input, Button, Typography, Checkbox } from 'antd';
+import { useEffect, useState } from 'react';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { login } from '../../redux/authSlice';
+import { useNavigate } from 'react-router-dom';
 
-function Login() {
+const { Title, Text, Link } = Typography;
+
+const Login = () => {
+    const [form] = Form.useForm();
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    const { isLoginPending, user } = useAppSelector((state) => state.auth);
+    const [fieldError, setFieldError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (user) navigate('/');
+    }, [user, navigate]);
+
+    const handleLogin = async (values: { email: string; password: string }) => {
+        const result = await dispatch(login(values));
+        if (login.rejected.match(result)) {
+            setFieldError(typeof result.payload === 'string' ? result.payload : 'Login failed');
+        }
+    };
+
     return (
-        <div>
+        <div
+            style={{
+                display: 'flex',
+                height: '100vh',
+                overflow: 'hidden',
+            }}
+        >
+            {/* Left - Form */}
+            <div
+                style={{
+                    flex: 1,
+                    backgroundColor: '#fff',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    padding: '0 64px',
+                    maxWidth: 480,
+                    margin: '0 auto',
+                }}
+            >
+                <div style={{ textAlign: 'center', marginBottom: 32 }}>
+                    <img src="/logo.jpg" alt="logo" width={48} height={48} />
+                    <Title level={2} style={{ margin: '16px 0 8px' }}>
+                        Sign in
+                    </Title>
+                    <Text>Welcome back to Dophin Preschool ! Please enter your details below to sign in.</Text>
+                </div>
 
+                <Form
+                    form={form}
+                    layout="vertical"
+                    onFinish={handleLogin}
+                    initialValues={{ email: '', password: '', remember: true }}
+                >
+                    <Form.Item
+                        label="Username"
+                        name="email"
+                        rules={[
+                            { required: true, message: 'Please enter your email' },
+                            { type: 'email', message: 'Invalid email format' },
+                        ]}
+                    >
+                        <Input placeholder="Username" size="large" />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Password"
+                        name="password"
+                        rules={[{ required: true, message: 'Please enter your password' }]}
+                    >
+                        <Input.Password placeholder="Password" size="large" />
+                    </Form.Item>
+
+                    {fieldError && (
+                        <div style={{ color: 'red', marginBottom: 16 }}>{fieldError}</div>
+                    )}
+
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: 24,
+                        }}
+                    >
+                        <Form.Item name="remember" valuePropName="checked" noStyle>
+                            <Checkbox>Remember me</Checkbox>
+                        </Form.Item>
+                        <Link href="#">Forgot password?</Link>
+                    </div>
+
+                    <Form.Item>
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            size="large"
+                            loading={isLoginPending}
+                            style={{ width: '100%' }}
+                        >
+                            Log in
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </div>
+
+            {/* Right - Image */}
+            <div
+                style={{
+                    flex: 1,
+                    backgroundImage: 'url("/1.jpg")',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                }}
+            />
         </div>
-    )
-}
+    );
+};
 
-export default Login
+export default Login;

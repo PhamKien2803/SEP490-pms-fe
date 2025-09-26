@@ -1,16 +1,14 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
-import { paths } from "@/routes/paths";
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAppSelector } from '../redux/hooks';
 
-function PublicRoute() {
-    const { user } = useAuth();
-
+const PublicRoute = () => {
+    const { user } = useAppSelector((state) => state.auth);
+    // Nếu đã login thì redirect về HOME
     if (user) {
-        // Đã login thì không cho vào /login nữa → redirect về dashboard
-        return <Navigate to={paths.HOME} replace />;
+        return <Navigate to="/" replace />;
     }
-    // Chưa login → render tiếp nội dung bên trong
+    // Nếu chưa login thì cho phép truy cập các route công khai như /login, /forgot-password
     return <Outlet />;
-}
+};
 
 export default PublicRoute;

@@ -1,4 +1,4 @@
-import { SessionStorageKey } from '@/types/session-storage';
+import { SessionStorageKey } from '../types/session-storage';
 
 interface CookieUtilsType {
     setCookie: (name: string, value: string, days?: number) => void;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { LocalStorageKey } from '@/types/local-storage';
+import { LocalStorageKey } from '../types/local-storage';
 
 export const useLocalStorage = <T>(
     key: LocalStorageKey,

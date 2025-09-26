@@ -1,6 +1,6 @@
-import { constants } from '@/constants';
-import { CookieUtils } from '@/utils/cookies';
 import axios from 'axios';
+import { CookieUtils } from '../utils/cookies';
+import { constants } from '../constants';
 
 const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_API_URL,

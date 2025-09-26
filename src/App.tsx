@@ -1,13 +1,13 @@
-import { AuthProvider } from './context/AuthContext';
-import AppRouter from './routes/AppRouter';
+import { AppRouter } from './routes/AppRouter';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './services/queryClient';
 import { ConfigProvider, notification } from 'antd';
 import theme from './themes';
-import './app.css';
+// import './app.css';
 import { messages } from './constants/message';
 import { useEffect } from 'react';
-
+import { Provider } from 'react-redux';
+import { store } from './redux/store';
 
 function App() {
   useEffect(() => {
@@ -19,11 +19,14 @@ function App() {
         duration: 0,
       });
     };
+
     const handleOnline = () => {
       notification.destroy(messages.MSG_ERROR_CODE_NETWORK);
     };
+
     window.addEventListener('offline', handleOffline);
     window.addEventListener('online', handleOnline);
+
     return () => {
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('online', handleOnline);
@@ -41,9 +44,9 @@ function App() {
       button={{ autoInsertSpace: false }}
     >
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
+        <Provider store={store}>
           <AppRouter />
-        </AuthProvider>
+        </Provider>
       </QueryClientProvider>
     </ConfigProvider>
   );

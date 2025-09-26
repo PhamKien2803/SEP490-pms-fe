@@ -1,9 +1,9 @@
-import { LoginRequest, LoginResponse } from "@/types/auth";
 import { apiEndPoint } from "./api";
 import axiosAuth from "./axiosAuth";
 import { AxiosError } from "axios";
-import { messages } from "@/constants/message";
-import { User } from "@/types/user";
+import type { LoginRequest, LoginResponse } from "../types/auth";
+import type { User } from "../types/user";
+import { messages } from "../constants/message";
 
 export const authApis = {
     login: async (body: LoginRequest): Promise<LoginResponse> => {

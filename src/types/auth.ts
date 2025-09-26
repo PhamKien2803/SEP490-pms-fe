@@ -1,7 +1,4 @@
-export enum LoginErrorField {
-    EMAIL = 'email',
-    PASSWORD = 'password',
-}
+export type LoginErrorField = 'email' | 'password';
 
 export type LoginRequest = {
     email: string;
@@ -16,3 +13,50 @@ export type LoginResponse = {
         message: string;
     };
 };
+
+export interface PermissionAction {
+    name: string;
+    allowed: boolean;
+}
+
+
+export interface FunctionPermission {
+    functionId: {
+        _id: string;
+        functionName: string;
+        urlFunction: string;
+    };
+    action: PermissionAction[];
+}
+
+
+export interface ModulePermission {
+    moduleId: {
+        _id: string;
+        moduleName: string;
+    };
+    functionList: FunctionPermission[];
+}
+
+
+export interface UserWithPermissions {
+    role: string;
+    permissionListAll: { permissionList: ModulePermission[] }[];
+    email?: string;
+    name?: string;
+}
+
+
+export interface AuthContextType {
+    user: UserWithPermissions | null;
+    isLoginPending: boolean;
+    isLogoutPending: boolean;
+    login: (email: string, password: string) => Promise<void>;
+    logout: () => Promise<void>;
+
+
+    hasRole: (role: string) => boolean;
+    hasModule: (moduleName: string) => boolean;
+    hasFunction: (urlFunction: string) => boolean;
+    canAction: (urlFunction: string, actionName: string) => boolean;
+}
