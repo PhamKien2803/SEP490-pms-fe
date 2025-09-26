@@ -1,19 +1,19 @@
 import { RouteObject } from 'react-router-dom';
 import PrivateRoute from '../PrivateRoute';
-import AdminDashboard from '../../pages/dash-board/AdminDashboard';
+import Dashboard from '../../pages/dash-board/Dashboard';
 import UserManagement from '../../pages/user-management/UserManagement';
 
 
-export const routesAdmin: RouteObject[] = [
+export const routes: RouteObject[] = [
     {
-        path: '/admin',
+        path: '/pms',
         element: (
-            <PrivateRoute requireFunction="/admin" requireAction="view" />
+            <PrivateRoute requireFunction="/pms" requireAction="view" />
         ),
         children: [
             {
                 index: true,
-                element: <AdminDashboard />,
+                element: <Dashboard />,
             },
             {
                 path: 'users',

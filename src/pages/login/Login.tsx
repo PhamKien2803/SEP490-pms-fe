@@ -22,7 +22,7 @@ const Login = () => {
 
         if (login.fulfilled.match(result)) {
             await dispatch(getCurrentUser());
-            navigate('/admin');
+            navigate('/pms');
         } else if (login.rejected.match(result)) {
             const error = result.payload;
             if (typeof error === 'string') {
