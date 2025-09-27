@@ -3,7 +3,6 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './services/queryClient';
 import { ConfigProvider, notification } from 'antd';
 import theme from './themes';
-// import './app.css';
 import { messages } from './constants/message';
 import { useEffect } from 'react';
 import { Provider } from 'react-redux';

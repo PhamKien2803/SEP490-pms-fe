@@ -1,8 +1,10 @@
 import { Form, Input, Button, Typography, Checkbox } from 'antd';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { getCurrentUser, login } from '../../redux/authSlice';
 import { useNavigate } from 'react-router-dom';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { LocalStorageKey } from '../../types/local-storage';
 
 const { Title, Text, Link } = Typography;
 
@@ -10,40 +12,45 @@ const Login = () => {
     const [form] = Form.useForm();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const { isLoginPending, user } = useAppSelector((state) => state.auth);
-    const [fieldError, setFieldError] = useState<string | null>(null);
+    const { isLoginPending } = useAppSelector((state) => state.auth);
 
-    useEffect(() => {
-        if (user) navigate('/admin', { replace: true });
-    }, [user, navigate]);
+    // ✅ Dùng useLocalStorage cho email
+    const [email, setEmail] = useLocalStorage<string>(LocalStorageKey.EMAIL, '');
+    const [password, setPassword] = useState('');
+    const [remember, setRemember] = useState(true);
+    const [fieldError, setFieldError] = useState<string | null>(null);
 
     const handleLogin = async (values: { email: string; password: string }) => {
         const result = await dispatch(login(values));
 
         if (login.fulfilled.match(result)) {
-            await dispatch(getCurrentUser());
-            navigate('/pms');
+            // ✅ Nếu tick remember thì lưu email
+            if (remember) {
+                setEmail(values.email);
+            } else {
+                setEmail('');
+            }
+
+            const getUserResult = await dispatch(getCurrentUser());
+            if (getCurrentUser.fulfilled.match(getUserResult)) {
+                navigate("/pms", { replace: true });
+            } else {
+                setFieldError("Không lấy được thông tin người dùng");
+            }
         } else if (login.rejected.match(result)) {
             const error = result.payload;
-            if (typeof error === 'string') {
+            if (typeof error === "string") {
                 setFieldError(error);
             } else if (error?.errorField) {
                 form.setFields([{ name: error.errorField, errors: [error.message] }]);
             } else {
-                setFieldError(error?.message || 'Login failed');
+                setFieldError(error?.message || "Login failed");
             }
         }
     };
 
-
     return (
-        <div
-            style={{
-                display: 'flex',
-                height: '100vh',
-                overflow: 'hidden',
-            }}
-        >
+        <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
             {/* Left - Form */}
             <div
                 style={{
@@ -59,17 +66,17 @@ const Login = () => {
             >
                 <div style={{ textAlign: 'center', marginBottom: 32 }}>
                     <img src="/logo.jpg" alt="logo" width={48} height={48} />
-                    <Title level={2} style={{ margin: '16px 0 8px' }}>
-                        Sign in
-                    </Title>
-                    <Text>Welcome back to Dophin Preschool ! Please enter your details below to sign in.</Text>
+                    <Title level={2} style={{ margin: '16px 0 8px' }}>Sign in</Title>
+                    <Text>
+                        Welcome back to Dophin Preschool! Please enter your details below to sign in.
+                    </Text>
                 </div>
 
                 <Form
                     form={form}
                     layout="vertical"
                     onFinish={handleLogin}
-                    initialValues={{ email: '', password: '', remember: true }}
+                    initialValues={{ email, password, remember }}
                 >
                     <Form.Item
                         label="Username"
@@ -79,7 +86,12 @@ const Login = () => {
                             { type: 'email', message: 'Invalid email format' },
                         ]}
                     >
-                        <Input placeholder="Username" size="large" />
+                        <Input
+                            placeholder="Username"
+                            size="large"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
                     </Form.Item>
 
                     <Form.Item
@@ -87,7 +99,12 @@ const Login = () => {
                         name="password"
                         rules={[{ required: true, message: 'Please enter your password' }]}
                     >
-                        <Input.Password placeholder="Password" size="large" />
+                        <Input.Password
+                            placeholder="Password"
+                            size="large"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
                     </Form.Item>
 
                     {fieldError && (
@@ -103,7 +120,12 @@ const Login = () => {
                         }}
                     >
                         <Form.Item name="remember" valuePropName="checked" noStyle>
-                            <Checkbox>Remember me</Checkbox>
+                            <Checkbox
+                                checked={remember}
+                                onChange={(e) => setRemember(e.target.checked)}
+                            >
+                                Remember me
+                            </Checkbox>
                         </Form.Item>
                         <Link href="#">Forgot password?</Link>
                     </div>
@@ -114,6 +136,7 @@ const Login = () => {
                             htmlType="submit"
                             size="large"
                             loading={isLoginPending}
+                            disabled={password.length < 8}
                             style={{ width: '100%' }}
                         >
                             Log in

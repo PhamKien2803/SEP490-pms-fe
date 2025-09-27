@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type {
@@ -13,7 +14,7 @@ interface AuthState {
   isLoginPending: boolean;
   isLogoutPending: boolean;
   loginError?: { errorField?: "email" | "password"; message: string };
-  moduleMenu: ModuleMenu[]; 
+  moduleMenu: ModuleMenu[];
   functionItem: FunctionItem[];
 }
 
@@ -153,7 +154,7 @@ const authSlice = createSlice({
         state.isLoginPending = false;
         state.loginError = action.payload || { message: "Đăng nhập thất bại" };
       })
-       .addCase(getCurrentUser.fulfilled, (state, action) => {
+      .addCase(getCurrentUser.fulfilled, (state, action) => {
         state.user = action.payload;
         state.moduleMenu = buildModuleMenu(
           action.payload.permissionListAll || []

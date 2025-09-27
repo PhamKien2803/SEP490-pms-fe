@@ -2,7 +2,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import PublicRoute from './PublicRoute';
 import PrivateRoute from './PrivateRoute';
 import NotFound from '../pages/not-found/NotFound';
-import { routes } from './role/admin.routes';
+import { routes } from './role/routes';
 import PMSHome from '../pages/homepage/PMShome';
 import Login from '../pages/login/Login';
 import ForgotPassword from '../pages/forgot-password/ForgotPassword';

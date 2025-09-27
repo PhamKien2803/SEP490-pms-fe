@@ -20,7 +20,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
   }
 
   if (requireFunction && requireAction && !canAction(requireFunction, requireAction)) {
-    // return <Navigate to="/unauthorized" replace />;
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return <Outlet />;
