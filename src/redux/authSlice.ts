@@ -16,6 +16,7 @@ interface AuthState {
   loginError?: { errorField?: "email" | "password"; message: string };
   moduleMenu: ModuleMenu[];
   functionItem: FunctionItem[];
+  isInitializing: boolean;
 }
 
 const initialState: AuthState = {
@@ -23,7 +24,8 @@ const initialState: AuthState = {
   isLoginPending: false,
   isLogoutPending: false,
   moduleMenu: [],
-  functionItem: []
+  functionItem: [],
+  isInitializing: true,
 };
 
 interface PermissionAction {
@@ -154,16 +156,19 @@ const authSlice = createSlice({
         state.isLoginPending = false;
         state.loginError = action.payload || { message: "Đăng nhập thất bại" };
       })
+      .addCase(getCurrentUser.pending, (state) => {
+        state.isInitializing = true;
+      })
       .addCase(getCurrentUser.fulfilled, (state, action) => {
         state.user = action.payload;
-        state.moduleMenu = buildModuleMenu(
-          action.payload.permissionListAll || []
-        );
+        state.moduleMenu = buildModuleMenu(action.payload.permissionListAll || []);
+        state.isInitializing = false;
       })
-    //   .addCase(getCurrentUser.rejected, (state) => {
-    //     state.user = null;
-    //     state.permissionMap = {};
-    //   });
+      .addCase(getCurrentUser.rejected, (state) => {
+        state.user = null;
+        state.isInitializing = false;
+        localStorage.removeItem("token");
+      })
   },
 });
 

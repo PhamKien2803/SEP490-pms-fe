@@ -2,11 +2,12 @@ import { RouteObject } from 'react-router-dom';
 import PrivateRoute from '../PrivateRoute';
 import Dashboard from '../../pages/dash-board/Dashboard';
 import UserManagement from '../../pages/user-management/UserManagement';
+import { constants } from '../../constants';
 
 export const routes: RouteObject[] = [
     {
-        path: "/pms",
-        element: <PrivateRoute requireFunction="/pms" requireAction="view" />,
+        path: constants.APP_PREFIX,
+        element: <PrivateRoute requireFunction={constants.APP_PREFIX} requireAction="view" />,
         children: [
             {
                 path: "",
@@ -20,7 +21,7 @@ export const routes: RouteObject[] = [
                         path: "accounts",
                         element: (
                             <PrivateRoute
-                                requireFunction="/pms/accounts"
+                                requireFunction={`${constants.APP_PREFIX}/accounts`}
                                 requireAction="view"
                             />
                         ),

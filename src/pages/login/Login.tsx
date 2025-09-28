@@ -5,6 +5,7 @@ import { getCurrentUser, login } from '../../redux/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { LocalStorageKey } from '../../types/local-storage';
+import { constants } from '../../constants';
 
 const { Title, Text, Link } = Typography;
 
@@ -14,7 +15,6 @@ const Login = () => {
     const navigate = useNavigate();
     const { isLoginPending } = useAppSelector((state) => state.auth);
 
-    // ✅ Dùng useLocalStorage cho email
     const [email, setEmail] = useLocalStorage<string>(LocalStorageKey.EMAIL, '');
     const [password, setPassword] = useState('');
     const [remember, setRemember] = useState(true);
@@ -24,7 +24,6 @@ const Login = () => {
         const result = await dispatch(login(values));
 
         if (login.fulfilled.match(result)) {
-            // ✅ Nếu tick remember thì lưu email
             if (remember) {
                 setEmail(values.email);
             } else {
@@ -33,7 +32,7 @@ const Login = () => {
 
             const getUserResult = await dispatch(getCurrentUser());
             if (getCurrentUser.fulfilled.match(getUserResult)) {
-                navigate("/pms", { replace: true });
+                navigate(constants.APP_PREFIX, { replace: true });
             } else {
                 setFieldError("Không lấy được thông tin người dùng");
             }

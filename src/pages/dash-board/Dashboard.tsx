@@ -14,6 +14,8 @@ import {
   MenuOutlined,
   UserOutlined,
   DownOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
 } from "@ant-design/icons";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -22,7 +24,6 @@ import { logout } from "../../redux/authSlice";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { LocalStorageKey } from "../../types/local-storage";
 import ErrorBoundary from "../../components/error-boundary/Error";
-import { SIDER_COLLAPSED_WIDTH } from "../../components/sider/Sider";
 
 const { Header, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -81,13 +82,13 @@ const Dashboard: React.FC = () => {
   );
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
+    <Layout hasSider style={{ minHeight: "100vh" }}>
       {screens.lg && (
         <Layout.Sider
-          collapsible
           collapsed={collapsed}
-          onCollapse={setCollapsed}
+          trigger={null}
           width={250}
+          collapsedWidth={80}
           style={{
             backgroundColor: "#fff",
             borderRight: "1px solid #f0f0f0",
@@ -119,12 +120,7 @@ const Dashboard: React.FC = () => {
         </Layout.Sider>
       )}
 
-      <Layout
-        style={{
-          marginLeft: screens.lg ? (collapsed ? SIDER_COLLAPSED_WIDTH : 250) : 0,
-          transition: "margin-left 0.2s",
-        }}
-      >
+      <Layout>
         <Header
           style={{
             backgroundColor: "#fff",
@@ -136,14 +132,28 @@ const Dashboard: React.FC = () => {
             boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
           }}
         >
-          {!screens.lg && (
-            <Button
-              icon={<MenuOutlined />}
-              type="text"
-              onClick={() => setDrawerVisible(true)}
-            />
-          )}
+          <div style={{ display: "flex", alignItems: "center" }}>
+            {screens.lg && (
+              <Button
+                type="text"
+                icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                onClick={() => setCollapsed(!collapsed)}
+                style={{
+                  fontSize: "16px",
+                  width: 40,
+                  height: 40,
+                }}
+              />
+            )}
 
+            {!screens.lg && (
+              <Button
+                icon={<MenuOutlined />}
+                type="text"
+                onClick={() => setDrawerVisible(true)}
+              />
+            )}
+          </div>
           <Dropdown overlay={userMenu} trigger={["click"]}>
             <Button type="text" style={{ display: "flex", alignItems: "center" }}>
               <Avatar style={{ marginRight: 8 }} icon={<UserOutlined />} />

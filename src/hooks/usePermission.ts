@@ -1,28 +1,5 @@
 import { useAppSelector } from '../redux/hooks';
-const ADMIN_PERMISSIONS = [
-    '/accounts',
-    '/roles',
-    '/students',
-    '/parents',
-];
-// const TEACHER_PERMISSIONS = [
-//     '/classes',
-//     '/subjects',
-//     '/exams',
-//     '/scores',
-// ];
 
-// const STAFF_PERMISSIONS = [
-//     '/classes',
-//     '/subjects',
-//     '/exams',
-//     '/scores',
-// ];
-
-// const PARENT_PERMISSIONS = [
-//     '/children',
-//     '/scores',
-// ]
 export const usePermission = () => {
     const user = useAppSelector((state) => state.auth.user);
 
@@ -70,10 +47,6 @@ export const usePermission = () => {
         return urls;
     };
 
-    const isAdmin = (): boolean => {
-        const userUrls = getAllFunctionUrls();
-        return ADMIN_PERMISSIONS.every((adminUrl: string) => userUrls.includes(adminUrl));
-    };
-
-    return { hasRole, hasModule, hasFunction, canAction, isAdmin, getAllFunctionUrls };
+    return { hasRole, hasModule, hasFunction, canAction, getAllFunctionUrls };
 };
+

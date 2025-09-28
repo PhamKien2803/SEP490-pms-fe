@@ -6,6 +6,7 @@ import { routes } from './role/routes';
 import PMSHome from '../pages/homepage/PMShome';
 import Login from '../pages/login/Login';
 import ForgotPassword from '../pages/forgot-password/ForgotPassword';
+import UnauthorizedPage from '../pages/not-found/UnauthorizedPage';
 
 const router = createBrowserRouter([
     {
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
         children: [
             ...routes,
         ],
+    },
+    {
+        path: '/unauthorized',
+        element: <UnauthorizedPage />,
     },
     {
         path: '*',
