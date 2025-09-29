@@ -21,7 +21,6 @@ export const useLocalStorage = <T>(
             return initialValue;
         }
     });
-
     // Save state to localStorage
     useEffect(() => {
         try {

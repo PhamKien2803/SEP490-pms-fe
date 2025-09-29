@@ -49,7 +49,6 @@ export const usePermission = () => {
 
     const getAllowedActions = (urlFunction: string): string[] => {
         if (!user?.permissionListAll) return [];
-
         for (const block of user.permissionListAll) {
             for (const module of block.permissionList) {
                 const func = module.functionList.find(f => f.functionId.urlFunction === urlFunction);
@@ -60,7 +59,9 @@ export const usePermission = () => {
                 }
             }
         }
-        return [];
+        return [
+            "Không có quyền"
+        ];
     };
 
     return { hasRole, hasModule, hasFunction, canAction, getAllFunctionUrls, getAllowedActions };

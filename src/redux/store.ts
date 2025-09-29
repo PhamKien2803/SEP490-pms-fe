@@ -4,7 +4,6 @@ import authReducer from './authSlice';
 export const store = configureStore({
     reducer: {
         auth: authReducer,
-        // Thêm reducer khác tại đây nếu có
     },
     devTools: import.meta.env.DEV,
 });
