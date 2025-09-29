@@ -4,51 +4,13 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type {
   LoginRequest,
   LoginResponse,
+  ModuleMenu,
   UserWithPermissions,
 } from "../types/auth";
 import { apiEndPoint } from "../services/api";
 import axiosAuth from "../services/axiosAuth";
+import { initialState } from './../types/auth';
 
-interface AuthState {
-  user: UserWithPermissions | null;
-  isLoginPending: boolean;
-  isLogoutPending: boolean;
-  loginError?: { errorField?: "email" | "password"; message: string };
-  moduleMenu: ModuleMenu[];
-  functionItem: FunctionItem[];
-  isInitializing: boolean;
-}
-
-const initialState: AuthState = {
-  user: null,
-  isLoginPending: false,
-  isLogoutPending: false,
-  moduleMenu: [],
-  functionItem: [],
-  isInitializing: true,
-};
-
-interface PermissionAction {
-  name: string;
-  allowed: boolean;
-}
-
-interface FunctionItem {
-  functionId: {
-    _id: string;
-    functionName: string;
-    urlFunction: string;
-  };
-  action: PermissionAction[];
-}
-
-interface ModuleMenu {
-  moduleName: string;
-  functions: {
-    name: string;
-    url: string;
-  }[];
-}
 // LOGIN
 export const login = createAsyncThunk<
   string,
@@ -124,7 +86,6 @@ function buildModuleMenu(permissionListAll: { permissionList: any[] }[]): Module
       }
     }
   }
-
   return Array.from(map.values());
 }
 

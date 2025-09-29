@@ -14,11 +14,6 @@ export type LoginResponse = {
     };
 };
 
-export interface PermissionAction {
-    name: string;
-    allowed: boolean;
-}
-
 
 export interface FunctionPermission {
     functionId: {
@@ -38,7 +33,6 @@ export interface ModulePermission {
     functionList: FunctionPermission[];
 }
 
-
 export interface UserWithPermissions {
     id: string;
     email: string;
@@ -49,17 +43,58 @@ export interface UserWithPermissions {
 }
 
 
-
 export interface AuthContextType {
     user: UserWithPermissions | null;
     isLoginPending: boolean;
     isLogoutPending: boolean;
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
-
-
     hasRole: (role: string) => boolean;
     hasModule: (moduleName: string) => boolean;
     hasFunction: (urlFunction: string) => boolean;
     canAction: (urlFunction: string, actionName: string) => boolean;
 }
+
+export interface AuthState {
+    user: UserWithPermissions | null;
+    isLoginPending: boolean;
+    isLogoutPending: boolean;
+    loginError?: { errorField?: "email" | "password"; message: string };
+    moduleMenu: ModuleMenu[];
+    functionItem: FunctionItem[];
+    isInitializing: boolean;
+}
+
+export const initialState: AuthState = {
+    user: null,
+    isLoginPending: false,
+    isLogoutPending: false,
+    moduleMenu: [],
+    functionItem: [],
+    isInitializing: true,
+};
+
+export interface PermissionAction {
+    name: string;
+    allowed: boolean;
+}
+
+export interface FunctionItem {
+    functionId: {
+        _id: string;
+        functionName: string;
+        urlFunction: string;
+    };
+    action: PermissionAction[];
+}
+
+export interface ModuleMenu {
+    moduleName: string;
+    functions: {
+        name: string;
+        url: string;
+    }[];
+}
+
+
+

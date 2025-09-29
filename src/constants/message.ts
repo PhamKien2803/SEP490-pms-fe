@@ -29,5 +29,12 @@ export const messages = {
     INVALID_EMAIL: 'Please enter a valid email address.',
     PASSWORD_MIN_LENGTH: 'Password must be at least 8 characters long.',
     MSG_ERROR_CODE_NETWORK: 'Network error. Please check your internet connection.',
+    INVALID_CREDENTIALS: 'Invalid email or password.',
+    PASSWORDS_DO_NOT_MATCH: 'Passwords do not match.',
+    SESSION_EXPIRED: 'Your session has expired. Please log in again.',
+    UNSAVED_CHANGES: 'You have unsaved changes. Are you sure you want to leave?',
+    NO_DATA: 'No data available.',
+    LOADING: 'Loading...',
+    SUBMITTING: 'Submitting...',
 
 }
