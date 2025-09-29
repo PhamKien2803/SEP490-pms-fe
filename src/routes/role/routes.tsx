@@ -3,6 +3,7 @@ import PrivateRoute from '../PrivateRoute';
 import Dashboard from '../../pages/dash-board/Dashboard';
 import UserManagement from '../../pages/user-management/UserManagement';
 import { constants } from '../../constants';
+import RolePermission from '../../pages/role-permission/RolePermission';
 
 export const routes: RouteObject[] = [
     {
@@ -29,6 +30,21 @@ export const routes: RouteObject[] = [
                             {
                                 index: true,
                                 element: <UserManagement />,
+                            },
+                        ],
+                    },
+                    {
+                        path: "roles",
+                        element: (
+                            <PrivateRoute
+                                requireFunction={`${constants.APP_PREFIX}/roles`}
+                                requireAction="view"
+                            />
+                        ),
+                        children: [
+                            {
+                                index: true,
+                                element: <RolePermission />,
                             },
                         ],
                     },

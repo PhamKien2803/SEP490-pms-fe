@@ -49,7 +49,6 @@ interface ModuleMenu {
     url: string;
   }[];
 }
-
 // LOGIN
 export const login = createAsyncThunk<
   string,
@@ -65,7 +64,6 @@ export const login = createAsyncThunk<
 
     if (error || !token)
       return rejectWithValue(error || { message: "Đăng nhập thất bại" });
-
     localStorage.setItem("token", token);
     return token;
   } catch (err: any) {
@@ -129,7 +127,6 @@ function buildModuleMenu(permissionListAll: { permissionList: any[] }[]): Module
 
   return Array.from(map.values());
 }
-
 
 // SLICE
 const authSlice = createSlice({

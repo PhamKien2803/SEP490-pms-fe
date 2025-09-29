@@ -47,6 +47,22 @@ export const usePermission = () => {
         return urls;
     };
 
-    return { hasRole, hasModule, hasFunction, canAction, getAllFunctionUrls };
+    const getAllowedActions = (urlFunction: string): string[] => {
+        if (!user?.permissionListAll) return [];
+
+        for (const block of user.permissionListAll) {
+            for (const module of block.permissionList) {
+                const func = module.functionList.find(f => f.functionId.urlFunction === urlFunction);
+                if (func) {
+                    return func.action
+                        .filter(act => act.allowed)
+                        .map(act => act.name);
+                }
+            }
+        }
+        return [];
+    };
+
+    return { hasRole, hasModule, hasFunction, canAction, getAllFunctionUrls, getAllowedActions };
 };
 
