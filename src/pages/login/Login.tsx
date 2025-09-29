@@ -14,7 +14,6 @@ const Login = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const { isLoginPending } = useAppSelector((state) => state.auth);
-
     const [email, setEmail] = useLocalStorage<string>(LocalStorageKey.EMAIL, '');
     const [password, setPassword] = useState('');
     const [remember, setRemember] = useState(true);
@@ -29,7 +28,6 @@ const Login = () => {
             } else {
                 setEmail('');
             }
-
             const getUserResult = await dispatch(getCurrentUser());
             if (getCurrentUser.fulfilled.match(getUserResult)) {
                 navigate(constants.APP_PREFIX, { replace: true });
@@ -47,10 +45,8 @@ const Login = () => {
             }
         }
     };
-
     return (
         <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-            {/* Left - Form */}
             <div
                 style={{
                     flex: 1,

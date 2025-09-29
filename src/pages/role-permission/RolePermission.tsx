@@ -1,5 +1,5 @@
 
-function RoleManagement() {
+function RolePermission() {
     return (
         <div>
             Role Management Page
@@ -7,4 +7,4 @@ function RoleManagement() {
     )
 }
 
-export default RoleManagement
+export default RolePermission
