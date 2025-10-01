@@ -1,7 +1,7 @@
 import { apiEndPoint } from "./api";
 import axiosAuth from "./axiosAuth";
 import { AxiosError } from "axios";
-import type { LoginRequest, LoginResponse } from "../types/auth";
+import type { CreateFunctionDto, Functions, FunctionsResponse, LoginRequest, LoginResponse, UpdateFunctionDto } from "../types/auth";
 import type { User } from "../types/user";
 import { messages } from "../constants/message";
 
@@ -34,5 +34,26 @@ export const userApis = {
     getCurrentUser: async (): Promise<User> => {
         const response = await axiosAuth.get<User>(apiEndPoint.CURRENT_USER);
         return response.data;
+    },
+}
+
+export const functionsApis = {
+    getFunctions: async (params: { page: number, limit: number }): Promise<FunctionsResponse> => {
+        const response = await axiosAuth.get<FunctionsResponse>(apiEndPoint.GET_FUNCTION, { params });
+        return response.data;
+    },
+
+    createFunction: async (body: CreateFunctionDto): Promise<Functions> => {
+        const response = await axiosAuth.post<Functions>(apiEndPoint.CREATE_FUNTION, body);
+        return response.data;
+    },
+
+    updateFunction: async (id: string, body: UpdateFunctionDto): Promise<Functions> => {
+        const response = await axiosAuth.put<Functions>(apiEndPoint.UPDATE_FUNCTION(id), body);
+        return response.data;
+    },
+
+    deleteFunction: async (id: string): Promise<void> => {
+        await axiosAuth.post(apiEndPoint.DELETE_FUNCTION(id));
     },
 }

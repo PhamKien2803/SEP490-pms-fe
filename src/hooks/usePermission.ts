@@ -59,9 +59,7 @@ export const usePermission = () => {
                 }
             }
         }
-        return [
-            "Không có quyền"
-        ];
+        return [];
     };
 
     return { hasRole, hasModule, hasFunction, canAction, getAllFunctionUrls, getAllowedActions };

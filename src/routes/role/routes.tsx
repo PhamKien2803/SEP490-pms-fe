@@ -4,6 +4,7 @@ import Dashboard from '../../pages/dash-board/Dashboard';
 import UserManagement from '../../pages/user-management/UserManagement';
 import { constants } from '../../constants';
 import RolePermission from '../../pages/role-permission/RolePermission';
+import FunctionsManagement from '../../pages/functions-management/FunctionsManagement';
 
 export const routes: RouteObject[] = [
     {
@@ -48,6 +49,21 @@ export const routes: RouteObject[] = [
                             },
                         ],
                     },
+                    {
+                        path: "functions",
+                        element: (
+                            <PrivateRoute
+                                requireFunction={`${constants.APP_PREFIX}/functions`}
+                                requireAction="view"
+                            />
+                        ),
+                        children: [
+                            {
+                                index: true,
+                                element: <FunctionsManagement />,
+                            },
+                        ],
+                    }
                 ],
             },
         ],
