@@ -1,12 +1,13 @@
 import { AppRouter } from './routes/AppRouter';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './services/queryClient';
-import { ConfigProvider, Flex, notification, Spin } from 'antd';
+import { ConfigProvider, Flex, notification, Spin, App as AntdApp } from 'antd';
 import theme from './themes';
 import { messages } from './constants/message';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentUser } from './redux/authSlice';
+import { ToastContainer } from 'react-toastify';
 import type { AppDispatch, RootState } from './redux/store';
 
 function App() {
@@ -61,9 +62,23 @@ function App() {
       }}
       button={{ autoInsertSpace: false }}
     >
-      <QueryClientProvider client={queryClient}>
-        <AppRouter />
-      </QueryClientProvider>
+      <AntdApp>
+        <QueryClientProvider client={queryClient}>
+          <AppRouter />
+          <ToastContainer
+            position="bottom-left"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
+        </QueryClientProvider>
+      </AntdApp>
     </ConfigProvider>
   );
 }

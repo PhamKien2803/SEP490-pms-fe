@@ -97,4 +97,34 @@ export interface ModuleMenu {
 }
 
 
+//Function type
+export interface Functions {
+    _id: string;
+    functionCode: string;
+    functionName: string;
+    urlFunction: string;
+    active?: boolean;
+}
+
+export interface PaginationInfo {
+    totalCount: number;
+    limit: number;
+    page: number;
+}
+
+export interface FunctionsResponse {
+    data: Functions[];
+    page: PaginationInfo;
+}
+
+export interface CreateFunctionDto {
+    functionName: string;
+    urlFunction: string;
+}
+
+export interface UpdateFunctionDto {
+    functionName?: string;
+    urlFunction?: string;
+}
+
 
