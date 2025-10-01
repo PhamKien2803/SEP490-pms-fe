@@ -15,6 +15,7 @@ import { toast } from 'react-toastify';
 
 const FunctionsManagement: React.FC = () => {
     const [functions, setFunctions] = useState<Functions[]>([]);
+    const [searchKeyword, setSearchKeyword] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
     const [pagination, setPagination] = useState<TablePaginationConfig>({
         current: 1,
@@ -25,6 +26,7 @@ const FunctionsManagement: React.FC = () => {
         position: ['bottomCenter'],
         showTotal: (total) => `Tổng số: ${total} bản ghi`,
     });
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -57,6 +59,15 @@ const FunctionsManagement: React.FC = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pagination.current, pagination.pageSize]);
 
+    const filteredFunctions = useMemo(() => {
+        const keyword = searchKeyword.trim().toLowerCase();
+        if (!keyword) return functions;
+        return functions.filter(item =>
+            item.functionName.toLowerCase().includes(keyword) ||
+            item.functionCode.toLowerCase().includes(keyword)
+        );
+    }, [functions, searchKeyword]);
+
     const handleTableChange = useCallback((newPagination: TablePaginationConfig) => {
         setPagination(prev => ({
             ...prev,
@@ -65,7 +76,6 @@ const FunctionsManagement: React.FC = () => {
         }));
     }, []);
 
-    // Handle create function
     const handleCreateFunction = async (values: CreateFunctionDto) => {
         setIsSubmitting(true);
         try {
@@ -84,7 +94,6 @@ const FunctionsManagement: React.FC = () => {
         }
     };
 
-    // Handle update function
     const handleOpenUpdateModal = (record: Functions) => {
         setEditingFunction(record);
         setIsUpdateModalOpen(true);
@@ -112,7 +121,6 @@ const FunctionsManagement: React.FC = () => {
 
     const handleConfirmDelete = async () => {
         if (!deletingId) return;
-
         setIsDeleting(true);
         try {
             await functionsApis.deleteFunction(deletingId);
@@ -171,14 +179,21 @@ const FunctionsManagement: React.FC = () => {
             </Col>
             <Col>
                 <Space>
-                    <Input.Search placeholder="Tìm kiếm chức năng..." style={{ width: 250 }} />
+                    <Input.Search
+                        placeholder="Tìm kiếm chức năng..."
+                        style={{ width: 250 }}
+                        value={searchKeyword}
+                        onChange={e => setSearchKeyword(e.target.value)}
+                        allowClear
+                    />
                     <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
                         Tạo mới
                     </Button>
                 </Space>
             </Col>
         </Row>
-    ), []);
+    ), [searchKeyword]);
+
     const initialUpdateData = editingFunction ? {
         functionName: editingFunction.functionName,
         urlSuffix: editingFunction.urlFunction.replace('/pms', ''),
@@ -189,13 +204,14 @@ const FunctionsManagement: React.FC = () => {
             <Card title={cardHeader} bordered={false} style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
                 <Table
                     columns={columns}
-                    dataSource={functions}
+                    dataSource={filteredFunctions}
                     loading={loading}
                     rowKey="_id"
-                    pagination={pagination}
+                    pagination={searchKeyword.trim() ? false : pagination}
                     onChange={handleTableChange}
                 />
             </Card>
+
             <CreateFunction
                 open={isModalOpen}
                 loading={isSubmitting}
