@@ -15,7 +15,7 @@ function App() {
   const { isInitializing } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (token) {
       dispatch(getCurrentUser());
     }
@@ -44,7 +44,7 @@ function App() {
     };
   }, []);
 
-  if (isInitializing && localStorage.getItem('token')) {
+  if (isInitializing && sessionStorage.getItem('token')) {
     return (
       <Flex align="center" justify="center" style={{ minHeight: '100vh' }}>
         <Spin size="large" />

@@ -104,6 +104,8 @@ export interface Functions {
     functionName: string;
     urlFunction: string;
     active?: boolean;
+    createdBy: string;
+    updateBy?: string;
 }
 
 export interface PaginationInfo {
@@ -120,11 +122,13 @@ export interface FunctionsResponse {
 export interface CreateFunctionDto {
     functionName: string;
     urlFunction: string;
+    createdBy: string;
 }
 
 export interface UpdateFunctionDto {
     functionName?: string;
     urlFunction?: string;
+    updatedBy: string;
 }
 
 
