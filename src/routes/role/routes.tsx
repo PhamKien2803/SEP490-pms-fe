@@ -3,8 +3,8 @@ import PrivateRoute from '../PrivateRoute';
 import Dashboard from '../../pages/dash-board/Dashboard';
 import UserManagement from '../../pages/user-management/UserManagement';
 import { constants } from '../../constants';
-import RolePermission from '../../pages/role-permission/RolePermission';
 import FunctionsManagement from '../../pages/functions-management/FunctionsManagement';
+import RoleManagement from '../../pages/role-management/RoleManagement';
 
 export const routes: RouteObject[] = [
     {
@@ -45,7 +45,7 @@ export const routes: RouteObject[] = [
                         children: [
                             {
                                 index: true,
-                                element: <RolePermission />,
+                                element: <RoleManagement />,
                             },
                         ],
                     },
