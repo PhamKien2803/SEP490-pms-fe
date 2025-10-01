@@ -17,7 +17,7 @@ export const login = createAsyncThunk<
   string,
   LoginRequest,
   { rejectValue: LoginResponse["error"] }
->("auth/login", async (credentials, { rejectWithValue }) => {
+>("pms/auth/login", async (credentials, { rejectWithValue }) => {
   try {
     const res = await axiosAuth.post<LoginResponse>(
       apiEndPoint.LOGIN,
@@ -41,7 +41,7 @@ export const getCurrentUser = createAsyncThunk<
   UserWithPermissions,
   void,
   { rejectValue: string }
->("auth/getCurrentUser", async (_, { rejectWithValue }) => {
+>("pms/auth/getCurrentUser", async (_, { rejectWithValue }) => {
   try {
     const res = await axiosAuth.get(apiEndPoint.CURRENT_USER, {
       headers: {
