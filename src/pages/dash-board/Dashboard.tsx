@@ -74,7 +74,7 @@ const Dashboard: React.FC = () => {
           ),
           onClick: () => {
             dispatch(logout());
-            navigate("/pms/auth/login");
+            navigate("/login");
           },
         },
       ]}

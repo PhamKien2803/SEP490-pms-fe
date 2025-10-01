@@ -27,7 +27,7 @@ export const login = createAsyncThunk<
 
     if (error || !token)
       return rejectWithValue(error || { message: "Đăng nhập thất bại" });
-    localStorage.setItem("token", token);
+    sessionStorage.setItem("token", token);
     return token;
   } catch (err: any) {
     return rejectWithValue({
@@ -45,7 +45,7 @@ export const getCurrentUser = createAsyncThunk<
   try {
     const res = await axiosAuth.get(apiEndPoint.CURRENT_USER, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
       },
     });
 
@@ -96,7 +96,7 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
-      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
       state.user = null;
       state.moduleMenu = [];
       state.functionItem = [];
@@ -126,7 +126,7 @@ const authSlice = createSlice({
       .addCase(getCurrentUser.rejected, (state) => {
         state.user = null;
         state.isInitializing = false;
-        localStorage.removeItem("token");
+        sessionStorage.removeItem("token");
       })
   },
 });
