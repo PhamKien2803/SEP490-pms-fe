@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Button } from 'antd';
 import { CreateFunctionDto } from '../../types/auth';
 import { toast } from 'react-toastify';
+// import { useCurrentUser } from '../../hooks/useCurrentUser';
 
 interface CreateFunctionProps {
     open: boolean;
@@ -17,6 +18,7 @@ interface FormValues {
 
 const CreateFunction: React.FC<CreateFunctionProps> = ({ open, loading, onClose, onSubmit }) => {
     const [form] = Form.useForm<FormValues>();
+    // const user = useCurrentUser();
     const [isConfirmVisible, setIsConfirmVisible] = useState(false);
 
     useEffect(() => {
@@ -29,6 +31,7 @@ const CreateFunction: React.FC<CreateFunctionProps> = ({ open, loading, onClose,
         const finalValues: CreateFunctionDto = {
             functionName: values.functionName,
             urlFunction: '/pms' + values.urlSuffix,
+            createdBy: ''
         };
         onSubmit(finalValues);
     };

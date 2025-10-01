@@ -11,12 +11,14 @@ import { functionsApis } from '../../services/apiServices';
 import CreateFunction from '../../modal/create-functions/CreateFunction';
 import UpdateFunction from '../../modal/update-functions/UpdateFunction';
 import DeleteModal from '../../modal/delete-modal/DeleteModal';
+import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { toast } from 'react-toastify';
 
 const FunctionsManagement: React.FC = () => {
     const [functions, setFunctions] = useState<Functions[]>([]);
     const [searchKeyword, setSearchKeyword] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
+    const user = useCurrentUser();
     const [pagination, setPagination] = useState<TablePaginationConfig>({
         current: 1,
         pageSize: 5,
@@ -77,9 +79,14 @@ const FunctionsManagement: React.FC = () => {
     }, []);
 
     const handleCreateFunction = async (values: CreateFunctionDto) => {
+        if (!user) {
+            toast.error('Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.');
+            return;
+        }
         setIsSubmitting(true);
         try {
-            await functionsApis.createFunction(values);
+            const payload = { ...values, createdBy: user.email };
+            await functionsApis.createFunction(payload);
             toast.success('Tạo chức năng thành công!');
             setIsModalOpen(false);
             if (pagination.current !== 1) {
@@ -100,10 +107,14 @@ const FunctionsManagement: React.FC = () => {
     };
 
     const handleUpdateFunction = async (values: UpdateFunctionDto) => {
-        if (!editingFunction) return;
+        if (!editingFunction || !user) {
+            toast.error('Thiếu thông tin cần thiết để cập nhật.');
+            return;
+        }
         setIsUpdating(true);
         try {
-            await functionsApis.updateFunction(editingFunction._id, values);
+            const payload = { ...values, updatedBy: user.email };
+            await functionsApis.updateFunction(editingFunction._id, payload);
             toast.success('Cập nhật chức năng thành công!');
             setIsUpdateModalOpen(false);
             fetchFunctions({ page: pagination.current!, limit: pagination.pageSize! });
@@ -153,6 +164,16 @@ const FunctionsManagement: React.FC = () => {
             key: 'functionName',
         },
         {
+            title: 'Người tạo',
+            dataIndex: 'createdBy',
+            key: 'createdBy',
+        },
+        {
+            title: 'Người cập nhật',
+            dataIndex: 'updatedBy',
+            key: 'updatedBy',
+        },
+        {
             title: 'Hành động',
             key: 'action',
             align: 'center',
@@ -168,6 +189,7 @@ const FunctionsManagement: React.FC = () => {
                 </Space>
             ),
         },
+
     ], []);
 
     const cardHeader = useMemo(() => (

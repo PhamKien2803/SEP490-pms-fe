@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Button } from 'antd';
 import { UpdateFunctionDto } from '../../types/auth';
 import { toast } from 'react-toastify';
+// import { useCurrentUser } from '../../hooks/useCurrentUser';
 
 export interface UpdateFormValues {
     functionName: string;
@@ -17,6 +18,7 @@ interface UpdateFunctionProps {
 
 const UpdateFunction: React.FC<UpdateFunctionProps> = ({ open, loading, initialData, onClose, onSubmit }) => {
     const [form] = Form.useForm<UpdateFormValues>();
+    // const user = useCurrentUser();
     const [isConfirmVisible, setIsConfirmVisible] = useState(false);
 
     useEffect(() => {
@@ -32,6 +34,7 @@ const UpdateFunction: React.FC<UpdateFunctionProps> = ({ open, loading, initialD
         const finalValues: UpdateFunctionDto = {
             functionName: values.functionName,
             urlFunction: '/pms' + values.urlSuffix,
+            updatedBy: ''
         };
         onSubmit(finalValues);
     };
@@ -94,7 +97,7 @@ const UpdateFunction: React.FC<UpdateFunctionProps> = ({ open, loading, initialD
                     </Form.Item>
                 </Form>
             </Modal>
-            
+
             <Modal
                 title="Bạn có chắc muốn hủy?"
                 open={isConfirmVisible}
