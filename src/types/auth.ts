@@ -14,11 +14,6 @@ export type LoginResponse = {
     };
 };
 
-export interface PermissionAction {
-    name: string;
-    allowed: boolean;
-}
-
 
 export interface FunctionPermission {
     functionId: {
@@ -38,12 +33,13 @@ export interface ModulePermission {
     functionList: FunctionPermission[];
 }
 
-
 export interface UserWithPermissions {
-    role: string;
-    permissionListAll: { permissionList: ModulePermission[] }[];
-    email?: string;
-    name?: string;
+    id: string;
+    email: string;
+    roleList: string[];
+    permissionListAll: {
+        permissionList: ModulePermission[];
+    }[];
 }
 
 
@@ -53,10 +49,82 @@ export interface AuthContextType {
     isLogoutPending: boolean;
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
-
-
     hasRole: (role: string) => boolean;
     hasModule: (moduleName: string) => boolean;
     hasFunction: (urlFunction: string) => boolean;
     canAction: (urlFunction: string, actionName: string) => boolean;
 }
+
+export interface AuthState {
+    user: UserWithPermissions | null;
+    isLoginPending: boolean;
+    isLogoutPending: boolean;
+    loginError?: { errorField?: "email" | "password"; message: string };
+    moduleMenu: ModuleMenu[];
+    functionItem: FunctionItem[];
+    isInitializing: boolean;
+}
+
+export const initialState: AuthState = {
+    user: null,
+    isLoginPending: false,
+    isLogoutPending: false,
+    moduleMenu: [],
+    functionItem: [],
+    isInitializing: true,
+};
+
+export interface PermissionAction {
+    name: string;
+    allowed: boolean;
+}
+
+export interface FunctionItem {
+    functionId: {
+        _id: string;
+        functionName: string;
+        urlFunction: string;
+    };
+    action: PermissionAction[];
+}
+
+export interface ModuleMenu {
+    moduleName: string;
+    functions: {
+        name: string;
+        url: string;
+    }[];
+}
+
+
+//Function type
+export interface Functions {
+    _id: string;
+    functionCode: string;
+    functionName: string;
+    urlFunction: string;
+    active?: boolean;
+}
+
+export interface PaginationInfo {
+    totalCount: number;
+    limit: number;
+    page: number;
+}
+
+export interface FunctionsResponse {
+    data: Functions[];
+    page: PaginationInfo;
+}
+
+export interface CreateFunctionDto {
+    functionName: string;
+    urlFunction: string;
+}
+
+export interface UpdateFunctionDto {
+    functionName?: string;
+    urlFunction?: string;
+}
+
+

@@ -1,4 +1,3 @@
-import { Permission } from "./permission";
 
 export type User = {
     id: string;
@@ -7,7 +6,7 @@ export type User = {
     status: AccountStatus;
     role: Role;
     branch: string;
-    permissions: Permission[];
+    permissions: string[];
 };
 
 export enum AccountStatus {

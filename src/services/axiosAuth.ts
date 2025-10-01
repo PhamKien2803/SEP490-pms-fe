@@ -40,8 +40,8 @@ axiosAuth.interceptors.response.use(
          * which will make infinite loop of redirecting.
          */
         if (status === 401) {
-            if (error instanceof AxiosError && window.location.pathname !== '/auth/login') {
-                window.location.pathname = '/auth/login';
+            if (error instanceof AxiosError && window.location.pathname !== 'pms/auth/login') {
+                window.location.pathname = 'pms/auth/login';
             }
         }
         let errorMessage = messages.AN_UNKNOWN_ERROR_OCCURRED;

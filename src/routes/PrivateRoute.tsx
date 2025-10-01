@@ -1,38 +1,26 @@
-import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAppSelector } from '../redux/hooks';
-import { Role } from '../types/user';
+import { usePermission } from '../hooks/usePermission';
 
 interface PrivateRouteProps {
-  allowRoles?: Role[];
   requireFunction?: string;
   requireAction?: string;
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({
-  allowRoles,
   requireFunction,
   requireAction,
 }) => {
   const location = useLocation();
-  const { user, permissionMap } = useAppSelector((state) => state.auth);
+  const { user } = useAppSelector((state) => state.auth);
+  const { canAction } = usePermission();
 
-  // 1. Chưa login
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // 2. Check role
-  if (allowRoles?.length && !allowRoles.includes(user.role as Role)) {
-    return <Navigate to="/403" replace />;
-  }
-
-  // 3. Check permission
-  if (requireFunction && requireAction) {
-    const actions = permissionMap.get(requireFunction);
-    if (!actions || !actions[requireAction]) {
-      return <Navigate to="/403" replace />;
-    }
+  if (requireFunction && requireAction && !canAction(requireFunction, requireAction)) {
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return <Outlet />;

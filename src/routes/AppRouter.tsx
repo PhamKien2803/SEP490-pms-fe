@@ -2,13 +2,11 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import PublicRoute from './PublicRoute';
 import PrivateRoute from './PrivateRoute';
 import NotFound from '../pages/not-found/NotFound';
-import { routesAdmin } from './role/admin.routes';
-import { routesTeacher } from './role/teacher.routes';
-import { routesParent } from './role/parent.routes';
-import { routesStaff } from './role/staff.routes';
+import { routes } from './role/routes';
 import PMSHome from '../pages/homepage/PMShome';
 import Login from '../pages/login/Login';
 import ForgotPassword from '../pages/forgot-password/ForgotPassword';
+import UnauthorizedPage from '../pages/not-found/UnauthorizedPage';
 
 const router = createBrowserRouter([
     {
@@ -22,11 +20,12 @@ const router = createBrowserRouter([
     {
         element: <PrivateRoute />,
         children: [
-            ...routesAdmin,
-            ...routesTeacher,
-            ...routesParent,
-            ...routesStaff,
+            ...routes,
         ],
+    },
+    {
+        path: '/unauthorized',
+        element: <UnauthorizedPage />,
     },
     {
         path: '*',

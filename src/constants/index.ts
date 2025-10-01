@@ -14,4 +14,6 @@ export const constants = {
     REQUEST_SUCCESS: 'Request success',
     AN_UNKNOWN_ERROR_OCCURRED: 'An unknown error occurred',
     SOMETHING_WENT_WRONG: 'Something went wrong',
+    RETRY: 'Retry',
+    APP_PREFIX: "/pms"
 }
