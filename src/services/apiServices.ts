@@ -1,7 +1,7 @@
 import { apiEndPoint } from "./api";
 import axiosAuth from "./axiosAuth";
 import { AxiosError } from "axios";
-import type { CreateFunctionDto, Functions, FunctionsResponse, LoginRequest, LoginResponse, UpdateFunctionDto } from "../types/auth";
+import type { CreateFunctionDto, CreateParentDto, Functions, FunctionsResponse, LoginRequest, LoginResponse, Parent, ParentsResponse, UpdateFunctionDto, UpdateParentDto } from "../types/auth";
 import type { User } from "../types/user";
 import { messages } from "../constants/message";
 
@@ -55,5 +55,26 @@ export const functionsApis = {
 
     deleteFunction: async (id: string): Promise<void> => {
         await axiosAuth.post(apiEndPoint.DELETE_FUNCTION(id));
+    },
+}
+
+export const parentsApis = {
+    getParents: async (params: { page: number, limit: number }): Promise<ParentsResponse> => {
+        const response = await axiosAuth.get<ParentsResponse>(apiEndPoint.GET_PARENT, { params });
+        return response.data;
+    },
+
+    createParents: async (body: CreateParentDto): Promise<Parent> => {
+        const response = await axiosAuth.post<Parent>(apiEndPoint.CREATE_PARENT, body);
+        return response.data;
+    },
+
+    updateParents: async (id: string, body: UpdateParentDto): Promise<Parent> => {
+        const response = await axiosAuth.put<Parent>(apiEndPoint.UPDATE_PARENT(id), body);
+        return response.data;
+    },
+
+    deleteParents: async (id: string): Promise<void> => {
+        await axiosAuth.delete(apiEndPoint.DELETE_PARENT(id));
     },
 }

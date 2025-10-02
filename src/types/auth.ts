@@ -119,6 +119,11 @@ export interface FunctionsResponse {
     page: PaginationInfo;
 }
 
+export interface ParentsResponse {
+    data: Parent[];
+    page: PaginationInfo;
+}
+
 export interface CreateFunctionDto {
     functionName: string;
     urlFunction: string;
@@ -131,4 +136,61 @@ export interface UpdateFunctionDto {
     updatedBy: string;
 }
 
+export interface Parent {
+    _id: string;
+    parentCode: string;
+    fullName: string;
+    dob: string; // ISO date string
+    phoneNumber?: string;
+    email?: string;
+    IDCard: string;
+    gender: "male" | "female" | "other";
+    students: string[]; // mảng id của student
+    address?: string;
+    nation?: string;
+    religion?: string;
+    createdBy: string;
+    updatedBy?: string;
+    createdAt: string;
+    updatedAt: string;
+}
 
+export interface Parent2 {
+    fullName?: string;
+    dob?: string; // ISO date string
+    phoneNumber?: string;
+    email?: string;
+    gender?: "male" | "female" | "other";
+    students?: string[]; // mảng id của student
+    address?: string;
+    nation?: string;
+    religion?: string;
+    updatedBy: string;
+}
+
+
+export interface UpdateParentDto {
+    fullName?: string;
+    dob?: string; // ISO date string
+    phoneNumber?: string;
+    email?: string;
+    gender?: "male" | "female" | "other";
+    students?: string[]; // mảng id của student
+    address?: string;
+    nation?: string;
+    religion?: string;
+    updatedBy: string;
+}
+
+export interface CreateParentDto {
+    fullName: string;
+    dob: string;
+    phoneNumber?: string;
+    email?: string;
+    IDCard: string;
+    gender: "male" | "female" | "other";
+    students?: string[];
+    address?: string;
+    nation?: string;
+    religion?: string;
+}
