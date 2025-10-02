@@ -5,6 +5,7 @@ import UserManagement from '../../pages/user-management/UserManagement';
 import { constants } from '../../constants';
 import RolePermission from '../../pages/role-permission/RolePermission';
 import FunctionsManagement from '../../pages/functions-management/FunctionsManagement';
+import ParentManagement from '../../pages/parent-management/ParentManagement';
 
 export const routes: RouteObject[] = [
     {
@@ -61,6 +62,21 @@ export const routes: RouteObject[] = [
                             {
                                 index: true,
                                 element: <FunctionsManagement />,
+                            },
+                        ],
+                    },
+                    {
+                        path: "parents",
+                        element: (
+                            <PrivateRoute
+                                requireFunction={`${constants.APP_PREFIX}/parents`}
+                                requireAction="view"
+                            />
+                        ),
+                        children: [
+                            {
+                                index: true,
+                                element: <ParentManagement />,
                             },
                         ],
                     }

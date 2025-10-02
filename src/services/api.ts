@@ -6,4 +6,8 @@ export const apiEndPoint = {
     CREATE_FUNTION: '/functions/create',
     UPDATE_FUNCTION: (id: string) => `/functions/update/${id}`,
     DELETE_FUNCTION: (id: string) => `/functions/delete/${id}`,
+    GET_PARENT: '/parents/list',
+    CREATE_PARENT: '/parents/create',
+    UPDATE_PARENT: (id: string) => `/parents/update/${id}`,
+    DELETE_PARENT: (id: string) => `/parents/delete/${id}`,
 };
