@@ -5,6 +5,7 @@ import type { CreateFunctionDto, CreateParentDto, Functions, FunctionsResponse, 
 import type { User } from "../types/user";
 import { messages } from "../constants/message";
 import { CreateRoleDto, RoleDetails, RoleFunctionItem, RoleModuleItem, RolesListResponse, UpdateRoleDto } from "../types/role";
+import { CreateUserData, StudentRecord, StudentResponse, UpdateUserData } from "../types/student-management";
 
 export const authApis = {
     login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -114,3 +115,25 @@ export const rolesApis = {
         await axiosAuth.post(apiEndPoint.DELETE_ROLE(id));
     },
 };
+
+export const studentApis = {
+    getListStudent: async (params: { page: number, limit: number }): Promise<StudentResponse> => {
+        const response = await axiosAuth.get<StudentResponse>(apiEndPoint.GET_LIST_STUDENT, { params });
+        return response.data;
+    },
+
+    createStudent: async (body: CreateUserData): Promise<StudentRecord> => {
+        const response = await axiosAuth.post<StudentRecord>(apiEndPoint.CREATE_STUDENT, body);
+        return response.data;
+    },
+
+    updateStudent: async (id: string, body: UpdateUserData): Promise<StudentRecord> => {
+        const response = await axiosAuth.put<StudentRecord>(apiEndPoint.UPDATE_STUDENT(id), body);
+        return response.data;
+    },
+
+    deleteStudent: async (id: string): Promise<void> => {
+        await axiosAuth.post(apiEndPoint.DELETE_STUDENT(id));
+    },
+}
+
