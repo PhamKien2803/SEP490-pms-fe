@@ -17,4 +17,8 @@ export const apiEndPoint = {
     DELETE_ROLE: (id: string) => `/roles/delete/${id}`,
     GET_LIST_FUNCTION: '/roles/listFunction',
     GET_LIST_MODULE: '/roles/listModule',
+    GET_ACCOUNT_LIST: '/accounts/list',
+    CREATE_ACCOUNT: '/accounts/create',
+    UPDATE_ACCOUNT: (id: string) => `/accounts/update/${id}`,
+    DELETE_ACCOUNT: (id: string) => `/accounts/delete/${id}`
 };

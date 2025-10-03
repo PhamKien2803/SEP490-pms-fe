@@ -114,3 +114,7 @@ export const rolesApis = {
         await axiosAuth.post(apiEndPoint.DELETE_ROLE(id));
     },
 };
+
+export const accountsApis = {
+
+}
