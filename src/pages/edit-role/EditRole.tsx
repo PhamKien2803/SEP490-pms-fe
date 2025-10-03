@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Space, Typography, Card, Select, Tooltip, Spin, Flex } from 'antd';
+import { Form, Input, Button, Space, Typography, Card, Select, Tooltip, Spin, Flex, Modal, Row, Col } from 'antd';
 import { ArrowLeftOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -12,6 +12,9 @@ const hardcodedActions = [
     { label: 'Tạo', value: 'create' },
     { label: 'Sửa', value: 'update' },
     { label: 'Xóa', value: 'delete' },
+    { label: 'Duyệt đơn', value: 'approve' },
+    { label: 'Xuất file', value: 'export' },
+    { label: 'Nhập file', value: 'import' },
 ];
 
 const EditRole: React.FC = () => {
@@ -25,17 +28,19 @@ const EditRole: React.FC = () => {
     const [roleData, setRoleData] = useState<RoleDetails | null>(null);
     const [functions, setFunctions] = useState<RoleFunctionItem[]>([]);
     const [modules, setModules] = useState<RoleModuleItem[]>([]);
+    const [isConfirmVisible, setIsConfirmVisible] = useState(false);
 
     const permissions = Form.useWatch<{ function?: string }[]>('permissions', form);
 
     useEffect(() => {
         if (!id) {
-            toast.error('Không tìm thấy ID của vai trò.');
+            toast.error('URL không hợp lệ, thiếu ID của vai trò.');
             navigate('/pms/roles');
             return;
         }
 
         const fetchData = async () => {
+            setPageLoading(true);
             try {
                 const [roleRes, functionsRes, modulesRes] = await Promise.all([
                     rolesApis.getRoleById(id),
@@ -46,15 +51,15 @@ const EditRole: React.FC = () => {
                 setRoleData(roleRes);
                 setFunctions(functionsRes);
                 setModules(modulesRes);
-                
-                const flattenedPermissions = roleRes.permissionList.flatMap(module => 
+
+                const flattenedPermissions = roleRes.permissionList.flatMap(module =>
                     module.functionList.map(func => ({
                         function: func.functionId,
                         module: module.moduleId,
                         actions: func.action.filter(a => a.allowed).map(a => a.name),
                     }))
                 );
-                
+
                 form.setFieldsValue({
                     roleName: roleRes.roleName,
                     permissions: flattenedPermissions,
@@ -62,6 +67,7 @@ const EditRole: React.FC = () => {
 
             } catch (error) {
                 toast.error('Không thể tải dữ liệu của vai trò.');
+                navigate('/pms/roles');
             } finally {
                 setPageLoading(false);
             }
@@ -73,12 +79,11 @@ const EditRole: React.FC = () => {
     const functionOptions = functions.map(f => ({ label: f.functionName, value: f._id }));
     const moduleOptions = modules.map(m => ({ label: m.moduleName, value: m._id }));
 
-    const handleFunctionChange = (value: string, fieldName: number) => {
-        const selectedFunction = functions.find(f => f._id === value);
-        if (selectedFunction) {
-            const currentPermissions = form.getFieldValue('permissions');
-            currentPermissions[fieldName].module = selectedFunction.moduleId;
-            form.setFieldsValue({ permissions: currentPermissions });
+    const handleCancel = () => {
+        if (form.isFieldsTouched()) {
+            setIsConfirmVisible(true);
+        } else {
+            navigate(-1);
         }
     };
 
@@ -103,7 +108,7 @@ const EditRole: React.FC = () => {
                 }
             });
         }
-        
+
         const payload: UpdateRoleDto = {
             roleName: values.roleName,
             permissionList: Array.from(permissionsMap.values()),
@@ -120,10 +125,10 @@ const EditRole: React.FC = () => {
             setSubmitting(false);
         }
     };
-    
+
     if (pageLoading) {
         return (
-            <Flex align="center" justify="center" style={{ minHeight: '100vh' }}>
+            <Flex align="center" justify="center" style={{ minHeight: 'calc(100vh - 150px)' }}>
                 <Spin size="large" />
             </Flex>
         );
@@ -134,17 +139,32 @@ const EditRole: React.FC = () => {
             <Card bordered={false}>
                 <Space align="center" style={{ marginBottom: '24px' }}>
                     <Tooltip title="Quay lại">
-                        <Button shape="circle" icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} />
+                        <Button shape="circle" icon={<ArrowLeftOutlined />} onClick={handleCancel} />
                     </Tooltip>
                     <Typography.Title level={2} style={{ margin: 0 }}>
                         Cập nhật vai trò: {roleData?.roleName}
                     </Typography.Title>
                 </Space>
 
-                <Form form={form} name="edit_role" onFinish={onFinish} autoComplete="off" layout="vertical">
+                <Form form={form} name="edit_role" onFinish={onFinish} autoComplete="off" layout="horizontal">
+                    <Form.Item label="Mã vai trò">
+                        <Input value={roleData?.roleCode} disabled />
+                    </Form.Item>
                     <Form.Item name="roleName" label="Tên vai trò" rules={[{ required: true, message: 'Vui lòng nhập tên vai trò!' }]} style={{ maxWidth: '400px' }}>
                         <Input placeholder="Nhập tên vai trò" />
                     </Form.Item>
+
+                    <Row gutter={[16, 0]} style={{ color: 'rgba(0, 0, 0, 0.45)', marginBottom: '8px' }}>
+                        <Col style={{ width: 224 }}>
+                            <Typography.Text>Tên chức năng</Typography.Text>
+                        </Col>
+                        <Col style={{ width: 224 }}>
+                            <Typography.Text>Tên phân hệ</Typography.Text>
+                        </Col>
+                        <Col style={{ width: 324 }}>
+                            <Typography.Text>Hành động</Typography.Text>
+                        </Col>
+                    </Row>
 
                     <Form.List name="permissions">
                         {(fields, { add, remove }) => (
@@ -155,14 +175,14 @@ const EditRole: React.FC = () => {
                                         opt => !selectedFunctions.includes(opt.value) || opt.value === permissions?.[name]?.function
                                     );
                                     return (
-                                        <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline" wrap>
-                                            <Form.Item {...restField} name={[name, 'function']} rules={[{ required: true, message: 'Vui lòng chọn chức năng!' }]} style={{ minWidth: '200px' }}>
-                                                <Select options={availableFunctions} placeholder="Chọn chức năng" onChange={(value) => handleFunctionChange(value, name)} />
+                                        <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline" wrap={false}>
+                                            <Form.Item {...restField} name={[name, 'function']} rules={[{ required: true, message: 'Vui lòng chọn!' }]} style={{ minWidth: 200, margin: 0 }}>
+                                                <Select options={availableFunctions} placeholder="Chọn chức năng" />
                                             </Form.Item>
-                                            <Form.Item {...restField} name={[name, 'module']} rules={[{ required: true, message: 'Vui lòng chọn phân hệ!' }]} style={{ minWidth: '200px' }}>
-                                                <Select options={moduleOptions} placeholder="Chọn phân hệ" disabled />
+                                            <Form.Item {...restField} name={[name, 'module']} rules={[{ required: true, message: 'Vui lòng chọn!' }]} style={{ minWidth: 200, margin: 0 }}>
+                                                <Select options={moduleOptions} placeholder="Chọn phân hệ" />
                                             </Form.Item>
-                                            <Form.Item {...restField} name={[name, 'actions']} rules={[{ required: true, message: 'Vui lòng chọn quyền!' }]} style={{ minWidth: '300px' }}>
+                                            <Form.Item {...restField} name={[name, 'actions']} rules={[{ required: true, message: 'Vui lòng chọn!' }]} style={{ minWidth: 300, margin: 0 }}>
                                                 <Select mode="multiple" allowClear options={hardcodedActions} placeholder="Chọn các hành động" />
                                             </Form.Item>
                                             <MinusCircleOutlined onClick={() => remove(name)} style={{ color: 'red' }} />
@@ -170,7 +190,7 @@ const EditRole: React.FC = () => {
                                     );
                                 })}
                                 <Form.Item>
-                                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />} style={{ maxWidth: '800px' }}>
+                                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />} style={{ maxWidth: '772px', marginTop: '16px' }}>
                                         Thêm quyền
                                     </Button>
                                 </Form.Item>
@@ -180,7 +200,7 @@ const EditRole: React.FC = () => {
 
                     <Form.Item style={{ marginTop: '32px' }}>
                         <Space>
-                            <Button htmlType="button" onClick={() => navigate(-1)} disabled={submitting}>
+                            <Button htmlType="button" onClick={handleCancel} disabled={submitting}>
                                 Hủy
                             </Button>
                             <Button type="primary" htmlType="submit" loading={submitting}>
@@ -190,6 +210,20 @@ const EditRole: React.FC = () => {
                     </Form.Item>
                 </Form>
             </Card>
+
+            <Modal
+                title="Bạn có chắc muốn hủy?"
+                open={isConfirmVisible}
+                onOk={() => {
+                    setIsConfirmVisible(false);
+                    navigate(-1);
+                }}
+                onCancel={() => setIsConfirmVisible(false)}
+                okText="Đồng ý"
+                cancelText="Không"
+            >
+                <p>Các thay đổi sẽ không được lưu lại.</p>
+            </Modal>
         </div>
     );
 };

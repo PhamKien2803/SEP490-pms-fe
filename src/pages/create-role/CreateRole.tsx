@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Space, Typography, Card, Select, Tooltip, Modal } from 'antd';
+import { Form, Input, Button, Space, Typography, Card, Select, Tooltip, Modal, Table } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 import { ArrowLeftOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +14,9 @@ const hardcodedActions = [
     { label: 'Tạo', value: 'create' },
     { label: 'Sửa', value: 'update' },
     { label: 'Xóa', value: 'delete' },
+    { label: 'Duyệt đơn', value: 'approve' },
+    { label: 'Xuất file', value: 'export' },
+    { label: 'Nhập file', value: 'import' },
 ];
 
 const CreateRole: React.FC = () => {
@@ -54,6 +58,11 @@ const CreateRole: React.FC = () => {
     };
 
     const onFinish = async (values: any) => {
+        if (!values.permissions || values.permissions.length === 0) {
+            toast.warning('Vui lòng thêm ít nhất một quyền cho vai trò!');
+            return;
+        }
+
         setLoading(true);
 
         const permissionsMap = new Map<string, { moduleId: string; functionList: any[] }>();
@@ -101,6 +110,10 @@ const CreateRole: React.FC = () => {
         }
     };
 
+    const onFinishFailed = () => {
+        toast.warning('Vui lòng điền đầy đủ các thông tin bắt buộc!');
+    };
+
     return (
         <div style={{ padding: '24px', background: '#f0f2f5' }}>
             <Card bordered={false}>
@@ -121,8 +134,9 @@ const CreateRole: React.FC = () => {
                     form={form}
                     name="create_role"
                     onFinish={onFinish}
+                    onFinishFailed={onFinishFailed}
                     autoComplete="off"
-                    layout="vertical"
+                    layout="horizontal"
                 >
                     <Form.Item
                         name="roleName"
@@ -133,55 +147,72 @@ const CreateRole: React.FC = () => {
                         <Input placeholder="Nhập tên vai trò" />
                     </Form.Item>
 
-                    <Form.List name="permissions">
-                        {(fields, { add, remove }) => (
-                            <>
-                                {fields.map(({ key, name, ...restField }) => {
-                                    const selectedFunctions = (permissions || []).map((p: { function: string }) => p?.function).filter(Boolean);
-                                    const availableFunctions = functionOptions.filter(
-                                        opt => !selectedFunctions.includes(opt.value) || opt.value === permissions?.[name]?.function
-                                    );
+                    <Typography.Title level={4} style={{ marginTop: '16px', marginBottom: '16px' }}>
+                        Danh sách quyền
+                    </Typography.Title>
 
-                                    return (
-                                        <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline" wrap>
-                                            <Form.Item
-                                                {...restField}
-                                                name={[name, 'function']}
-                                                rules={[{ required: true, message: 'Vui lòng chọn chức năng!' }]}
-                                                style={{ minWidth: '200px' }}
-                                            >
-                                                <Select
-                                                    options={availableFunctions}
-                                                    placeholder="Chọn chức năng"
-                                                />
+                    <Form.List name="permissions">
+                        {(fields, { add, remove }) => {
+                            const tableColumns: ColumnsType<any> = [
+                                {
+                                    title: 'Tên chức năng',
+                                    key: 'function',
+                                    render: (_text, field) => {
+                                        const selectedFunctions = (permissions || []).map((p: { function: string }) => p?.function).filter(Boolean);
+                                        const availableFunctions = functionOptions.filter(
+                                            opt => !selectedFunctions.includes(opt.value) || opt.value === permissions?.[field.name]?.function
+                                        );
+                                        return (
+                                            <Form.Item name={[field.name, 'function']} rules={[{ required: true, message: 'Vui lòng chọn!' }]} style={{ margin: 0 }}>
+                                                <Select options={availableFunctions} placeholder="Chọn chức năng" />
                                             </Form.Item>
-                                            <Form.Item
-                                                {...restField}
-                                                name={[name, 'module']}
-                                                rules={[{ required: true, message: 'Vui lòng chọn phân hệ!' }]}
-                                                style={{ minWidth: '200px' }}
-                                            >
-                                                <Select options={moduleOptions} placeholder="Chọn phân hệ" />
-                                            </Form.Item>
-                                            <Form.Item
-                                                {...restField}
-                                                name={[name, 'actions']}
-                                                rules={[{ required: true, message: 'Vui lòng chọn quyền!' }]}
-                                                style={{ minWidth: '300px' }}
-                                            >
-                                                <Select mode="multiple" allowClear options={hardcodedActions} placeholder="Chọn các hành động" />
-                                            </Form.Item>
-                                            <MinusCircleOutlined onClick={() => remove(name)} style={{ color: 'red' }} />
-                                        </Space>
-                                    );
-                                })}
-                                <Form.Item>
-                                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />} style={{ maxWidth: '800px' }}>
+                                        );
+                                    },
+                                },
+                                {
+                                    title: 'Tên phân hệ',
+                                    key: 'module',
+                                    render: (_text, field) => (
+                                        <Form.Item name={[field.name, 'module']} rules={[{ required: true, message: 'Vui lòng chọn!' }]} style={{ margin: 0 }}>
+                                            <Select options={moduleOptions} placeholder="Chọn phân hệ" />
+                                        </Form.Item>
+                                    ),
+                                },
+                                {
+                                    title: 'Hành động',
+                                    key: 'actions',
+                                    width: '40%',
+                                    render: (_text, field) => (
+                                        <Form.Item name={[field.name, 'actions']} rules={[{ required: true, message: 'Vui lòng chọn!' }]} style={{ margin: 0 }}>
+                                            <Select mode="multiple" allowClear options={hardcodedActions} placeholder="Chọn các hành động" />
+                                        </Form.Item>
+                                    ),
+                                },
+                                {
+                                    title: '',
+                                    key: 'delete',
+                                    width: '5%',
+                                    render: (_text, field) => (
+                                        <MinusCircleOutlined onClick={() => remove(field.name)} style={{ color: 'red' }} />
+                                    ),
+                                },
+                            ];
+
+                            return (
+                                <>
+                                    <Table
+                                        columns={tableColumns}
+                                        dataSource={fields}
+                                        pagination={false}
+                                        rowKey="key"
+                                        bordered
+                                    />
+                                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />} style={{ marginTop: '16px' }}>
                                         Thêm quyền
                                     </Button>
-                                </Form.Item>
-                            </>
-                        )}
+                                </>
+                            );
+                        }}
                     </Form.List>
 
                     <Form.Item style={{ marginTop: '32px' }}>
