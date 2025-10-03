@@ -6,6 +6,7 @@ import type { User } from "../types/user";
 import { messages } from "../constants/message";
 import { CreateRoleDto, RoleDetails, RoleFunctionItem, RoleModuleItem, RolesListResponse, UpdateRoleDto } from "../types/role";
 import { CreateUserData, StudentRecord, StudentResponse, UpdateUserData } from "../types/student-management";
+import { AccountsListResponse, RoleNameItem, UpdateAccountDto } from "../types/account";
 
 export const authApis = {
     login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -138,5 +139,21 @@ export const studentApis = {
 }
 
 export const accountsApis = {
+    getAccountList: async (params: { page: number, limit: number, query?: string }): Promise<AccountsListResponse> => {
+        const response = await axiosAuth.get<AccountsListResponse>(apiEndPoint.GET_ACCOUNT_LIST, { params });
+        return response.data;
+    },
 
+    updateAccount: async (id: string, body: UpdateAccountDto): Promise<void> => {
+        await axiosAuth.put(apiEndPoint.UPDATE_ACCOUNT(id), body);
+    },
+
+    deleteAccount: async (id: string): Promise<void> => {
+        await axiosAuth.post(apiEndPoint.DELETE_ACCOUNT(id));
+    },
+
+    getRoleNameList: async (): Promise<RoleNameItem[]> => {
+        const response = await axiosAuth.get<RoleNameItem[]>(apiEndPoint.GET_ROLE_NAME_LIST);
+        return response.data;
+    },
 }
