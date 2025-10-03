@@ -137,3 +137,6 @@ export const studentApis = {
     },
 }
 
+export const accountsApis = {
+
+}

@@ -103,6 +103,7 @@ const CreateRole: React.FC = () => {
             await rolesApis.createRole(payload);
             toast.success('Tạo vai trò thành công!');
             navigate('/pms/roles');
+            window.location.reload();
         } catch (error) {
             toast.error('Tạo vai trò thất bại.');
         } finally {
