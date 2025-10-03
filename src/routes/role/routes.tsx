@@ -55,7 +55,7 @@ export const routes: RouteObject[] = [
                                 element: <CreateRole />,
                             },
                             {
-                                path: "edit/:roleId",
+                                path: "edit/:id",
                                 element: <EditRole />,
                             }
                         ],

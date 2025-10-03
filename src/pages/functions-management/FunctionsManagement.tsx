@@ -113,7 +113,7 @@ const FunctionsManagement: React.FC = () => {
 
     const handleUpdateFunction = async (values: UpdateFunctionDto) => {
         if (!editingFunction || !user) {
-            toast.error('Thiếu thông tin cần thiết để cập nhật.');
+            toast.warning('Thiếu thông tin cần thiết để cập nhật.');
             return;
         }
         setIsUpdating(true);
