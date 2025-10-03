@@ -22,7 +22,7 @@ export const apiEndPoint = {
   UPDATE_STUDENT: (id: string) => `/students/update/${id}`,
   DELETE_STUDENT: (id: string) => `/students/delete/${id}`,
   GET_ACCOUNT_LIST: '/accounts/list',
-  CREATE_ACCOUNT: '/accounts/create',
   UPDATE_ACCOUNT: (id: string) => `/accounts/update/${id}`,
-  DELETE_ACCOUNT: (id: string) => `/accounts/delete/${id}`
+  DELETE_ACCOUNT: (id: string) => `/accounts/delete/${id}`,
+  GET_ROLE_NAME_LIST: "/accounts/roleNames",
 };
