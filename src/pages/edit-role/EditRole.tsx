@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Space, Typography, Card, Select, Tooltip, Spin, Flex, Modal, Row, Col } from 'antd';
-import { ArrowLeftOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+    Form, Input, Button, Space, Typography, Card, Select, Tooltip, Spin, Flex, Modal, Table, Popconfirm
+} from 'antd';
+import { ArrowLeftOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -30,7 +32,8 @@ const EditRole: React.FC = () => {
     const [modules, setModules] = useState<RoleModuleItem[]>([]);
     const [isConfirmVisible, setIsConfirmVisible] = useState(false);
 
-    const permissions = Form.useWatch<{ function?: string }[]>('permissions', form);
+    // Watch the permissions field to dynamically update options
+    const permissions: { function?: string }[] = Form.useWatch('permissions', form) || [];
 
     useEffect(() => {
         if (!id) {
@@ -119,6 +122,7 @@ const EditRole: React.FC = () => {
             await rolesApis.updateRole(id, payload);
             toast.success('Cập nhật vai trò thành công!');
             navigate('/pms/roles');
+            window.location.reload();
         } catch (error) {
             toast.error('Cập nhật vai trò thất bại.');
         } finally {
@@ -146,56 +150,99 @@ const EditRole: React.FC = () => {
                     </Typography.Title>
                 </Space>
 
-                <Form form={form} name="edit_role" onFinish={onFinish} autoComplete="off" layout="horizontal">
+                <Form form={form} name="edit_role" onFinish={onFinish} autoComplete="off">
                     <Form.Item label="Mã vai trò">
-                        <Input value={roleData?.roleCode} disabled />
+                        <Input value={roleData?.roleCode} disabled style={{ maxWidth: '400px' }} />
                     </Form.Item>
                     <Form.Item name="roleName" label="Tên vai trò" rules={[{ required: true, message: 'Vui lòng nhập tên vai trò!' }]} style={{ maxWidth: '400px' }}>
                         <Input placeholder="Nhập tên vai trò" />
                     </Form.Item>
 
-                    <Row gutter={[16, 0]} style={{ color: 'rgba(0, 0, 0, 0.45)', marginBottom: '8px' }}>
-                        <Col style={{ width: 224 }}>
-                            <Typography.Text>Tên chức năng</Typography.Text>
-                        </Col>
-                        <Col style={{ width: 224 }}>
-                            <Typography.Text>Tên phân hệ</Typography.Text>
-                        </Col>
-                        <Col style={{ width: 324 }}>
-                            <Typography.Text>Hành động</Typography.Text>
-                        </Col>
-                    </Row>
+                    <Typography.Title level={5} style={{ marginTop: '32px', marginBottom: '16px' }}>
+                        Phân quyền chức năng
+                    </Typography.Title>
 
                     <Form.List name="permissions">
-                        {(fields, { add, remove }) => (
-                            <>
-                                {fields.map(({ key, name, ...restField }) => {
-                                    const selectedFunctions = (permissions || []).map((p: { function?: string }) => p?.function).filter(Boolean);
-                                    const availableFunctions = functionOptions.filter(
-                                        opt => !selectedFunctions.includes(opt.value) || opt.value === permissions?.[name]?.function
-                                    );
-                                    return (
-                                        <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline" wrap={false}>
-                                            <Form.Item {...restField} name={[name, 'function']} rules={[{ required: true, message: 'Vui lòng chọn!' }]} style={{ minWidth: 200, margin: 0 }}>
+                        {(fields, { add, remove }) => {
+                            const columns = [
+                                {
+                                    title: 'Tên chức năng',
+                                    key: 'function',
+                                    width: '25%',
+                                    render: (_: any, record: any, index: number) => {
+                                        const selectedFunctions = permissions.map((p: { function?: string }) => p?.function).filter(Boolean);
+                                        const currentFunction = permissions[index]?.function;
+                                        const availableFunctions = functionOptions.filter(
+                                            opt => !selectedFunctions.includes(opt.value) || opt.value === currentFunction
+                                        );
+                                        return (
+                                            <Form.Item
+                                                name={[record.name, 'function']}
+                                                rules={[{ required: true, message: 'Vui lòng chọn!' }]}
+                                                style={{ margin: 0 }}
+                                            >
                                                 <Select options={availableFunctions} placeholder="Chọn chức năng" />
                                             </Form.Item>
-                                            <Form.Item {...restField} name={[name, 'module']} rules={[{ required: true, message: 'Vui lòng chọn!' }]} style={{ minWidth: 200, margin: 0 }}>
-                                                <Select options={moduleOptions} placeholder="Chọn phân hệ" />
-                                            </Form.Item>
-                                            <Form.Item {...restField} name={[name, 'actions']} rules={[{ required: true, message: 'Vui lòng chọn!' }]} style={{ minWidth: 300, margin: 0 }}>
-                                                <Select mode="multiple" allowClear options={hardcodedActions} placeholder="Chọn các hành động" />
-                                            </Form.Item>
-                                            <MinusCircleOutlined onClick={() => remove(name)} style={{ color: 'red' }} />
-                                        </Space>
-                                    );
-                                })}
-                                <Form.Item>
-                                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />} style={{ maxWidth: '772px', marginTop: '16px' }}>
-                                        Thêm quyền
-                                    </Button>
-                                </Form.Item>
-                            </>
-                        )}
+                                        );
+                                    },
+                                },
+                                {
+                                    title: 'Tên phân hệ',
+                                    key: 'module',
+                                    width: '25%',
+                                    render: (_: any, record: any) => (
+                                        <Form.Item
+                                            name={[record.name, 'module']}
+                                            rules={[{ required: true, message: 'Vui lòng chọn!' }]}
+                                            style={{ margin: 0 }}
+                                        >
+                                            <Select options={moduleOptions} placeholder="Chọn phân hệ" />
+                                        </Form.Item>
+                                    ),
+                                },
+                                {
+                                    title: 'Hành động',
+                                    key: 'actions',
+                                    width: '40%',
+                                    render: (_: any, record: any) => (
+                                        <Form.Item
+                                            name={[record.name, 'actions']}
+                                            rules={[{ required: true, message: 'Vui lòng chọn!' }]}
+                                            style={{ margin: 0 }}
+                                        >
+                                            <Select mode="multiple" allowClear options={hardcodedActions} placeholder="Chọn các hành động" />
+                                        </Form.Item>
+                                    ),
+                                },
+                                {
+                                    title: 'Thao tác',
+                                    key: 'action',
+                                    width: '10%',
+                                    render: (_: any, record: any) => (
+                                        <Popconfirm title="Bạn chắc chắn muốn xóa?" onConfirm={() => remove(record.name)}>
+                                            <Button type="text" danger icon={<DeleteOutlined />} />
+                                        </Popconfirm>
+                                    ),
+                                },
+                            ];
+
+                            return (
+                                <>
+                                    <Table
+                                        columns={columns}
+                                        dataSource={fields}
+                                        pagination={false}
+                                        rowKey="key"
+                                        bordered
+                                    />
+                                    <Form.Item style={{ marginTop: '16px' }}>
+                                        <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                                            Thêm quyền
+                                        </Button>
+                                    </Form.Item>
+                                </>
+                            );
+                        }}
                     </Form.List>
 
                     <Form.Item style={{ marginTop: '32px' }}>
