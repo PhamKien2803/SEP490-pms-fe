@@ -5,6 +5,8 @@ import UserManagement from '../../pages/user-management/UserManagement';
 import { constants } from '../../constants';
 import FunctionsManagement from '../../pages/functions-management/FunctionsManagement';
 import RoleManagement from '../../pages/role-management/RoleManagement';
+import CreateRole from '../../pages/create-role/CreateRole';
+import EditRole from '../../pages/edit-role/EditRole';
 
 export const routes: RouteObject[] = [
     {
@@ -47,7 +49,16 @@ export const routes: RouteObject[] = [
                                 index: true,
                                 element: <RoleManagement />,
                             },
+                            {
+                                path: "create",
+                                element: <CreateRole />,
+                            },
+                            {
+                                path: "edit/:roleId",
+                                element: <EditRole />,
+                            }
                         ],
+
                     },
                     {
                         path: "functions",

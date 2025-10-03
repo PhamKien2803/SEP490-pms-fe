@@ -4,6 +4,7 @@ import { AxiosError } from "axios";
 import type { CreateFunctionDto, Functions, FunctionsResponse, LoginRequest, LoginResponse, UpdateFunctionDto } from "../types/auth";
 import type { User } from "../types/user";
 import { messages } from "../constants/message";
+import { CreateRoleDto, RoleDetails, RoleFunctionItem, RoleModuleItem, RolesListResponse, UpdateRoleDto } from "../types/role";
 
 export const authApis = {
     login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -57,3 +58,39 @@ export const functionsApis = {
         await axiosAuth.post(apiEndPoint.DELETE_FUNCTION(id));
     },
 }
+
+export const rolesApis = {
+    getRolesList: async (params: { page: number, limit: number, query?: string }): Promise<RolesListResponse> => {
+        const response = await axiosAuth.get<RolesListResponse>(apiEndPoint.GET_ROLE_LIST, { params });
+        return response.data;
+    },
+
+    getListFunction: async (): Promise<RoleFunctionItem[]> => {
+        const response = await axiosAuth.get<RoleFunctionItem[]>(apiEndPoint.GET_LIST_FUNCTION);
+        return response.data;
+    },
+
+    getListModule: async (): Promise<RoleModuleItem[]> => {
+        const response = await axiosAuth.get<RoleModuleItem[]>(apiEndPoint.GET_LIST_MODULE);
+        return response.data;
+    },
+
+    getRoleById: async (id: string): Promise<RoleDetails> => {
+        const response = await axiosAuth.get<RoleDetails>(apiEndPoint.GET_ROLE_BY_ID(id));
+        return response.data;
+    },
+
+    createRole: async (body: CreateRoleDto): Promise<RoleDetails> => {
+        const response = await axiosAuth.post<RoleDetails>(apiEndPoint.CREATE_ROLE, body);
+        return response.data;
+    },
+
+    updateRole: async (id: string, body: UpdateRoleDto): Promise<RoleDetails> => {
+        const response = await axiosAuth.put<RoleDetails>(apiEndPoint.UPDATE_ROLE(id), body);
+        return response.data;
+    },
+
+    deleteRole: async (id: string): Promise<void> => {
+        await axiosAuth.post(apiEndPoint.DELETE_ROLE(id));
+    },
+};
