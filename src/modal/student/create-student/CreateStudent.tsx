@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Form, Input, Button, DatePicker, Select } from "antd";
+import { Modal, Form, Input, Button, DatePicker, Select, Row, Col } from "antd";
 import { toast } from "react-toastify";
 import { CreateUserData } from "../../../types/student-management";
 import dayjs from "dayjs";
@@ -77,17 +77,7 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
                 open={open}
                 onCancel={handleCancel}
                 confirmLoading={loading}
-                width={700}
-                styles={{
-                    body: {
-                        maxHeight: 'calc(100vh - 250px)', 
-                        overflowY: 'auto',
-                        paddingTop: '16px',
-                        paddingBottom: '0px',
-                        paddingLeft: '24px', 
-                        paddingRight: '24px',
-                    }
-                }}
+                width={800}
                 centered
                 footer={[
                     <Button key="back" onClick={handleCancel} disabled={loading}>
@@ -109,93 +99,91 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
                     onFinish={handleFinish}
                     onFinishFailed={handleFinishFailed}
                 >
-                    <div
-                        style={{
-                            display: "grid",
-                            gridTemplateColumns: "1fr 1fr",
-                            gap: "16px",
-                        }}
-                    >
-                        <Form.Item
-                            name="fullName"
-                            label="Họ và Tên"
-                            rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
-                        >
-                            <Input placeholder="Nguyễn Văn A" />
-                        </Form.Item>
-
-                        <Form.Item
-                            name="dob"
-                            label="Ngày sinh"
-                            rules={[{ required: true, message: "Vui lòng chọn ngày sinh!" }]}
-                        >
-                            <DatePicker
-                                style={{ width: "100%" }}
-                                format="DD/MM/YYYY"
-                                placeholder="Chọn ngày"
-                            />
-                        </Form.Item>
-
-                        <Form.Item
-                            name="idCard"
-                            label="CMND/CCCD/Hộ chiếu"
-                            rules={[
-                                { required: true, message: "Vui lòng nhập số định danh!" },
-                            ]}
-                        >
-                            <Input placeholder="012345678901" />
-                        </Form.Item>
-
-                        <Form.Item
-                            name="gender"
-                            label="Giới tính"
-                            rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
-                        >
-                            <Select placeholder="Chọn giới tính">
-                                <Option value="Male">Nam</Option>
-                                <Option value="Female">Nữ</Option>
-                                <Option value="Other">Khác</Option>
-                            </Select>
-                        </Form.Item>
-
-                        <Form.Item
-                            name="relationship"
-                            label="Mối quan hệ"
-                            rules={[
-                                { required: true, message: "Vui lòng nhập mối quan hệ!" },
-                            ]}
-                        >
-                            <Input placeholder="Cha/Mẹ/Người giám hộ" />
-                        </Form.Item>
-
-                        <Form.Item
-                            name="nation"
-                            label="Dân tộc"
-                            rules={[{ required: true, message: "Vui lòng nhập dân tộc!" }]}
-                        >
-                            <Input placeholder="Kinh/Tày/Thái..." />
-                        </Form.Item>
-
-                        <Form.Item
-                            name="religion"
-                            label="Tôn giáo"
-                            rules={[{ required: true, message: "Vui lòng nhập tôn giáo!" }]}
-                        >
-                            <Input placeholder="Không/Phật giáo/Công giáo..." />
-                        </Form.Item>
-                    </div>
-
-                    <Form.Item
-                        name="address"
-                        label="Địa chỉ"
-                        rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
-                        style={{ gridColumn: "span 2" }}
-                    >
-                        <Input.TextArea
-                            rows={2}
-                            placeholder="Số nhà, đường, quận/huyện, tỉnh/thành phố"
-                        />
-                    </Form.Item>
+                    <Row gutter={24}>
+                        <Col span={12}>
+                            <Form.Item
+                                name="fullName"
+                                label="Họ và Tên"
+                                rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
+                            >
+                                <Input placeholder="Nguyễn Văn A" />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                name="dob"
+                                label="Ngày sinh"
+                                rules={[{ required: true, message: "Vui lòng chọn ngày sinh!" }]}
+                            >
+                                <DatePicker
+                                    style={{ width: "100%" }}
+                                    format="DD/MM/YYYY"
+                                    placeholder="Chọn ngày"
+                                />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                name="idCard"
+                                label="CMND/CCCD/Hộ chiếu"
+                                rules={[{ required: true, message: "Vui lòng nhập số định danh!" }]}
+                            >
+                                <Input placeholder="012345678901" />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                name="gender"
+                                label="Giới tính"
+                                rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
+                            >
+                                <Select placeholder="Chọn giới tính">
+                                    <Option value="Male">Nam</Option>
+                                    <Option value="Female">Nữ</Option>
+                                    <Option value="Other">Khác</Option>
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                name="relationship"
+                                label="Mối quan hệ"
+                                rules={[{ required: true, message: "Vui lòng nhập mối quan hệ!" }]}
+                            >
+                                <Input placeholder="Cha/Mẹ/Người giám hộ" />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                             <Form.Item
+                                name="nation"
+                                label="Dân tộc"
+                                rules={[{ required: true, message: "Vui lòng nhập dân tộc!" }]}
+                            >
+                                <Input placeholder="Kinh/Tày/Thái..." />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                name="religion"
+                                label="Tôn giáo"
+                                rules={[{ required: true, message: "Vui lòng nhập tôn giáo!" }]}
+                            >
+                                <Input placeholder="Không/Phật giáo/Công giáo..." />
+                            </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                            <Form.Item
+                                name="address"
+                                label="Địa chỉ"
+                                rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
+                            >
+                                <Input.TextArea
+                                    rows={2}
+                                    placeholder="Số nhà, đường, quận/huyện, tỉnh/thành phố"
+                                />
+                            </Form.Item>
+                        </Col>
+                    </Row>
                 </Form>
             </Modal>
 
@@ -211,7 +199,7 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
                 cancelText="Không"
                 okButtonProps={{ danger: true }}
             >
-                <p>Các thay đổi bạn đã nhập sẽ **không** được lưu lại.</p>
+                <p>Các thay đổi bạn đã nhập sẽ <strong>không</strong> được lưu lại.</p>
             </Modal>
         </>
     );
