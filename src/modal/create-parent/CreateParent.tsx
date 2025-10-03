@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-// THAY ĐỔI: Import thêm Row và Col
 import { Modal, Form, Input, Button, DatePicker, Select, Row, Col } from "antd";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
@@ -48,15 +47,22 @@ const CreateParent: React.FC<CreateParentProps> = ({
   };
 
   const handleFinishFailed = () => {
-    toast.error("Vui lòng điền đầy đủ thông tin bắt buộc!");
+    toast.error("Vui lòng điền đầy đủ các trường bắt buộc!");
   };
 
   const handleCancel = () => {
-    if (form.isFieldsTouched()) {
+    if (form.isFieldsTouched(false)) {
       setIsConfirmVisible(true);
     } else {
       onClose();
     }
+  };
+
+  const handleConfirmCancel = () => setIsConfirmVisible(false);
+
+  const handleConfirmOk = () => {
+    setIsConfirmVisible(false);
+    onClose();
   };
 
   return (
@@ -66,7 +72,7 @@ const CreateParent: React.FC<CreateParentProps> = ({
         open={open}
         onCancel={handleCancel}
         confirmLoading={loading}
-        width={800} // Tăng chiều rộng Modal để có không gian cho 2 cột
+        width={800}
         footer={[
           <Button key="back" onClick={handleCancel} disabled={loading}>
             Hủy
@@ -86,21 +92,20 @@ const CreateParent: React.FC<CreateParentProps> = ({
           layout="vertical"
           onFinish={handleFinish}
           onFinishFailed={handleFinishFailed}
+          autoComplete="off"
         >
-          {/* THAY ĐỔI: Sử dụng Row và Col để chia layout */}
           <Row gutter={24}>
-            {/* Cột trái */}
             <Col span={12}>
               <Form.Item
                 name="fullName"
                 label="Họ và tên"
                 rules={[
                   { required: true, message: "Vui lòng nhập họ và tên!" },
-                  { min: 2, message: "Tên phải ít nhất 2 ký tự!" },
+                  { min: 2, message: "Tên phải có ít nhất 2 ký tự!" },
                   { max: 100, message: "Tên phải ít hơn 100 ký tự!" },
                 ]}
               >
-                <Input placeholder="e.g., Nguyễn Văn A" />
+                <Input placeholder="Ví dụ: Nguyễn Văn A" />
               </Form.Item>
 
               <Form.Item
@@ -111,12 +116,13 @@ const CreateParent: React.FC<CreateParentProps> = ({
                 <DatePicker
                   style={{ width: "100%" }}
                   format="DD/MM/YYYY"
+                  placeholder="Chọn ngày"
                   disabledDate={(current) =>
                     current && current > dayjs().endOf("day")
                   }
                 />
               </Form.Item>
-              
+
               <Form.Item
                 name="gender"
                 label="Giới tính"
@@ -130,11 +136,10 @@ const CreateParent: React.FC<CreateParentProps> = ({
               </Form.Item>
 
               <Form.Item name="nation" label="Dân tộc">
-                <Input placeholder="e.g., Kinh" />
+                <Input placeholder="Ví dụ: Kinh" />
               </Form.Item>
             </Col>
 
-            {/* Cột phải */}
             <Col span={12}>
               <Form.Item
                 name="IDCard"
@@ -143,11 +148,11 @@ const CreateParent: React.FC<CreateParentProps> = ({
                   { required: true, message: "Vui lòng nhập CMND/CCCD!" },
                   {
                     pattern: /^[0-9]{9,12}$/,
-                    message: "CMND/CCCD phải từ 9-12 chữ số!",
+                    message: "CMND/CCCD hợp lệ có 9 hoặc 12 chữ số!",
                   },
                 ]}
               >
-                <Input placeholder="e.g., 123456789" />
+                <Input placeholder="Nhập 9 hoặc 12 số" />
               </Form.Item>
 
               <Form.Item
@@ -155,12 +160,12 @@ const CreateParent: React.FC<CreateParentProps> = ({
                 label="Số điện thoại"
                 rules={[
                   {
-                    pattern: /^[0-9]{9,11}$/,
-                    message: "Số điện thoại phải từ 9-11 chữ số!",
+                    pattern: /^(0[3|5|7|8|9])+([0-9]{8})\b$/,
+                    message: "Số điện thoại không hợp lệ!",
                   },
                 ]}
               >
-                <Input placeholder="e.g., 0987654321" />
+                <Input placeholder="Ví dụ: 0987654321" />
               </Form.Item>
 
               <Form.Item
@@ -170,18 +175,17 @@ const CreateParent: React.FC<CreateParentProps> = ({
                   { type: "email", message: "Định dạng email không hợp lệ!" },
                 ]}
               >
-                <Input placeholder="e.g., example@gmail.com" />
+                <Input placeholder="Ví dụ: example@gmail.com" />
               </Form.Item>
 
               <Form.Item name="religion" label="Tôn giáo">
-                <Input placeholder="e.g., Không" />
+                <Input placeholder="Ví dụ: Không" />
               </Form.Item>
             </Col>
 
-            {/* Mục địa chỉ chiếm toàn bộ chiều rộng */}
             <Col span={24}>
               <Form.Item name="address" label="Địa chỉ">
-                <Input.TextArea rows={2} placeholder="Nhập địa chỉ" />
+                <Input.TextArea rows={2} placeholder="Nhập số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố" />
               </Form.Item>
             </Col>
           </Row>
@@ -189,17 +193,15 @@ const CreateParent: React.FC<CreateParentProps> = ({
       </Modal>
 
       <Modal
-        title="Bạn có chắc muốn hủy?"
+        title="Xác nhận hủy"
         open={isConfirmVisible}
-        onOk={() => {
-          setIsConfirmVisible(false);
-          onClose();
-        }}
-        onCancel={() => setIsConfirmVisible(false)}
+        onOk={handleConfirmOk}
+        onCancel={handleConfirmCancel}
         okText="Đồng ý"
         cancelText="Không"
+        keyboard={false}
       >
-        <p>Các thay đổi sẽ không được lưu lại.</p>
+        <p>Các thay đổi của bạn sẽ không được lưu. Bạn có chắc muốn hủy không?</p>
       </Modal>
     </>
   );
