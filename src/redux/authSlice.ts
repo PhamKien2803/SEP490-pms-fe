@@ -1,134 +1,170 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type {
-  LoginRequest,
-  LoginResponse,
-  ModuleMenu,
-  UserWithPermissions,
+    ApiUserResponse,
+    LoginRequest,
+    LoginResponse,
+    ModuleMenu,
+    PermissionsMap,
+    PermissionModule,
+    User,
 } from "../types/auth";
-import { apiEndPoint } from "../services/api";
+import { initialState } from "../types/auth";
 import axiosAuth from "../services/axiosAuth";
-import { initialState } from './../types/auth';
+import { apiEndPoint } from "../services/api";
 
-
-// LOGIN
-export const login = createAsyncThunk<
-  string,
-  LoginRequest,
-  { rejectValue: LoginResponse["error"] }
->("pms/auth/login", async (credentials, { rejectWithValue }) => {
-  try {
-    const res = await axiosAuth.post<LoginResponse>(
-      apiEndPoint.LOGIN,
-      credentials
-    );
-    const { token, error } = res.data;
-
-    if (error || !token)
-      return rejectWithValue(error || { message: "Đăng nhập thất bại" });
-    sessionStorage.setItem("token", token);
-    return token;
-  } catch (err: any) {
-    return rejectWithValue({
-      message: err.response?.data?.message || "Lỗi kết nối server",
-    });
-  }
-});
-
-// GET CURRENT USER
-export const getCurrentUser = createAsyncThunk<
-  UserWithPermissions,
-  void,
-  { rejectValue: string }
->("pms/auth/getCurrentUser", async (_, { rejectWithValue }) => {
-  try {
-    const res = await axiosAuth.get(apiEndPoint.CURRENT_USER, {
-      headers: {
-        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-      },
-    });
-
-    const { userProfile, permissionListAll } = res.data;
-
-    const user: UserWithPermissions = {
-      id: userProfile._id,
-      email: userProfile.email,
-      roleList: userProfile.roleList,
-      permissionListAll,
-    };
-
-    return user;
-  } catch (err: any) {
-    return rejectWithValue("Không thể tải thông tin người dùng");
-  }
-});
-
-function buildModuleMenu(permissionListAll: { permissionList: any[] }[]): ModuleMenu[] {
-  const map = new Map<string, ModuleMenu>();
-
-  for (const block of permissionListAll) {
-    for (const module of block.permissionList) {
-      const moduleName = module.moduleId.moduleName;
-
-      if (!map.has(moduleName)) {
-        map.set(moduleName, { moduleName, functions: [] });
-      }
-
-      const menu = map.get(moduleName)!;
-
-      for (const func of module.functionList) {
-        if (!menu.functions.find(f => f.url === func.functionId.urlFunction)) {
-          menu.functions.push({
-            name: func.functionId.functionName,
-            url: func.functionId.urlFunction,
-          });
+export const login = createAsyncThunk<string, LoginRequest, { rejectValue: LoginResponse["error"] }>(
+    "auth/login",
+    async (credentials, { rejectWithValue }) => {
+        try {
+            const res = await axiosAuth.post<LoginResponse>(apiEndPoint.LOGIN, credentials);
+            const { token, error } = res.data;
+            if (error || !token) {
+                return rejectWithValue(error || { message: "Đăng nhập thất bại" });
+            }
+            sessionStorage.setItem("token", token);
+            return token;
+        } catch (err: any) {
+            return rejectWithValue({
+                message: err.response?.data?.message || "Lỗi kết nối server",
+            });
         }
-      }
     }
-  }
-  return Array.from(map.values());
+);
+
+const fetchUserData = async () => {
+    const res = await axiosAuth.get<ApiUserResponse>(apiEndPoint.CURRENT_USER);
+    const { userProfile, permissionListAll } = res.data;
+    const user: User = { ...userProfile, permissionListAll };
+    return user;
+};
+
+export const getCurrentUser = createAsyncThunk<User, void, { rejectValue: string }>(
+    "auth/getCurrentUser",
+    async (_, { rejectWithValue }) => {
+        try {
+            return await fetchUserData();
+        } catch (err: any) {
+            return rejectWithValue("Không thể tải thông tin người dùng");
+        }
+    }
+);
+
+export const forceRefetchUser = createAsyncThunk<User, void, { rejectValue: string }>(
+    "auth/forceRefetchUser",
+    async (_, { rejectWithValue }) => {
+        try {
+            return await fetchUserData();
+        } catch (err: any) {
+            return rejectWithValue("Không thể tải thông tin người dùng");
+        }
+    }
+);
+
+function buildPermissionsMap(permissionListAll: PermissionModule[]): PermissionsMap {
+    const map: PermissionsMap = {};
+    if (!permissionListAll) return map;
+
+    for (const module of permissionListAll) {
+        if (!module || !Array.isArray(module.functions)) continue;
+        for (const func of module.functions) {
+            if (!func || !func.urlFunction) continue;
+            const url = func.urlFunction;
+
+            if (!map[url]) {
+                map[url] = {};
+            }
+
+            if (!Array.isArray(func.actions)) continue;
+            for (const act of func.actions) {
+                if (act) {
+                    map[url][act.name] = act.allowed;
+                }
+            }
+        }
+    }
+    return map;
 }
 
-// SLICE
+function buildModuleMenu(permissionListAll: PermissionModule[]): ModuleMenu[] {
+    if (!permissionListAll) return [];
+
+    return permissionListAll
+        .map(module => {
+            if (!module || !Array.isArray(module.functions)) {
+                return null;
+            }
+
+            const visibleFunctions = module.functions
+                .filter(func =>
+                    func && Array.isArray(func.actions) &&
+                    func.actions.some(a => a.name === 'view' && a.allowed)
+                )
+                .map(func => ({
+                    name: func.functionName,
+                    url: func.urlFunction
+                }));
+
+            if (visibleFunctions.length > 0) {
+                return {
+                    moduleName: module.moduleName,
+                    functions: visibleFunctions
+                };
+            }
+            return null;
+        })
+        .filter((menuModule): menuModule is ModuleMenu => menuModule !== null);
+}
+
 const authSlice = createSlice({
-  name: "auth",
-  initialState,
-  reducers: {
-    logout: (state) => {
-      sessionStorage.removeItem("token");
-      state.user = null;
-      state.moduleMenu = [];
-      state.functionItem = [];
+    name: "auth",
+    initialState,
+    reducers: {
+        logout: (state) => {
+            sessionStorage.removeItem("token");
+            state.user = null;
+            state.moduleMenu = [];
+            state.permissionsMap = {};
+        },
     },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(login.pending, (state) => {
-        state.isLoginPending = true;
-        state.loginError = undefined;
-      })
-      .addCase(login.fulfilled, (state) => {
-        state.isLoginPending = false;
-      })
-      .addCase(login.rejected, (state, action) => {
-        state.isLoginPending = false;
-        state.loginError = action.payload || { message: "Đăng nhập thất bại" };
-      })
-      .addCase(getCurrentUser.pending, (state) => {
-        state.isInitializing = true;
-      })
-      .addCase(getCurrentUser.fulfilled, (state, action) => {
-        state.user = action.payload;
-        state.moduleMenu = buildModuleMenu(action.payload.permissionListAll || []);
-        state.isInitializing = false;
-      })
-      .addCase(getCurrentUser.rejected, (state) => {
-        state.user = null;
-        state.isInitializing = false;
-        sessionStorage.removeItem("token");
-      })
-  },
+    extraReducers: (builder) => {
+        builder
+            .addCase(login.pending, (state) => {
+                state.isLoginPending = true;
+                state.loginError = undefined;
+            })
+            .addCase(login.fulfilled, (state) => {
+                state.isLoginPending = false;
+            })
+            .addCase(login.rejected, (state, action) => {
+                state.isLoginPending = false;
+                state.loginError = action.payload || { message: "Đăng nhập thất bại" };
+            })
+            .addCase(getCurrentUser.pending, (state) => {
+                state.isInitializing = true;
+            })
+            .addCase(forceRefetchUser.pending, (state) => {
+                state.isInitializing = true;
+            })
+            .addMatcher(
+                (action) => action.type === getCurrentUser.fulfilled.type || action.type === forceRefetchUser.fulfilled.type,
+                (state, action: { payload: User }) => {
+                    state.user = action.payload;
+                    state.permissionsMap = buildPermissionsMap(action.payload.permissionListAll);
+                    state.moduleMenu = buildModuleMenu(action.payload.permissionListAll);
+                    state.isInitializing = false;
+                }
+            )
+            .addMatcher(
+                (action) => action.type === getCurrentUser.rejected.type || action.type === forceRefetchUser.rejected.type,
+                (state) => {
+                    state.user = null;
+                    state.moduleMenu = [];
+                    state.permissionsMap = {};
+                    state.isInitializing = false;
+                    sessionStorage.removeItem("token");
+                }
+            );
+    },
 });
 
 export const { logout } = authSlice.actions;

@@ -10,4 +10,11 @@ export const apiEndPoint = {
     CREATE_PARENT: '/parents/create',
     UPDATE_PARENT: (id: string) => `/parents/update/${id}`,
     DELETE_PARENT: (id: string) => `/parents/delete/${id}`,
+    GET_ROLE_LIST: '/roles/list',
+    GET_ROLE_BY_ID: (id: string) => `/roles/getByID/${id}`,
+    CREATE_ROLE: '/roles/create',
+    UPDATE_ROLE: (id: string) => `/roles/update/${id}`,
+    DELETE_ROLE: (id: string) => `/roles/delete/${id}`,
+    GET_LIST_FUNCTION: '/roles/listFunction',
+    GET_LIST_MODULE: '/roles/listModule',
 };

@@ -3,9 +3,11 @@ import PrivateRoute from '../PrivateRoute';
 import Dashboard from '../../pages/dash-board/Dashboard';
 import UserManagement from '../../pages/user-management/UserManagement';
 import { constants } from '../../constants';
-import RolePermission from '../../pages/role-permission/RolePermission';
 import FunctionsManagement from '../../pages/functions-management/FunctionsManagement';
 import ParentManagement from '../../pages/parent-management/ParentManagement';
+import RoleManagement from '../../pages/role-management/RoleManagement';
+import CreateRole from '../../pages/create-role/CreateRole';
+import EditRole from '../../pages/edit-role/EditRole';
 
 export const routes: RouteObject[] = [
     {
@@ -46,9 +48,18 @@ export const routes: RouteObject[] = [
                         children: [
                             {
                                 index: true,
-                                element: <RolePermission />,
+                                element: <RoleManagement />,
                             },
+                            {
+                                path: "create",
+                                element: <CreateRole />,
+                            },
+                            {
+                                path: "edit/:roleId",
+                                element: <EditRole />,
+                            }
                         ],
+
                     },
                     {
                         path: "functions",
