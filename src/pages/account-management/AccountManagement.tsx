@@ -62,7 +62,7 @@ const mockData: User[] = [
     },
 ];
 
-function UserManagement() {
+function AccountManagement() {
     const columns: ColumnsType<User> = [
         {
             title: 'Tài khoản',
@@ -156,4 +156,4 @@ function UserManagement() {
     );
 }
 
-export default UserManagement;
+export default AccountManagement;
