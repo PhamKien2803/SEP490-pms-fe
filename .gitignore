@@ -27,6 +27,8 @@
     .env.*.local
     .env.production
     .env.staging
-node_modules
-package-lock.json
-yarn.lock
+    node_modules
+    package-lock.json
+    yarn.lock
+    pnpm-lock.yaml
+    .turbo
