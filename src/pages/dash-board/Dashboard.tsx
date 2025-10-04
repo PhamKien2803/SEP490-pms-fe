@@ -74,7 +74,7 @@ const Dashboard: React.FC = () => {
           ),
           onClick: () => {
             dispatch(logout());
-            navigate("/pms/auth/login");
+            navigate("/login");
           },
         },
       ]}
@@ -106,7 +106,7 @@ const Dashboard: React.FC = () => {
               borderBottom: "1px solid #f0f0f0",
             }}
           >
-            {collapsed ? "PMS" : "PMS Admin"}
+            {collapsed ? "PMS" : "PMS"}
           </div>
           <Menu
             mode="inline"
@@ -165,7 +165,7 @@ const Dashboard: React.FC = () => {
 
         {!screens.lg && (
           <Drawer
-            title="PMS Admin"
+            title="PMS"
             placement="left"
             onClose={() => setDrawerVisible(false)}
             open={drawerVisible}

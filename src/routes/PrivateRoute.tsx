@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAppSelector } from '../redux/hooks';
 import { usePermission } from '../hooks/usePermission';
+import { PagePermissionProvider } from '../context/PermissionContext';
 
 interface PrivateRouteProps {
   requireFunction?: string;
@@ -22,8 +23,12 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
   if (requireFunction && requireAction && !canAction(requireFunction, requireAction)) {
     return <Navigate to="/unauthorized" replace />;
   }
-
-  return <Outlet />;
+  //   return <Outlet />;
+  return (
+    <PagePermissionProvider value={requireFunction || null}>
+      <Outlet />
+    </PagePermissionProvider>
+  );
 };
 
 export default PrivateRoute;

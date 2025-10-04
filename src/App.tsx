@@ -1,57 +1,37 @@
 import { AppRouter } from './routes/AppRouter';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './services/queryClient';
-import { ConfigProvider, Flex, notification, Spin, App as AntdApp } from 'antd';
+import { ConfigProvider, Flex, Spin, App as AntdApp } from 'antd';
 import theme from './themes';
-import { messages } from './constants/message';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentUser } from './redux/authSlice';
 import { ToastContainer } from 'react-toastify';
 import type { AppDispatch, RootState } from './redux/store';
+import { usePermissionWatcher } from './hooks/usePermissionWatcher';
+import { messages } from './constants/message';
+import BlockingOverlay from './components/block-page/BlockingOverlay';
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
-  const { isInitializing } = useSelector((state: RootState) => state.auth);
-
+  const { isInitializing, user, permissionsStale } = useSelector((state: RootState) => state.auth);
+  usePermissionWatcher();
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
+    const token = sessionStorage.getItem('token');
+    if (token && !user) {
       dispatch(getCurrentUser());
     }
-  }, [dispatch]);
-
-  useEffect(() => {
-    const handleOffline = () => {
-      notification.error({
-        key: messages.MSG_ERROR_CODE_NETWORK,
-        message: messages.MSG_ERROR_CODE_NETWORK,
-        closable: false,
-        duration: 0,
-      });
-    };
-
-    const handleOnline = () => {
-      notification.destroy(messages.MSG_ERROR_CODE_NETWORK);
-    };
-
-    window.addEventListener('offline', handleOffline);
-    window.addEventListener('online', handleOnline);
-
-    return () => {
-      window.removeEventListener('offline', handleOffline);
-      window.removeEventListener('online', handleOnline);
-    };
-  }, []);
-
-  if (isInitializing && localStorage.getItem('token')) {
+  }, [dispatch, user]);
+  if (isInitializing && sessionStorage.getItem('token')) {
     return (
       <Flex align="center" justify="center" style={{ minHeight: '100vh' }}>
         <Spin size="large" />
       </Flex>
     );
   }
-
+  if (permissionsStale) {
+    return <BlockingOverlay />;
+  }
   return (
     <ConfigProvider
       theme={theme}
@@ -66,7 +46,7 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <AppRouter />
           <ToastContainer
-            position="bottom-left"
+            position="bottom-right"
             autoClose={3000}
             hideProgressBar={false}
             newestOnTop={false}
@@ -82,4 +62,5 @@ function App() {
     </ConfigProvider>
   );
 }
+
 export default App;

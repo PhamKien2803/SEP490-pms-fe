@@ -1,3 +1,7 @@
+// =================================================================
+// SECTION: Authentication & User Types
+// =================================================================
+
 export type LoginErrorField = 'email' | 'password';
 
 export type LoginRequest = {
@@ -7,103 +11,75 @@ export type LoginRequest = {
 
 export type LoginResponse = {
     token?: string;
-    userId?: string;
     error?: {
         errorField?: LoginErrorField;
         message: string;
     };
 };
 
-
-export interface FunctionPermission {
-    functionId: {
-        _id: string;
-        functionName: string;
-        urlFunction: string;
-    };
-    action: PermissionAction[];
-}
-
-
-export interface ModulePermission {
-    moduleId: {
-        _id: string;
-        moduleName: string;
-    };
-    functionList: FunctionPermission[];
-}
-
-export interface UserWithPermissions {
-    id: string;
+export interface UserProfile {
+    _id: string;
     email: string;
     roleList: string[];
-    permissionListAll: {
-        permissionList: ModulePermission[];
-    }[];
+    active: boolean;
+    isAdmin: boolean;
 }
 
-
-export interface AuthContextType {
-    user: UserWithPermissions | null;
-    isLoginPending: boolean;
-    isLogoutPending: boolean;
-    login: (email: string, password: string) => Promise<void>;
-    logout: () => Promise<void>;
-    hasRole: (role: string) => boolean;
-    hasModule: (moduleName: string) => boolean;
-    hasFunction: (urlFunction: string) => boolean;
-    canAction: (urlFunction: string, actionName: string) => boolean;
+export interface User extends UserProfile {
+    permissionListAll: PermissionModule[];
 }
 
-export interface AuthState {
-    user: UserWithPermissions | null;
-    isLoginPending: boolean;
-    isLogoutPending: boolean;
-    loginError?: { errorField?: "email" | "password"; message: string };
-    moduleMenu: ModuleMenu[];
-    functionItem: FunctionItem[];
-    isInitializing: boolean;
-}
+// =================================================================
+// SECTION: Permissions & Roles Types
+// =================================================================
 
-export const initialState: AuthState = {
-    user: null,
-    isLoginPending: false,
-    isLogoutPending: false,
-    moduleMenu: [],
-    functionItem: [],
-    isInitializing: true,
-};
-
-export interface PermissionAction {
+export interface ActionPermission {
     name: string;
     allowed: boolean;
 }
 
-export interface FunctionItem {
-    functionId: {
-        _id: string;
-        functionName: string;
-        urlFunction: string;
-    };
-    action: PermissionAction[];
+// Type cho một function trong mảng "functions"
+export interface PermissionFunction {
+    functionId: string;
+    urlFunction: string;
+    functionName: string;
+    actions: ActionPermission[];
 }
 
-export interface ModuleMenu {
+// Type cho mỗi phần tử trong mảng "permissionListAll"
+export interface PermissionModule {
+    moduleId: string;
     moduleName: string;
-    functions: {
-        name: string;
-        url: string;
-    }[];
+    functions: PermissionFunction[];
 }
 
+// Type cho cấu trúc map quyền đã được làm phẳng
+export type PermissionsMap = {
+    [urlFunction: string]: {
+        [actionName: string]: boolean;
+    };
+};
 
-//Function type
+// =================================================================
+// SECTION: API-Specific Types
+// =================================================================
+
+// Cấu trúc response của API /getCurrentUser
+export interface ApiUserResponse {
+    message: string;
+    userProfile: UserProfile;
+    permissionListAll: PermissionModule[];
+}
+
+// Types cho việc quản lý chức năng (Functions)
 export interface Functions {
     _id: string;
     functionCode: string;
     functionName: string;
     urlFunction: string;
     active?: boolean;
+    createdBy: string;
+    updateBy?: string;
 }
 
 export interface PaginationInfo {
@@ -117,14 +93,114 @@ export interface FunctionsResponse {
     page: PaginationInfo;
 }
 
+export interface ParentsResponse {
+    data: Parent[];
+    page: PaginationInfo;
+}
+
 export interface CreateFunctionDto {
     functionName: string;
     urlFunction: string;
+    createdBy: string;
 }
 
 export interface UpdateFunctionDto {
     functionName?: string;
     urlFunction?: string;
+    updatedBy: string;
+}
+
+export interface Parent {
+    _id: string;
+    parentCode: string;
+    fullName: string;
+    dob: string; // ISO date string
+    phoneNumber?: string;
+    email?: string;
+    IDCard: string;
+    gender: "male" | "female" | "other";
+    students: string[]; // mảng id của student
+    address?: string;
+    nation?: string;
+    religion?: string;
+    createdBy: string;
+    updatedBy?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface Parent2 {
+    fullName?: string;
+    dob?: string; // ISO date string
+    phoneNumber?: string;
+    email?: string;
+    gender?: "male" | "female" | "other";
+    students?: string[]; // mảng id của student
+    address?: string;
+    nation?: string;
+    religion?: string;
+    updatedBy: string;
 }
 
 
+export interface UpdateParentDto {
+    fullName?: string;
+    dob?: string; // ISO date string
+    phoneNumber?: string;
+    email?: string;
+    gender?: "male" | "female" | "other";
+    students?: string[]; // mảng id của student
+    address?: string;
+    nation?: string;
+    religion?: string;
+    updatedBy: string;
+}
+
+export interface CreateParentDto {
+    fullName: string;
+    dob: string;
+    phoneNumber?: string;
+    email?: string;
+    IDCard: string;
+    gender: "male" | "female" | "other";
+    students?: string[];
+    address?: string;
+    nation?: string;
+    religion?: string;
+}
+// =================================================================
+// SECTION: Redux State & UI-Related Types
+// =================================================================
+
+// Cấu trúc cho menu sidebar
+export interface ModuleMenu {
+    moduleName: string;
+    functions: {
+        name: string;
+        url: string;
+    }[];
+}
+
+// Cấu trúc state chính của auth slice
+export interface AuthState {
+    user: User | null;
+    isLoginPending: boolean;
+    isLogoutPending: boolean;
+    loginError?: { errorField?: "email" | "password"; message: string };
+    isInitializing: boolean;
+    moduleMenu: ModuleMenu[];
+    permissionsMap: PermissionsMap;
+    permissionsStale: boolean;
+}
+
+// Giá trị khởi tạo cho state
+export const initialState: AuthState = {
+    user: null,
+    isLoginPending: false,
+    isLogoutPending: false,
+    loginError: undefined,
+    isInitializing: true,
+    moduleMenu: [],
+    permissionsMap: {},
+    permissionsStale: false,
+};

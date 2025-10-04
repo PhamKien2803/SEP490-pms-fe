@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import {
-    Table, Input, Button, Space, Typography, Row, Col, Card, Tooltip
-} from 'antd';
+import { Table, Input, Button, Space, Typography, Row, Col, Card, Tooltip } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { CreateFunctionDto, Functions, UpdateFunctionDto } from '../../types/auth';
@@ -11,12 +9,21 @@ import { functionsApis } from '../../services/apiServices';
 import CreateFunction from '../../modal/create-functions/CreateFunction';
 import UpdateFunction from '../../modal/update-functions/UpdateFunction';
 import DeleteModal from '../../modal/delete-modal/DeleteModal';
+import { useCurrentUser } from '../../hooks/useCurrentUser';
+import { usePagePermission } from '../../hooks/usePagePermission';
 import { toast } from 'react-toastify';
+import { useAppDispatch } from '../../redux/hooks';
+import { forceRefetchUser } from '../../redux/authSlice';
 
 const FunctionsManagement: React.FC = () => {
     const [functions, setFunctions] = useState<Functions[]>([]);
     const [searchKeyword, setSearchKeyword] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
+    const user = useCurrentUser();
+    const dispatch = useAppDispatch();
+
+    const { canCreate, canUpdate, canDelete } = usePagePermission();
+
     const [pagination, setPagination] = useState<TablePaginationConfig>({
         current: 1,
         pageSize: 5,
@@ -56,8 +63,7 @@ const FunctionsManagement: React.FC = () => {
 
     useEffect(() => {
         fetchFunctions({ page: pagination.current!, limit: pagination.pageSize! });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pagination.current, pagination.pageSize]);
+    }, [fetchFunctions, pagination.current, pagination.pageSize]);
 
     const filteredFunctions = useMemo(() => {
         const keyword = searchKeyword.trim().toLowerCase();
@@ -77,10 +83,16 @@ const FunctionsManagement: React.FC = () => {
     }, []);
 
     const handleCreateFunction = async (values: CreateFunctionDto) => {
+        if (!user) {
+            toast.error('Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.');
+            return;
+        }
         setIsSubmitting(true);
         try {
-            await functionsApis.createFunction(values);
+            const payload = { ...values, createdBy: user.email };
+            await functionsApis.createFunction(payload);
             toast.success('Tạo chức năng thành công!');
+            dispatch(forceRefetchUser());
             setIsModalOpen(false);
             if (pagination.current !== 1) {
                 setPagination(prev => ({ ...prev, current: 1 }));
@@ -100,11 +112,16 @@ const FunctionsManagement: React.FC = () => {
     };
 
     const handleUpdateFunction = async (values: UpdateFunctionDto) => {
-        if (!editingFunction) return;
+        if (!editingFunction || !user) {
+            toast.warning('Thiếu thông tin cần thiết để cập nhật.');
+            return;
+        }
         setIsUpdating(true);
         try {
-            await functionsApis.updateFunction(editingFunction._id, values);
+            const payload = { ...values, updatedBy: user.email };
+            await functionsApis.updateFunction(editingFunction._id, payload);
             toast.success('Cập nhật chức năng thành công!');
+            dispatch(forceRefetchUser());
             setIsUpdateModalOpen(false);
             fetchFunctions({ page: pagination.current!, limit: pagination.pageSize! });
         } catch (error) {
@@ -125,8 +142,8 @@ const FunctionsManagement: React.FC = () => {
         try {
             await functionsApis.deleteFunction(deletingId);
             toast.success('Xóa chức năng thành công!');
+            dispatch(forceRefetchUser());
             setIsDeleteModalOpen(false);
-
             if (functions.length === 1 && pagination.current! > 1) {
                 setPagination(prev => ({ ...prev, current: prev.current! - 1 }));
             } else {
@@ -141,17 +158,10 @@ const FunctionsManagement: React.FC = () => {
     };
 
     const columns: ColumnsType<Functions> = useMemo(() => [
-        {
-            title: 'Mã chức năng',
-            dataIndex: 'functionCode',
-            key: 'functionCode',
-            width: '20%',
-        },
-        {
-            title: 'Tên chức năng',
-            dataIndex: 'functionName',
-            key: 'functionName',
-        },
+        { title: 'Mã chức năng', dataIndex: 'functionCode', key: 'functionCode', width: '20%' },
+        { title: 'Tên chức năng', dataIndex: 'functionName', key: 'functionName' },
+        { title: 'Người tạo', dataIndex: 'createdBy', key: 'createdBy' },
+        { title: 'Người cập nhật', dataIndex: 'updatedBy', key: 'updatedBy' },
         {
             title: 'Hành động',
             key: 'action',
@@ -160,15 +170,26 @@ const FunctionsManagement: React.FC = () => {
             render: (_: unknown, record: Functions) => (
                 <Space size="middle">
                     <Tooltip title="Chỉnh sửa">
-                        <Button type="text" icon={<EditOutlined style={{ color: '#1890ff' }} />} onClick={() => handleOpenUpdateModal(record)} />
+                        <Button
+                            type="text"
+                            icon={<EditOutlined style={{ color: '#1890ff' }} />}
+                            onClick={() => handleOpenUpdateModal(record)}
+                            disabled={!canUpdate}
+                        />
                     </Tooltip>
                     <Tooltip title="Xóa chức năng">
-                        <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleOpenDeleteModal(record._id)} />
+                        <Button
+                            type="text"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={() => handleOpenDeleteModal(record._id)}
+                            disabled={!canDelete}
+                        />
                     </Tooltip>
                 </Space>
             ),
         },
-    ], []);
+    ], [canUpdate, canDelete]);
 
     const cardHeader = useMemo(() => (
         <Row justify="space-between" align="middle">
@@ -186,13 +207,15 @@ const FunctionsManagement: React.FC = () => {
                         onChange={e => setSearchKeyword(e.target.value)}
                         allowClear
                     />
-                    <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
-                        Tạo mới
-                    </Button>
+                    {canCreate && (
+                        <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
+                            Tạo mới
+                        </Button>
+                    )}
                 </Space>
             </Col>
         </Row>
-    ), [searchKeyword]);
+    ), [searchKeyword, canCreate]);
 
     const initialUpdateData = editingFunction ? {
         functionName: editingFunction.functionName,
