@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type {
     ApiUserResponse,
     LoginRequest,
@@ -124,6 +124,10 @@ const authSlice = createSlice({
             state.user = null;
             state.moduleMenu = [];
             state.permissionsMap = {};
+            state.permissionsStale = false;
+        },
+        setPermissionsStale: (state, action: PayloadAction<boolean>) => {
+            state.permissionsStale = action.payload;
         },
     },
     extraReducers: (builder) => {
@@ -140,7 +144,10 @@ const authSlice = createSlice({
                 state.loginError = action.payload || { message: "Đăng nhập thất bại" };
             })
             .addCase(getCurrentUser.pending, (state) => {
-                state.isInitializing = true;
+                // state.isInitializing = true;
+                if (!state.user) {
+                    state.isInitializing = true;
+                }
             })
             .addCase(forceRefetchUser.pending, (state) => {
                 state.isInitializing = true;
@@ -167,5 +174,5 @@ const authSlice = createSlice({
     },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, setPermissionsStale } = authSlice.actions;
 export default authSlice.reducer;

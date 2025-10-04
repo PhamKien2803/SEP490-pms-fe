@@ -22,6 +22,7 @@ export interface UserProfile {
     email: string;
     roleList: string[];
     active: boolean;
+    isAdmin: boolean;
 }
 
 export interface User extends UserProfile {
@@ -189,6 +190,7 @@ export interface AuthState {
     isInitializing: boolean;
     moduleMenu: ModuleMenu[];
     permissionsMap: PermissionsMap;
+    permissionsStale: boolean;
 }
 
 // Giá trị khởi tạo cho state
@@ -200,4 +202,5 @@ export const initialState: AuthState = {
     isInitializing: true,
     moduleMenu: [],
     permissionsMap: {},
+    permissionsStale: false,
 };
