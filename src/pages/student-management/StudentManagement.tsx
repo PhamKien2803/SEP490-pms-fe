@@ -26,7 +26,7 @@ import CreateStudent from "../../modal/student/create-student/CreateStudent";
 import dayjs from "dayjs";
 import UpdateStudent from "../../modal/student/update-student/UpdateStudent";
 import ModalConfirm from "../../modal/common/ModalConfirm/ModalConfirm";
-import ViewStudentDetails from "../../modal/view-student/ViewStudentDetail";
+import ViewStudentDetails from "../../modal/student/view-student/ViewStudentDetail";
 
 const StudentManagement: React.FC = () => {
     const [dataStudents, setDataStudents] = useState<StudentRecord[]>([]);

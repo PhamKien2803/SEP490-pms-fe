@@ -9,6 +9,7 @@ import CreateRole from "../../pages/create-role/CreateRole";
 import EditRole from "../../pages/edit-role/EditRole";
 import StudentManagement from "../../pages/student-management/StudentManagement";
 import AccountManagement from '../../pages/account-management/AccountManagement';
+import StaffManagement from "../../pages/staff-management/StaffManagement";
 
 export const routes: RouteObject[] = [
   {
@@ -93,6 +94,21 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <StudentManagement />,
+              },
+            ],
+          },
+          {
+            path: "staffs",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/staffs`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <StaffManagement />,
               },
             ],
           },
@@ -187,7 +203,7 @@ export const routes: RouteObject[] = [
                     element: <ParentManagement />,
                   },
                 ],
-              }
+              },
             ],
           },
         ],

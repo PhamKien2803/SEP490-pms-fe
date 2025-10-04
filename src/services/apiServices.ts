@@ -7,6 +7,7 @@ import { messages } from "../constants/message";
 import { CreateRoleDto, RoleDetails, RoleFunctionItem, RoleModuleItem, RolesListResponse, UpdateRoleDto } from "../types/role";
 import { CreateUserData, StudentRecord, StudentResponse, UpdateUserData } from "../types/student-management";
 import { AccountsListResponse, RoleNameItem, UpdateAccountDto } from "../types/account";
+import { CreateStaffData, StaffRecord, StaffResponse, UpdateStaffData } from "../types/staff-management";
 
 export const authApis = {
     login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -135,6 +136,27 @@ export const studentApis = {
 
     deleteStudent: async (id: string): Promise<void> => {
         await axiosAuth.post(apiEndPoint.DELETE_STUDENT(id));
+    },
+}
+
+export const staffApis = {
+    getListStaff: async (params: { page: number, limit: number }): Promise<StaffResponse> => {
+        const response = await axiosAuth.get<StaffResponse>(apiEndPoint.GET_LIST_STAFF, { params });
+        return response.data;
+    },
+
+    createStaff: async (body: CreateStaffData): Promise<StaffRecord> => {
+        const response = await axiosAuth.post<StaffRecord>(apiEndPoint.CREATE_STAFF, body);
+        return response.data;
+    },
+
+    updateStaff: async (id: string, body: UpdateStaffData): Promise<StaffRecord> => {
+        const response = await axiosAuth.put<StaffRecord>(apiEndPoint.UPDATE_STAFF(id), body);
+        return response.data;
+    },
+
+    deleteStaff: async (id: string): Promise<void> => {
+        await axiosAuth.post(apiEndPoint.DELETE_STAFF(id));
     },
 }
 
