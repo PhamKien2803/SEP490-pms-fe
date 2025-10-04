@@ -1,19 +1,21 @@
+import dayjs from "dayjs";
+
 export interface StudentRecord {
   _id: string;
   studentCode: string;
   fullName: string;
-  dob: string; 
+  dob: dayjs.Dayjs | null; 
   idCard: string;
-  gender: 'Male' | 'Female' | 'Other' | string;
+  gender: 'Nam' | 'Nữ' | 'Khác' | string;
   address: string;
   relationship: string;
   nation: string;
   religion: string;
   active: boolean;
-  createdBy: string;
-  updatedBy: string;
-  createdAt: string; 
-  updatedAt: string; 
+  createdBy?: string;
+  updatedBy?: string;
+  createdAt?: string; 
+  updatedAt?: string; 
 } 
 
 export interface PaginationInfo {

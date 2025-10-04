@@ -138,9 +138,9 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
                                 rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
                             >
                                 <Select placeholder="Chọn giới tính">
-                                    <Option value="Male">Nam</Option>
-                                    <Option value="Female">Nữ</Option>
-                                    <Option value="Other">Khác</Option>
+                                    <Option value="Nam">Nam</Option>
+                                    <Option value="Nữ">Nữ</Option>
+                                    <Option value="Khác">Khác</Option>
                                 </Select>
                             </Form.Item>
                         </Col>
