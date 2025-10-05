@@ -1,172 +1,180 @@
-import { useState } from 'react';
-import { Typography, Button, Modal, Row, Col } from 'antd';
+import { JSX, useState } from 'react';
+import { Typography, Button, Modal, Row, Col, Tag } from 'antd';
 import {
-    AudioOutlined,
+    GlobalOutlined,
     HighlightOutlined,
+    SmileOutlined,
+    ExperimentOutlined,
 } from '@ant-design/icons';
 
 const { Title, Paragraph } = Typography;
 
-const FONT_FAMILY = "'Poppins', sans-serif";
-
 const programsData = [
     {
-        icon: <AudioOutlined />,
-        title: 'Âm nhạc & Nhịp điệu',
-        description:
-            'Trẻ được làm quen với âm nhạc, nhịp điệu, phát triển cảm xúc, khả năng cảm thụ nghệ thuật và sự tự tin thể hiện bản thân qua các tiết học hát, múa, chơi nhạc cụ.',
+        icon: <GlobalOutlined />,
+        title: 'Tiếng Anh Song Ngữ',
+        description: 'Bé tiếp xúc với tiếng Anh tự nhiên qua các hoạt động vui chơi, bài hát và giao tiếp hàng ngày cùng giáo viên bản ngữ.',
         featured: true,
     },
     {
         icon: <HighlightOutlined />,
-        title: 'Mỹ thuật & Sáng tạo',
-        description:
-            'Các hoạt động vẽ, tô màu, làm thủ công giúp trẻ phát triển tư duy sáng tạo, khả năng quan sát và sự khéo léo của đôi tay.',
+        title: 'Mỹ Thuật Sáng Tạo',
+        description: 'Các hoạt động vẽ, nặn đất sét, làm đồ thủ công giúp bé phát triển trí tưởng tượng, sự khéo léo và thể hiện cá tính riêng.',
+        featured: false,
+    },
+    {
+        icon: <SmileOutlined />,
+        title: 'Phát Triển Kỹ Năng Sống',
+        description: 'Bé học cách tự lập, chia sẻ, làm việc nhóm và giải quyết vấn đề thông qua các tình huống thực tế được lồng ghép trong giờ học.',
+        featured: false,
+    },
+    {
+        icon: <ExperimentOutlined />,
+        title: 'Khám Phá Khoa Học',
+        description: 'Các thí nghiệm khoa học vui nhộn, gần gũi giúp khơi dậy trí tò mò, khả năng quan sát và tư duy logic của trẻ từ sớm.',
         featured: false,
     },
 ];
 
 const ProgramsSection = () => {
-    const [openIndex, setOpenIndex] = useState<number | null>(null);
+    const [modalData, setModalData] = useState<{
+        icon: JSX.Element;
+        title: string;
+        description: string;
+        featured: boolean;
+    } | null>(null);
 
-    const featuredColor = '#29C2B4';
-    const standardColor = '#F9A84B';
+    const COLORS = {
+        primary: '#0958d9',
+        secondary: '#fa8c16',
+        text: '#333',
+        background: '#fff',
+    };
+
+    const sectionStyle = {
+        padding: '80px 24px',
+        backgroundColor: COLORS.background,
+    };
+
+    const baseCardStyle = {
+        height: '100%',
+        backgroundColor: '#fff',
+        borderRadius: '16px',
+        padding: '32px 24px',
+        textAlign: 'center',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        position: 'relative',
+        borderTop: '4px solid transparent',
+    };
+
+    const featuredCardStyle = {
+        borderTop: `4px solid ${COLORS.primary}`,
+    };
+
+    const iconWrapperStyle = {
+        margin: '0 auto 16px auto',
+        height: '80px',
+        width: '80px',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '40px',
+    };
 
     return (
-        <div style={{ padding: '64px 0', backgroundColor: '#FEFDFC' }}>
-            <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 16px' }}>
-                {/* Section Title */}
+        <div style={sectionStyle}>
+            <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+                {/* Tiêu đề Section */}
                 <div style={{ textAlign: 'center', marginBottom: 48 }}>
-                    <Title level={2} style={{ fontFamily: FONT_FAMILY, fontWeight: 900 }}>
-                        Chương trình nổi bật
+                    <Title level={2} style={{ fontWeight: 'bold', color: COLORS.text }}>
+                        Chương Trình Đào Tạo Đa Dạng
                     </Title>
-                    <Paragraph
-                        style={{
-                            fontFamily: FONT_FAMILY,
-                            maxWidth: 500,
-                            margin: '12px auto 0',
-                            color: '#666',
-                        }}
-                    >
-                        Trường mầm non Sakura dành cho trẻ từ 1-5 tuổi với chương trình học tập hiện đại, phát triển toàn diện.
+                    <Paragraph style={{ maxWidth: 600, margin: '12px auto 0', color: '#666', fontSize: '16px' }}>
+                        Tại Dolphin Preschool, chúng tôi xây dựng các chương trình học tiên tiến, giúp bé phát triển toàn diện về trí tuệ, thể chất và cảm xúc.
                     </Paragraph>
                 </div>
 
-                {/* Program Cards */}
-                <Row gutter={[24, 24]} justify="center">
+                {/* Các card chương trình */}
+                <Row gutter={[32, 32]} justify="center">
                     {programsData.map((program, index) => {
-                        const isOpen = openIndex === index;
+                        const isFeatured = program.featured;
+                        const mainColor = isFeatured ? COLORS.primary : COLORS.secondary;
 
                         return (
-                            <Col xs={24} md={8} key={index}>
+                            <Col xs={24} sm={12} lg={6} key={index}>
                                 <div
                                     style={{
-                                        minHeight: 370,
-                                        height: '100%',
-                                        borderRadius: 24,
-                                        textAlign: 'center',
-                                        backgroundColor: program.featured ? featuredColor : 'white',
-                                        color: program.featured ? 'white' : 'inherit',
-                                        border: program.featured ? 'none' : `2px dotted ${standardColor}`,
-                                        boxShadow: program.featured
-                                            ? `0 10px 30px -5px ${featuredColor}77`
-                                            : 'none',
-                                        padding: 32,
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        justifyContent: 'space-between',
-                                        transition: 'all 0.3s ease',
-                                    }}
+                                        ...baseCardStyle,
+                                        ...(isFeatured ? featuredCardStyle : {}),
+                                    } as React.CSSProperties}
                                     onMouseEnter={(e) => {
-                                        (e.currentTarget as HTMLElement).style.transform = 'translateY(-8px)';
+                                        e.currentTarget.style.transform = 'translateY(-10px)';
+                                        e.currentTarget.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.12)';
                                     }}
                                     onMouseLeave={(e) => {
-                                        (e.currentTarget as HTMLElement).style.transform = 'none';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)';
                                     }}
                                 >
+                                    {isFeatured && (
+                                        <Tag color={COLORS.primary} style={{ position: 'absolute', top: 16, right: 16, fontWeight: 'bold' }}>
+                                            Nổi bật
+                                        </Tag>
+                                    )}
                                     <div>
-                                        <div
-                                            style={{
-                                                display: 'inline-flex',
-                                                padding: 12,
-                                                marginBottom: 16,
-                                                borderRadius: '50%',
-                                                backgroundColor: program.featured ? 'white' : 'transparent',
-                                                color: program.featured ? featuredColor : standardColor,
-                                                fontSize: 48,
-                                            }}
-                                        >
+                                        <div style={{ ...iconWrapperStyle, backgroundColor: `${mainColor}20`, color: mainColor }}>
                                             {program.icon}
                                         </div>
-                                        <Title level={4} style={{ fontFamily: FONT_FAMILY, fontWeight: 'bold' }}>
+                                        <Title level={4} style={{ fontWeight: 'bold', color: COLORS.text, minHeight: '64px' }}>
                                             {program.title}
                                         </Title>
-                                        <Paragraph
-                                            style={{
-                                                fontFamily: FONT_FAMILY,
-                                                opacity: program.featured ? 0.9 : 1,
-                                                minHeight: 60,
-                                            }}
-                                        >
+                                        <Paragraph style={{ color: '#666', minHeight: '100px' }}>
                                             {program.description}
                                         </Paragraph>
                                     </div>
-
                                     <Button
-                                        type="default"
-                                        onClick={() => setOpenIndex(index)}
+                                        type={isFeatured ? 'primary' : 'default'}
+                                        onClick={() => setModalData(program)}
                                         style={{
-                                            borderRadius: 50,
-                                            padding: '6px 24px',
+                                            borderRadius: '50px',
                                             fontWeight: 'bold',
-                                            fontFamily: FONT_FAMILY,
-                                            color: program.featured ? 'white' : standardColor,
-                                            borderColor: program.featured ? 'white' : standardColor,
-                                            backgroundColor: 'transparent',
-                                        }}
-                                        onMouseOver={(e) => {
-                                            e.currentTarget.style.backgroundColor = program.featured
-                                                ? 'rgba(255,255,255,0.1)'
-                                                : 'rgba(249, 168, 75, 0.1)';
-                                        }}
-                                        onMouseOut={(e) => {
-                                            e.currentTarget.style.backgroundColor = 'transparent';
+                                            backgroundColor: isFeatured ? mainColor : 'transparent',
+                                            borderColor: mainColor,
+                                            color: isFeatured ? '#fff' : mainColor,
                                         }}
                                     >
                                         Xem chi tiết
                                     </Button>
-
-                                    <Modal
-                                        open={isOpen}
-                                        onCancel={() => setOpenIndex(null)}
-                                        footer={null}
-                                        centered
-                                        title={program.title}
-                                        style={{ fontFamily: FONT_FAMILY }}
-                                        bodyStyle={{
-                                            backgroundColor: program.featured ? featuredColor : 'white',
-                                            color: program.featured ? 'white' : 'inherit',
-                                            textAlign: 'center',
-                                            borderRadius: 12,
-                                        }}
-                                    >
-                                        <div style={{ marginBottom: 16, fontSize: 48 }}>
-                                            {program.icon}
-                                        </div>
-                                        <Paragraph
-                                            style={{
-                                                fontFamily: FONT_FAMILY,
-                                                opacity: program.featured ? 0.9 : 1,
-                                            }}
-                                        >
-                                            {program.description}
-                                        </Paragraph>
-                                    </Modal>
                                 </div>
                             </Col>
                         );
                     })}
                 </Row>
+
+                {/* Modal hiển thị chi tiết */}
+                <Modal
+                    open={!!modalData}
+                    onCancel={() => setModalData(null)}
+                    footer={null}
+                    centered
+                    title={<Title level={3} style={{ color: modalData?.featured ? COLORS.primary : COLORS.secondary, margin: 0 }}>{modalData?.title}</Title>}
+                >
+                    {modalData && (
+                        <div style={{ textAlign: 'center', padding: '16px' }}>
+                            <div style={{ ...iconWrapperStyle, margin: '16px auto', fontSize: '48px', color: modalData.featured ? COLORS.primary : COLORS.secondary }}>
+                                {modalData.icon}
+                            </div>
+                            <Paragraph style={{ fontSize: '16px' }}>
+                                {modalData.description}
+                            </Paragraph>
+                        </div>
+                    )}
+                </Modal>
             </div>
         </div>
     );

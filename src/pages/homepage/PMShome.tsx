@@ -1,5 +1,4 @@
 import { ConfigProvider } from 'antd';
-import { Header } from 'antd/es/layout/layout';
 import { EnrollmentCTASection } from '../../components/pms/EnrollmentCTASection';
 import ProgramsSection from '../../components/pms/ProgramCard';
 import ProgramIntroSection from '../../components/pms/ProgramIntroSection';
@@ -8,6 +7,7 @@ import KnowMoreSection from '../../components/pms/KnowMoreSection';
 import JoinSessionSection from '../../components/pms/JoinSessionSection';
 import { FeaturesSection } from '../../components/pms/FeaturesSection';
 import Footer from '../../components/pms/Footer';
+import { Header } from './../../components/pms/Header';
 
 const customTheme = {
     token: {
@@ -25,25 +25,27 @@ const customTheme = {
             padding: 10,
         },
         Typography: {
-            fontFamily: '"Lora", serif',
+            fontFamily: '"Poppins", sans-serif',
         },
     },
 };
 
 export default function PMSHome() {
     return (
-        <ConfigProvider theme={customTheme}>
-            <Header />
-            <main>
-                <EnrollmentCTASection />
-                <ProgramsSection />
-                <ProgramIntroSection />
-                <ProgramListSection />
-                <KnowMoreSection />
-                <JoinSessionSection />
-                <FeaturesSection />
-            </main>
-            <Footer />
-        </ConfigProvider>
+        <div style={{ overflowX: 'hidden' }}>
+            <ConfigProvider theme={customTheme}>
+                <Header />
+                <main>
+                    <EnrollmentCTASection />
+                    <ProgramsSection />
+                    <ProgramIntroSection />
+                    <ProgramListSection />
+                    <KnowMoreSection />
+                    <JoinSessionSection />
+                    <FeaturesSection />
+                </main>
+                <Footer />
+            </ConfigProvider>
+        </div>
     );
 }
