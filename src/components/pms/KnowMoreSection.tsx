@@ -8,22 +8,22 @@ const FONT_FAMILY = "'Poppins', sans-serif";
 
 const cards = [
     {
-        title: 'Giá trị Sakura - Yêu thương & Tôn trọng',
-        desc: 'Sakura xây dựng môi trường giáo dục dựa trên sự yêu thương, tôn trọng cá nhân, giúp trẻ phát triển nhân cách và tự tin thể hiện bản thân.',
+        title: 'Giá trị Dolphin - Yêu thương & Tôn trọng',
+        desc: 'Dolphin xây dựng môi trường giáo dục dựa trên sự yêu thương, tôn trọng cá nhân, giúp trẻ phát triển nhân cách và tự tin thể hiện bản thân.',
         color: '#F9A84B',
         textColor: 'white',
         highlight: true,
     },
     {
         title: 'Chương trình học hiện đại, sáng tạo',
-        desc: 'Chương trình tại Sakura kết hợp giữa kiến thức, kỹ năng sống, STEAM, tiếng Anh và các hoạt động trải nghiệm, giúp trẻ phát triển toàn diện.',
+        desc: 'Chương trình tại Dolphin kết hợp giữa kiến thức, kỹ năng sống, STEAM, tiếng Anh và các hoạt động trải nghiệm, giúp trẻ phát triển toàn diện.',
         color: '#fff',
         textColor: '#222',
         highlight: false,
     },
     {
         title: 'Đội ngũ giáo viên tận tâm, chuyên nghiệp',
-        desc: 'Giáo viên Sakura giàu kinh nghiệm, tận tâm, luôn đồng hành, truyền cảm hứng và khơi dậy tiềm năng của từng học sinh.',
+        desc: 'Giáo viên Dolphin giàu kinh nghiệm, tận tâm, luôn đồng hành, truyền cảm hứng và khơi dậy tiềm năng của từng học sinh.',
         color: '#fff',
         textColor: '#222',
         highlight: false,
@@ -48,7 +48,7 @@ const KnowMoreSection = () => {
                 {/* Left Side – Cards */}
                 <div style={{ flex: 1, minWidth: 320 }}>
                     <Title level={3} style={{ fontFamily: FONT_FAMILY, fontWeight: 900, marginBottom: 24 }}>
-                        Tìm hiểu thêm về Sakura
+                        Tìm hiểu thêm về Dolphin
                     </Title>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                         {cards.map((card, idx) => {

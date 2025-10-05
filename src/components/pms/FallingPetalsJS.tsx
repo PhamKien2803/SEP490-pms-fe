@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useRef } from 'react';
-import 'swiper/css';
-import 'swiper/css/pagination';
-import 'swiper/css/navigation';
+// import 'swiper/css';
+// import 'swiper/css/pagination';
+// import 'swiper/css/navigation';
 
 interface Petal {
     x: number;
