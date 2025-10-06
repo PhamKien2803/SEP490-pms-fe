@@ -8,6 +8,7 @@ import { CreateRoleDto, RoleDetails, RoleFunctionItem, RoleModuleItem, RolesList
 import { CreateUserData, StudentRecord, StudentResponse, UpdateUserData } from "../types/student-management";
 import { AccountsListResponse, RoleNameItem, UpdateAccountDto } from "../types/account";
 import { CreateStaffData, StaffRecord, StaffResponse, UpdateStaffData } from "../types/staff-management";
+import { RegisterEnrollmentDto } from "../types/enrollment";
 
 export const authApis = {
     login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -179,3 +180,9 @@ export const accountsApis = {
         return response.data;
     },
 }
+
+export const enrollmentApis = {
+    registerEnrollment: async (body: RegisterEnrollmentDto): Promise<void> => {
+        await axiosAuth.post(apiEndPoint.REGISTER_ENROLLMENT, body);
+    },
+};

@@ -5,7 +5,7 @@ import {
     LoginOutlined,
     RocketOutlined,
 } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const { Header: AntHeader } = Layout;
 const { Title } = Typography;
@@ -21,6 +21,24 @@ export const Header = () => {
     const [scrolled, setScrolled] = useState(false);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation(); // 1. Lấy vị trí hiện tại
+
+    // 2. Xác định key của menu item đang active
+    const [current, setCurrent] = useState('');
+
+    useEffect(() => {
+        const path = location.pathname;
+        if (path === '/') {
+            setCurrent('home');
+        } else if (path.startsWith('/enrollment')) {
+            setCurrent('enrollment');
+        } else if (path.startsWith('/news')) {
+            setCurrent('news');
+        } else {
+            setCurrent(''); // Không chọn item nào nếu không khớp
+        }
+    }, [location.pathname]);
+
 
     useEffect(() => {
         const handleScroll = () => {
@@ -77,9 +95,11 @@ export const Header = () => {
                             <Menu
                                 mode="horizontal"
                                 items={menuItems}
+                                selectedKeys={[current]} // 3. Truyền key đang active vào Menu
                                 style={{
                                     borderBottom: 'none',
                                     backgroundColor: 'transparent',
+                                    minWidth: '300px',
                                 }}
                                 onClick={({ key }) => {
                                     const item = menuItems.find(i => i.key === key);
@@ -125,26 +145,23 @@ export const Header = () => {
                 onClose={closeDrawer}
                 open={drawerOpen}
             >
-                <Space direction="vertical" style={{ width: '100%' }}>
-                    {menuItems.map(item => (
-                        <Button
-                            key={item.key}
-                            type="text"
-                            block
-                            style={{ textAlign: 'left', fontSize: '16px' }}
-                            onClick={() => {
-                                item.onClick();
-                                closeDrawer();
-                            }}
-                        >
-                            {item.label}
-                        </Button>
-                    ))}
+                <Menu
+                    mode="inline"
+                    items={menuItems}
+                    selectedKeys={[current]} // 4. Đồng bộ key active cho cả menu trên mobile
+                    onClick={({ key }) => {
+                        const item = menuItems.find(i => i.key === key);
+                        if (item && item.onClick) {
+                            item.onClick();
+                            closeDrawer();
+                        }
+                    }}
+                />
+                 <Space direction="vertical" style={{ width: '100%', marginTop: '24px' }}>
                     <Button
                         type="default"
                         block
                         icon={<LoginOutlined />}
-                        style={{ marginTop: '16px' }}
                         onClick={() => {
                             navigate('/login');
                             closeDrawer();
