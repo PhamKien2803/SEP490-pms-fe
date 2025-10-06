@@ -7,6 +7,7 @@ import PMSHome from '../pages/homepage/PMShome';
 import Login from '../pages/login/Login';
 import ForgotPassword from '../pages/forgot-password/ForgotPassword';
 import UnauthorizedPage from '../pages/not-found/UnauthorizedPage';
+import Enrollment from '../pages/enrollment/Enrollment';
 
 const router = createBrowserRouter([
     {
@@ -15,6 +16,7 @@ const router = createBrowserRouter([
             { path: '/', element: <PMSHome /> },
             { path: '/login', element: <Login /> },
             { path: '/forgot-password', element: <ForgotPassword /> },
+            { path: '/enrollment', element: <Enrollment /> }
         ],
     },
     {

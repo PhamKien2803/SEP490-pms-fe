@@ -1,4 +1,4 @@
-import { Form, Input, Button, Typography, Checkbox, Alert, Row, Col } from 'antd';
+import { Form, Input, Button, Typography, Checkbox, Alert, Row, Col, Tooltip } from 'antd';
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { getCurrentUser, login } from '../../redux/authSlice';
@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { LocalStorageKey } from '../../types/local-storage';
 import { constants } from '../../constants';
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { LockOutlined, UserOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import Paragraph from 'antd/lib/typography/Paragraph';
 
 const { Title, Link } = Typography;
@@ -109,6 +109,20 @@ const Login = () => {
             <Row style={styles.loginPage}>
                 <Col xs={24} lg={10} style={styles.formColumn}>
                     <div style={styles.formContainer} className="login-form-container">
+                        <Tooltip title="Quay lại trang chủ">
+                            <Button
+                                type="text"
+                                shape="circle"
+                                icon={<ArrowLeftOutlined />}
+                                onClick={() => navigate('/')}
+                                style={{
+                                    position: 'absolute',
+                                    top: '20px',
+                                    left: '20px',
+                                    fontSize: '16px'
+                                }}
+                            />
+                        </Tooltip>
                         <div style={{ textAlign: 'center', marginBottom: 32 }}>
                             <div onClick={() => navigate('/')} style={{ cursor: 'pointer', display: 'inline-block' }}>
                                 <Title level={3} style={{ color: '#0958d9', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
@@ -147,7 +161,6 @@ const Login = () => {
                     </div>
                 </Col>
 
-                {/* --- PHƯƠNG ÁN 2: HÌNH KHỐI --- */}
                 <Col xs={0} lg={14} style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(160deg, #e6f7ff 0%, #d6e4ff 100%)' }}>
                     <style>
                         {`
@@ -161,13 +174,11 @@ const Login = () => {
             }
         `}
                     </style>
-                    {/* Các hình khối trang trí */}
                     <div className="shape" style={{ width: '200px', height: '200px', background: 'rgba(9, 88, 217, 0.15)', borderRadius: '50%', top: '15%', left: '20%' }}></div>
                     <div className="shape" style={{ width: '150px', height: '150px', background: 'rgba(250, 140, 22, 0.25)', borderRadius: '15%', bottom: '20%', right: '25%', animationDuration: '30s', animationDirection: 'reverse' }}></div>
                     <div className="shape" style={{ width: '80px', height: '80px', border: '10px solid rgba(9, 88, 217, 0.2)', top: '25%', right: '15%', animationDuration: '50s' }}></div>
                     <div className="shape" style={{ width: '100px', height: '100px', background: 'rgba(250, 140, 22, 0.1)', borderRadius: '50%', bottom: '15%', left: '10%', animationDuration: '35s' }}></div>
 
-                    {/* Hình ảnh chính */}
                     <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
                         <img src="./Dolphin.svg" alt="Dolphin Preschool Illustration" style={{ ...styles.mainIllustration, animation: 'none' } as React.CSSProperties} />
                     </div>

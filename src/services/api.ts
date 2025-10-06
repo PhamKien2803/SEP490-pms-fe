@@ -29,4 +29,5 @@ export const apiEndPoint = {
   UPDATE_ACCOUNT: (id: string) => `/accounts/update/${id}`,
   DELETE_ACCOUNT: (id: string) => `/accounts/delete/${id}`,
   GET_ROLE_NAME_LIST: "/accounts/roleNames",
+  REGISTER_ENROLLMENT: '/enrollments/registerEnroll'
 };
