@@ -231,7 +231,7 @@ const StudentManagement: React.FC = () => {
                 dataIndex: "fullName",
                 key: "fullName",
                 fixed: "left",
-                // width: 200,
+                width: 200,
             },
             {
                 title: "Ngày sinh",
@@ -244,14 +244,14 @@ const StudentManagement: React.FC = () => {
                 title: "Giới tính",
                 dataIndex: "gender",
                 key: "gender",
-                // width: 100,
+                width: 100,
                 render: (gender: String) => gender,
             },
             {
                 title: "Địa chỉ",
                 dataIndex: "address",
                 key: "address",
-                // width: 300,
+                width: 300,
                 render: (address: string) => (
                     <Tooltip title={address}>
                         <div
@@ -272,7 +272,7 @@ const StudentManagement: React.FC = () => {
                 title: "Hành động",
                 key: "action",
                 align: "center",
-                // width: 150,
+                width: 150,
                 fixed: "right",
                 render: (_: unknown, record: StudentRecord) => (
                     <Space size="middle">
