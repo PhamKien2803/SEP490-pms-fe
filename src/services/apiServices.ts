@@ -8,7 +8,7 @@ import { CreateRoleDto, RoleDetails, RoleFunctionItem, RoleModuleItem, RolesList
 import { CreateUserData, StudentRecord, StudentResponse, UpdateUserData } from "../types/student-management";
 import { AccountsListResponse, RoleNameItem, UpdateAccountDto } from "../types/account";
 import { CreateStaffData, StaffRecord, StaffResponse, UpdateStaffData } from "../types/staff-management";
-import { RegisterEnrollmentDto } from "../types/enrollment";
+import { ApproveEnrollmentDto, EnrollmentListItem, EnrollmentsListResponse, RegisterEnrollmentDto, RejectEnrollmentDto, UpdateEnrollmentDto, UploadPDFResponse } from "../types/enrollment";
 
 export const authApis = {
     login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -185,4 +185,44 @@ export const enrollmentApis = {
     registerEnrollment: async (body: RegisterEnrollmentDto): Promise<void> => {
         await axiosAuth.post(apiEndPoint.REGISTER_ENROLLMENT, body);
     },
-};
+
+    getEnrollmentList: async (params: { page: number, limit: number }): Promise<EnrollmentsListResponse> => {
+        const response = await axiosAuth.get<EnrollmentsListResponse>(apiEndPoint.GET_ENROLLMENT_LIST, { params });
+        return response.data;
+    },
+
+    getEnrollmentById: async (id: string): Promise<EnrollmentListItem> => {
+        const response = await axiosAuth.get<EnrollmentListItem>(apiEndPoint.GET_ENROLLMENT_BY_ID(id));
+        return response.data;
+    },
+
+    uploadPDF: async (file: File): Promise<UploadPDFResponse> => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await axiosAuth.post<UploadPDFResponse>(apiEndPoint.UPLOAD_PDF, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    },
+
+    getPDFById: async (id: string): Promise<ArrayBuffer> => {
+        const response = await axiosAuth.get<ArrayBuffer>(apiEndPoint.GET_PDF_BY_ID(id), {
+            responseType: 'arraybuffer',
+        });
+        return response.data;
+    },
+    approveEnrollment: async (body: ApproveEnrollmentDto): Promise<void> => {
+        await axiosAuth.post(apiEndPoint.APPROVE_ENROLLMENT, body);
+    },
+
+    updateEnrollment: async (id: string, body: UpdateEnrollmentDto): Promise<void> => {
+        await axiosAuth.put(apiEndPoint.UPDATE_ENROLLMENT(id), body);
+    },
+
+    rejectEnrollment: async (id: string, body: RejectEnrollmentDto): Promise<void> => {
+        await axiosAuth.post(apiEndPoint.REJECT_ENROLLMENT(id), body);
+    },
+
+}

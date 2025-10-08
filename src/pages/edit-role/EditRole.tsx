@@ -17,6 +17,7 @@ const hardcodedActions = [
     { label: 'Duyệt đơn', value: 'approve' },
     { label: 'Xuất file', value: 'export' },
     { label: 'Nhập file', value: 'import' },
+    { label: 'Từ chối', value: 'reject' },
 ];
 
 const EditRole: React.FC = () => {
