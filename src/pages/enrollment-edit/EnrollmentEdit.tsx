@@ -99,6 +99,17 @@ const EnrollmentEdit: React.FC = () => {
         }
     }, [id, form, birthCertId, healthCertId, fetchData]);
 
+    const handleViewPDF = useCallback(async (fileId: string) => {
+        try {
+            const arrayBuffer = await enrollmentApis.getPDFById(fileId);
+            const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+            const fileURL = URL.createObjectURL(blob);
+            window.open(fileURL, '_blank');
+        } catch (error) {
+            toast.error("Không thể xem file PDF.");
+        }
+    }, []);
+
     const handleApprove = useCallback(async () => {
         if (!id) return;
         if (!birthCertId || !healthCertId) {
@@ -257,14 +268,28 @@ const EnrollmentEdit: React.FC = () => {
                     <Row gutter={32}>
                         <Col xs={24} md={12}>
                             <Form.Item label="Giấy khai sinh (PDF)">
-                                <Upload disabled={!isEditing} fileList={birthCertFile} beforeUpload={(file) => beforeUploadPDF(file, 'birth')} onRemove={() => { setBirthCertId(null); setBirthCertFile([]); }} maxCount={1}>
+                                <Upload
+                                    disabled={!isEditing}
+                                    fileList={birthCertFile}
+                                    beforeUpload={(file) => beforeUploadPDF(file, 'birth')}
+                                    onRemove={() => { setBirthCertId(null); setBirthCertFile([]); }}
+                                    onPreview={(file) => { if (file.url) handleViewPDF(file.url); }}
+                                    maxCount={1}
+                                >
                                     {birthCertFile.length < 1 && <Button icon={<UploadOutlined />} disabled={!isEditing}>Tải lên file mới</Button>}
                                 </Upload>
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={12}>
                             <Form.Item label="Giấy khám sức khỏe (PDF)">
-                                <Upload disabled={!isEditing} fileList={healthCertFile} beforeUpload={(file) => beforeUploadPDF(file, 'health')} onRemove={() => { setHealthCertId(null); setHealthCertFile([]); }} maxCount={1}>
+                                <Upload
+                                    disabled={!isEditing}
+                                    fileList={healthCertFile}
+                                    beforeUpload={(file) => beforeUploadPDF(file, 'health')}
+                                    onRemove={() => { setHealthCertId(null); setHealthCertFile([]); }}
+                                    onPreview={(file) => { if (file.url) handleViewPDF(file.url); }}
+                                    maxCount={1}
+                                >
                                     {healthCertFile.length < 1 && <Button icon={<UploadOutlined />} disabled={!isEditing}>Tải lên file mới</Button>}
                                 </Upload>
                             </Form.Item>
