@@ -16,3 +16,16 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
+
+/* Tăng độ đậm của màu chữ cho các trường input bị vô hiệu hóa */
+.ant-input[disabled],
+.ant-input-textarea[disabled],
+.ant-picker-input > input[disabled] {
+  color: rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Tăng độ đậm cho Select và DatePicker bị vô hiệu hóa */
+.ant-select-disabled .ant-select-selector,
+.ant-picker-disabled {
+  color: rgba(0, 0, 0, 0.7) !important;
+}
