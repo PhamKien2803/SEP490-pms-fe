@@ -37,4 +37,5 @@ export const apiEndPoint = {
   APPROVE_ENROLLMENT: "/enrollments/aprrovedEnroll",
   UPDATE_ENROLLMENT: (id: string) => `/enrollments/update/${id}`,
   REJECT_ENROLLMENT: (id: string) => `/enrollments/rejectEnroll/${id}`,
+  APPROVE_ALL_ENROLLMENT: "/enrollments/approvedEnrollAll",
 };

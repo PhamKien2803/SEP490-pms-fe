@@ -225,4 +225,8 @@ export const enrollmentApis = {
         await axiosAuth.post(apiEndPoint.REJECT_ENROLLMENT(id), body);
     },
 
+    approveAllEnrollments: async (body: { ids: string[] }): Promise<void> => {
+        await axiosAuth.post(apiEndPoint.APPROVE_ALL_ENROLLMENT, body);
+    },
+
 }

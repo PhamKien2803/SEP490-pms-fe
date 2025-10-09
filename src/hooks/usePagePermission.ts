@@ -16,7 +16,8 @@ export const usePagePermission = () => {
                 canApprove: false,
                 canExportfile: false,
                 canImportfile: false,
-                canReject: false
+                canReject: false,
+                canApproveAll: false
             };
         }
 
@@ -28,7 +29,8 @@ export const usePagePermission = () => {
             canApprove: canAction(urlFunction, 'approve'),
             canExportfile: canAction(urlFunction, 'export'),
             canImportfile: canAction(urlFunction, 'import'),
-            canReject: canAction(urlFunction, 'reject')
+            canReject: canAction(urlFunction, 'reject'),
+            canApproveAll: canAction(urlFunction, 'approve_all')
         };
     }, [canAction, urlFunction]);
 
