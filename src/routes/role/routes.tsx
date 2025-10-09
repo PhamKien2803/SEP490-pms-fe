@@ -13,6 +13,7 @@ import StaffManagement from "../../pages/staff-management/StaffManagement";
 import EnrollmentManagement from "../../pages/enrollment-management/EnrollmentManagement";
 import EnrollmentDetail from "../../pages/enrollment-details/EnrollmentDetail";
 import EnrollmentEdit from "../../pages/enrollment-edit/EnrollmentEdit";
+import Admissions from "../../pages/admissions-report/Admissions";
 
 export const routes: RouteObject[] = [
     {
@@ -151,6 +152,21 @@ export const routes: RouteObject[] = [
                                 path: "edit/:id",
                                 element: <EnrollmentEdit />
                             }
+                        ],
+                    },
+                    {
+                        path: "admissions",
+                        element: (
+                            <PrivateRoute
+                                requireFunction={`${constants.APP_PREFIX}/admissions`}
+                                requireAction="view"
+                            />
+                        ),
+                        children: [
+                            {
+                                index: true,
+                                element: <Admissions />,
+                            },
                         ],
                     },
                 ],
