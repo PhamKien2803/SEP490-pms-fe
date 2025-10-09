@@ -2,9 +2,10 @@ import axios, { AxiosError } from 'axios';
 import { notification } from 'antd';
 import { constants } from '../constants';
 import { messages } from '../constants/message';
+import { apiConfig } from './api';
 
 const axiosAuth = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: apiConfig.baseURL,
     headers: {
         'Content-Type': 'application/json',
     },

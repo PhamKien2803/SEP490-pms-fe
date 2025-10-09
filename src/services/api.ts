@@ -39,3 +39,8 @@ export const apiEndPoint = {
   REJECT_ENROLLMENT: (id: string) => `/enrollments/rejectEnroll/${id}`,
   APPROVE_ALL_ENROLLMENT: "/enrollments/approvedEnrollAll",
 };
+
+export const apiConfig = {
+  // baseURL: import.meta.env.VITE_API_URL_PROD,
+  baseURL: import.meta.env.VITE_API_URL,
+}
