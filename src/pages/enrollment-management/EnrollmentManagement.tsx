@@ -23,7 +23,6 @@ const EnrollmentManagement: React.FC = () => {
         showTotal: (total) => `Tổng số: ${total} bản ghi`,
     });
     const [searchQuery, setSearchQuery] = useState('');
-    // const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
     const [statusFilters, setStatusFilters] = useState<string[]>([]);
     const [isApproveAllModalVisible, setIsApproveAllModalVisible] = useState(false);
     const [recordsToApprove, setRecordsToApprove] = useState<EnrollmentListItem[]>([]);
@@ -61,24 +60,8 @@ const EnrollmentManagement: React.FC = () => {
         fetchAllEnrollments();
     }, [fetchAllEnrollments]);
 
-    // const filteredEnrollments = useMemo(() => {
-    //     let data = allEnrollments;
-    //     if (statusFilters && statusFilters.length > 0) {
-    //         data = data.filter(item => item.state === statusFilters);
-    //     }
-    //     if (searchQuery) {
-    //         const keyword = searchQuery.trim().toLowerCase();
-    //         data = data.filter(item =>
-    //             item.studentName.toLowerCase().includes(keyword) ||
-    //             item.enrollmentCode.toLowerCase().includes(keyword) ||
-    //             item.fatherName.toLowerCase().includes(keyword)
-    //         );
-    //     } 
-    //     return data;
-    // }, [allEnrollments, searchQuery, statusFilters]);
-
     const filteredEnrollments = useMemo(() => {
-        let data = allEnrollments.filter(item => item.state !== 'Hoàn thành');
+        let data = allEnrollments
         if (statusFilters && statusFilters.length > 0) {
             data = data.filter(item => statusFilters.includes(item.state));
         }
@@ -204,7 +187,7 @@ const EnrollmentManagement: React.FC = () => {
                                 allowClear
                             >
                                 <Select.Option value="Chờ xử lý">Chờ xử lý</Select.Option>
-                                {/* <Select.Option value="Hoàn thành">Hoàn thành</Select.Option> */}
+                                <Select.Option value="Hoàn thành">Hoàn thành</Select.Option>
                                 <Select.Option value="Chờ bổ sung">Chờ bổ sung</Select.Option>
                                 <Select.Option value="Chờ BGH phê duyệt">Chờ BGH phê duyệt</Select.Option>
                                 <Select.Option value="Chưa đủ điều kiện nhập học">Chưa đủ điều kiện nhập học</Select.Option>
