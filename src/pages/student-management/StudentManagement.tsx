@@ -10,7 +10,12 @@ import {
     Card,
     Tooltip,
 } from "antd";
-import { EditOutlined, DeleteOutlined, PlusOutlined, EyeOutlined } from "@ant-design/icons";
+import {
+    EditOutlined,
+    DeleteOutlined,
+    PlusOutlined,
+    EyeOutlined,
+} from "@ant-design/icons";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { studentApis } from "../../services/apiServices";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
@@ -33,7 +38,9 @@ const StudentManagement: React.FC = () => {
     const [searchKeyword, setSearchKeyword] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-    const [viewingStudent, setViewingStudent] = useState<StudentRecord | null>(null);
+    const [viewingStudent, setViewingStudent] = useState<StudentRecord | null>(
+        null
+    );
     const user = useCurrentUser();
     const dispatch = useAppDispatch();
 
@@ -73,7 +80,9 @@ const StudentManagement: React.FC = () => {
                     pageSize: response.page.limit,
                 }));
             } catch (error) {
-                toast.error("Tải dữ liệu học sinh thất bại.");
+                toast.error(
+                    typeof error === "string" ? error : "Tải dữ liệu học sinh thất bại."
+                );
             } finally {
                 setLoading(false);
             }
@@ -128,7 +137,7 @@ const StudentManagement: React.FC = () => {
                 fetchListStudent({ page: 1, limit: pagination.pageSize! });
             }
         } catch (error) {
-            toast.error("Tạo học sinh thất bại.");
+            toast.error(typeof error === "string" ? error : "Tạo học sinh thất bại.");
         } finally {
             setIsSubmitting(false);
         }
@@ -155,7 +164,9 @@ const StudentManagement: React.FC = () => {
                 limit: pagination.pageSize!,
             });
         } catch (error) {
-            toast.error("Cập nhật học sinh thất bại.");
+            toast.error(
+                typeof error === "string" ? error : "Cập nhật học sinh thất bại."
+            );
         } finally {
             setIsUpdating(false);
         }
@@ -182,7 +193,9 @@ const StudentManagement: React.FC = () => {
                 });
             }
         } catch (error) {
-            toast.error("Xóa học sinh thất bại.");
+            toast.error(
+                typeof error === "string" ? error : "Xóa học sinh thất bại."
+            );
         } finally {
             setIsDeleting(false);
             setDeletingId(null);
@@ -190,9 +203,9 @@ const StudentManagement: React.FC = () => {
     };
 
     const handleOpenViewModal = (record: StudentRecord) => {
-        setViewingStudent(record)
+        setViewingStudent(record);
         setIsViewModalOpen(true);
-    }
+    };
 
     const columns: ColumnsType<StudentRecord> = useMemo(
         () => [
@@ -218,7 +231,7 @@ const StudentManagement: React.FC = () => {
                 dataIndex: "fullName",
                 key: "fullName",
                 fixed: "left",
-                // width: 200,
+                width: 200,
             },
             {
                 title: "Ngày sinh",
@@ -231,22 +244,14 @@ const StudentManagement: React.FC = () => {
                 title: "Giới tính",
                 dataIndex: "gender",
                 key: "gender",
-                // width: 100,
-                render: (gender) => {
-                    if (gender === "Male") {
-                        return "Nam";
-                    }
-                    if (gender === "Female") {
-                        return "Nữ";
-                    }
-                    return "Khác";
-                }
+                width: 100,
+                render: (gender: String) => gender,
             },
             {
                 title: "Địa chỉ",
                 dataIndex: "address",
                 key: "address",
-                // width: 300,
+                width: 300,
                 render: (address: string) => (
                     <Tooltip title={address}>
                         <div
@@ -267,7 +272,7 @@ const StudentManagement: React.FC = () => {
                 title: "Hành động",
                 key: "action",
                 align: "center",
-                // width: 150,
+                width: 150,
                 fixed: "right",
                 render: (_: unknown, record: StudentRecord) => (
                     <Space size="middle">
@@ -337,6 +342,8 @@ const StudentManagement: React.FC = () => {
 
     const initialUpdateData = editingStudent
         ? {
+            _id: editingStudent._id,
+            studentCode: editingStudent.studentCode,
             fullName: editingStudent.fullName,
             dob: dayjs(editingStudent.dob),
             idCard: editingStudent.idCard,
@@ -345,6 +352,7 @@ const StudentManagement: React.FC = () => {
             relationship: editingStudent.relationship,
             nation: editingStudent.nation,
             religion: editingStudent.religion,
+            active: editingStudent.active,
         }
         : null;
 
@@ -362,7 +370,7 @@ const StudentManagement: React.FC = () => {
                     rowKey="_id"
                     pagination={searchKeyword.trim() ? false : pagination}
                     onChange={handleTableChange}
-                    // scroll={{ x: 1300, y: 500 }}
+                // scroll={{ x: 1300, y: 500 }}
                 />
             </Card>
 

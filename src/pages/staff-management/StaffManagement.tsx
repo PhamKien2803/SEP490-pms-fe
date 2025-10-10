@@ -204,8 +204,9 @@ const StaffManagement: React.FC = () => {
       {
         title: "STT",
         key: "stt",
-        width: 80,
+        width: 50,
         align: "center",
+        className: 'ant-table-header-nowrap',
         render: (_, __, index) => {
           const page = pagination.current ?? 1;
           const pageSize = pagination.pageSize ?? 5;
@@ -216,56 +217,60 @@ const StaffManagement: React.FC = () => {
         title: "Mã nhân viên",
         dataIndex: "staffCode",
         key: "staffCode",
-        // width: 130,
+        width: 120, // Đặt width cụ thể
+        className: 'ant-table-header-nowrap',
       },
       {
         title: "Họ và tên",
         dataIndex: "fullName",
         key: "fullName",
+        width: 180,
         fixed: "left",
-        // width: 200,
+        className: 'ant-table-header-nowrap',
       },
       {
         title: "Ngày sinh",
         dataIndex: "dob",
         key: "dob",
-        // width: 120,
+        width: 100,
+        className: 'ant-table-header-nowrap',
         render: (dob: string) => dayjs(dob).format("DD/MM/YYYY"),
       },
       {
-        title: "Giới tính",
-        dataIndex: "gender",
-        key: "gender",
-        // width: 100,
-        render: (gender: string) => gender,
-      },
-      {
-        title: "Địa chỉ",
-        dataIndex: "address",
-        key: "address",
-        // width: 300,
-        render: (address: string) => (
-          <Tooltip title={address}>
+        title: "Email",
+        dataIndex: "email",
+        key: "email",
+        width: 200,
+        render: (email: string) => (
+          <Tooltip title={email}>
             <div
               style={{
-                maxWidth: 280,
-                display: "-webkit-box",
-                WebkitBoxOrient: "vertical",
-                WebkitLineClamp: 2,
+                whiteSpace: "nowrap",
                 overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: 180,
               }}
             >
-              {address}
+              {email}
             </div>
           </Tooltip>
         ),
       },
       {
+        title: "Số điện thoại",
+        dataIndex: "phoneNumber",
+        key: "phoneNumber",
+        width: 120, // Đặt width cụ thể
+        className: 'ant-table-header-nowrap',
+        render: (phoneNumber: string) => phoneNumber,
+      },
+      {
         title: "Hành động",
         key: "action",
         align: "center",
-        // width: 150,
+        width: 100, // Giảm width
         fixed: "right",
+        className: 'ant-table-header-nowrap',
         render: (_: unknown, record: StaffRecord) => (
           <Space size="middle">
             <Tooltip title="Xem chi tiết">
@@ -296,7 +301,7 @@ const StaffManagement: React.FC = () => {
         ),
       },
     ],
-    [canUpdate, canDelete, handleOpenUpdateModal, handleOpenDeleteModal]
+    [canUpdate, canDelete, handleOpenUpdateModal, handleOpenDeleteModal, handleOpenViewModal]
   );
 
   const cardHeader = useMemo(

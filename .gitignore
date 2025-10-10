@@ -6,7 +6,8 @@
     yarn-error.log*
     pnpm-debug.log*
     lerna-debug.log*
-
+.env
+.env.*
     node_modules
     dist
     dist-ssr
@@ -22,11 +23,6 @@
     *.njsproj
     *.sln
     *.sw?
-    .env
-    .env.local
-    .env.*.local
-    .env.production
-    .env.staging
     node_modules
     package-lock.json
     yarn.lock

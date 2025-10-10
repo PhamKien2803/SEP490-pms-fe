@@ -9,7 +9,7 @@ import {
 import { useMotionValue, animate } from 'framer-motion';
 
 const { Title, Paragraph, Text } = Typography;
-const FONT_FAMILY = 'Poppins, sans-serif';
+const FONT_FAMILY = '"Poppins", sans-serif';
 
 const stats = [
     { value: '14+', label: 'Năm kinh nghiệm', icon: <ReadOutlined /> },
@@ -45,7 +45,6 @@ const ProgramIntroSection = () => {
     return (
         <div style={{ background: '#FEFDFC', padding: '64px 0' }}>
             <Row justify="center" align="middle" gutter={[64, 32]} style={{ maxWidth: 1200, margin: '0 auto' }}>
-                {/* Left image */}
                 <Col xs={24} md={10}>
                     <div
                         style={{
@@ -80,7 +79,6 @@ const ProgramIntroSection = () => {
                     </div>
                 </Col>
 
-                {/* Right content */}
                 <Col xs={24} md={14}>
                     <Typography style={{ fontFamily: FONT_FAMILY }}>
                         <Title level={2} style={{ fontWeight: 900 }}>Chương trình của chúng tôi</Title>

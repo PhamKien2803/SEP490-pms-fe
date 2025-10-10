@@ -29,4 +29,18 @@ export const apiEndPoint = {
   UPDATE_ACCOUNT: (id: string) => `/accounts/update/${id}`,
   DELETE_ACCOUNT: (id: string) => `/accounts/delete/${id}`,
   GET_ROLE_NAME_LIST: "/accounts/roleNames",
+  REGISTER_ENROLLMENT: '/enrollments/registerEnroll',
+  GET_ENROLLMENT_LIST: '/enrollments/list',
+  GET_ENROLLMENT_BY_ID: (id: string) => `/enrollments/getById/${id}`,
+  UPLOAD_PDF: "/enrollments/uploadPDF",
+  GET_PDF_BY_ID: (id: string) => `/enrollments/pdf/${id}`,
+  APPROVE_ENROLLMENT: "/enrollments/aprrovedEnroll",
+  UPDATE_ENROLLMENT: (id: string) => `/enrollments/update/${id}`,
+  REJECT_ENROLLMENT: (id: string) => `/enrollments/rejectEnroll/${id}`,
+  APPROVE_ALL_ENROLLMENT: "/enrollments/approvedEnrollAll",
 };
+
+export const apiConfig = {
+  // baseURL: import.meta.env.VITE_API_URL_PROD,
+  baseURL: import.meta.env.VITE_API_URL,
+}

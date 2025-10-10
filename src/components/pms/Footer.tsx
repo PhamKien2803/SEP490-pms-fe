@@ -1,111 +1,143 @@
-import { Layout, Row, Col, Typography, Space } from 'antd';
+import { Layout, Row, Col, Typography, Space, Input, Button } from 'antd';
 import {
     FacebookFilled,
     YoutubeFilled,
+    InstagramFilled, // Thêm icon Instagram
 } from '@ant-design/icons';
 
 const { Footer: AntFooter } = Layout;
 const { Title, Text, Link } = Typography;
 
 export default function Footer() {
+    // --- Bảng màu và styles object ---
+    const COLORS = {
+        background: '#f0f5ff',
+        primary: '#29c2b4',
+        secondary: '#fa8c16',
+        textPrimary: '#1f1f1f',
+        textSecondary: '#595959',
+    };
+
     const styles = {
-        wrapper: {
-            backgroundColor: '#29C2B4',
-            color: 'white',
-            paddingTop: 0,
-            paddingBottom: 48,
-            marginTop: 64,
-            fontFamily: "'Poppins', sans-serif",
-        },
-        topBar: {
-            height: 6,
-            background: 'linear-gradient(to right, #46a2da, #4194cb, #3982b8)',
+        footer: {
+            backgroundColor: COLORS.background,
+            color: COLORS.textPrimary,
+            padding: '60px 0 0 0', // Bỏ padding bottom để sub-footer chiếm trọn
+            borderTop: `4px solid ${COLORS.primary}`,
         },
         content: {
             maxWidth: 1200,
             margin: '0 auto',
-            paddingTop: 48,
-            paddingLeft: 24,
-            paddingRight: 24,
+            padding: '0 24px 60px 24px',
         },
         title: {
-            color: 'white',
-            marginBottom: 16,
+            color: COLORS.textPrimary,
+            marginBottom: '16px',
+            fontWeight: 'bold',
+        },
+        link: {
+            color: COLORS.textSecondary,
+            display: 'block',
+            marginBottom: '8px',
+            transition: 'color 0.3s ease',
         },
         text: {
-            display: 'block',
-            color: 'white',
-            fontSize: 14,
+            color: COLORS.textSecondary,
         },
-        icon: {
-            fontSize: 20,
-            color: 'white',
+        subFooter: {
+            backgroundColor: COLORS.primary,
+            color: '#fff',
+            padding: '24px',
+        },
+        socialIcon: {
+            fontSize: '24px',
+            color: '#fff',
             transition: 'transform 0.3s ease',
             cursor: 'pointer',
         },
     };
 
     return (
-        <AntFooter style={styles.wrapper}>
-            <div style={styles.topBar} />
-
+        <AntFooter style={styles.footer}>
             <div style={styles.content}>
-                <Row gutter={[32, 32]} justify="space-between" align="top">
-                    <Col xs={24} sm={12} md={8}>
-                        <Title level={5} style={styles.title}>Sakura School</Title>
-                        <Text style={styles.text}>Địa chỉ: Khu Công Nghệ Cao Hòa Lạc, km 29</Text>
-                        <Text style={styles.text}>Hotline: 0913339709</Text>
+                <Row gutter={[40, 40]} justify="space-between">
+                    {/* --- Cột 1: Giới thiệu & Logo --- */}
+                    <Col xs={24} sm={12} lg={6}>
+                        <Title level={4} style={{ ...styles.title, display: 'flex', alignItems: 'center' }}>
+                            <span style={{ fontSize: '28px', marginRight: '8px' }}>🐬</span> Dolphin Preschool
+                        </Title>
                         <Text style={styles.text}>
-                            Website:{' '}
-                            <Link href="https://sakura.edu.vn" target="_blank" style={styles.text}>
-                                sakura.edu.vn
-                            </Link>
-                        </Text>
-                        <Text style={styles.text}>
-                            Email:{' '}
-                            <Link href="mailto:sakura.edu@gmail.com" target="_blank" style={styles.text}>
-                                sakura.edu@gmail.com
-                            </Link>
+                            Nơi ươm mầm những ước mơ trẻ thơ trong môi trường giáo dục an toàn, sáng tạo và đầy yêu thương.
                         </Text>
                     </Col>
 
-                    <Col xs={24} sm={12} md={8}>
-                        <Title level={5} style={styles.title}>Chính sách</Title>
-                        <Space direction="vertical" size={8}>
-                            <Link href="#" style={styles.text}>Giới thiệu nhà trường</Link>
-                            <Link href="#" style={styles.text}>Câu hỏi thường gặp</Link>
-                            <Link href="#" style={styles.text}>Chính sách bảo mật</Link>
-                            <Link href="#" style={styles.text}>Học phí & ưu đãi</Link>
-                        </Space>
+                    {/* --- Cột 2: Về chúng tôi --- */}
+                    <Col xs={24} sm={12} lg={5}>
+                        <Title level={5} style={styles.title}>Về chúng tôi</Title>
+                        <Link href="#" style={styles.link} className="footer-link">Giới thiệu</Link>
+                        <Link href="#" style={styles.link} className="footer-link">Đội ngũ giáo viên</Link>
+                        <Link href="#" style={styles.link} className="footer-link">Cơ sở vật chất</Link>
+                        <Link href="#" style={styles.link} className="footer-link">Tuyển dụng</Link>
                     </Col>
 
-                    <Col xs={24} sm={12} md={8}>
-                        <Title level={5} style={styles.title}>Kết nối với chúng tôi</Title>
-                        <Space size="middle" style={{ marginBottom: 12 }}>
-                            <a href="https://facebook.com" aria-label="Facebook">
-                                <FacebookFilled
-                                    style={{ ...styles.icon }}
-                                    onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.2)')}
-                                    onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-                                />
-                            </a>
-                            <a href="https://youtube.com" aria-label="YouTube">
-                                <YoutubeFilled
-                                    style={{ ...styles.icon }}
-                                    onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.2)')}
-                                    onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-                                />
-                            </a>
-                        </Space>
-                        <Text style={styles.text}>
-                            © 2025 Sakura School. Thiết kế bởi{' '}
-                            <Link href="https://nina.vn" target="_blank" style={styles.text}>
-                                Sakura team
-                            </Link>
+                    {/* --- Cột 3: Thông tin liên hệ --- */}
+                    <Col xs={24} sm={12} lg={6}>
+                        <Title level={5} style={styles.title}>Liên hệ</Title>
+                        <Text style={{ ...styles.text, display: 'block', marginBottom: '8px' }}><b>Địa chỉ:</b> 123 Đường Nguyễn Trãi, Thanh Xuân, Hà Nội</Text>
+                        <Text style={{ ...styles.text, display: 'block', marginBottom: '8px' }}><b>Hotline:</b> 0987 654 321</Text>
+                        <Text style={{ ...styles.text, display: 'block', marginBottom: '8px' }}><b>Email:</b> lienhe@dolphinpreschool.edu.vn</Text>
+                    </Col>
+
+                    {/* --- Cột 4: Đăng ký nhận tin --- */}
+                    <Col xs={24} sm={12} lg={7}>
+                        <Title level={5} style={styles.title}>Nhận bản tin từ Dolphin</Title>
+                        <Text style={{ ...styles.text, display: 'block', marginBottom: '16px' }}>
+                            Đăng ký để nhận thông tin mới nhất về các hoạt động và ưu đãi tuyển sinh.
                         </Text>
+                        <Input.Search
+                            placeholder="Nhập email của bạn"
+                            enterButton={<Button type="primary" style={{ backgroundColor: COLORS.secondary, borderColor: COLORS.secondary, height: '40px' }}>Đăng ký</Button>}
+                            size="large"
+                            style={{ height: '40px' }}
+                        />
                     </Col>
                 </Row>
             </div>
+
+            {/* --- Sub-Footer: Copyright & Mạng xã hội --- */}
+            <div style={styles.subFooter}>
+                <Row justify="space-between" align="middle" style={{ maxWidth: 1200, margin: '0 auto' }}>
+                    <Col>
+                        <Text style={{ color: '#fff' }}>
+                            © {new Date().getFullYear()} Dolphin Preschool. All Rights Reserved.
+                        </Text>
+                    </Col>
+                    <Col>
+                        <Space size="middle">
+                            <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
+                                <FacebookFilled style={styles.socialIcon} className="social-icon-hover" />
+                            </a>
+                            <a href="https://youtube.com" aria-label="YouTube" target="_blank" rel="noopener noreferrer">
+                                <YoutubeFilled style={styles.socialIcon} className="social-icon-hover" />
+                            </a>
+                            <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+                                <InstagramFilled style={styles.socialIcon} className="social-icon-hover" />
+                            </a>
+                        </Space>
+                    </Col>
+                </Row>
+            </div>
+            {/* Thêm CSS cho hiệu ứng hover của link và icon */}
+            <style>
+                {`
+                    .footer-link:hover {
+                        color: ${COLORS.primary} !important;
+                    }
+                    .social-icon-hover:hover {
+                        transform: scale(1.2);
+                    }
+                `}
+            </style>
         </AntFooter>
     );
 }

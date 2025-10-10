@@ -5,7 +5,7 @@ const FONT_FAMILY = 'Poppins, sans-serif';
 const programs = [
     {
         image: '/Nhà trẻ Sakura.png',
-        title: 'Nhà trẻ Sakura',
+        title: 'Nhà trẻ Dolphin ',
         desc: 'Chương trình dành cho trẻ nhỏ, chú trọng phát triển vận động, cảm xúc và kỹ năng tự lập trong môi trường an toàn, thân thiện.',
         info: [
             { value: '4-5', label: 'Tuổi', color: '#F9A84B' },
@@ -15,7 +15,7 @@ const programs = [
     },
     {
         image: '/Mẫu giáo Bé Sakura.png',
-        title: 'Mẫu giáo Bé Sakura',
+        title: 'Mẫu giáo Bé Dolphin',
         desc: 'Tập trung phát triển ngôn ngữ, tư duy logic, kỹ năng giao tiếp và sáng tạo qua các hoạt động trải nghiệm.',
         info: [
             { value: '3-4', label: 'Tuổi', color: '#F9A84B' },
@@ -25,7 +25,7 @@ const programs = [
     },
     {
         image: '/Mẫu giáo Nhỡ & Lớn.png',
-        title: 'Mẫu giáo Nhỡ & Lớn Sakura',
+        title: 'Mẫu giáo Nhỡ & Lớn Dolphin',
         desc: 'Phát triển toàn diện về thể chất, trí tuệ, cảm xúc, chuẩn bị sẵn sàng cho lớp 1 với các hoạt động STEAM, tiếng Anh, kỹ năng sống.',
         info: [
             { value: '1-2', label: 'Tuổi', color: '#F9A84B' },
@@ -43,7 +43,7 @@ const ProgramListSection = () => {
                     Các chương trình nổi bật
                 </Typography.Title>
                 <Typography.Paragraph style={{ fontFamily: FONT_FAMILY, color: 'rgba(0,0,0,0.65)', maxWidth: 500, margin: 'auto' }}>
-                    EduKid mang đến môi trường học tập hiện đại, sáng tạo và thân thiện, giúp trẻ phát triển toàn diện từ thể chất đến trí tuệ.
+                    Dolphin Preschool mang đến môi trường học tập hiện đại, sáng tạo và thân thiện, giúp trẻ phát triển toàn diện từ thể chất đến trí tuệ.
                 </Typography.Paragraph>
             </div>
 

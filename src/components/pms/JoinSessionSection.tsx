@@ -83,10 +83,10 @@ const JoinSessionSection = () => {
                 }}
             >
                 <Title level={2} style={{ fontFamily: FONT_FAMILY, fontWeight: 900, marginBottom: 16, color: 'white' }}>
-                    Đăng ký nhập học tại Sakura
+                    Đăng ký nhập học tại Dolphin Preschool ngay hôm nay!
                 </Title>
                 <Paragraph style={{ fontFamily: FONT_FAMILY, color: 'white', opacity: 0.95, marginBottom: 24 }}>
-                    Hãy để bé trải nghiệm môi trường giáo dục hiện đại, sáng tạo và đầy yêu thương tại Sakura.
+                    Hãy để bé trải nghiệm môi trường giáo dục hiện đại, sáng tạo và đầy yêu thương tại Dolphin Preschool ngay hôm nay!.
                     Đăng ký ngay để nhận tư vấn, tham quan trường và nhận ưu đãi nhập học cho năm học mới!
                 </Paragraph>
 

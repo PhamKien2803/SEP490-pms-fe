@@ -13,6 +13,11 @@ export const usePagePermission = () => {
                 canCreate: false,
                 canUpdate: false,
                 canDelete: false,
+                canApprove: false,
+                canExportfile: false,
+                canImportfile: false,
+                canReject: false,
+                canApproveAll: false
             };
         }
 
@@ -21,6 +26,11 @@ export const usePagePermission = () => {
             canCreate: canAction(urlFunction, 'create'),
             canUpdate: canAction(urlFunction, 'update'),
             canDelete: canAction(urlFunction, 'delete'),
+            canApprove: canAction(urlFunction, 'approve'),
+            canExportfile: canAction(urlFunction, 'export'),
+            canImportfile: canAction(urlFunction, 'import'),
+            canReject: canAction(urlFunction, 'reject'),
+            canApproveAll: canAction(urlFunction, 'approve_all')
         };
     }, [canAction, urlFunction]);
 

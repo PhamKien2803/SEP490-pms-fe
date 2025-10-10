@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { CookieUtils } from '../utils/cookies';
 import { constants } from '../constants';
+import { apiConfig } from './api';
 
 const axiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: apiConfig.baseURL,
     headers: {
         'Content-Type': 'application/json',
     },
