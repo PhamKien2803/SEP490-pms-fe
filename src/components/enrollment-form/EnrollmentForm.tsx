@@ -54,7 +54,7 @@ const EnrollmentForm: React.FC = () => {
             toast.success('Gửi đơn đăng ký thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.');
             form.resetFields();
         } catch (error) {
-            toast.error('Gửi đơn đăng ký thất bại. Vui lòng thử lại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Có lỗi xảy ra. Vui lòng thử lại!');
         } finally {
             setLoading(false);
             setFormData(null);

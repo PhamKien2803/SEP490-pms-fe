@@ -23,7 +23,7 @@ const Admissions: React.FC = () => {
             const response = await enrollmentApis.getEnrollmentList({ page: 1, limit: 1000 });
             setAllEnrollments(response.data);
         } catch (error) {
-            toast.error('Tải dữ liệu báo cáo thất bại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách đơn tuyển sinh.');
         } finally {
             setLoading(false);
         }

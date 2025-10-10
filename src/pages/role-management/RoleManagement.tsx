@@ -34,7 +34,7 @@ const RoleManagement: React.FC = () => {
             const response = await rolesApis.getRolesList({ page: 1, limit: 1000 });
             setAllRoles(response.data);
         } catch (error) {
-            toast.error('Tải danh sách vai trò thất bại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách vai trò.');
         } finally {
             setLoading(false);
         }
@@ -82,7 +82,7 @@ const RoleManagement: React.FC = () => {
             setIsDeleteModalOpen(false);
             fetchAllRoles();
         } catch (error) {
-            toast.error('Xóa vai trò thất bại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Xóa vai trò thất bại. Vui lòng thử lại!');
         } finally {
             setIsDeleting(false);
             setDeletingId(null);

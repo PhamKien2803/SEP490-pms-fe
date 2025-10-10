@@ -12,7 +12,6 @@ import {
     Card,
     Tooltip,
 } from "antd";
-// THAY ĐỔI: Thêm icon EyeOutlined
 import {
     EditOutlined,
     DeleteOutlined,
@@ -25,7 +24,6 @@ import { parentsApis } from "../../services/apiServices";
 import CreateParent from "../../modal/create-parent/CreateParent";
 import UpdateParent from "../../modal/update-parents/UpdateParent";
 import DeleteModal from "../../modal/delete-modal/DeleteModal";
-// THAY ĐỔI: Import modal xem chi tiết vừa tạo
 import ViewParentDetails from "../../modal/view-parent/ViewParentDetail";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { toast } from "react-toastify";
@@ -57,11 +55,9 @@ const ParentManagement: React.FC = () => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
-    // THAY ĐỔI: Thêm state cho modal xem chi tiết
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [viewingParent, setViewingParent] = useState<Parent | null>(null);
 
-    // Fetch Parents
     const fetchParents = useCallback(
         async (params: { page: number; limit: number }) => {
             setLoading(true);
@@ -75,7 +71,7 @@ const ParentManagement: React.FC = () => {
                     pageSize: response.page.limit,
                 }));
             } catch (error) {
-                toast.error("Tải dữ liệu phụ huynh thất bại.");
+                typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách phụ huynh.');
             } finally {
                 setLoading(false);
             }
@@ -133,7 +129,7 @@ const ParentManagement: React.FC = () => {
                 fetchParents({ page: 1, limit: pagination.pageSize! });
             }
         } catch (error) {
-            toast.error("Tạo phụ huynh thất bại.");
+            typeof error === "string" ? toast.warn(error) : toast.error('Tạo phụ huynh thất bại. Vui lòng thử lại!');
         } finally {
             setIsSubmitting(false);
         }
@@ -161,7 +157,7 @@ const ParentManagement: React.FC = () => {
                 limit: pagination.pageSize!,
             });
         } catch (error) {
-            toast.error("Cập nhật phụ huynh thất bại.");
+            typeof error === "string" ? toast.warn(error) : toast.error('Cập nhật phụ huynh thất bại. Vui lòng thử lại!');
         } finally {
             setIsUpdating(false);
         }
@@ -190,20 +186,18 @@ const ParentManagement: React.FC = () => {
                 });
             }
         } catch (error) {
-            toast.error("Xóa phụ huynh thất bại.");
+            typeof error === "string" ? toast.warn(error) : toast.error('Xóa phụ huynh thất bại. Vui lòng thử lại!');
         } finally {
             setIsDeleting(false);
             setDeletingId(null);
         }
     };
 
-    // THAY ĐỔI: Thêm hàm mở modal xem chi tiết
     const handleOpenViewModal = (record: Parent) => {
         setViewingParent(record);
         setIsViewModalOpen(true);
     };
 
-    // THAY ĐỔI: Rút gọn lại các cột theo yêu cầu
     const columns: ColumnsType<Parent> = useMemo(
         () => [
             {
@@ -228,13 +222,6 @@ const ParentManagement: React.FC = () => {
                 key: "fullName",
             },
             {
-                title: "Ngày sinh",
-                dataIndex: "dob",
-                key: "dob",
-                render: (dob: string) =>
-                    dob ? new Date(dob).toLocaleDateString("vi-VN") : "-",
-            },
-            {
                 title: "Email",
                 dataIndex: "email",
                 key: "email",
@@ -251,7 +238,6 @@ const ParentManagement: React.FC = () => {
                 width: 150,
                 render: (_: unknown, record: Parent) => (
                     <Space size="middle">
-                        {/* THAY ĐỔI: Thêm nút xem chi tiết */}
                         <Tooltip title="Xem chi tiết">
                             <Button
                                 type="text"
@@ -284,7 +270,6 @@ const ParentManagement: React.FC = () => {
         ], [canUpdate, canDelete]
     );
 
-    // Header (Không thay đổi)
     const cardHeader = useMemo(
         () => (
             <Row justify="space-between" align="middle">
@@ -316,7 +301,6 @@ const ParentManagement: React.FC = () => {
 
     const initialUpdateData = editingParent
         ? {
-            //...dữ liệu giữ nguyên
             _id: editingParent._id,
             parentCode: editingParent.parentCode,
             fullName: editingParent.fullName,
@@ -350,7 +334,6 @@ const ParentManagement: React.FC = () => {
                     rowKey="_id"
                     pagination={searchKeyword.trim() ? false : pagination}
                     onChange={handleTableChange}
-                    // Bạn có thể giữ hoặc bỏ scroll tùy ý vì số cột đã ít đi
                     scroll={{ x: "max-content" }}
                 />
             </Card>
@@ -377,7 +360,6 @@ const ParentManagement: React.FC = () => {
                 onConfirm={handleConfirmDelete}
             />
 
-            {/* THAY ĐỔI: Render modal xem chi tiết */}
             <ViewParentDetails
                 open={isViewModalOpen}
                 onClose={() => setIsViewModalOpen(false)}

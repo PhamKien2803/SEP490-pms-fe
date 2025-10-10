@@ -55,7 +55,7 @@ const FunctionsManagement: React.FC = () => {
                 pageSize: response.page.limit,
             }));
         } catch (error) {
-            toast.error('Tải dữ liệu chức năng thất bại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách chức năng.');
         } finally {
             setLoading(false);
         }
@@ -100,7 +100,7 @@ const FunctionsManagement: React.FC = () => {
                 fetchFunctions({ page: 1, limit: pagination.pageSize! });
             }
         } catch (error) {
-            toast.error('Tạo chức năng thất bại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Tạo chức năng thất bại. Vui lòng thử lại!');
         } finally {
             setIsSubmitting(false);
         }
@@ -125,7 +125,7 @@ const FunctionsManagement: React.FC = () => {
             setIsUpdateModalOpen(false);
             fetchFunctions({ page: pagination.current!, limit: pagination.pageSize! });
         } catch (error) {
-            toast.error('Cập nhật chức năng thất bại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Cập nhật chức năng thất bại. Vui lòng thử lại!');
         } finally {
             setIsUpdating(false);
         }
@@ -150,7 +150,7 @@ const FunctionsManagement: React.FC = () => {
                 fetchFunctions({ page: pagination.current!, limit: pagination.pageSize! });
             }
         } catch (error) {
-            toast.error('Xóa chức năng thất bại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Xóa chức năng thất bại. Vui lòng thử lại!');
         } finally {
             setIsDeleting(false);
             setDeletingId(null);

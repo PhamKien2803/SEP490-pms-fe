@@ -50,7 +50,7 @@ const EnrollmentManagement: React.FC = () => {
             const response = await enrollmentApis.getEnrollmentList({ page: 1, limit: 1000 });
             setAllEnrollments(response.data);
         } catch (error) {
-            toast.error('Tải danh sách đơn tuyển sinh thất bại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách đơn tuyển sinh.');
         } finally {
             setLoading(false);
         }
@@ -101,7 +101,7 @@ const EnrollmentManagement: React.FC = () => {
             setIsApproveAllModalVisible(false);
             fetchAllEnrollments();
         } catch (error) {
-            toast.error('Đã có lỗi xảy ra khi duyệt hàng loạt.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Duyệt hàng loạt thất bại. Vui lòng thử lại!');
         } finally {
             setIsApprovingAll(false);
         }

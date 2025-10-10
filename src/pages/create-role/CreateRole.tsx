@@ -40,7 +40,7 @@ const CreateRole: React.FC = () => {
                 setFunctions(functionsRes);
                 setModules(modulesRes);
             } catch (error) {
-                toast.error('Không thể tải dữ liệu cho các lựa chọn.');
+                typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải dữ liệu cho các dropdown.');
             }
         };
         fetchDataForDropdowns();
@@ -105,7 +105,7 @@ const CreateRole: React.FC = () => {
             navigate('/pms/roles');
             window.location.reload();
         } catch (error) {
-            toast.error('Tạo vai trò thất bại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Tạo vai trò thất bại. Vui lòng thử lại!');
         } finally {
             setLoading(false);
         }
