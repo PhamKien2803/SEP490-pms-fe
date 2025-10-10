@@ -5,7 +5,7 @@ import { messages } from '../constants/message';
 import { apiConfig } from './api';
 
 const axiosAuth = axios.create({
-    baseURL: apiConfig.baseURL,
+    baseURL: apiConfig.baseURL || apiConfig.baseURL_Local,
     headers: {
         'Content-Type': 'application/json',
     },

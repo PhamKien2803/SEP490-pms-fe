@@ -6,11 +6,13 @@ import { toast } from 'react-toastify';
 import { enrollmentApis } from '../../services/apiServices';
 import { EnrollmentListItem } from '../../types/enrollment';
 import { useExcelExport } from '../../hooks/useExcelExport';
+import { usePagePermission } from "../../hooks/usePagePermission";
 import dayjs from 'dayjs';
 
 const { Title } = Typography;
 
 const Admissions: React.FC = () => {
+    const { canExportfile } = usePagePermission();
     const [allEnrollments, setAllEnrollments] = useState<EnrollmentListItem[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [selectedYear, setSelectedYear] = useState<number>(dayjs().year());
@@ -94,14 +96,16 @@ const Admissions: React.FC = () => {
                                 options={yearOptions}
                                 placeholder="Chọn năm"
                             />
-                            <Button
-                                type="primary"
-                                icon={<DownloadOutlined />}
-                                onClick={exportToExcel}
-                                loading={isExportingExcel}
-                            >
-                                Xuất Excel
-                            </Button>
+                            {canExportfile && (
+                                <Button
+                                    type="primary"
+                                    icon={<DownloadOutlined />}
+                                    onClick={exportToExcel}
+                                    loading={isExportingExcel}
+                                >
+                                    Xuất Excel
+                                </Button>
+                            )}
                         </Space>
                     </Col>
                 </Row>

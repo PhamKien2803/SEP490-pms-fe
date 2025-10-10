@@ -4,7 +4,7 @@ import { constants } from '../constants';
 import { apiConfig } from './api';
 
 const axiosInstance = axios.create({
-    baseURL: apiConfig.baseURL,
+    baseURL: apiConfig.baseURL || apiConfig.baseURL_Local,
     headers: {
         'Content-Type': 'application/json',
     },

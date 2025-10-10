@@ -144,7 +144,6 @@ const authSlice = createSlice({
                 state.loginError = action.payload || { message: "Đăng nhập thất bại" };
             })
             .addCase(getCurrentUser.pending, (state) => {
-                // state.isInitializing = true;
                 if (!state.user) {
                     state.isInitializing = true;
                 }
