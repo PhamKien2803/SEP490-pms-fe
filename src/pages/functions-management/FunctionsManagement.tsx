@@ -159,7 +159,7 @@ const FunctionsManagement: React.FC = () => {
 
     const columns: ColumnsType<Functions> = useMemo(() => [
         { title: 'Mã chức năng', dataIndex: 'functionCode', key: 'functionCode', width: '20%' },
-        { title: 'Tên chức năng', dataIndex: 'functionName', key: 'functionName' },
+        { title: 'Tên chức năng', dataIndex: 'functionName', key: 'functionName'},
         { title: 'Người tạo', dataIndex: 'createdBy', key: 'createdBy' },
         { title: 'Người cập nhật', dataIndex: 'updatedBy', key: 'updatedBy' },
         {
