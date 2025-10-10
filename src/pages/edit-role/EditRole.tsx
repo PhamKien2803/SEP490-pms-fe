@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import { rolesApis } from '../../services/apiServices';
 import { UpdateRoleDto, RoleDetails, RoleFunctionItem, RoleModuleItem } from '../../types/role';
 import hardcodedActions from '../../components/hard-code-action';
+import { constants } from '../../constants';
 
 const EditRole: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -29,7 +30,7 @@ const EditRole: React.FC = () => {
     useEffect(() => {
         if (!id) {
             toast.error('URL không hợp lệ, thiếu ID của vai trò.');
-            navigate('/pms/roles');
+            navigate(`${constants.APP_PREFIX}/roles`);;
             return;
         }
 
@@ -61,7 +62,7 @@ const EditRole: React.FC = () => {
 
             } catch (error) {
                 toast.error('Không thể tải dữ liệu của vai trò.');
-                navigate('/pms/roles');
+                navigate(`${constants.APP_PREFIX}/roles`);;
             } finally {
                 setPageLoading(false);
             }
@@ -112,7 +113,7 @@ const EditRole: React.FC = () => {
         try {
             await rolesApis.updateRole(id, payload);
             toast.success('Cập nhật vai trò thành công!');
-            navigate('/pms/roles');
+            navigate(`${constants.APP_PREFIX}/roles`);;
             window.location.reload();
         } catch (error) {
             toast.error('Cập nhật vai trò thất bại.');

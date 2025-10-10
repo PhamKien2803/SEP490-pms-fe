@@ -9,6 +9,7 @@ import { enrollmentApis } from '../../services/apiServices';
 import { ApproveEnrollmentDto, EnrollmentListItem } from '../../types/enrollment';
 import dayjs from 'dayjs';
 import TextArea from 'antd/es/input/TextArea';
+import { constants } from '../../constants';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -122,7 +123,7 @@ const EnrollmentEdit: React.FC = () => {
             const payload = { _id: id, ...values, studentDob: dayjs(values.studentDob).toISOString(), birthCertId, healthCertId, approvedBy: user.email };
             await enrollmentApis.approveEnrollment(payload as ApproveEnrollmentDto);
             toast.success('Duyệt đơn đăng ký thành công!');
-            navigate('/pms/enrollments');
+            navigate(`${constants.APP_PREFIX}/enrollments`);
         } catch (formError) {
             typeof formError === "string" ? toast.warn(formError) : toast.error('Dữ liệu chưa hợp lệ để duyệt. Vui lòng kiểm tra lại.');
         } finally {
@@ -140,7 +141,7 @@ const EnrollmentEdit: React.FC = () => {
             await enrollmentApis.rejectEnrollment(id, { _id: id, reason: rejectReason });
             toast.success('Đã từ chối đơn đăng ký thành công.');
             setIsRejectModalVisible(false);
-            navigate('/pms/enrollments');
+            navigate(`${constants.APP_PREFIX}/enrollments`);
         } catch (error) {
             typeof error === "string" ? toast.warn(error) : toast.error('Từ chối đơn đăng ký thất bại. Vui lòng thử lại!');
         } finally {

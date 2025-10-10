@@ -8,6 +8,7 @@ import { rolesApis } from '../../services/apiServices';
 import { usePagePermission } from '../../hooks/usePagePermission';
 import { RoleListItem } from '../../types/role';
 import DeleteModal from '../../modal/delete-modal/DeleteModal';
+import { constants } from './../../constants/index';
 
 const RoleManagement: React.FC = () => {
     const navigate = useNavigate();
@@ -158,7 +159,7 @@ const RoleManagement: React.FC = () => {
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                     {canCreate && (
-                        <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/pms/roles/create')}>
+                        <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate(`${constants.APP_PREFIX}/roles/create`)}>
                             Tạo mới
                         </Button>
                     )}

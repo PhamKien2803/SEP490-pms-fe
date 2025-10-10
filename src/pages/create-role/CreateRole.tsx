@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { rolesApis } from '../../services/apiServices';
 import { CreateRoleDto } from '../../types/role';
 import { RoleFunctionItem, RoleModuleItem } from '../../types/role';
+import { constants } from '../../constants';
 
 const hardcodedActions = [
     { label: 'Xem', value: 'view' },
@@ -102,7 +103,7 @@ const CreateRole: React.FC = () => {
         try {
             await rolesApis.createRole(payload);
             toast.success('Tạo vai trò thành công!');
-            navigate('/pms/roles');
+            navigate(`${constants.APP_PREFIX}/roles`);
             window.location.reload();
         } catch (error) {
             typeof error === "string" ? toast.warn(error) : toast.error('Tạo vai trò thất bại. Vui lòng thử lại!');
