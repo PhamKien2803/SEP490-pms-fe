@@ -29,12 +29,15 @@ import DeleteModal from "../../modal/delete-modal/DeleteModal";
 import ViewParentDetails from "../../modal/view-parent/ViewParentDetail";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { toast } from "react-toastify";
+import { usePagePermission } from '../../hooks/usePagePermission';
 
 const ParentManagement: React.FC = () => {
     const [parents, setParents] = useState<Parent[]>([]);
     const [searchKeyword, setSearchKeyword] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const user = useCurrentUser();
+    const { canCreate, canUpdate, canDelete } = usePagePermission();
+
     const [pagination, setPagination] = useState<TablePaginationConfig>({
         current: 1,
         pageSize: 5,
@@ -261,6 +264,7 @@ const ParentManagement: React.FC = () => {
                                 type="text"
                                 icon={<EditOutlined style={{ color: "#1890ff" }} />}
                                 onClick={() => handleOpenUpdateModal(record)}
+                                disabled={!canUpdate}
                             />
                         </Tooltip>
                         <Tooltip title="Xóa phụ huynh">
@@ -269,13 +273,13 @@ const ParentManagement: React.FC = () => {
                                 danger
                                 icon={<DeleteOutlined />}
                                 onClick={() => handleOpenDeleteModal(record._id)}
+                                disabled={!canDelete}
                             />
                         </Tooltip>
                     </Space>
                 ),
             },
-        ],
-        []
+        ], [canUpdate, canDelete]
     );
 
     // Header (Không thay đổi)
@@ -296,18 +300,16 @@ const ParentManagement: React.FC = () => {
                             onChange={(e) => setSearchKeyword(e.target.value)}
                             allowClear
                         />
-                        <Button
-                            type="primary"
-                            icon={<PlusOutlined />}
-                            onClick={() => setIsModalOpen(true)}
-                        >
-                            Tạo mới
-                        </Button>
+                        {canCreate && (
+                            <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)} >
+                                Tạo mới
+                            </Button>
+                        )}
                     </Space>
                 </Col>
             </Row>
         ),
-        [searchKeyword]
+        [searchKeyword, canCreate]
     );
 
     const initialUpdateData = editingParent
