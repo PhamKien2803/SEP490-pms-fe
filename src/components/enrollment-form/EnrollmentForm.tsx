@@ -114,9 +114,6 @@ const EnrollmentForm: React.FC = () => {
                 </Paragraph>
                 <Form form={form} layout="vertical" onFinish={onFinish}>
                     <Form.Item name="isExistingParentCheckbox" valuePropName="checked">
-                        {/* <Checkbox onChange={handleCheckboxChange}>
-                            <Text strong>Tôi đã có con đang theo học tại trường (đăng ký cho con thứ hai trở lên)</Text>
-                        </Checkbox> */}
                         <Alert
                             type="info"
                             message={
