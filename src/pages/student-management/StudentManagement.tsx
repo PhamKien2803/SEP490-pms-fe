@@ -282,21 +282,23 @@ const StudentManagement: React.FC = () => {
                             />
                         </Tooltip>
                         <Tooltip title="Chỉnh sửa hồ sơ">
-                            <Button
-                                type="text"
-                                icon={<EditOutlined style={{ color: "#1890ff" }} />}
-                                onClick={() => handleOpenUpdateModal(record)}
-                                disabled={!canUpdate}
-                            />
+                            {canUpdate && (
+                                <Button
+                                    type="text"
+                                    icon={<EditOutlined style={{ color: "#1890ff" }} />}
+                                    onClick={() => handleOpenUpdateModal(record)}
+                                />
+                            )}
                         </Tooltip>
                         <Tooltip title="Xóa hồ sơ">
-                            <Button
-                                type="text"
-                                danger
-                                icon={<DeleteOutlined />}
-                                onClick={() => handleOpenDeleteModal(record._id)}
-                                disabled={!canDelete}
-                            />
+                            {canDelete && (
+                                <Button
+                                    type="text"
+                                    danger
+                                    icon={<DeleteOutlined />}
+                                    onClick={() => handleOpenDeleteModal(record._id)}
+                                />
+                            )}
                         </Tooltip>
                     </Space>
                 ),
