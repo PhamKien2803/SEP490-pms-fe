@@ -14,6 +14,10 @@ import EnrollmentManagement from "../../pages/enrollment-management/EnrollmentMa
 import EnrollmentDetail from "../../pages/enrollment-details/EnrollmentDetail";
 import EnrollmentEdit from "../../pages/enrollment-edit/EnrollmentEdit";
 import Admissions from "../../pages/admissions-report/Admissions";
+import MenuManagement from "../../pages/menu-management/MenuManagement";
+import MenuDetailPage from "../../pages/menu-management/detail/MenuDetail";
+import EditMenuPage from "../../pages/menu-management/edit/EditMenu";
+import CreateMenu from "../../pages/menu-management/create-menu/CreateMenu";
 
 export const routes: RouteObject[] = [
     {
@@ -167,6 +171,33 @@ export const routes: RouteObject[] = [
                                 index: true,
                                 element: <Admissions />,
                             },
+                        ],
+                    },
+                     {
+                        path: "menus",
+                        element: (
+                            <PrivateRoute
+                                requireFunction={`${constants.APP_PREFIX}/menus`}
+                                requireAction="view"
+                            />
+                        ),
+                        children: [
+                            {
+                                index: true,
+                                element: <MenuManagement />,
+                            },
+                            {
+                                path: "view/:id",
+                                element: <MenuDetailPage />,
+                            },
+                            {
+                                path: "edit/:id",
+                                element: <EditMenuPage />
+                            },
+                             {
+                                path: "create",
+                                element: <CreateMenu />
+                            }
                         ],
                     },
                 ],
