@@ -1,6 +1,7 @@
 import React from "react";
 import { Modal, Descriptions, Divider, Tag } from "antd";
 import { StudentRecord } from "../../../types/student-management";
+import dayjs from "dayjs";
 
 interface ViewStudentDetailsProps {
     open: boolean;
@@ -19,11 +20,7 @@ const ViewStudentDetails: React.FC<ViewStudentDetailsProps> = ({
 
     const formatDate = (dateString?: string) => {
         if (!dateString) return "-";
-        return new Date(dateString).toLocaleDateString("vi-VN", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-        });
+        return dayjs(dateString).format("DD/MM/YYYY");
     };
 
     const formatGender = (gender?: string) => {

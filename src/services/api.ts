@@ -38,6 +38,10 @@ export const apiEndPoint = {
   UPDATE_ENROLLMENT: (id: string) => `/enrollments/update/${id}`,
   REJECT_ENROLLMENT: (id: string) => `/enrollments/rejectEnroll/${id}`,
   APPROVE_ALL_ENROLLMENT: "/enrollments/approvedEnrollAll",
+  GET_LIST_MENU: "/menus/list",
+  CREATE_MENU: "/menus/create",
+  DELETE_MENU: (menuId: string) =>  `/menus/delete/${menuId}`,
+  GET_MENU_BY_ID: (menuId: string) => `/menus/get-by-id/${menuId}`
 };
 
 export const apiConfig = {
