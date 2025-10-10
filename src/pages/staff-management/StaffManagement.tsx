@@ -21,7 +21,6 @@ import { staffApis } from "../../services/apiServices";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { usePagePermission } from "../../hooks/usePagePermission";
 import { toast } from "react-toastify";
-import { useAppDispatch } from "../../redux/hooks";
 import dayjs from "dayjs";
 import ModalConfirm from "../../modal/common/ModalConfirm/ModalConfirm";
 import {
@@ -40,7 +39,6 @@ const StaffManagement: React.FC = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [viewingStaff, setViewingStaff] = useState<StaffRecord | null>(null);
   const user = useCurrentUser();
-  const dispatch = useAppDispatch();
 
   const { canCreate, canUpdate, canDelete } = usePagePermission();
 
@@ -336,20 +334,20 @@ const StaffManagement: React.FC = () => {
 
   const initialUpdateData: StaffRecord | null = editingStaff
     ? {
-        _id: editingStaff?._id,
-        staffCode: editingStaff?.staffCode,
-        fullName: editingStaff.fullName,
-        dob: editingStaff.dob ? dayjs(editingStaff.dob) : null,
-        IDCard: editingStaff.IDCard,
-        email: editingStaff.email,
-        phoneNumber: editingStaff.phoneNumber,
-        isTeacher: editingStaff.isTeacher,
-        gender: editingStaff.gender,
-        address: editingStaff.address,
-        nation: editingStaff.nation,
-        religion: editingStaff.religion,
-        active: editingStaff.active,
-      }
+      _id: editingStaff?._id,
+      staffCode: editingStaff?.staffCode,
+      fullName: editingStaff.fullName,
+      dob: editingStaff.dob ? dayjs(editingStaff.dob) : null,
+      IDCard: editingStaff.IDCard,
+      email: editingStaff.email,
+      phoneNumber: editingStaff.phoneNumber,
+      isTeacher: editingStaff.isTeacher,
+      gender: editingStaff.gender,
+      address: editingStaff.address,
+      nation: editingStaff.nation,
+      religion: editingStaff.religion,
+      active: editingStaff.active,
+    }
     : null;
 
   return (
@@ -366,7 +364,7 @@ const StaffManagement: React.FC = () => {
           rowKey="_id"
           pagination={searchKeyword.trim() ? false : pagination}
           onChange={handleTableChange}
-          // scroll={{ x: 1300, y: 500 }}
+        // scroll={{ x: 1300, y: 500 }}
         />
       </Card>
 

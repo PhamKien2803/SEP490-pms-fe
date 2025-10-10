@@ -55,7 +55,7 @@ const ViewStaffDetails: React.FC<ViewStaffDetailsProps> = ({
                     {staffData.gender}
                 </Descriptions.Item>
                 <Descriptions.Item label="Ngày sinh" labelStyle={labelStyle} contentStyle={contentStyle}>
-                    {formatDate(staffData.dob)}
+                    {formatDate(staffData.dob ? staffData.dob.toISOString() : undefined)}
                 </Descriptions.Item>
 
                 <Descriptions.Item label="CMND/CCCD" labelStyle={labelStyle} contentStyle={contentStyle}>
