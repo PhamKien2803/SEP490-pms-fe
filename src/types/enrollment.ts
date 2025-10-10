@@ -16,6 +16,7 @@ export interface RegisterEnrollmentDto {
     motherEmail: string;
     motherIdCard: string;
     motherJob: string;
+    isCheck: boolean;
 }
 
 interface EnrollmentFile {
