@@ -21,7 +21,6 @@ import { studentApis } from "../../services/apiServices";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { usePagePermission } from "../../hooks/usePagePermission";
 import { toast } from "react-toastify";
-import { useAppDispatch } from "../../redux/hooks";
 import {
     CreateUserData,
     StudentRecord,
@@ -42,7 +41,6 @@ const StudentManagement: React.FC = () => {
         null
     );
     const user = useCurrentUser();
-    const dispatch = useAppDispatch();
 
     const { canCreate, canUpdate, canDelete } = usePagePermission();
 

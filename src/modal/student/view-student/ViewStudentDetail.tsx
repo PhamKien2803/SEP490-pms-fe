@@ -61,7 +61,7 @@ const ViewStudentDetails: React.FC<ViewStudentDetailsProps> = ({
                     {formatGender(studentData.gender)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Ngày sinh" labelStyle={labelStyle} contentStyle={contentStyle}>
-                    {formatDate(studentData.dob)}
+                    {formatDate(studentData.dob ? studentData.dob.toISOString() : undefined)}
                 </Descriptions.Item>
 
                 <Descriptions.Item label="CMND/CCCD" labelStyle={labelStyle} contentStyle={contentStyle}>
