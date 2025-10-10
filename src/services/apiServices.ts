@@ -49,8 +49,21 @@ import {
   UpdateEnrollmentDto,
   UploadPDFResponse,
 } from "../types/enrollment";
-import { CreateMenuParams, MenuListParams, MenuListResponse, MenuRecord } from "../types/menu-management";
-import { CreateSchoolYearDto, SchoolYearListItem, SchoolYearReportResponses, SchoolYearsListResponse, UpdateSchoolYearDto } from "../types/schoolYear";
+import {
+  CreateMenuParams,
+  FoodListResponse,
+  ListFoodParams,
+  MenuDetail,
+  MenuListParams,
+  MenuListResponse,
+} from "../types/menu-management";
+import {
+  CreateSchoolYearDto,
+  SchoolYearListItem,
+  SchoolYearReportResponses,
+  SchoolYearsListResponse,
+  UpdateSchoolYearDto,
+} from "../types/schoolYear";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -390,9 +403,9 @@ export const menuApis = {
     return response.data;
   },
 
-  getMenuById: async (menuId: string): Promise<MenuRecord> => {
-    const response = await axiosAuth.get<MenuRecord>(
-      apiEndPoint.GET_MENU_BY_ID(menuId),
+  getMenuById: async (menuId: string): Promise<MenuDetail> => {
+    const response = await axiosAuth.get<MenuDetail>(
+      apiEndPoint.GET_MENU_BY_ID(menuId)
     );
     return response.data;
   },
@@ -404,16 +417,47 @@ export const menuApis = {
   deleteMenu: async (menuId: string): Promise<void> => {
     await axiosAuth.delete(apiEndPoint.DELETE_MENU(menuId));
   },
+
+  editMenu: async (menuId: string, body: CreateMenuParams): Promise<void> => {
+    await axiosAuth.put(apiEndPoint.EDIT_MENU(menuId), body);
+  },
+
+  approveMenu: async (menuId: string): Promise<void> => {
+    await axiosAuth.put(apiEndPoint.APPROVE_MENU(menuId));
+  },
+
+  rejectMenu: async (
+    menuId: string,
+    body: { reason: string }
+  ): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.APPROVE_MENU(menuId), body);
+  },
+
+  getListFood: async (params: ListFoodParams): Promise<FoodListResponse> => {
+    const response = await axiosAuth.get<FoodListResponse>(
+      apiEndPoint.GET_LIST_FOOD,
+      { params }
+    );
+    return response.data;
+  },
 };
 
 export const schoolYearApis = {
-  getSchoolYearList: async (params: { page: number, limit: number }): Promise<SchoolYearsListResponse> => {
-    const response = await axiosAuth.get<SchoolYearsListResponse>(apiEndPoint.GET_SCHOOLYEARS_LIST, { params });
+  getSchoolYearList: async (params: {
+    page: number;
+    limit: number;
+  }): Promise<SchoolYearsListResponse> => {
+    const response = await axiosAuth.get<SchoolYearsListResponse>(
+      apiEndPoint.GET_SCHOOLYEARS_LIST,
+      { params }
+    );
     return response.data;
   },
 
   getSchoolYearById: async (id: string): Promise<SchoolYearListItem> => {
-    const response = await axiosAuth.get<SchoolYearListItem>(apiEndPoint.GET_SCHOOLYEAR_BY_ID(id));
+    const response = await axiosAuth.get<SchoolYearListItem>(
+      apiEndPoint.GET_SCHOOLYEAR_BY_ID(id)
+    );
     return response.data;
   },
 
@@ -421,7 +465,10 @@ export const schoolYearApis = {
     await axiosAuth.post(apiEndPoint.CREATE_SCHOOLYEAR, body);
   },
 
-  updateSchoolYear: async (id: string, body: UpdateSchoolYearDto): Promise<void> => {
+  updateSchoolYear: async (
+    id: string,
+    body: UpdateSchoolYearDto
+  ): Promise<void> => {
     await axiosAuth.put(apiEndPoint.UPDATE_SCHOOLYEAR(id), body);
   },
 
@@ -440,7 +487,7 @@ export const schoolYearApis = {
   getStudentGraduatedReport: async (params: {
     year: number;
     page: number;
-    limit: number
+    limit: number;
   }): Promise<SchoolYearReportResponses> => {
     const response = await axiosAuth.get<SchoolYearReportResponses>(
       apiEndPoint.SCHOOLYEAR_REPORT,
@@ -448,4 +495,4 @@ export const schoolYearApis = {
     );
     return response.data;
   },
-}
+};

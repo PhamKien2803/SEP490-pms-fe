@@ -20,7 +20,6 @@ import {
   AppstoreOutlined,
   EyeOutlined,
   FilterOutlined,
-  ReloadOutlined,
 } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
 import weekOfYear from "dayjs/plugin/weekOfYear";
@@ -57,11 +56,9 @@ interface Pagination {
 }
 
 const AGE_GROUPS = [
-  { value: "1", label: "1 Tuổi" },
-  { value: "2", label: "2 Tuổi" },
-  { value: "3", label: "3 Tuổi" },
-  { value: "4", label: "4 Tuổi" },
-  { value: "5", label: "5 Tuổi" },
+  { value: "1", label: "Dưới 1 tuổi" },
+  { value: "2", label: "1-3 tuổi" },
+  { value: "3", label: "4-5 tuổi" },
 ];
 
 const MenuManagement: React.FC = () => {
@@ -104,14 +101,16 @@ const MenuManagement: React.FC = () => {
       const fromDate = dateRange ? dateRange[0].format("YYYY-MM-DD") : "";
       const toDate = dateRange ? dateRange[1].format("YYYY-MM-DD") : "";
 
-      const ageGroupParam = parseInt(ageGroup);
+      const group = AGE_GROUPS.find((g) => g.value === ageGroup);
+      const ageGroupParam = group ? group?.label : "";
 
       const params: MenuListParams = {
         page,
         limit,
         ageGroup: ageGroupParam,
-        weekStart: fromDate,
-        weekEnd: toDate,
+        weekStart: fromDate || null,
+        weekEnd: toDate || null,
+        active: true,
       };
 
       try {
@@ -202,6 +201,14 @@ const MenuManagement: React.FC = () => {
     }
   };
 
+  const renderStatusTag = useCallback((state: string) => {
+    let color = "processing";
+    if (state === "Đã duyệt") color = "success";
+    if (state === "Chờ xử lý") color = "processing";
+    if (state === "Từ chối") color = "error";
+    return <Tag color={color}>{state.toUpperCase()}</Tag>;
+  }, []);
+
   const columns: ColumnsType<MenuRecord> = [
     {
       title: "Ngày Bắt Đầu",
@@ -228,7 +235,7 @@ const MenuManagement: React.FC = () => {
         const group = AGE_GROUPS.find((g) => g.value === ageGroupString);
         return (
           <Tooltip title={`Thực đơn cho ${group?.label || ageGroupString}`}>
-            <Tag color="blue" style={{ minWidth: 80, textAlign: 'center' }}>
+            <Tag color="blue" style={{ minWidth: 80, textAlign: "center" }}>
               {group?.label || ageGroupString}
             </Tag>
           </Tooltip>
@@ -243,7 +250,7 @@ const MenuManagement: React.FC = () => {
       align: "center",
       render: (calo) => (
         <Text strong type="danger">
-          {Number(calo)?.toLocaleString('vi-VN') || 0}
+          {Number(calo)?.toLocaleString("vi-VN") || 0}
         </Text>
       ),
     },
@@ -253,6 +260,13 @@ const MenuManagement: React.FC = () => {
       key: "notes",
       align: "center",
       ellipsis: true,
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "state",
+      key: "state",
+      align: "center",
+      render: renderStatusTag,
     },
     {
       title: "Hành động",
@@ -304,7 +318,8 @@ const MenuManagement: React.FC = () => {
       <Row justify="space-between" align="middle" gutter={[16, 16]}>
         <Col xs={24} sm={12}>
           <Title level={3} style={{ margin: 0, paddingTop: 15 }}>
-            <AppstoreOutlined style={{ marginRight: 8 }} /> Quản lý Thực đơn Tuần
+            <AppstoreOutlined style={{ marginRight: 8 }} /> Quản lý Thực đơn
+            Tuần
           </Title>
         </Col>
 
@@ -312,7 +327,9 @@ const MenuManagement: React.FC = () => {
           <Row justify="space-between" align="middle" gutter={[16, 16]}>
             <Col>
               <Space wrap size="middle" style={{ marginTop: 16 }}>
-                <Text strong><FilterOutlined style={{ marginRight: 4 }} /> Lọc:</Text>
+                <Text strong>
+                  <FilterOutlined style={{ marginRight: 4 }} /> Lọc:
+                </Text>
 
                 <Select
                   placeholder="Chọn Nhóm tuổi"
@@ -340,16 +357,13 @@ const MenuManagement: React.FC = () => {
 
             <Col style={{ marginTop: 16 }}>
               <Space wrap size="middle">
-                <Tooltip title="Làm mới danh sách">
-                  <Button style={{ marginRight: 5 }} icon={<ReloadOutlined />}
-                    onClick={() => fetchMenuList(pagination.page, pagination.limit, selectedAgeGroup, selectedDateRange)}
-                    loading={loading}>Làm mới danh sách</Button>
-                </Tooltip>
                 {canCreate && (
                   <Button
                     type="primary"
                     icon={<PlusOutlined />}
-                    onClick={() => navigate(`${constants.APP_PREFIX}/menus/create`)}
+                    onClick={() =>
+                      navigate(`${constants.APP_PREFIX}/menus/create`)
+                    }
                     loading={loading}
                     disabled={loading}
                   >
@@ -397,7 +411,7 @@ const MenuManagement: React.FC = () => {
               />
             ),
           }}
-          style={{ padding: '16px' }}
+          style={{ padding: "16px" }}
         />
       </Card>
 

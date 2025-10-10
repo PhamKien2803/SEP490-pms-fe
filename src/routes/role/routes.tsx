@@ -8,7 +8,7 @@ import RoleManagement from "../../pages/role-management/RoleManagement";
 import CreateRole from "../../pages/role-management/create-role/CreateRole";
 import EditRole from "../../pages/role-management/edit-role/EditRole";
 import StudentManagement from "../../pages/student-management/StudentManagement";
-import AccountManagement from '../../pages/account-management/AccountManagement';
+import AccountManagement from "../../pages/account-management/AccountManagement";
 import StaffManagement from "../../pages/staff-management/StaffManagement";
 import EnrollmentManagement from "../../pages/enrollment-management/EnrollmentManagement";
 import EnrollmentDetail from "../../pages/enrollment-management/enrollment-details/EnrollmentDetail";
@@ -25,230 +25,230 @@ import CreateSchoolyear from "../../pages/schoolyears-management/create-schoolye
 import SchoolyearsReport from "../../pages/schoolyears-management/schoolyears-report/SchoolyearsReport";
 
 export const routes: RouteObject[] = [
-    {
-        path: constants.APP_PREFIX,
-        element: (
-            <PrivateRoute
-                requireFunction={constants.APP_PREFIX}
-                requireAction="view"
-            />
-        ),
+  {
+    path: constants.APP_PREFIX,
+    element: (
+      <PrivateRoute
+        requireFunction={constants.APP_PREFIX}
+        requireAction="view"
+      />
+    ),
+    children: [
+      {
+        path: "",
+        element: <Dashboard />,
         children: [
-            {
-                path: "",
-                element: <Dashboard />,
-                children: [
-                    {
-                        index: true,
-                        element: <div>Trang chủ PMS</div>,
-                    },
-                    {
-                        path: "accounts",
-                        element: (
-                            <PrivateRoute
-                                requireFunction={`${constants.APP_PREFIX}/accounts`}
-                                requireAction="view"
-                            />
-                        ),
-                        children: [
-                            {
-                                index: true,
-                                element: <AccountManagement />,
-                            },
-                        ],
-                    },
-                    {
-                        path: "roles",
-                        element: (
-                            <PrivateRoute
-                                requireFunction={`${constants.APP_PREFIX}/roles`}
-                                requireAction="view"
-                            />
-                        ),
-                        children: [
-                            {
-                                index: true,
-                                element: <RoleManagement />,
-                            },
-                            {
-                                path: "create",
-                                element: <CreateRole />,
-                            },
-                            {
-                                path: "edit/:id",
-                                element: <EditRole />,
-                            },
-                        ],
-                    },
-                    {
-                        path: "functions",
-                        element: (
-                            <PrivateRoute
-                                requireFunction={`${constants.APP_PREFIX}/functions`}
-                                requireAction="view"
-                            />
-                        ),
-                        children: [
-                            {
-                                index: true,
-                                element: <FunctionsManagement />,
-                            },
-                        ],
-                    },
-                    {
-                        path: "students",
-                        element: (
-                            <PrivateRoute
-                                requireFunction={`${constants.APP_PREFIX}/students`}
-                                requireAction="view"
-                            />
-                        ),
-                        children: [
-                            {
-                                index: true,
-                                element: <StudentManagement />,
-                            },
-                        ],
-                    },
-                    {
-                        path: "staffs",
-                        element: (
-                            <PrivateRoute
-                                requireFunction={`${constants.APP_PREFIX}/staffs`}
-                                requireAction="view"
-                            />
-                        ),
-                        children: [
-                            {
-                                index: true,
-                                element: <StaffManagement />,
-                            },
-                        ],
-                    },
-                    {
-                        path: "parents",
-                        element: (
-                            <PrivateRoute
-                                requireFunction={`${constants.APP_PREFIX}/parents`}
-                                requireAction="view"
-                            />
-                        ),
-                        children: [
-                            {
-                                index: true,
-                                element: <ParentManagement />,
-                            },
-                        ],
-                    },
-                    {
-                        path: "enrollments",
-                        element: (
-                            <PrivateRoute
-                                requireFunction={`${constants.APP_PREFIX}/enrollments`}
-                                requireAction="view"
-                            />
-                        ),
-                        children: [
-                            {
-                                index: true,
-                                element: <EnrollmentManagement />,
-                            },
-                            {
-                                path: "view/:id",
-                                element: <EnrollmentDetail />,
-                            },
-                            {
-                                path: "edit/:id",
-                                element: <EnrollmentEdit />
-                            }
-                        ],
-                    },
-                    {
-                        path: "admissions",
-                        element: (
-                            <PrivateRoute
-                                requireFunction={`${constants.APP_PREFIX}/admissions`}
-                                requireAction="view"
-                            />
-                        ),
-                        children: [
-                            {
-                                index: true,
-                                element: <Admissions />,
-                            },
-                        ],
-                    },
-                    {
-                        path: "menus",
-                        element: (
-                            <PrivateRoute
-                                requireFunction={`${constants.APP_PREFIX}/menus`}
-                                requireAction="view"
-                            />
-                        ),
-                        children: [
-                            {
-                                index: true,
-                                element: <MenuManagement />,
-                            },
-                            {
-                                path: "view/:id",
-                                element: <MenuDetailPage />,
-                            },
-                            {
-                                path: "edit/:id",
-                                element: <EditMenuPage />
-                            },
-                            {
-                                path: "create",
-                                element: <CreateMenu />
-                            }
-                        ],
-                    },
-                    {
-                        path: "schoolYears",
-                        element: (
-                            <PrivateRoute
-                                requireFunction={`${constants.APP_PREFIX}/schoolYears`}
-                                requireAction="view"
-                            />
-                        ),
-                        children: [
-                            {
-                                index: true,
-                                element: <SchoolYears />,
-                            },
-                            {
-                                path: "edit/:id",
-                                element: <EditSchoolyear />
-                            },
-                            {
-                                path: "view/:id",
-                                element: <SchoolyearDetails />
-                            },
-                            {
-                                path: "create",
-                                element: <CreateSchoolyear />
-                            }
-                        ],
-                    },
-                    {
-                        path: "school-years-report",
-                        element: (
-                            <PrivateRoute
-                                requireFunction={`${constants.APP_PREFIX}/school-years-report`}
-                                requireAction="view"
-                            />
-                        ),
-                        children: [
-                            {
-                                index: true,
-                                element: <SchoolyearsReport />,
-                            },
-                        ],
-                    },
-                ],
-            },
+          {
+            index: true,
+            element: <div>Trang chủ PMS</div>,
+          },
+          {
+            path: "accounts",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/accounts`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <AccountManagement />,
+              },
+            ],
+          },
+          {
+            path: "roles",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/roles`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <RoleManagement />,
+              },
+              {
+                path: "create",
+                element: <CreateRole />,
+              },
+              {
+                path: "edit/:id",
+                element: <EditRole />,
+              },
+            ],
+          },
+          {
+            path: "functions",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/functions`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <FunctionsManagement />,
+              },
+            ],
+          },
+          {
+            path: "students",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/students`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <StudentManagement />,
+              },
+            ],
+          },
+          {
+            path: "staffs",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/staffs`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <StaffManagement />,
+              },
+            ],
+          },
+          {
+            path: "parents",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/parents`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <ParentManagement />,
+              },
+            ],
+          },
+          {
+            path: "enrollments",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/enrollments`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <EnrollmentManagement />,
+              },
+              {
+                path: "view/:id",
+                element: <EnrollmentDetail />,
+              },
+              {
+                path: "edit/:id",
+                element: <EnrollmentEdit />,
+              },
+            ],
+          },
+          {
+            path: "admissions",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/admissions`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <Admissions />,
+              },
+            ],
+          },
+          {
+            path: "menus",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/menus`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <MenuManagement />,
+              },
+              {
+                path: "view/:id",
+                element: <MenuDetailPage />,
+              },
+              {
+                path: "edit/:id",
+                element: <EditMenuPage />,
+              },
+              {
+                path: "create",
+                element: <CreateMenu />,
+              },
+            ],
+          },
+          {
+            path: "schoolYears",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/schoolYears`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <SchoolYears />,
+              },
+              {
+                path: "edit/:id",
+                element: <EditSchoolyear />,
+              },
+              {
+                path: "view/:id",
+                element: <SchoolyearDetails />,
+              },
+              {
+                path: "create",
+                element: <CreateSchoolyear />,
+              },
+            ],
+          },
+          {
+            path: "school-years-report",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/school-years-report`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <SchoolyearsReport />,
+              },
+            ],
+          },
         ],
-    },
+      },
+    ],
+  },
 ];

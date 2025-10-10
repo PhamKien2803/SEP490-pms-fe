@@ -25,12 +25,12 @@ export const apiEndPoint = {
   UPDATE_STAFF: (id: string) => `/staffs/update/${id}`,
   DELETE_STUDENT: (id: string) => `/students/delete/${id}`,
   DELETE_STAFF: (id: string) => `/staffs/delete/${id}`,
-  GET_ACCOUNT_LIST: '/accounts/list',
+  GET_ACCOUNT_LIST: "/accounts/list",
   UPDATE_ACCOUNT: (id: string) => `/accounts/update/${id}`,
   DELETE_ACCOUNT: (id: string) => `/accounts/delete/${id}`,
   GET_ROLE_NAME_LIST: "/accounts/roleNames",
-  REGISTER_ENROLLMENT: '/enrollments/registerEnroll',
-  GET_ENROLLMENT_LIST: '/enrollments/list',
+  REGISTER_ENROLLMENT: "/enrollments/registerEnroll",
+  GET_ENROLLMENT_LIST: "/enrollments/list",
   GET_ENROLLMENT_BY_ID: (id: string) => `/enrollments/getById/${id}`,
   UPLOAD_PDF: "/enrollments/uploadPDF",
   GET_PDF_BY_ID: (id: string) => `/enrollments/pdf/${id}`,
@@ -42,17 +42,21 @@ export const apiEndPoint = {
   CREATE_MENU: "/menus/create",
   DELETE_MENU: (menuId: string) => `/menus/delete/${menuId}`,
   GET_MENU_BY_ID: (menuId: string) => `/menus/get-by-id/${menuId}`,
-  GET_SCHOOLYEARS_LIST: '/schoolYears/list',
-  CREATE_SCHOOLYEAR: '/schoolYears/create',
+  GET_SCHOOLYEARS_LIST: "/schoolYears/list",
+  CREATE_SCHOOLYEAR: "/schoolYears/create",
   UPDATE_SCHOOLYEAR: (id: string) => `/schoolYears/update/${id}`,
   DELETE_SCHOOLYEAR: (id: string) => `/schoolYears/delete/${id}`,
   CONFIRM_SCHOOLYEAR: (id: string) => `/schoolYears/confirm/${id}`,
   GET_SCHOOLYEAR_BY_ID: (id: string) => `/schoolYears/getById/${id}`,
   END_SCHOOLYEAR: (id: string) => `/schoolYears/endSchoolYear/${id}`,
-  SCHOOLYEAR_REPORT: '/schoolYears/getStudentGraduated'
+  SCHOOLYEAR_REPORT: "/schoolYears/getStudentGraduated",
+  EDIT_MENU: (menuId: string) => `/menus/update/${menuId}`,
+  APPROVE_MENU: (menuId: string) => `/menus/approve-menu/${menuId}`,
+  REJECT_MENU: (menuId: string) => `/menus/reject-menu/${menuId}`,
+  GET_LIST_FOOD: "/foods/list",
 };
 
 export const apiConfig = {
   // baseURL: import.meta.env.VITE_API_URL_PROD || "https://kingdergarten-api-gmena8b7cug2f4cr.southeastasia-01.azurewebsites.net/api/pms/",
   baseURL: import.meta.env.VITE_API_URL,
-}
+};
