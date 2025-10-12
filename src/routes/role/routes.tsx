@@ -18,6 +18,10 @@ import MenuManagement from "../../pages/menu-management/MenuManagement";
 import MenuDetailPage from "../../pages/menu-management/detail/MenuDetail";
 import EditMenuPage from "../../pages/menu-management/edit/EditMenu";
 import CreateMenu from "../../pages/menu-management/create-menu/CreateMenu";
+import SchoolYears from "../../pages/schoolyears-management/SchoolYears";
+import EditSchoolyear from "../../pages/edit-schoolyear/EditSchoolyear";
+import SchoolyearDetails from "../../pages/schoolyear-details/SchoolyearDetails";
+import CreateSchoolyear from "../../pages/create-schoolyears/CreateSchoolyear";
 
 export const routes: RouteObject[] = [
     {
@@ -173,7 +177,7 @@ export const routes: RouteObject[] = [
                             },
                         ],
                     },
-                     {
+                    {
                         path: "menus",
                         element: (
                             <PrivateRoute
@@ -194,9 +198,36 @@ export const routes: RouteObject[] = [
                                 path: "edit/:id",
                                 element: <EditMenuPage />
                             },
-                             {
+                            {
                                 path: "create",
                                 element: <CreateMenu />
+                            }
+                        ],
+                    },
+                    {
+                        path: "schoolYears",
+                        element: (
+                            <PrivateRoute
+                                requireFunction={`${constants.APP_PREFIX}/schoolYears`}
+                                requireAction="view"
+                            />
+                        ),
+                        children: [
+                            {
+                                index: true,
+                                element: <SchoolYears />,
+                            },
+                            {
+                                path: "edit/:id",
+                                element: <EditSchoolyear />
+                            },
+                            {
+                                path: "view/:id",
+                                element: <SchoolyearDetails />
+                            },
+                            {
+                                path: "create",
+                                element: <CreateSchoolyear />
                             }
                         ],
                     },

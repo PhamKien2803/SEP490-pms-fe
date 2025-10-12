@@ -40,8 +40,13 @@ export const apiEndPoint = {
   APPROVE_ALL_ENROLLMENT: "/enrollments/approvedEnrollAll",
   GET_LIST_MENU: "/menus/list",
   CREATE_MENU: "/menus/create",
-  DELETE_MENU: (menuId: string) =>  `/menus/delete/${menuId}`,
-  GET_MENU_BY_ID: (menuId: string) => `/menus/get-by-id/${menuId}`
+  DELETE_MENU: (menuId: string) => `/menus/delete/${menuId}`,
+  GET_MENU_BY_ID: (menuId: string) => `/menus/get-by-id/${menuId}`,
+  GET_SCHOOLYEARS_LIST: '/schoolYears/list',
+  CREATE_SCHOOLYEAR: '/schoolYears/create',
+  UPDATE_SCHOOLYEAR: (id: string) => `/schoolYears/update/${id}`,
+  DELETE_SCHOOLYEAR: (id: string) => `/schoolYears/delete/${id}`,
+  GET_SCHOOLYEAR_BY_ID: (id: string) => `/schoolYears/getById/${id}`
 };
 
 export const apiConfig = {

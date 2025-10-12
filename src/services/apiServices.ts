@@ -50,6 +50,7 @@ import {
   UploadPDFResponse,
 } from "../types/enrollment";
 import { CreateMenuParams, MenuListParams, MenuListResponse, MenuRecord } from "../types/menu-management";
+import { CreateSchoolYearDto, SchoolYearListItem, SchoolYearsListResponse, UpdateSchoolYearDto } from "../types/schoolYear";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -389,18 +390,42 @@ export const menuApis = {
     return response.data;
   },
 
-   getMenuById: async (menuId: string): Promise<MenuRecord> => {
+  getMenuById: async (menuId: string): Promise<MenuRecord> => {
     const response = await axiosAuth.get<MenuRecord>(
       apiEndPoint.GET_MENU_BY_ID(menuId),
     );
     return response.data;
   },
 
-   createMenu: async (body: CreateMenuParams): Promise<void> => {
+  createMenu: async (body: CreateMenuParams): Promise<void> => {
     await axiosAuth.post(apiEndPoint.CREATE_MENU, body);
   },
 
-  deleteMenu: async (menuId:string): Promise<void> => {
+  deleteMenu: async (menuId: string): Promise<void> => {
     await axiosAuth.delete(apiEndPoint.DELETE_MENU(menuId));
   },
 };
+
+export const schoolYearApis = {
+  getSchoolYearList: async (params: { page: number, limit: number }): Promise<SchoolYearsListResponse> => {
+    const response = await axiosAuth.get<SchoolYearsListResponse>(apiEndPoint.GET_SCHOOLYEARS_LIST, { params });
+    return response.data;
+  },
+
+  getSchoolYearById: async (id: string): Promise<SchoolYearListItem> => {
+    const response = await axiosAuth.get<SchoolYearListItem>(apiEndPoint.GET_SCHOOLYEAR_BY_ID(id));
+    return response.data;
+  },
+
+  createSchoolYear: async (body: CreateSchoolYearDto): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.CREATE_SCHOOLYEAR, body);
+  },
+
+  updateSchoolYear: async (id: string, body: UpdateSchoolYearDto): Promise<void> => {
+    await axiosAuth.put(apiEndPoint.UPDATE_SCHOOLYEAR(id), body);
+  },
+
+  deleteSchoolYear: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_SCHOOLYEAR(id));
+  },
+}
