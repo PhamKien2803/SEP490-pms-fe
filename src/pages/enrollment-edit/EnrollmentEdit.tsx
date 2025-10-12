@@ -306,23 +306,23 @@ const EnrollmentEdit: React.FC = () => {
                             </Space>
                         ) : (
                             <Space size="middle">
-                                {enrollmentData?.state === 'Chờ xử lý' && (
-                                    <>
-                                        <Button danger icon={<CloseCircleOutlined />} onClick={() => setIsRejectModalVisible(true)}>Từ chối</Button>
-                                        <Popconfirm
-                                            title="Xác nhận duyệt đơn?"
-                                            description="Hành động này sẽ duyệt đơn đăng ký. Bạn chắc chắn chứ?"
-                                            onConfirm={handleApprove}
-                                            okText="Đồng ý"
-                                            cancelText="Không"
-                                        >
-                                            <Button type="primary" icon={<CheckCircleOutlined />} loading={isApproving}>Duyệt đơn</Button>
-                                        </Popconfirm>
-                                    </>
-                                )}
-                                {enrollmentData?.state !== 'Chờ BGH phê duyệt' && enrollmentData?.state !== 'Chưa đủ điều kiện nhập học' && enrollmentData?.state !== 'Hoàn thành' && (
-                                    <Button icon={<EditOutlined />} onClick={() => setIsEditing(true)}>Chỉnh sửa thông tin</Button>
-                                )}
+                                    {enrollmentData?.state === 'Chờ xử lý' && (
+                                        <>
+                                            <Button danger icon={<CloseCircleOutlined />} onClick={() => setIsRejectModalVisible(true)}>Từ chối</Button>
+                                            <Popconfirm
+                                                title="Xác nhận duyệt đơn?"
+                                                description="Hành động này sẽ duyệt đơn đăng ký. Bạn chắc chắn chứ?"
+                                                onConfirm={handleApprove}
+                                                okText="Đồng ý"
+                                                cancelText="Không"
+                                            >
+                                                <Button type="primary" icon={<CheckCircleOutlined />} loading={isApproving}>Duyệt đơn</Button>
+                                            </Popconfirm>
+                                        </>
+                                    )}
+                                    {enrollmentData?.state !== 'Chờ BGH phê duyệt' && enrollmentData?.state !== 'Chưa đủ điều kiện nhập học' && enrollmentData?.state !== 'Hoàn thành' && (
+                                        <Button icon={<EditOutlined />} onClick={() => setIsEditing(true)}>Chỉnh sửa thông tin</Button>
+                                    )}
                             </Space>
                         )}
                     </Row>
