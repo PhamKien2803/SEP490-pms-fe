@@ -3,13 +3,14 @@ import {
     Form, Input, Button, Space, Typography, Card, Select, Tooltip, Spin, Flex, Modal, Table, Popconfirm
 } from 'antd';
 import { ArrowLeftOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { rolesApis } from '../../services/apiServices';
-import { UpdateRoleDto, RoleDetails, RoleFunctionItem, RoleModuleItem } from '../../types/role';
-import hardcodedActions from '../../components/hard-code-action';
-import { constants } from '../../constants';
+import { useCurrentUser } from '../../../hooks/useCurrentUser';
+import { RoleDetails, RoleFunctionItem, RoleModuleItem, UpdateRoleDto } from '../../../types/role';
+import { constants } from '../../../constants';
+import { rolesApis } from '../../../services/apiServices';
+import hardcodedActions from '../../../components/hard-code-action';
+
 
 const EditRole: React.FC = () => {
     const { id } = useParams<{ id: string }>();
