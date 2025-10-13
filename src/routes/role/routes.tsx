@@ -19,9 +19,9 @@ import MenuDetailPage from "../../pages/menu-management/detail/MenuDetail";
 import EditMenuPage from "../../pages/menu-management/edit/EditMenu";
 import CreateMenu from "../../pages/menu-management/create-menu/CreateMenu";
 import SchoolYears from "../../pages/schoolyears-management/SchoolYears";
-import EditSchoolyear from "../../pages/edit-schoolyear/EditSchoolyear";
-import SchoolyearDetails from "../../pages/schoolyear-details/SchoolyearDetails";
-import CreateSchoolyear from "../../pages/create-schoolyears/CreateSchoolyear";
+import EditSchoolyear from "../../pages/schoolyears-management/edit-schoolyear/EditSchoolyear";
+import SchoolyearDetails from "../../pages/schoolyears-management/schoolyear-details/SchoolyearDetails";
+import CreateSchoolyear from "../../pages/schoolyears-management/create-schoolyears/CreateSchoolyear";
 
 export const routes: RouteObject[] = [
     {

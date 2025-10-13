@@ -3,9 +3,9 @@ import { Form, InputNumber, Button, Space, Typography, Card, DatePicker, Row, Co
 import { ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { schoolYearApis } from '../../services/apiServices';
-import { CreateSchoolYearDto } from '../../types/schoolYear';
-import { useCurrentUser } from '../../hooks/useCurrentUser';
+import { schoolYearApis } from '../../../services/apiServices';
+import { CreateSchoolYearDto } from '../../../types/schoolYear';
+import { useCurrentUser } from '../../../hooks/useCurrentUser';
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;

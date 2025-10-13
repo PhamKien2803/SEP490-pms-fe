@@ -3,9 +3,9 @@ import { Form, InputNumber, Button, Space, Typography, Card, DatePicker, Row, Co
 import { ArrowLeftOutlined, SaveOutlined, CheckCircleOutlined, StopOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { schoolYearApis } from '../../services/apiServices';
-import { SchoolYearListItem, UpdateSchoolYearDto } from '../../types/schoolYear';
-import { useCurrentUser } from '../../hooks/useCurrentUser';
+import { schoolYearApis } from '../../../services/apiServices';
+import { SchoolYearListItem, UpdateSchoolYearDto } from '../../../types/schoolYear';
+import { useCurrentUser } from '../../../hooks/useCurrentUser';
 import dayjs from 'dayjs';
 
 const { Title } = Typography;
@@ -116,18 +116,33 @@ function EditSchoolyear() {
     };
 
     const showConfirmAction = (action: 'activate' | 'end') => {
+        if (!schoolYearData) return;
+
         const isActivating = action === 'activate';
-        const actionText = isActivating ? 'xác nhận' : 'kết thúc';
+        const actionText = isActivating ? 'kích hoạt' : 'kết thúc';
 
         modalApi.confirm({
             title: `Xác nhận ${actionText} năm học?`,
             icon: <ExclamationCircleOutlined />,
-            content: `Bạn có chắc chắn muốn ${actionText} năm học ${schoolYearData?.schoolYear}?`,
+            content: `Bạn có chắc chắn muốn ${actionText} năm học ${schoolYearData.schoolYear}?`,
             okText: 'Xác nhận',
             cancelText: 'Hủy',
             okType: isActivating ? 'primary' : 'danger',
-            onOk: () => {
-                toast.info(`Chức năng "${actionText}" sẽ được phát triển trong tương lai.`);
+            onOk: async () => {
+                if (action === 'end') {
+                    setIsSubmitting(true);
+                    try {
+                        await schoolYearApis.endSchoolYear(schoolYearData._id);
+                        toast.success('Kết thúc năm học thành công!');
+                        navigate(-1)
+                    } catch (error) {
+                        toast.error('Kết thúc năm học thất bại.');
+                    } finally {
+                        setIsSubmitting(false);
+                    }
+                } else {
+                    toast.info(`Chức năng "${actionText}" sẽ được phát triển trong tương lai.`);
+                }
             },
         });
     };
