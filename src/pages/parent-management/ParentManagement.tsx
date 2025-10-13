@@ -71,7 +71,8 @@ const ParentManagement: React.FC = () => {
                     pageSize: response.page.limit,
                 }));
             } catch (error) {
-                typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách phụ huynh.');
+                // typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách phụ huynh.');
+                toast.info('Hiện tại không có phụ huynh nào trong hệ thống.');
             } finally {
                 setLoading(false);
             }

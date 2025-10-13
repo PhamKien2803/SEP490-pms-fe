@@ -33,7 +33,7 @@ const AccountManagement: React.FC = () => {
             const response = await accountsApis.getAccountList({ page: 1, limit: 1000 });
             setAllAccounts(response.data);
         } catch (error) {
-            toast.error('Tải danh sách tài khoản thất bại.');
+            toast.info('Hiện chưa có tài khoản nào.');
         } finally {
             setLoading(false);
         }
