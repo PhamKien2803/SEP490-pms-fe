@@ -1,9 +1,9 @@
 import React from 'react';
 import { Row, Col, Layout } from 'antd';
-import SchoolInfo from '../../components/school-infor/SchoolInfo';
-import EnrollmentForm from '../../components/enrollment-form/EnrollmentForm';
-import { Header } from '../../components/pms/Header';
-import Footer from '../../components/pms/Footer';
+import SchoolInfo from '../../../components/school-infor/SchoolInfo';
+import EnrollmentForm from '../../../components/enrollment-form/EnrollmentForm';
+import { Header } from '../../../components/pms/Header';
+import Footer from '../../../components/pms/Footer';
 
 const { Content } = Layout;
 

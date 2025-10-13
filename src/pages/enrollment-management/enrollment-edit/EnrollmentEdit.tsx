@@ -2,14 +2,14 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Form, Input, Button, Space, Typography, Card, Select, DatePicker, Row, Col, Tooltip, Spin, Flex, Upload, Popconfirm, Modal } from 'antd';
 import { ArrowLeftOutlined, CheckCircleOutlined, CloseCircleOutlined, UploadOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
 import type { RcFile, UploadFile } from 'antd/es/upload/interface';
-import { useCurrentUser } from '../../hooks/useCurrentUser';
+import { useCurrentUser } from '../../../hooks/useCurrentUser';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { enrollmentApis } from '../../services/apiServices';
-import { ApproveEnrollmentDto, EnrollmentListItem } from '../../types/enrollment';
+import { enrollmentApis } from '../../../services/apiServices';
+import { ApproveEnrollmentDto, EnrollmentListItem } from '../../../types/enrollment';
 import dayjs from 'dayjs';
 import TextArea from 'antd/es/input/TextArea';
-import { constants } from '../../constants';
+import { constants } from '../../../constants';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -306,23 +306,23 @@ const EnrollmentEdit: React.FC = () => {
                             </Space>
                         ) : (
                             <Space size="middle">
-                                    {enrollmentData?.state === 'Chờ xử lý' && (
-                                        <>
-                                            <Button danger icon={<CloseCircleOutlined />} onClick={() => setIsRejectModalVisible(true)}>Từ chối</Button>
-                                            <Popconfirm
-                                                title="Xác nhận duyệt đơn?"
-                                                description="Hành động này sẽ duyệt đơn đăng ký. Bạn chắc chắn chứ?"
-                                                onConfirm={handleApprove}
-                                                okText="Đồng ý"
-                                                cancelText="Không"
-                                            >
-                                                <Button type="primary" icon={<CheckCircleOutlined />} loading={isApproving}>Duyệt đơn</Button>
-                                            </Popconfirm>
-                                        </>
-                                    )}
-                                    {enrollmentData?.state !== 'Chờ BGH phê duyệt' && enrollmentData?.state !== 'Chưa đủ điều kiện nhập học' && enrollmentData?.state !== 'Hoàn thành' && (
-                                        <Button icon={<EditOutlined />} onClick={() => setIsEditing(true)}>Chỉnh sửa thông tin</Button>
-                                    )}
+                                {enrollmentData?.state === 'Chờ xử lý' && (
+                                    <>
+                                        <Button danger icon={<CloseCircleOutlined />} onClick={() => setIsRejectModalVisible(true)}>Từ chối</Button>
+                                        <Popconfirm
+                                            title="Xác nhận duyệt đơn?"
+                                            description="Hành động này sẽ duyệt đơn đăng ký. Bạn chắc chắn chứ?"
+                                            onConfirm={handleApprove}
+                                            okText="Đồng ý"
+                                            cancelText="Không"
+                                        >
+                                            <Button type="primary" icon={<CheckCircleOutlined />} loading={isApproving}>Duyệt đơn</Button>
+                                        </Popconfirm>
+                                    </>
+                                )}
+                                {enrollmentData?.state !== 'Chờ BGH phê duyệt' && enrollmentData?.state !== 'Chưa đủ điều kiện nhập học' && enrollmentData?.state !== 'Hoàn thành' && (
+                                    <Button icon={<EditOutlined />} onClick={() => setIsEditing(true)}>Chỉnh sửa thông tin</Button>
+                                )}
                             </Space>
                         )}
                     </Row>

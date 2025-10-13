@@ -11,8 +11,8 @@ import StudentManagement from "../../pages/student-management/StudentManagement"
 import AccountManagement from '../../pages/account-management/AccountManagement';
 import StaffManagement from "../../pages/staff-management/StaffManagement";
 import EnrollmentManagement from "../../pages/enrollment-management/EnrollmentManagement";
-import EnrollmentDetail from "../../pages/enrollment-details/EnrollmentDetail";
-import EnrollmentEdit from "../../pages/enrollment-edit/EnrollmentEdit";
+import EnrollmentDetail from "../../pages/enrollment-management/enrollment-details/EnrollmentDetail";
+import EnrollmentEdit from "../../pages/enrollment-management/enrollment-edit/EnrollmentEdit";
 import Admissions from "../../pages/admissions-report/Admissions";
 import MenuManagement from "../../pages/menu-management/MenuManagement";
 import MenuDetailPage from "../../pages/menu-management/detail/MenuDetail";

@@ -3,8 +3,8 @@ import { Card, Spin, Flex, Typography, Button, Tooltip, Descriptions, Divider, T
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { enrollmentApis } from '../../services/apiServices';
-import { EnrollmentListItem } from '../../types/enrollment';
+import { enrollmentApis } from '../../../services/apiServices';
+import { EnrollmentListItem } from '../../../types/enrollment';
 import dayjs from 'dayjs';
 
 const { Title } = Typography;
