@@ -55,7 +55,8 @@ const FunctionsManagement: React.FC = () => {
                 pageSize: response.page.limit,
             }));
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách chức năng.');
+            // typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách chức năng.');
+            toast.info('Hiện chưa có chức năng nào. Vui lòng tạo mới!');
         } finally {
             setLoading(false);
         }

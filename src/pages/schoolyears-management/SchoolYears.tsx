@@ -9,6 +9,7 @@ import { SchoolYearListItem } from '../../types/schoolYear';
 import dayjs from 'dayjs';
 import { constants } from '../../constants';
 import DeleteModal from '../../modal/delete-modal/DeleteModal';
+import { usePagePermission } from '../../hooks/usePagePermission';
 
 const { Title } = Typography;
 
@@ -19,6 +20,7 @@ function SchoolYears() {
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const { canCreate, canUpdate, canDelete } = usePagePermission();
 
     const fetchAllSchoolYears = useCallback(async () => {
         setLoading(true);
@@ -106,12 +108,16 @@ function SchoolYears() {
                     <Tooltip title="Xem chi tiết">
                         <Button type="text" icon={<EyeOutlined />} onClick={() => navigate(`${constants.APP_PREFIX}/schoolYears/view/${record._id}`)} />
                     </Tooltip>
-                    <Tooltip title="Chỉnh sửa">
-                        <Button type="text" icon={<EditOutlined style={{ color: '#1890ff' }} />} onClick={() => navigate(`${constants.APP_PREFIX}/schoolYears/edit/${record._id}`)} />
-                    </Tooltip>
-                    <Tooltip title="Xóa">
-                        <Button type="text" danger icon={<DeleteOutlined />} onClick={() => showDeleteModal(record._id)} />
-                    </Tooltip>
+                    {canUpdate && (
+                        <Tooltip title="Chỉnh sửa">
+                            <Button type="text" icon={<EditOutlined style={{ color: '#1890ff' }} />} onClick={() => navigate(`${constants.APP_PREFIX}/schoolYears/edit/${record._id}`)} />
+                        </Tooltip>
+                    )}
+                    {canDelete && (
+                        <Tooltip title="Xóa">
+                            <Button type="text" danger icon={<DeleteOutlined />} onClick={() => showDeleteModal(record._id)} />
+                        </Tooltip>
+                    )}
                 </Space>
             ),
         },
@@ -125,9 +131,11 @@ function SchoolYears() {
                         <Title level={2} style={{ margin: 0 }}>Quản lý Năm học</Title>
                     </Col>
                     <Col>
-                        <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate(`${constants.APP_PREFIX}/schoolYears/create`)}>
-                            Tạo năm học mới
-                        </Button>
+                        {canCreate && (
+                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate(`${constants.APP_PREFIX}/schoolYears/create`)}>
+                                Tạo năm học mới
+                            </Button>
+                        )}
                     </Col>
                 </Row>
 
