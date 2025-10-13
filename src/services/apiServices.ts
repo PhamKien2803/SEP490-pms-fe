@@ -428,4 +428,8 @@ export const schoolYearApis = {
   deleteSchoolYear: async (id: string): Promise<void> => {
     await axiosAuth.post(apiEndPoint.DELETE_SCHOOLYEAR(id));
   },
+
+  endSchoolYear: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.END_SCHOOLYEAR(id));
+  }
 }

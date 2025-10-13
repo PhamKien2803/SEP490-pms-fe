@@ -3,8 +3,8 @@ import { Button, Space, Typography, Card, Row, Col, Spin, Flex, Tooltip, Tag, De
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { schoolYearApis } from '../../services/apiServices';
-import { SchoolYearListItem } from '../../types/schoolYear';
+import { schoolYearApis } from '../../../services/apiServices';
+import { SchoolYearListItem } from '../../../types/schoolYear';
 import dayjs from 'dayjs';
 
 const { Title } = Typography;
