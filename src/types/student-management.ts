@@ -4,7 +4,7 @@ export interface StudentRecord {
   _id: string;
   studentCode: string;
   fullName: string;
-  dob: dayjs.Dayjs | null; 
+  dob: string; 
   idCard: string;
   gender: 'Nam' | 'Nữ' | 'Khác' | string;
   address: string;
@@ -16,6 +16,8 @@ export interface StudentRecord {
   updatedBy?: string;
   createdAt?: string; 
   updatedAt?: string; 
+  birthCertId: string;
+  healthCertId: string;
 } 
 
 export interface PaginationInfo {
