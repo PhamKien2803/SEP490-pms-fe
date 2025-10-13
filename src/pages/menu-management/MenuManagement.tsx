@@ -20,6 +20,7 @@ import {
   AppstoreOutlined,
   EyeOutlined,
   FilterOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
 import weekOfYear from "dayjs/plugin/weekOfYear";
@@ -125,9 +126,9 @@ const MenuManagement: React.FC = () => {
         setMenuList(mappedData);
 
         setPagination((prev) => ({
-            page: response?.page?.page || prev.page,
-            limit: response?.page?.limit || prev.limit, 
-            total: response?.page?.totalCount || 0,
+          page: response?.page?.page || prev.page,
+          limit: response?.page?.limit || prev.limit,
+          total: response?.page?.totalCount || 0,
         }));
       } catch (error) {
         toast.error("Tải danh sách thực đơn thất bại. Vui lòng thử lại.");
@@ -184,7 +185,7 @@ const MenuManagement: React.FC = () => {
     if (!deletingId) return;
     setIsDeleting(true);
     try {
-      await menuApis.deleteMenu(deletingId); 
+      await menuApis.deleteMenu(deletingId);
       toast.success("Xóa thực đơn thành công!");
       setIsDeleteModalOpen(false);
       setDeletingId(null);
@@ -203,18 +204,18 @@ const MenuManagement: React.FC = () => {
 
   const columns: ColumnsType<MenuRecord> = [
     {
-        title: "Ngày Bắt Đầu",
-        dataIndex: "weekStart",
-        key: "weekStart",
-        width: 140,
-        render: (date) => <Text>{dayjs(date).format("DD/MM/YYYY")}</Text>,
+      title: "Ngày Bắt Đầu",
+      dataIndex: "weekStart",
+      key: "weekStart",
+      width: 140,
+      render: (date) => <Text>{dayjs(date).format("DD/MM/YYYY")}</Text>,
     },
     {
-        title: "Ngày Kết Thúc",
-        dataIndex: "weekEnd",
-        key: "weekEnd",
-        width: 140,
-        render: (date) => <Text>{dayjs(date).format("DD/MM/YYYY")}</Text>,
+      title: "Ngày Kết Thúc",
+      dataIndex: "weekEnd",
+      key: "weekEnd",
+      width: 140,
+      render: (date) => <Text>{dayjs(date).format("DD/MM/YYYY")}</Text>,
     },
     {
       title: "Nhóm Tuổi",
@@ -226,11 +227,11 @@ const MenuManagement: React.FC = () => {
         const ageGroupString = String(ageGroup);
         const group = AGE_GROUPS.find((g) => g.value === ageGroupString);
         return (
-            <Tooltip title={`Thực đơn cho ${group?.label || ageGroupString}`}>
-                <Tag color="blue" style={{ minWidth: 80, textAlign: 'center' }}>
-                    {group?.label || ageGroupString}
-                </Tag>
-            </Tooltip>
+          <Tooltip title={`Thực đơn cho ${group?.label || ageGroupString}`}>
+            <Tag color="blue" style={{ minWidth: 80, textAlign: 'center' }}>
+              {group?.label || ageGroupString}
+            </Tag>
+          </Tooltip>
         );
       },
     },
@@ -239,7 +240,7 @@ const MenuManagement: React.FC = () => {
       dataIndex: "totalCalo",
       key: "totalCalo",
       width: 160,
-      align: "center", 
+      align: "center",
       render: (calo) => (
         <Text strong type="danger">
           {Number(calo)?.toLocaleString('vi-VN') || 0}
@@ -250,7 +251,7 @@ const MenuManagement: React.FC = () => {
       title: "Ghi chú",
       dataIndex: "notes",
       key: "notes",
-      align: "center", 
+      align: "center",
       ellipsis: true,
     },
     {
@@ -307,52 +308,57 @@ const MenuManagement: React.FC = () => {
           </Title>
         </Col>
 
-        <Col xs={24} style={{ marginBottom: 15 }}> 
-            <Row justify="space-between" align="middle" gutter={[16, 16]}>
-                <Col>
-                    <Space wrap size="middle" style={{ marginTop: 16 }}>
-                        <Text strong><FilterOutlined style={{ marginRight: 4 }} /> Lọc:</Text>
-                        
-                        <Select
-                            placeholder="Chọn Nhóm tuổi"
-                            style={{ width: 150 }}
-                            value={selectedAgeGroup}
-                            onChange={handleAgeGroupChange}
-                            disabled={loading}
-                        >
-                        {AGE_GROUPS.map((group) => (
-                            <Option key={group.value} value={group.value}>
-                            {group.label}
-                            </Option>
-                        ))}
-                        </Select>
-                        
-                        <RangePicker
-                            format="DD/MM/YYYY"
-                            allowClear={true}
-                            value={selectedDateRange}
-                            onChange={handleDateRangeChange}
-                            style={{ width: 250 }}
-                        />
-                    </Space>
-                </Col>
+        <Col xs={24} style={{ marginBottom: 15 }}>
+          <Row justify="space-between" align="middle" gutter={[16, 16]}>
+            <Col>
+              <Space wrap size="middle" style={{ marginTop: 16 }}>
+                <Text strong><FilterOutlined style={{ marginRight: 4 }} /> Lọc:</Text>
 
-                <Col style={{ marginTop: 16 }}>
-                    <Space wrap size="middle">
-                        {canCreate && (
-                            <Button
-                                type="primary"
-                                icon={<PlusOutlined />}
-                                onClick={() => navigate(`${constants.APP_PREFIX}/menus/create`)}
-                                loading={loading}
-                                disabled={loading}
-                            >
-                                Tạo mới
-                            </Button>
-                        )}
-                    </Space>
-                </Col>
-            </Row>
+                <Select
+                  placeholder="Chọn Nhóm tuổi"
+                  style={{ width: 150 }}
+                  value={selectedAgeGroup}
+                  onChange={handleAgeGroupChange}
+                  disabled={loading}
+                >
+                  {AGE_GROUPS.map((group) => (
+                    <Option key={group.value} value={group.value}>
+                      {group.label}
+                    </Option>
+                  ))}
+                </Select>
+
+                <RangePicker
+                  format="DD/MM/YYYY"
+                  allowClear={true}
+                  value={selectedDateRange}
+                  onChange={handleDateRangeChange}
+                  style={{ width: 250 }}
+                />
+              </Space>
+            </Col>
+
+            <Col style={{ marginTop: 16 }}>
+              <Space wrap size="middle">
+                <Tooltip title="Làm mới danh sách">
+                  <Button style={{ marginRight: 5 }} icon={<ReloadOutlined />}
+                    onClick={() => fetchMenuList(pagination.page, pagination.limit, selectedAgeGroup, selectedDateRange)}
+                    loading={loading}>Làm mới danh sách</Button>
+                </Tooltip>
+                {canCreate && (
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => navigate(`${constants.APP_PREFIX}/menus/create`)}
+                    loading={loading}
+                    disabled={loading}
+                  >
+                    Tạo mới
+                  </Button>
+                )}
+              </Space>
+            </Col>
+          </Row>
         </Col>
       </Row>
     ),
@@ -391,7 +397,7 @@ const MenuManagement: React.FC = () => {
               />
             ),
           }}
-          style={{ padding: '16px' }} 
+          style={{ padding: '16px' }}
         />
       </Card>
 

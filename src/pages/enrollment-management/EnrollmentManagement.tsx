@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Table, Input, Button, Space, Typography, Row, Col, Card, Tooltip, Tag, Select, Modal } from 'antd';
-import { SearchOutlined, EditOutlined, EyeOutlined, DownloadOutlined } from '@ant-design/icons';
+import { SearchOutlined, EditOutlined, EyeOutlined, DownloadOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -16,6 +17,7 @@ const EnrollmentManagement: React.FC = () => {
     const navigate = useNavigate();
     const [allEnrollments, setAllEnrollments] = useState<EnrollmentListItem[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
+
     const [pagination, setPagination] = useState<TablePaginationConfig>({
         current: 1,
         pageSize: 10,
@@ -50,7 +52,6 @@ const EnrollmentManagement: React.FC = () => {
             const response = await enrollmentApis.getEnrollmentList({ page: 1, limit: 1000 });
             setAllEnrollments(response.data);
         } catch (error) {
-            // typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách đơn tuyển sinh.');
             toast.info('Hiện chưa có đơn tuyển sinh nào. Vui lòng tạo mới!');
         } finally {
             setLoading(false);
@@ -62,7 +63,7 @@ const EnrollmentManagement: React.FC = () => {
     }, [fetchAllEnrollments]);
 
     const filteredEnrollments = useMemo(() => {
-        let data = allEnrollments
+        let data = allEnrollments;
         if (statusFilters && statusFilters.length > 0) {
             data = data.filter(item => statusFilters.includes(item.state));
         }
@@ -167,6 +168,11 @@ const EnrollmentManagement: React.FC = () => {
                     </Col>
                     <Col>
                         <Space>
+                            <Tooltip title="Làm mới danh sách">
+                                <Button icon={<ReloadOutlined />}
+                                    onClick={fetchAllEnrollments}
+                                    loading={loading}>Làm mới danh sách</Button>
+                            </Tooltip>
                             {canApproveAll && (
                                 <Button type="primary" onClick={handleOpenApproveAllModal}>Duyệt tất cả</Button>
                             )}

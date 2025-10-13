@@ -17,6 +17,7 @@ import {
     DeleteOutlined,
     PlusOutlined,
     EyeOutlined,
+    ReloadOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { CreateParentDto, Parent, UpdateParentDto } from "../../types/auth";
@@ -281,6 +282,11 @@ const ParentManagement: React.FC = () => {
                 </Col>
                 <Col>
                     <Space>
+                        <Tooltip title="Làm mới danh sách">
+                            <Button icon={<ReloadOutlined />}
+                                onClick={() => fetchParents({ page: pagination.current!, limit: pagination.pageSize! })}
+                                loading={loading}>Làm mới danh sách</Button>
+                        </Tooltip>
                         <Input.Search
                             placeholder="Tìm kiếm phụ huynh..."
                             style={{ width: 300 }}

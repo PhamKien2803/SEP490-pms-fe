@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Table, Input, Button, Space, Typography, Row, Col, Card, Tooltip } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { CreateFunctionDto, Functions, UpdateFunctionDto } from '../../types/auth';
 import { functionsApis } from '../../services/apiServices';
@@ -201,6 +201,11 @@ const FunctionsManagement: React.FC = () => {
             </Col>
             <Col>
                 <Space>
+                    <Tooltip title="Làm mới danh sách">
+                        <Button icon={<ReloadOutlined />}
+                            onClick={() => fetchFunctions({ page: pagination.current!, limit: pagination.pageSize! })}
+                            loading={loading}>Làm mới danh sách</Button>
+                    </Tooltip>
                     <Input.Search
                         placeholder="Tìm kiếm chức năng..."
                         style={{ width: 250 }}

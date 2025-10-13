@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Table, Button, Space, Typography, Row, Col, Card, Tooltip, Tag } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -131,6 +131,11 @@ function SchoolYears() {
                         <Title level={2} style={{ margin: 0 }}>Quản lý Năm học</Title>
                     </Col>
                     <Col>
+                        <Tooltip title="Làm mới danh sách">
+                            <Button style={{ marginRight: 5 }} icon={<ReloadOutlined />}
+                                onClick={fetchAllSchoolYears}
+                                loading={loading}>Làm mới danh sách</Button>
+                        </Tooltip>
                         {canCreate && (
                             <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate(`${constants.APP_PREFIX}/schoolYears/create`)}>
                                 Tạo năm học mới

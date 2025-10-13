@@ -15,6 +15,7 @@ import {
     DeleteOutlined,
     PlusOutlined,
     EyeOutlined,
+    ReloadOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { studentApis } from "../../services/apiServices";
@@ -317,6 +318,11 @@ const StudentManagement: React.FC = () => {
                 </Col>
                 <Col>
                     <Space>
+                        <Tooltip title="Làm mới danh sách">
+                            <Button style={{ marginRight: 5 }} icon={<ReloadOutlined />}
+                                onClick={() => fetchListStudent({ page: pagination.current!, limit: pagination.pageSize! })}
+                                loading={loading}>Làm mới danh sách</Button>
+                        </Tooltip>
                         <Input.Search
                             placeholder="Mã HS hoặc Họ tên..."
                             style={{ width: 250 }}

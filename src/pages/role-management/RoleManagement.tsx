@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Table, Input, Button, Space, Typography, Row, Col, Card, Tooltip } from 'antd';
-import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -151,6 +151,11 @@ const RoleManagement: React.FC = () => {
             </Col>
             <Col>
                 <Space>
+                    <Tooltip title="Làm mới danh sách">
+                        <Button icon={<ReloadOutlined />}
+                            onClick={fetchAllRoles}
+                            loading={loading}>Làm mới danh sách</Button>
+                    </Tooltip>
                     <Input
                         placeholder="Tìm kiếm vai trò..."
                         style={{ width: 250 }}
