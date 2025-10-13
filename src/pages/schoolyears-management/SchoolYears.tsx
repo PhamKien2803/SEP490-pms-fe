@@ -24,9 +24,10 @@ function SchoolYears() {
         setLoading(true);
         try {
             const response = await schoolYearApis.getSchoolYearList({ page: 1, limit: 1000 });
-            setSchoolYears(response.data);
+            setSchoolYears(response.data || []);
+
         } catch (error) {
-            toast.error("Không thể tải danh sách năm học.");
+            toast.info('Hiện chưa có năm học nào. Vui lòng tạo mới!');
         } finally {
             setLoading(false);
         }
