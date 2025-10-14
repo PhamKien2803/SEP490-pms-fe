@@ -47,7 +47,8 @@ export const apiEndPoint = {
   UPDATE_SCHOOLYEAR: (id: string) => `/schoolYears/update/${id}`,
   DELETE_SCHOOLYEAR: (id: string) => `/schoolYears/delete/${id}`,
   GET_SCHOOLYEAR_BY_ID: (id: string) => `/schoolYears/getById/${id}`,
-  END_SCHOOLYEAR: (id: string) => `/schoolYears/endSchoolYear/${id}`
+  END_SCHOOLYEAR: (id: string) => `/schoolYears/endSchoolYear/${id}`,
+  SCHOOLYEAR_REPORT: '/schoolYears/getStudentGraduated'
 };
 
 export const apiConfig = {

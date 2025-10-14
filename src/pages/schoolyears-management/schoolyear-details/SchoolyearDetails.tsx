@@ -77,9 +77,11 @@ function SchoolyearDetails() {
                     <Descriptions.Item label="Trạng thái">
                         <Tag color={statusInfo.color}>{statusInfo.text}</Tag>
                     </Descriptions.Item>
-                    <Descriptions.Item label="Ngày bắt đầu">{dayjs(schoolYearData.startDate).format('DD/MM/YYYY')}</Descriptions.Item>
-                    <Descriptions.Item label="Ngày kết thúc">{dayjs(schoolYearData.endDate).format('DD/MM/YYYY')}</Descriptions.Item>
+                    <Descriptions.Item label="Ngày bắt đầu năm học">{dayjs(schoolYearData.startDate).format('DD/MM/YYYY')}</Descriptions.Item>
+                    <Descriptions.Item label="Ngày kết thúc năm học">{dayjs(schoolYearData.endDate).format('DD/MM/YYYY')}</Descriptions.Item>
                     <Descriptions.Item label="Chỉ tiêu tuyển sinh">{schoolYearData.numberTarget}</Descriptions.Item>
+                    <Descriptions.Item label="Ngày bắt đầu tuyển sinh">{dayjs(schoolYearData.enrollmentStartDate).format('DD/MM/YYYY')}</Descriptions.Item>
+                    <Descriptions.Item label="Ngày kết thúc tuyển sinh">{dayjs(schoolYearData.enrollmentEndDate).format('DD/MM/YYYY')}</Descriptions.Item>
                     <Descriptions.Item label="Người tạo">{schoolYearData.createdBy}</Descriptions.Item>
                     <Descriptions.Item label="Ngày tạo">{dayjs(schoolYearData.createdAt).format('DD/MM/YYYY HH:mm')}</Descriptions.Item>
                     <Descriptions.Item label="Cập nhật lần cuối">{dayjs(schoolYearData.updatedAt).format('DD/MM/YYYY HH:mm')}</Descriptions.Item>

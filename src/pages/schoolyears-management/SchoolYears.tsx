@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Table, Button, Space, Typography, Row, Col, Card, Tooltip, Tag } from 'antd';
+import { Table, Button, Space, Typography, Row, Col, Card, Tooltip, Tag, Select } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +12,13 @@ import DeleteModal from '../../modal/delete-modal/DeleteModal';
 import { usePagePermission } from '../../hooks/usePagePermission';
 
 const { Title } = Typography;
+const { Option } = Select;
+
+const STATUS = {
+    NOT_ACTIVE: 'Chưa hoạt động',
+    ACTIVE: 'Đang hoạt động',
+    EXPIRED: 'Hết thời hạn'
+};
 
 function SchoolYears() {
     const navigate = useNavigate();
@@ -22,12 +29,13 @@ function SchoolYears() {
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const { canCreate, canUpdate, canDelete } = usePagePermission();
 
+    const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
+
     const fetchAllSchoolYears = useCallback(async () => {
         setLoading(true);
         try {
             const response = await schoolYearApis.getSchoolYearList({ page: 1, limit: 1000 });
             setSchoolYears(response.data || []);
-
         } catch (error) {
             toast.info('Hiện chưa có năm học nào. Vui lòng tạo mới!');
         } finally {
@@ -39,9 +47,15 @@ function SchoolYears() {
         fetchAllSchoolYears();
     }, [fetchAllSchoolYears]);
 
-    const activeSchoolYears = useMemo(() => {
-        return schoolYears.filter(year => year.active);
-    }, [schoolYears]);
+    const filteredSchoolYears = useMemo(() => {
+        let data = schoolYears.filter(year => year.active);
+
+        if (statusFilter) {
+            data = data.filter(year => year.state === statusFilter);
+        }
+
+        return data;
+    }, [schoolYears, statusFilter]);
 
     const showDeleteModal = (id: string) => {
         setDeletingId(id);
@@ -62,7 +76,7 @@ function SchoolYears() {
             setSchoolYears(prevYears => prevYears.filter(year => year._id !== deletingId));
             hideDeleteModal();
         } catch (error) {
-            toast.error("Xóa năm học thất bại.");
+            typeof error === "string" ? toast.warn(error) : toast.error('Đã có lỗi xảy ra. Vui lòng thử lại!');
         } finally {
             setIsDeleting(false);
         }
@@ -71,13 +85,13 @@ function SchoolYears() {
     const renderStatusTag = useCallback((state: string) => {
         let color;
         switch (state) {
-            case 'Đang hoạt động':
+            case STATUS.ACTIVE:
                 color = 'success';
                 break;
-            case 'Hết thời hạn':
+            case STATUS.EXPIRED:
                 color = 'error';
                 break;
-            case 'Chưa hoạt động':
+            case STATUS.NOT_ACTIVE:
                 color = 'processing';
                 break;
             default:
@@ -121,7 +135,7 @@ function SchoolYears() {
                 </Space>
             ),
         },
-    ], [navigate, renderStatusTag]);
+    ], [navigate, renderStatusTag, canUpdate, canDelete]);
 
     return (
         <div style={{ padding: '24px', background: '#f0f2f5' }}>
@@ -131,22 +145,32 @@ function SchoolYears() {
                         <Title level={2} style={{ margin: 0 }}>Quản lý Năm học</Title>
                     </Col>
                     <Col>
-                        <Tooltip title="Làm mới danh sách">
-                            <Button style={{ marginRight: 5 }} icon={<ReloadOutlined />}
-                                onClick={fetchAllSchoolYears}
-                                loading={loading}>Làm mới danh sách</Button>
-                        </Tooltip>
-                        {canCreate && (
-                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate(`${constants.APP_PREFIX}/schoolYears/create`)}>
-                                Tạo năm học mới
-                            </Button>
-                        )}
+                        <Space>
+                            <Select
+                                placeholder="Lọc theo trạng thái"
+                                style={{ width: 200 }}
+                                onChange={(value) => setStatusFilter(value)}
+                                allowClear
+                            >
+                                <Option value={STATUS.NOT_ACTIVE}>Chưa hoạt động</Option>
+                                <Option value={STATUS.ACTIVE}>Đang hoạt động</Option>
+                                <Option value={STATUS.EXPIRED}>Hết thời hạn</Option>
+                            </Select>
+                            <Tooltip title="Làm mới danh sách">
+                                <Button icon={<ReloadOutlined />} onClick={fetchAllSchoolYears} loading={loading} />
+                            </Tooltip>
+                            {canCreate && (
+                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate(`${constants.APP_PREFIX}/schoolYears/create`)}>
+                                    Tạo năm học mới
+                                </Button>
+                            )}
+                        </Space>
                     </Col>
                 </Row>
 
                 <Table
                     columns={columns}
-                    dataSource={activeSchoolYears}
+                    dataSource={filteredSchoolYears}
                     loading={loading}
                     rowKey="_id"
                     bordered
@@ -161,6 +185,6 @@ function SchoolYears() {
             />
         </div>
     );
-}
+};
 
 export default SchoolYears;
