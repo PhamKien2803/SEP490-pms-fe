@@ -46,11 +46,12 @@ function EditSchoolyear() {
             setSchoolYearData(data);
             form.setFieldsValue({
                 dateRange: [dayjs(data.startDate), dayjs(data.endDate)],
+                enrollmentDateRange: [dayjs(data.enrollmentStartDate), dayjs(data.enrollmentEndDate)],
                 numberTarget: data.numberTarget,
             });
             setIsFormDirty(false);
         } catch (error) {
-            toast.error("Không thể tải dữ liệu năm học.");
+            typeof error === "string" ? toast.warn(error) : toast.error('Đã có lỗi xảy ra. Vui lòng thử lại!');
             navigate(-1);
         } finally {
             setLoading(false);
@@ -66,20 +67,24 @@ function EditSchoolyear() {
         try {
             const values = await form.validateFields();
             const [startDate, endDate] = values.dateRange;
+            const [enrollmentStartDate, enrollmentEndDate] = values.enrollmentDateRange;
 
             const payload: UpdateSchoolYearDto = {
                 startDate: startDate.toISOString(),
                 endDate: endDate.toISOString(),
                 numberTarget: values.numberTarget,
+                enrollmentStartDate: enrollmentStartDate.toISOString(),
+                enrollmentEndDate: enrollmentEndDate.toISOString(),
                 createdBy: user.email,
             };
 
             setIsSubmitting(true);
             await schoolYearApis.updateSchoolYear(id, payload);
             toast.success('Cập nhật năm học thành công!');
-            fetchData();
+            // fetchData();
+            navigate(-1);
         } catch (error) {
-            toast.error('Cập nhật thất bại, vui lòng thử lại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Đã có lỗi xảy ra. Vui lòng thử lại!');
         } finally {
             setIsSubmitting(false);
         }
@@ -232,6 +237,21 @@ function EditSchoolyear() {
                                     placeholder="Ví dụ: 150"
                                     disabled={schoolYearData?.state !== STATUS.NOT_ACTIVE}
                                     onKeyDown={allowOnlyNumbers}
+                                />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={24}>
+                        <Col span={12}>
+                            <Form.Item
+                                name="enrollmentDateRange"
+                                label="Thời gian tuyển sinh"
+                                rules={[{ required: true, message: 'Vui lòng chọn thời gian!' }]}
+                            >
+                                <RangePicker
+                                    style={{ width: '100%' }}
+                                    format="DD/MM/YYYY"
+                                    disabled={schoolYearData?.state !== STATUS.NOT_ACTIVE}
                                 />
                             </Form.Item>
                         </Col>

@@ -22,10 +22,13 @@ function CreateSchoolyear() {
         try {
             const values = await form.validateFields();
             const [startDate, endDate] = values.dateRange;
+            const [enrollmentStartDate, enrollmentEndDate] = values.enrollmentDateRange;
 
             const payload: CreateSchoolYearDto = {
                 startDate: startDate.toISOString(),
                 endDate: endDate.toISOString(),
+                enrollmentStartDate: enrollmentStartDate.toISOString(),
+                enrollmentEndDate: enrollmentEndDate.toISOString(),
                 numberTarget: values.numberTarget,
                 createdBy: user.email,
             };
@@ -35,7 +38,7 @@ function CreateSchoolyear() {
             toast.success('Thêm mới năm học thành công!');
             navigate(-1);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Thêm mới năm học thất bại, vui lòng thử lại.");
+            typeof error === "string" ? toast.warn(error) : toast.error('Đã có lỗi xảy ra. Vui lòng thử lại!');
         } finally {
             setIsSubmitting(false);
         }
@@ -95,6 +98,18 @@ function CreateSchoolyear() {
                                 name="dateRange"
                                 label="Khung thời gian năm học"
                                 rules={[{ required: true, message: 'Vui lòng chọn thời gian!' }]}
+                            >
+                                <RangePicker
+                                    style={{ width: '100%' }}
+                                    format="DD/MM/YYYY"
+                                />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                name="enrollmentDateRange"
+                                label="Khung thời gian tuyển sinh"
+                                rules={[{ required: true, message: 'Vui lòng chọn thời gian tuyển sinh!' }]}
                             >
                                 <RangePicker
                                     style={{ width: '100%' }}

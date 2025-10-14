@@ -50,7 +50,7 @@ import {
   UploadPDFResponse,
 } from "../types/enrollment";
 import { CreateMenuParams, MenuListParams, MenuListResponse, MenuRecord } from "../types/menu-management";
-import { CreateSchoolYearDto, SchoolYearListItem, SchoolYearsListResponse, UpdateSchoolYearDto } from "../types/schoolYear";
+import { CreateSchoolYearDto, SchoolYearListItem, SchoolYearReportResponses, SchoolYearsListResponse, UpdateSchoolYearDto } from "../types/schoolYear";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -431,5 +431,17 @@ export const schoolYearApis = {
 
   endSchoolYear: async (id: string): Promise<void> => {
     await axiosAuth.post(apiEndPoint.END_SCHOOLYEAR(id));
-  }
+  },
+
+  getStudentGraduatedReport: async (params: {
+    year: number;
+    page: number;
+    limit: number
+  }): Promise<SchoolYearReportResponses> => {
+    const response = await axiosAuth.get<SchoolYearReportResponses>(
+      apiEndPoint.SCHOOLYEAR_REPORT,
+      { params }
+    );
+    return response.data;
+  },
 }

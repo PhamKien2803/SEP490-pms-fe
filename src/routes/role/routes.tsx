@@ -22,6 +22,7 @@ import SchoolYears from "../../pages/schoolyears-management/SchoolYears";
 import EditSchoolyear from "../../pages/schoolyears-management/edit-schoolyear/EditSchoolyear";
 import SchoolyearDetails from "../../pages/schoolyears-management/schoolyear-details/SchoolyearDetails";
 import CreateSchoolyear from "../../pages/schoolyears-management/create-schoolyears/CreateSchoolyear";
+import SchoolyearsReport from "../../pages/schoolyears-management/schoolyears-report/SchoolyearsReport";
 
 export const routes: RouteObject[] = [
     {
@@ -229,6 +230,21 @@ export const routes: RouteObject[] = [
                                 path: "create",
                                 element: <CreateSchoolyear />
                             }
+                        ],
+                    },
+                    {
+                        path: "school-years-report",
+                        element: (
+                            <PrivateRoute
+                                requireFunction={`${constants.APP_PREFIX}/school-years-report`}
+                                requireAction="view"
+                            />
+                        ),
+                        children: [
+                            {
+                                index: true,
+                                element: <SchoolyearsReport />,
+                            },
                         ],
                     },
                 ],
