@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Table, Button, Space, Typography, Row, Col, Card, Select, Spin, Flex } from 'antd';
-import { DownloadOutlined } from '@ant-design/icons';
+import { Table, Button, Space, Typography, Row, Col, Card, Select, Spin, Flex, Tooltip } from 'antd';
+import { DownloadOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 import { SchoolYearListItem, SchoolYearReport } from '../../../types/schoolYear';
-import { enrollmentApis, schoolYearApis } from '../../../services/apiServices';
+import { schoolYearApis } from '../../../services/apiServices';
 import { useExcelExport } from '../../../hooks/useExcelExport';
 import { usePagePermission } from '../../../hooks/usePagePermission';
 
@@ -23,6 +23,42 @@ function SchoolyearsReport() {
         pageSize: 10,
         total: 0,
     });
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+    const fetchReportData = useCallback(async () => {
+        if (!selectedYearId || schoolYears.length === 0) {
+            setReportData([]);
+            return;
+        }
+
+        const selectedSchoolYear = schoolYears.find(sy => sy._id === selectedYearId);
+        if (!selectedSchoolYear) return;
+
+        setLoading(true);
+        try {
+            const yearNumber = parseInt(selectedSchoolYear.schoolYear.split('-')[0], 10);
+
+            if (isNaN(yearNumber)) {
+                toast.warn('Năm học không hợp lệ.');
+                setReportData([]);
+                return;
+            }
+
+            const response = await schoolYearApis.getStudentGraduatedReport({
+                year: yearNumber,
+                page: pagination.current,
+                limit: pagination.pageSize,
+            });
+
+            setReportData(response.data || []);
+            setPagination(prev => ({ ...prev, total: response.page.totalCount }));
+        } catch (error) {
+            toast.info('Hiện năm học chưa kết thúc hoặc không có học sinh tốt nghiệp.');
+            setReportData([]);
+        } finally {
+            setLoading(false);
+        }
+    }, [selectedYearId, schoolYears, pagination.current, pagination.pageSize]);
 
     useEffect(() => {
         const fetchSchoolYears = async () => {
@@ -44,55 +80,11 @@ function SchoolyearsReport() {
     }, []);
 
     useEffect(() => {
-        const fetchReportData = async () => {
-            if (!selectedYearId || schoolYears.length === 0) {
-                setReportData([]);
-                return;
-            }
-
-            const selectedSchoolYear = schoolYears.find(sy => sy._id === selectedYearId);
-            if (!selectedSchoolYear) return;
-
-            setLoading(true);
-            try {
-                const yearNumber = parseInt(selectedSchoolYear.schoolYear.split('-')[0], 10);
-
-                if (isNaN(yearNumber)) {
-                    toast.warn('Năm học không hợp lệ.');
-                    setReportData([]);
-                    return;
-                }
-
-                const response = await schoolYearApis.getStudentGraduatedReport({
-                    year: yearNumber,
-                    page: pagination.current,
-                    limit: pagination.pageSize,
-                });
-
-                setReportData(response.data || []);
-                setPagination(prev => ({ ...prev, total: response.page.totalCount }));
-            } catch (error) {
-                // const errorMessage = (error as any)?.response?.data?.message || 'Tải dữ liệu báo cáo thất bại.';
-                toast.info('Hiện năm học chưa kết thúc hoặc không có học sinh tốt nghiệp.');
-                setReportData([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchReportData();
-    }, [selectedYearId, schoolYears, pagination.current, pagination.pageSize]);
-
-    const handleViewPDF = useCallback(async (fileId: string) => {
-        try {
-            const arrayBuffer = await enrollmentApis.getPDFById(fileId);
-            const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
-            const fileURL = URL.createObjectURL(blob);
-            window.open(fileURL, '_blank');
-        } catch (error) {
-            toast.error('Không thể mở file PDF.');
-        }
-    }, []);
+    }, [fetchReportData, refreshTrigger]);
+    const handleRefresh = () => {
+        setRefreshTrigger(prev => prev + 1);
+    };
 
     const handleTableChange = (newPagination: any) => {
         setPagination(prev => ({
@@ -128,32 +120,16 @@ function SchoolyearsReport() {
     const columns: ColumnsType<SchoolYearReport> = useMemo(() => [
         { title: 'Mã Học Sinh', dataIndex: 'studentCode', key: 'studentCode', width: 150 },
         { title: 'Họ và Tên', dataIndex: 'fullName', key: 'fullName' },
+        {
+            title: 'Căn cước công dân',
+            dataIndex: 'idCard',
+            key: 'idCard',
+            render: (text) => text || 'N/A',
+        },
         { title: 'Ngày Sinh', dataIndex: 'dob', key: 'dob', render: (text) => dayjs(text).format('DD/MM/YYYY'), width: 120 },
         { title: 'Giới Tính', dataIndex: 'gender', key: 'gender', width: 100 },
         { title: 'Ngày Tốt Nghiệp', dataIndex: 'graduatedAt', key: 'graduatedAt', render: (text) => text ? dayjs(text).format('DD/MM/YYYY') : 'N/A', width: 150 },
-        {
-            title: 'Giấy Khai Sinh',
-            dataIndex: 'birthCertFiles',
-            key: 'birthCertFiles',
-            align: 'center',
-            render: (file) => file ? (
-                <Button type="link" onClick={() => handleViewPDF(file._id)}>
-                    {file.filename || 'Xem file'}
-                </Button>
-            ) : 'N/A'
-        },
-        {
-            title: 'Giấy Khám Sức Khỏe',
-            dataIndex: 'healthCertFiles',
-            key: 'healthCertFiles',
-            align: 'center',
-            render: (file) => file ? (
-                <Button type="link" onClick={() => handleViewPDF(file._id)}>
-                    {file.filename || 'Xem file'}
-                </Button>
-            ) : 'N/A'
-        },
-    ], [handleViewPDF]);
+    ], []);
 
     if (loading && schoolYears.length === 0) {
         return <Flex align="center" justify="center" style={{ minHeight: 'calc(100vh - 150px)' }}><Spin size="large" /></Flex>;
@@ -168,6 +144,11 @@ function SchoolyearsReport() {
                     </Col>
                     <Col>
                         <Space>
+                            <Tooltip title="Làm mới danh sách">
+                                <Button icon={<ReloadOutlined />}
+                                    onClick={handleRefresh}
+                                    loading={loading}>Làm mới danh sách</Button>
+                            </Tooltip>
                             <Select
                                 value={selectedYearId}
                                 style={{ width: 200 }}
