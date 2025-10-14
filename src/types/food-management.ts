@@ -12,6 +12,9 @@ export interface FoodRecord {
     _id: string,
     foodName: string;
     ageGroup: string;
+    totalProtein: number; 
+    totalLipid: number;   
+    totalCarb: number;   
     totalCalories: number;
     ingredients: Ingredient[];
     createdBy: string;
@@ -49,9 +52,22 @@ export interface CreateFoodParams {
     foodName: string;
     ageGroup: string;
     totalCalories: number; 
+    totalProtein?: number; 
+    totalLipid?: number;   
+    totalCarb?: number;    
     ingredients: IngredientParam[]; 
     createdBy: string; 
     active: boolean; 
+}
+
+export interface AICalculateResponse {
+    message: string;
+    ai_output: FoodRecord[];
+}
+
+export interface AICalculationTriggerResponse {
+    message: string;
+    ai_output?: any; 
 }
 
 export type UpdateFoodParams = CreateFoodParams 

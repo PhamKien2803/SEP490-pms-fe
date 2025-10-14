@@ -63,6 +63,8 @@ import {
   UpdateSchoolYearDto,
 } from "../types/schoolYear";
 import {
+  AICalculateResponse,
+  AICalculationTriggerResponse,
   CreateFoodParams,
   FoodListParams,
   FoodListResponse,
@@ -488,8 +490,19 @@ export const foodApis = {
     return response.data;
   },
 
-  createFood: async (body: CreateFoodParams): Promise<void> => {
-    await axiosAuth.post(apiEndPoint.CREATE_FOOD, body);
+  createFood: async (body: CreateFoodParams): Promise<FoodRecord> => {
+    const response = await axiosAuth.post<FoodRecord>(
+      apiEndPoint.CREATE_FOOD,
+      body
+    );
+    return response.data;
+  },
+
+  calculateFoodNutrients: async (foodId: string): Promise<AICalculateResponse> => {
+    const response = await axiosAuth.get<AICalculateResponse>(
+      apiEndPoint.CALCULATE_FOOD_AI(foodId),
+    );
+    return response.data;
   },
 
   updateFood: async (
@@ -504,6 +517,13 @@ export const foodApis = {
   },
 
   deleteFood: async (id: string): Promise<void> => {
-    await axiosAuth.delete(apiEndPoint.DELETE_FOOD(id));
+    await axiosAuth.post(apiEndPoint.DELETE_FOOD(id));
+  },
+
+  triggerAICalculation: async (): Promise<AICalculationTriggerResponse> => {
+    const response = await axiosAuth.get<AICalculationTriggerResponse>(
+      apiEndPoint.CALCULATE_TOTAL_CALO_AI
+    );
+    return response.data;
   },
 };

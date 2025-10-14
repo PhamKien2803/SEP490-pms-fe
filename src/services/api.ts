@@ -46,6 +46,8 @@ export const apiEndPoint = {
   CREATE_FOOD: "/foods/create",
   UPDATE_FOOD: (id: string) => `/foods/update/${id}`,
   DELETE_FOOD: (id: string) =>  `/foods/delete/${id}`,
+  CALCULATE_FOOD_AI: (foodId: string) => `foods/caculate-calo/${foodId}`,
+  CALCULATE_TOTAL_CALO_AI: `foods/caculate-calo`,
   GET_SCHOOLYEARS_LIST: '/schoolYears/list',
   CREATE_SCHOOLYEAR: '/schoolYears/create',
   UPDATE_SCHOOLYEAR: (id: string) => `/schoolYears/update/${id}`,

@@ -24,6 +24,9 @@ import SchoolyearDetails from "../../pages/schoolyears-management/schoolyear-det
 import CreateSchoolyear from "../../pages/schoolyears-management/create-schoolyears/CreateSchoolyear";
 import SchoolyearsReport from "../../pages/schoolyears-management/schoolyears-report/SchoolyearsReport";
 import FoodManagement from "../../pages/food-management/FoodManagement";
+import FoodDetailPage from "../../modal/food/view-food/FoodDetails";
+import UpdateFoodPage from "../../modal/food/update-food/UpdateFood";
+import CreateFoodPage from "../../modal/food/create-food/CreateFoodPage";
 
 export const routes: RouteObject[] = [
   {
@@ -34,6 +37,7 @@ export const routes: RouteObject[] = [
         requireAction="view"
       />
     ),
+
     children: [
       {
         path: "",
@@ -263,15 +267,15 @@ export const routes: RouteObject[] = [
               },
               {
                 path: "view/:id",
-                element: <MenuDetailPage />,
+                element: <FoodDetailPage />,
               },
               {
                 path: "edit/:id",
-                element: <EditMenuPage />,
+                element: <UpdateFoodPage />,
               },
               {
                 path: "create",
-                element: <CreateMenu />,
+                element: <CreateFoodPage />,
               },
             ],
           },
