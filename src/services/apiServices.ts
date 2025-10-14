@@ -433,6 +433,10 @@ export const schoolYearApis = {
     await axiosAuth.post(apiEndPoint.END_SCHOOLYEAR(id));
   },
 
+  confirmSchoolYear: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.CONFIRM_SCHOOLYEAR(id));
+  },
+
   getStudentGraduatedReport: async (params: {
     year: number;
     page: number;

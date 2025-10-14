@@ -124,7 +124,7 @@ function EditSchoolyear() {
         if (!schoolYearData) return;
 
         const isActivating = action === 'activate';
-        const actionText = isActivating ? 'kích hoạt' : 'kết thúc';
+        const actionText = isActivating ? 'xác nhận' : 'kết thúc';
 
         modalApi.confirm({
             title: `Xác nhận ${actionText} năm học?`,
@@ -134,19 +134,22 @@ function EditSchoolyear() {
             cancelText: 'Hủy',
             okType: isActivating ? 'primary' : 'danger',
             onOk: async () => {
-                if (action === 'end') {
-                    setIsSubmitting(true);
-                    try {
-                        await schoolYearApis.endSchoolYear(schoolYearData._id);
-                        toast.success('Kết thúc năm học thành công!');
-                        navigate(-1)
-                    } catch (error) {
-                        toast.error('Kết thúc năm học thất bại.');
-                    } finally {
-                        setIsSubmitting(false);
-                    }
-                } else {
-                    toast.info(`Chức năng "${actionText}" sẽ được phát triển trong tương lai.`);
+                const apiCall = isActivating
+                    ? () => schoolYearApis.confirmSchoolYear(schoolYearData._id)
+                    : () => schoolYearApis.endSchoolYear(schoolYearData._id);
+
+                const successMessage = `${actionText.charAt(0).toUpperCase() + actionText.slice(1)} năm học thành công!`;
+                const errorMessage = `${actionText.charAt(0).toUpperCase() + actionText.slice(1)} năm học thất bại.`;
+
+                setIsSubmitting(true);
+                try {
+                    await apiCall();
+                    toast.success(successMessage);
+                    navigate(-1);
+                } catch (error) {
+                    toast.error(errorMessage);
+                } finally {
+                    setIsSubmitting(false);
                 }
             },
         });
