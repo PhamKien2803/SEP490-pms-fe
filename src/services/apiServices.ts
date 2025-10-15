@@ -546,8 +546,8 @@ export const classApis = {
     return response.data;
   },
 
-  asyncClass: async (year: string): Promise<void> => {
-    await axiosAuth.post(apiEndPoint.ASYNC_CLASS, { year });
+  asyncClass: async (): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.ASYNC_CLASS);
   }
 
 }
