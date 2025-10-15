@@ -61,3 +61,10 @@ export interface CreateClassDto {
     students?: string[];
     teachers?: string[];
 }
+
+export interface AvailableRoom {
+    _id: string;
+    roomName: string;
+    roomType: string;
+    capacity: number;
+}

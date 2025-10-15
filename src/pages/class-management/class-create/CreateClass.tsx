@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Card, Spin, Alert, Button, Row, Col, Typography, Flex, Table,
@@ -8,23 +8,11 @@ import {
 import { ArrowLeftOutlined, UserAddOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { toast } from 'react-toastify';
-import { StudentInClass, TeacherInClass, CreateClassDto } from '../../../types/class';
+import { StudentInClass, TeacherInClass, CreateClassDto, AvailableRoom } from '../../../types/class';
 import { classApis } from '../../../services/apiServices';
 
 const { Title } = Typography;
 const { Option } = Select;
-
-interface RoomItem {
-    _id: string;
-    name: string;
-    capacity: number;
-}
-const mockAvailableRooms: RoomItem[] = [
-    { _id: 'room_01', name: 'Phòng A1 (Sức chứa: 20)', capacity: 20 },
-    { _id: 'room_02', name: 'Phòng A2 (Sức chứa: 25)', capacity: 25 },
-    { _id: 'room_03', name: 'Phòng B1 (Sức chứa: 20)', capacity: 20 },
-    { _id: 'room_04', name: 'Phòng C1 (Sức chứa: 30)', capacity: 30 },
-];
 
 function CreateClass() {
     const navigate = useNavigate();
@@ -38,21 +26,21 @@ function CreateClass() {
     const [students, setStudents] = useState<StudentInClass[]>([]);
     const [allAvailableStudents, setAllAvailableStudents] = useState<StudentInClass[]>([]);
     const [allAvailableTeachers, setAllAvailableTeachers] = useState<TeacherInClass[]>([]);
-    const [availableRooms, setAvailableRooms] = useState<RoomItem[]>([]);
-
+    const [availableRooms, setAvailableRooms] = useState<AvailableRoom[]>([]);
     const [isStudentModalVisible, setIsStudentModalVisible] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const [allStudents, allTeachers] = await Promise.all([
+                const [allStudents, allTeachers, allRooms] = await Promise.all([
                     classApis.getAllAvailableStudents(),
-                    classApis.getAllAvailableTeachers()
+                    classApis.getAllAvailableTeachers(),
+                    classApis.getAllAvailableRoom()
                 ]);
                 setAllAvailableStudents(allStudents);
                 setAllAvailableTeachers(allTeachers);
-                setAvailableRooms(mockAvailableRooms);
+                setAvailableRooms(allRooms);
             } catch (err) {
                 setError('Không thể tải dữ liệu cần thiết để tạo lớp.');
                 toast.error('Có lỗi xảy ra, vui lòng thử lại.');
@@ -176,7 +164,7 @@ function CreateClass() {
                                     allowClear
                                 >
                                     {availableRooms.map(room => (
-                                        <Option key={room._id} value={room._id}>{room.name}</Option>
+                                        <Option key={room._id} value={room._id}>{room.roomName} (Sức chứa: {room.capacity})</Option>
                                     ))}
                                 </Select>
                             </Form.Item>

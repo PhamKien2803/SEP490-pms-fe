@@ -65,6 +65,8 @@ export const apiEndPoint = {
   CREATE_CLASS: "/classes/create",
   GET_AVAILABEL_STUDENT: "/classes/available-student",
   GET_AVAILABEL_TEACHER: "/classes/available-teacher",
+  GET_AVAILABEL_ROOM: "/classes/available-room",
+  ASYNC_CLASS: "/classes/async-class",
 };
 
 export const apiConfig = {
