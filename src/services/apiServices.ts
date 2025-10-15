@@ -49,12 +49,13 @@ import {
   UpdateEnrollmentDto,
   UploadPDFResponse,
 } from "../types/enrollment";
-import { ClassDetail, ClassListResponse, CreateClassDto, StudentInClass, TeacherInClass, UpdateClassDto } from "../types/class";
 import {
   CreateMenuParams,
+  FoodListResponse,
+  ListFoodParams,
+  MenuDetail,
   MenuListParams,
   MenuListResponse,
-  MenuRecord,
 } from "../types/menu-management";
 import {
   CreateSchoolYearDto,
@@ -424,6 +425,29 @@ export const menuApis = {
 
   deleteMenu: async (menuId: string): Promise<void> => {
     await axiosAuth.delete(apiEndPoint.DELETE_MENU(menuId));
+  },
+
+  editMenu: async (menuId: string, body: CreateMenuParams): Promise<void> => {
+    await axiosAuth.put(apiEndPoint.EDIT_MENU(menuId), body);
+  },
+
+  approveMenu: async (menuId: string): Promise<void> => {
+    await axiosAuth.put(apiEndPoint.APPROVE_MENU(menuId));
+  },
+
+  rejectMenu: async (
+    menuId: string,
+    body: { reason: string }
+  ): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.APPROVE_MENU(menuId), body);
+  },
+
+  getListFood: async (params: ListFoodParams): Promise<FoodListResponse> => {
+    const response = await axiosAuth.get<FoodListResponse>(
+      apiEndPoint.GET_LIST_FOOD,
+      { params }
+    );
+    return response.data;
   },
 };
 

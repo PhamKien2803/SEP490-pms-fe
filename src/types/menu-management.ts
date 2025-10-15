@@ -88,19 +88,126 @@ export interface MenuInitialData {
 export interface MenuListParams {
   page: number;
   limit: number;
-  weekStart: string;
-  weekEnd: string;
-  ageGroup: number;
+  weekStart: string | null;
+  weekEnd: string | null;
+  ageGroup: string;
+  active?: boolean;
+}
+
+interface MealPayload {
+  mealType: string;
+  foods: FoodItemPayload[];
+}
+
+export interface DayMenuPayload {
+  date: string;
+  meals: MealPayload[];
+}
+
+export interface MealCreatePayload {
+  mealType: string;
+  foods: string[];
+}
+
+export interface DayMenuCreate {
+  date: string;
+  meals: MealCreatePayload[];
 }
 
 export interface CreateMenuParams {
-    weekStart: string; 
-    weekEnd: string;   
-    ageGroup: number;  
-    days: DayMenu[];   
-    totalCalo: number;
-    totalProtein: number;
-    totalLipid: number;
-    totalCarb: number;
-    notes?: string;
+  weekStart: string;
+  weekEnd: string;
+  ageGroup: string;
+  days: DayMenuCreate[];
+  notes?: string;
+}
+
+export interface Ingredient {
+  name: string;
+  gram: number;
+  unit: string;
+  calories: number;
+  protein: number;
+  lipid: number;
+  carb: number;
+}
+
+export interface FoodRecord {
+  _id: string;
+  foodName: string;
+  ageGroup: string;
+  totalCalories: number;
+  totalProtein: number;
+  totalLipid: number;
+  totalCarb: number;
+  ingredients: Ingredient[];
+}
+
+export interface FoodListResponse {
+  data: FoodRecord[];
+  page: {
+    totalCount: number;
+    limit: number;
+    page: number;
+  };
+}
+
+export interface ListFoodParams {
+  foodName?: string;
+  ageGroup: string;
+  page: number;
+  limit: number;
+}
+
+export interface Ingredient {
+  name: string;
+  gram: number;
+  unit: string;
+  calories: number;
+  protein: number;
+  lipid: number;
+  carb: number;
+}
+
+export interface Food {
+  _id: string;
+  foodName: string;
+  ageGroup: string;
+  totalCalories: number;
+  ingredients: Ingredient[];
+}
+
+export interface MealDetail {
+  mealType: "sáng" | "trưa" | "xế" | string;
+  foods: {
+    food: Food;
+  }[];
+  totalCalo: number;
+  totalProtein: number;
+  totalLipid: number;
+  totalCarb: number;
+}
+
+export interface DayDetail {
+  date: string;
+  meals: MealDetail[];
+}
+
+export interface MenuDetail {
+  _id: string;
+  interface: boolean;
+  ageGroup: string;
+  createdAt: string;
+  createdBy: string;
+  updatedAt: string;
+  updatedBy: string;
+  state: string;
+  notes: string;
+  totalCalo: number;
+  totalProtein: number;
+  totalLipid: number;
+  totalCarb: number;
+  weekStart: string;
+  weekEnd: string;
+  days: DayDetail[];
 }
