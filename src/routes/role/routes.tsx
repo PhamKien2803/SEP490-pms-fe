@@ -23,6 +23,10 @@ import EditSchoolyear from "../../pages/schoolyears-management/edit-schoolyear/E
 import SchoolyearDetails from "../../pages/schoolyears-management/schoolyear-details/SchoolyearDetails";
 import CreateSchoolyear from "../../pages/schoolyears-management/create-schoolyears/CreateSchoolyear";
 import SchoolyearsReport from "../../pages/schoolyears-management/schoolyears-report/SchoolyearsReport";
+import ClassManagement from "../../pages/class-management/ClassManagement";
+import ClassDetails from "../../pages/class-management/class-details/ClassDetails";
+import UpdateClass from "../../pages/class-management/class-update/UpdateClass";
+import CreateClass from "../../pages/class-management/class-create/CreateClass";
 
 export const routes: RouteObject[] = [
     {
@@ -245,6 +249,33 @@ export const routes: RouteObject[] = [
                                 index: true,
                                 element: <SchoolyearsReport />,
                             },
+                        ],
+                    },
+                    {
+                        path: "classes",
+                        element: (
+                            <PrivateRoute
+                                requireFunction={`${constants.APP_PREFIX}/classes`}
+                                requireAction="view"
+                            />
+                        ),
+                        children: [
+                            {
+                                index: true,
+                                element: <ClassManagement />,
+                            },
+                            {
+                                path: "view/:id",
+                                element: <ClassDetails />
+                            },
+                            {
+                                path: "update/:id",
+                                element: <UpdateClass />
+                            },
+                            {
+                                path: "create",
+                                element: <CreateClass />
+                            }
                         ],
                     },
                 ],

@@ -49,7 +49,13 @@ export const apiEndPoint = {
   CONFIRM_SCHOOLYEAR: (id: string) => `/schoolYears/confirm/${id}`,
   GET_SCHOOLYEAR_BY_ID: (id: string) => `/schoolYears/getById/${id}`,
   END_SCHOOLYEAR: (id: string) => `/schoolYears/endSchoolYear/${id}`,
-  SCHOOLYEAR_REPORT: '/schoolYears/getStudentGraduated'
+  SCHOOLYEAR_REPORT: '/schoolYears/getStudentGraduated',
+  GET_CLASS_LIST: '/classes/list',
+  GET_CLASS_BY_ID: (id: string) => `/classes/getById/${id}`,
+  UPDATE_CLASS: (id: string) => `/classes/update/${id}`,
+  CREATE_CLASS: "/classes/create",
+  GET_AVAILABEL_STUDENT: "/classes/available-student",
+  GET_AVAILABEL_TEACHER: "/classes/available-teacher",
 };
 
 export const apiConfig = {

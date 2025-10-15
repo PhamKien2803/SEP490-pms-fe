@@ -51,6 +51,7 @@ import {
 } from "../types/enrollment";
 import { CreateMenuParams, MenuListParams, MenuListResponse, MenuRecord } from "../types/menu-management";
 import { CreateSchoolYearDto, SchoolYearListItem, SchoolYearReportResponses, SchoolYearsListResponse, UpdateSchoolYearDto } from "../types/schoolYear";
+import { ClassDetail, ClassListResponse, CreateClassDto, StudentInClass, TeacherInClass, UpdateClassDto } from "../types/class";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -448,4 +449,41 @@ export const schoolYearApis = {
     );
     return response.data;
   },
+}
+
+export const classApis = {
+  getClassList: async (params: {
+    year: string;
+    page?: number;
+    limit?: number;
+  }): Promise<ClassListResponse> => {
+    const response = await axiosAuth.get<ClassListResponse>(apiEndPoint.GET_CLASS_LIST, {
+      params,
+    });
+    return response.data;
+  },
+
+  getClassById: async (id: string): Promise<ClassDetail> => {
+    const response = await axiosAuth.get<ClassDetail>(apiEndPoint.GET_CLASS_BY_ID(id));
+    return response.data;
+  },
+
+  updateClass: async (id: string, data: UpdateClassDto): Promise<void> => {
+    await axiosAuth.put(apiEndPoint.UPDATE_CLASS(id), data);
+  },
+
+  createClass: async (body: CreateClassDto): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.CREATE_CLASS, body);
+  },
+
+  getAllAvailableStudents: async (): Promise<StudentInClass[]> => {
+    const response = await axiosAuth.get(apiEndPoint.GET_AVAILABEL_STUDENT);
+    return response.data;
+  },
+
+  getAllAvailableTeachers: async (): Promise<TeacherInClass[]> => {
+    const response = await axiosAuth.get(apiEndPoint.GET_AVAILABEL_TEACHER);
+    return response.data;
+  },
+
 }
