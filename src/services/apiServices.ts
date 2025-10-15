@@ -72,7 +72,7 @@ import {
   FoodRecord,
   UpdateFoodParams,
 } from "../types/food-management";
-import { ClassDetail, ClassListResponse, CreateClassDto, StudentInClass, TeacherInClass, UpdateClassDto } from "../types/class";
+import { AvailableRoom, ClassDetail, ClassListResponse, CreateClassDto, StudentInClass, TeacherInClass, UpdateClassDto } from "../types/class";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -540,6 +540,15 @@ export const classApis = {
     const response = await axiosAuth.get(apiEndPoint.GET_AVAILABEL_TEACHER);
     return response.data;
   },
+
+  getAllAvailableRoom: async (): Promise<AvailableRoom[]> => {
+    const response = await axiosAuth.get(apiEndPoint.GET_AVAILABEL_ROOM);
+    return response.data;
+  },
+
+  asyncClass: async (year: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.ASYNC_CLASS, { year });
+  }
 
 }
 
