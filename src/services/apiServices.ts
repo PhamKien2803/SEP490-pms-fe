@@ -51,11 +51,10 @@ import {
 } from "../types/enrollment";
 import {
   CreateMenuParams,
-  FoodListResponse,
   ListFoodParams,
-  MenuDetail,
   MenuListParams,
   MenuListResponse,
+  MenuRecord,
 } from "../types/menu-management";
 import {
   CreateSchoolYearDto,
@@ -73,6 +72,7 @@ import {
   FoodRecord,
   UpdateFoodParams,
 } from "../types/food-management";
+import { ClassDetail, ClassListResponse, CreateClassDto, StudentInClass, TeacherInClass, UpdateClassDto } from "../types/class";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
