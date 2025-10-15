@@ -34,6 +34,18 @@ export interface TeacherInClass {
     phoneNumber: string;
 }
 
+export interface RoomDetail {
+    _id: string;
+    roomName: string;
+    roomType: string;
+    capacity: number;
+    notes: string;
+    active: boolean;
+    createdBy: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
 export interface ClassDetail {
     _id: string;
     classCode: string;
@@ -42,7 +54,7 @@ export interface ClassDetail {
     active: boolean;
     students: StudentInClass[];
     teachers: TeacherInClass[];
-    room: string;
+    room: RoomDetail;
     schoolYear: string;
 }
 

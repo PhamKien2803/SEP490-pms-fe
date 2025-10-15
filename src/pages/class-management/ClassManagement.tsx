@@ -25,6 +25,7 @@ function ClassManagement() {
     const [filteredClassList, setFilteredClassList] = useState<ClassListItem[]>([]);
     const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [syncLoading, setSyncLoading] = useState(false); // State cho nút đồng bộ
     const [selectedSchoolYear, setSelectedSchoolYear] = useState<string | undefined>(undefined);
     const [searchTerm, setSearchTerm] = useState('');
     const [pagination, setPagination] = useState({
@@ -52,6 +53,23 @@ function ClassManagement() {
             setLoading(false);
         }
     }, []);
+
+    // Hàm xử lý đồng bộ dữ liệu
+    const handleSync = async () => {
+        setSyncLoading(true);
+        try {
+            await classApis.asyncClass();
+            toast.success('Đồng bộ dữ liệu thành công!');
+            if (selectedSchoolYear) {
+                await fetchClassList(selectedSchoolYear); // Tải lại danh sách lớp sau khi đồng bộ
+            }
+        } catch (error) {
+            toast.error('Đồng bộ dữ liệu thất bại. Vui lòng thử lại.');
+            console.error("Sync failed:", error);
+        } finally {
+            setSyncLoading(false);
+        }
+    };
 
     useEffect(() => {
         const fetchSchoolYears = async () => {
@@ -150,7 +168,13 @@ function ClassManagement() {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 style={{ width: 200 }}
                             />
-                            <Button icon={<SyncOutlined />}>Đồng bộ dữ liệu</Button>
+                            <Button
+                                icon={<SyncOutlined />}
+                                onClick={handleSync}
+                                loading={syncLoading}
+                            >
+                                Đồng bộ dữ liệu
+                            </Button>
                             <Button onClick={() => navigate(`${constants.APP_PREFIX}/classes/create`)} type="primary" icon={<PlusOutlined />}>Tạo mới</Button>
                         </Space>
                     </Col>

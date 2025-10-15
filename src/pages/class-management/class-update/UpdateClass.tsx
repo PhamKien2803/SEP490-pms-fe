@@ -59,7 +59,7 @@ function UpdateClass() {
                 form.setFieldsValue({
                     className: classDetails.className,
                     age: parseInt(classDetails.age, 10),
-                    room: classDetails.room,
+                    room: classDetails.room.roomName,
                 });
                 setStudents(classDetails.students);
                 setTeachers(classDetails.teachers);
@@ -243,7 +243,7 @@ function UpdateClass() {
                         </Col>
                         <Col span={8}>
                             <Form.Item name="room" label="Phòng học">
-                                <Select showSearch placeholder="Chọn phòng học" optionFilterProp="children" allowClear
+                                <Select placeholder="Chọn phòng học" optionFilterProp="children" allowClear
                                     filterOption={(input, option) => (String(option?.children) ?? '').toLowerCase().includes(input.toLowerCase())}
                                 >
                                     {availableRooms.map(room => (
