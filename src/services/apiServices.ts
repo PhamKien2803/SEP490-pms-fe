@@ -64,6 +64,15 @@ import {
   SchoolYearsListResponse,
   UpdateSchoolYearDto,
 } from "../types/schoolYear";
+import {
+  AICalculateResponse,
+  AICalculationTriggerResponse,
+  CreateFoodParams,
+  FoodListParams,
+  FoodListResponse,
+  FoodRecord,
+  UpdateFoodParams,
+} from "../types/food-management";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -403,8 +412,8 @@ export const menuApis = {
     return response.data;
   },
 
-  getMenuById: async (menuId: string): Promise<MenuDetail> => {
-    const response = await axiosAuth.get<MenuDetail>(
+  getMenuById: async (menuId: string): Promise<MenuRecord> => {
+    const response = await axiosAuth.get<MenuRecord>(
       apiEndPoint.GET_MENU_BY_ID(menuId)
     );
     return response.data;
@@ -492,6 +501,91 @@ export const schoolYearApis = {
     const response = await axiosAuth.get<SchoolYearReportResponses>(
       apiEndPoint.SCHOOLYEAR_REPORT,
       { params }
+    );
+    return response.data;
+  },
+}
+
+export const classApis = {
+  getClassList: async (params: {
+    year: string;
+    page?: number;
+    limit?: number;
+  }): Promise<ClassListResponse> => {
+    const response = await axiosAuth.get<ClassListResponse>(apiEndPoint.GET_CLASS_LIST, {
+      params,
+    });
+    return response.data;
+  },
+
+  getClassById: async (id: string): Promise<ClassDetail> => {
+    const response = await axiosAuth.get<ClassDetail>(apiEndPoint.GET_CLASS_BY_ID(id));
+    return response.data;
+  },
+
+  updateClass: async (id: string, data: UpdateClassDto): Promise<void> => {
+    await axiosAuth.put(apiEndPoint.UPDATE_CLASS(id), data);
+  },
+
+  createClass: async (body: CreateClassDto): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.CREATE_CLASS, body);
+  },
+
+  getAllAvailableStudents: async (): Promise<StudentInClass[]> => {
+    const response = await axiosAuth.get(apiEndPoint.GET_AVAILABEL_STUDENT);
+    return response.data;
+  },
+
+  getAllAvailableTeachers: async (): Promise<TeacherInClass[]> => {
+    const response = await axiosAuth.get(apiEndPoint.GET_AVAILABEL_TEACHER);
+    return response.data;
+  },
+
+}
+
+
+export const foodApis = {
+  getListFood: async (params: FoodListParams): Promise<FoodListResponse> => {
+    const response = await axiosAuth.get<FoodListResponse>(
+      apiEndPoint.GET_LIST_FOOD,
+      { params }
+    );
+    return response.data;
+  },
+
+  createFood: async (body: CreateFoodParams): Promise<FoodRecord> => {
+    const response = await axiosAuth.post<FoodRecord>(
+      apiEndPoint.CREATE_FOOD,
+      body
+    );
+    return response.data;
+  },
+
+  calculateFoodNutrients: async (foodId: string): Promise<AICalculateResponse> => {
+    const response = await axiosAuth.get<AICalculateResponse>(
+      apiEndPoint.CALCULATE_FOOD_AI(foodId),
+    );
+    return response.data;
+  },
+
+  updateFood: async (
+    id: string,
+    body: UpdateFoodParams
+  ): Promise<FoodRecord> => {
+    const response = await axiosAuth.put<FoodRecord>(
+      apiEndPoint.UPDATE_FOOD(id),
+      body
+    );
+    return response.data;
+  },
+
+  deleteFood: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_FOOD(id));
+  },
+
+  triggerAICalculation: async (): Promise<AICalculationTriggerResponse> => {
+    const response = await axiosAuth.get<AICalculationTriggerResponse>(
+      apiEndPoint.CALCULATE_TOTAL_CALO_AI
     );
     return response.data;
   },

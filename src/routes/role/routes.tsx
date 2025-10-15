@@ -23,6 +23,14 @@ import EditSchoolyear from "../../pages/schoolyears-management/edit-schoolyear/E
 import SchoolyearDetails from "../../pages/schoolyears-management/schoolyear-details/SchoolyearDetails";
 import CreateSchoolyear from "../../pages/schoolyears-management/create-schoolyears/CreateSchoolyear";
 import SchoolyearsReport from "../../pages/schoolyears-management/schoolyears-report/SchoolyearsReport";
+import ClassManagement from "../../pages/class-management/ClassManagement";
+import ClassDetails from "../../pages/class-management/class-details/ClassDetails";
+import UpdateClass from "../../pages/class-management/class-update/UpdateClass";
+import CreateClass from "../../pages/class-management/class-create/CreateClass";
+import FoodManagement from "../../pages/food-management/FoodManagement";
+import FoodDetailPage from "../../modal/food/view-food/FoodDetails";
+import UpdateFoodPage from "../../modal/food/update-food/UpdateFood";
+import CreateFoodPage from "../../modal/food/create-food/CreateFoodPage";
 
 export const routes: RouteObject[] = [
   {
@@ -33,6 +41,7 @@ export const routes: RouteObject[] = [
         requireAction="view"
       />
     ),
+
     children: [
       {
         path: "",
@@ -244,6 +253,60 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <SchoolyearsReport />,
+              },
+            ],
+          },
+          {
+            path: "classes",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/classes`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <ClassManagement />,
+              },
+              {
+                path: "view/:id",
+                element: <ClassDetails />
+              },
+              {
+                path: "update/:id",
+                element: <UpdateClass />
+              },
+              {
+                path: "create",
+                element: <CreateClass />
+              }
+            ],
+          },
+          {
+            path: "foods",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/foods`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <FoodManagement />,
+              },
+              {
+                path: "view/:id",
+                element: <FoodDetailPage />,
+              },
+              {
+                path: "edit/:id",
+                element: <UpdateFoodPage />,
+              },
+              {
+                path: "create",
+                element: <CreateFoodPage />,
               },
             ],
           },
