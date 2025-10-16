@@ -31,6 +31,7 @@ import FoodManagement from "../../pages/food-management/FoodManagement";
 import FoodDetailPage from "../../modal/food/view-food/FoodDetails";
 import UpdateFoodPage from "../../modal/food/update-food/UpdateFood";
 import CreateFoodPage from "../../modal/food/create-food/CreateFoodPage";
+import CurriculumManagement from "../../pages/curriculum-management/CurriculumManagement";
 
 export const routes: RouteObject[] = [
   {
@@ -253,6 +254,21 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <SchoolyearsReport />,
+              },
+            ],
+          },
+          {
+            path: "curriculums",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/curriculums`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <CurriculumManagement />,
               },
             ],
           },

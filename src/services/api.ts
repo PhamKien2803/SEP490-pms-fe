@@ -67,6 +67,10 @@ export const apiEndPoint = {
   GET_AVAILABEL_TEACHER: "/classes/available-teacher",
   GET_AVAILABEL_ROOM: "/classes/available-room",
   ASYNC_CLASS: "/classes/async-class",
+  GET_AVAILABEL_CLASS_STUDENT: "/classes/available-classStudent",
+  GET_AVAILABEL_CLASS_TEACHER: "/classes/available-classTeacher",
+  STUDENT_CHANGE_CLASS: "/classes/studentChangeClass",
+  TEACHER_CHANGE_CLASS: "/classes/teacherChangeClass"
 };
 
 export const apiConfig = {

@@ -72,7 +72,7 @@ import {
   FoodRecord,
   UpdateFoodParams,
 } from "../types/food-management";
-import { AvailableRoom, ClassDetail, ClassListResponse, CreateClassDto, StudentInClass, TeacherInClass, UpdateClassDto } from "../types/class";
+import { AvailableClassForStudent, AvailableClassForTeacher, AvailableRoom, ClassDetail, ClassListResponse, CreateClassDto, StudentChangeClassDto, StudentInClass, TeacherChangeClassDto, TeacherInClass, UpdateClassDto } from "../types/class";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -548,6 +548,30 @@ export const classApis = {
 
   asyncClass: async (): Promise<void> => {
     await axiosAuth.post(apiEndPoint.ASYNC_CLASS);
+  },
+
+  getAvailableClassForStudent: async (params: { classAge: number }): Promise<AvailableClassForStudent[]> => {
+    const response = await axiosAuth.get<AvailableClassForStudent[]>(apiEndPoint.GET_AVAILABEL_CLASS_STUDENT, {
+      params,
+    });
+    return response.data;
+  },
+
+
+  getAvailableClassForTeacher: async (params: { classAge: number }): Promise<AvailableClassForTeacher[]> => {
+    const response = await axiosAuth.get<AvailableClassForTeacher[]>(apiEndPoint.GET_AVAILABEL_CLASS_TEACHER, {
+      params,
+    });
+    return response.data;
+  },
+
+  studentChangeClass: async (body: StudentChangeClassDto): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.STUDENT_CHANGE_CLASS, body);
+  },
+
+
+  teacherChangeClass: async (body: TeacherChangeClassDto): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.TEACHER_CHANGE_CLASS, body);
   }
 
 }

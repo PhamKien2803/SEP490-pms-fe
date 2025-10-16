@@ -8,6 +8,9 @@ const hardcodedActions = [
     { label: 'Nhập file', value: 'import' },
     { label: 'Từ chối', value: 'reject' },
     { label: 'Duyệt tất cả', value: 'approve_all' },
+    { label: 'Đồng bộ dữ liệu', value: 'sync_data' },
+    { label: 'Khóa', value: 'lock' },
+    { label: 'Mở khóa', value: 'un_lock' },
 ];
 
 export default hardcodedActions;

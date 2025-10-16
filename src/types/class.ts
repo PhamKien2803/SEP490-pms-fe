@@ -61,7 +61,7 @@ export interface ClassDetail {
 export interface UpdateClassDto {
     className: string;
     age: string;
-    room?: string;
+    room?: string | RoomDetail;
     students?: string[];
     teachers?: string[];
 }
@@ -79,4 +79,35 @@ export interface AvailableRoom {
     roomName: string;
     roomType: string;
     capacity: number;
+}
+
+
+export interface AvailableClassForStudent {
+    _id: string;
+    classCode: string;
+    className: string;
+    teachers: {
+        _id: string;
+        staffCode: string;
+        fullName: string;
+    }[];
+}
+
+export interface AvailableClassForTeacher {
+    _id: string;
+    classCode: string;
+    className: string;
+}
+
+export interface StudentChangeClassDto {
+    studentId: string;
+    oldClassId: string;
+    newClassId: string;
+    classAge: number;
+}
+
+export interface TeacherChangeClassDto {
+    teacherId: string;
+    oldClassId: string;
+    newClassId: string;
 }
