@@ -48,41 +48,6 @@ function UpdateClass() {
     const [transferableClasses, setTransferableClasses] = useState<(AvailableClassForStudent | AvailableClassForTeacher)[]>([]);
     const [isTransferLoading, setIsTransferLoading] = useState(false);
 
-
-
-
-    // const fetchData = useCallback(async () => {
-    //     if (!id) {
-    //         setLoading(false);
-    //         setError('ID lớp học không hợp lệ.');
-    //         return;
-    //     }
-    //     setLoading(true);
-    //     try {
-    //         const [classDetails, allStudents, allTeachers, allRooms] = await Promise.all([
-    //             classApis.getClassById(id),
-    //             classApis.getAllAvailableStudents(),
-    //             classApis.getAllAvailableTeachers(),
-    //             classApis.getAllAvailableRoom(),
-    //         ]);
-    //         form.setFieldsValue({
-    //             className: classDetails.className,
-    //             age: parseInt(classDetails.age, 10),
-    //             room: classDetails.room?._id,
-    //         });
-
-    //         setStudents(classDetails.students);
-    //         setTeachers(classDetails.teachers);
-    //         setAllAvailableStudents(allStudents);
-    //         setAllAvailableTeachers(allTeachers);
-    //         setAvailableRooms(allRooms);
-    //     } catch (err) {
-    //         setError('Không thể tải dữ liệu để chỉnh sửa.');
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // }, [id, form]);
-    
     const fetchData = useCallback(async () => {
         if (!id) {
             setLoading(false);

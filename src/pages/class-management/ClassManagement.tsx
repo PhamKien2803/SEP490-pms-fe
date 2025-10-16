@@ -5,7 +5,6 @@ import {
 } from 'antd';
 import {
     PlusOutlined, SyncOutlined, EyeOutlined, EditOutlined,
-    LockOutlined, UnlockOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { toast } from 'react-toastify';
@@ -22,7 +21,7 @@ const { Search } = Input;
 
 function ClassManagement() {
     const navigate = useNavigate();
-    const { canSyncData, canCreate, canLock, canUnLock } = usePagePermission();
+    const { canSyncData, canCreate } = usePagePermission();
     const [originalClassList, setOriginalClassList] = useState<ClassListItem[]>([]);
     const [filteredClassList, setFilteredClassList] = useState<ClassListItem[]>([]);
     const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
@@ -126,9 +125,6 @@ function ClassManagement() {
         setPagination(prev => ({ ...prev, total: filteredData.length }));
     }, [searchTerm, originalClassList]);
 
-    const handleLock = (id: string) => toast.info(`Khóa lớp: ${id} (chức năng chưa hoàn thiện)`);
-    const handleUnlock = (id: string) => toast.info(`Mở khóa lớp: ${id} (chức năng chưa hoàn thiện)`);
-
     const columns: ColumnsType<ClassListItem> = [
         { title: 'Mã Lớp', dataIndex: 'classCode', key: 'classCode' },
         { title: 'Tên Lớp', dataIndex: 'className', key: 'className' },
@@ -149,12 +145,6 @@ function ClassManagement() {
                         <>
                             <Tooltip title="Chỉnh sửa">
                                 <Button type="text" icon={<EditOutlined style={{ color: '#1890ff' }} />} onClick={() => navigate(`${constants.APP_PREFIX}/classes/update/${record._id}`)} />
-                            </Tooltip>
-                            <Tooltip title="Khóa lớp">
-                                {canLock && (<Button type="text" danger icon={<LockOutlined />} onClick={() => handleLock(record._id)} />)}
-                            </Tooltip>
-                            <Tooltip title="Mở khóa">
-                                {canUnLock && (<Button type="text" icon={<UnlockOutlined style={{ color: 'green' }} />} onClick={() => handleUnlock(record._id)} />)}
                             </Tooltip>
                         </>
                     )}
