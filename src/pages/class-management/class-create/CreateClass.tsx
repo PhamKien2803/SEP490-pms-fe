@@ -5,7 +5,12 @@ import {
     Form, Input, Modal, Popconfirm,
     Space, Select, InputNumber
 } from 'antd';
-import { ArrowLeftOutlined, UserAddOutlined, DeleteOutlined } from '@ant-design/icons';
+import {
+    ArrowLeftOutlined, UserAddOutlined, DeleteOutlined, SaveOutlined,
+    TeamOutlined, NumberOutlined, HomeOutlined, SolutionOutlined,
+    UsergroupAddOutlined, ExclamationCircleOutlined, SnippetsOutlined,
+    CloseCircleOutlined, PlusOutlined
+} from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { toast } from 'react-toastify';
 import { StudentInClass, TeacherInClass, CreateClassDto, AvailableRoom } from '../../../types/class';
@@ -113,13 +118,13 @@ function CreateClass() {
     };
 
     const mainStudentColumns: ColumnsType<StudentInClass> = [
-        { title: 'Mã HS', dataIndex: 'studentCode', key: 'studentCode' },
+        { title: 'Mã HS', dataIndex: 'studentCode', key: 'studentCode', width: '25%' },
         { title: 'Họ tên', dataIndex: 'fullName', key: 'fullName' },
-        { title: 'Giới tính', dataIndex: 'gender', key: 'gender' },
+        { title: 'Giới tính', dataIndex: 'gender', key: 'gender', width: '20%' },
         {
-            title: 'Hành động', key: 'action', align: 'center',
+            title: 'Hành động', key: 'action', align: 'center', width: '15%',
             render: (_, record) => (
-                <Popconfirm title="Xóa học sinh này?" onConfirm={() => handleDeleteStudent(record._id)}>
+                <Popconfirm title="Xóa học sinh này?" onConfirm={() => handleDeleteStudent(record._id)} okText="Xóa" cancelText="Hủy">
                     <Button type="text" danger icon={<DeleteOutlined />} />
                 </Popconfirm>
             ),
@@ -134,28 +139,40 @@ function CreateClass() {
     }
 
     return (
-        <div style={{ padding: '24px' }}>
+        <div style={{ padding: '24px', background: '#f0f2f5' }}>
             <Row align="middle" style={{ marginBottom: 24 }}>
                 <Button shape="circle" icon={<ArrowLeftOutlined />} onClick={handleBackNavigation} style={{ marginRight: 16 }} />
                 <Col>
-                    <Title level={4} style={{ margin: 0 }}>Tạo mới Lớp học</Title>
+                    <Title level={4} style={{ margin: 0, display: 'flex', alignItems: 'center' }}>
+                        <SnippetsOutlined style={{ marginRight: 8, color: '#1890ff' }} />
+                        Tạo mới Lớp học
+                    </Title>
                 </Col>
             </Row>
 
             <Form form={form} layout="vertical" onFinish={onFinish} onValuesChange={() => setIsDirty(true)}>
-                <Card title="Thông tin chung" style={{ marginBottom: 24 }}>
-                    <Row gutter={16}>
-                        <Col span={8}>
+                <Card
+                    title={<><TeamOutlined style={{ marginRight: 8 }} />Thông tin chung</>}
+                    style={{ marginBottom: 24 }}
+                    bordered={false}
+                >
+                    <Row gutter={24}>
+                        <Col xs={24} sm={12} md={8}>
                             <Form.Item name="className" label="Tên Lớp" rules={[{ required: true, message: 'Vui lòng nhập tên lớp!' }]}>
-                                <Input placeholder="Ví dụ: Lớp Mầm 1" />
+                                <Input placeholder="Ví dụ: Lớp Mầm 1" prefix={<TeamOutlined />} />
                             </Form.Item>
                         </Col>
-                        <Col span={8}>
+                        <Col xs={24} sm={12} md={8}>
                             <Form.Item name="age" label="Độ tuổi" rules={[{ required: true, message: 'Vui lòng nhập độ tuổi!' }]}>
-                                <InputNumber onKeyPress={allowOnlyNumbers} min={1} max={10} style={{ width: '100%' }} placeholder="Ví dụ: 3" />
+                                <InputNumber
+                                    onKeyPress={allowOnlyNumbers}
+                                    min={1} max={10} style={{ width: '100%' }}
+                                    placeholder="Ví dụ: 3"
+                                    prefix={<NumberOutlined />}
+                                />
                             </Form.Item>
                         </Col>
-                        <Col span={8}>
+                        <Col xs={24} sm={12} md={8}>
                             <Form.Item name="room" label="Phòng học">
                                 <Select
                                     placeholder="Chọn phòng học"
@@ -164,7 +181,7 @@ function CreateClass() {
                                     allowClear
                                 >
                                     {availableRooms.map(room => (
-                                        <Option key={room._id} value={room._id}>{room.roomName} (Sức chứa: {room.capacity})</Option>
+                                        <Option key={room._id} value={room._id}><HomeOutlined /> {room.roomName} (Sức chứa: {room.capacity})</Option>
                                     ))}
                                 </Select>
                             </Form.Item>
@@ -178,26 +195,30 @@ function CreateClass() {
                             onChange={handleTeacherChange}
                         >
                             {allAvailableTeachers.map(teacher => (
-                                <Option key={teacher._id} value={teacher._id}>{teacher.fullName} ({teacher.staffCode})</Option>
+                                <Option key={teacher._id} value={teacher._id}><SolutionOutlined /> {teacher.fullName} ({teacher.staffCode})</Option>
                             ))}
                         </Select>
                     </Form.Item>
                 </Card>
 
-                <Card title="Danh sách Học sinh" extra={<Button icon={<UserAddOutlined />} onClick={() => setIsStudentModalVisible(true)}>Thêm Học sinh</Button>}>
-                    <Table columns={mainStudentColumns} dataSource={students} rowKey="_id" pagination={{ pageSize: 10 }} />
+                <Card
+                    title={<><UsergroupAddOutlined style={{ marginRight: 8 }} />Danh sách Học sinh</>}
+                    extra={<Button type="primary" icon={<UserAddOutlined />} onClick={() => setIsStudentModalVisible(true)}>Thêm Học sinh</Button>}
+                    bordered={false}
+                >
+                    <Table columns={mainStudentColumns} dataSource={students} rowKey="_id" pagination={{ pageSize: 10, hideOnSinglePage: true }} />
                 </Card>
 
                 <Row justify="end" style={{ marginTop: 24 }}>
                     <Space>
-                        <Button onClick={handleBackNavigation}>Hủy</Button>
-                        <Button type="primary" htmlType="submit" loading={isSubmitting}>Lưu</Button>
+                        <Button icon={<CloseCircleOutlined />} onClick={handleBackNavigation}>Hủy</Button>
+                        <Button type="primary" icon={<SaveOutlined />} htmlType="submit" loading={isSubmitting}>Lưu</Button>
                     </Space>
                 </Row>
             </Form>
 
             <AddMemberTableModal
-                title="Thêm Học sinh"
+                title={<><UserAddOutlined style={{ color: '#1890ff' }} /> Thêm Học sinh vào lớp</>}
                 open={isStudentModalVisible}
                 onCancel={() => setIsStudentModalVisible(false)}
                 onOk={handleAddStudents}
@@ -205,7 +226,12 @@ function CreateClass() {
             />
 
             <Modal
-                title="Bạn có chắc muốn quay lại?"
+                title={
+                    <span style={{ display: 'flex', alignItems: 'center' }}>
+                        <ExclamationCircleOutlined style={{ color: '#faad14', marginRight: 8, fontSize: '22px' }} />
+                        Xác nhận quay lại
+                    </span>
+                }
                 open={isBackConfirmVisible}
                 onOk={() => navigate(-1)}
                 onCancel={() => setIsBackConfirmVisible(false)}
@@ -213,13 +239,13 @@ function CreateClass() {
                 cancelText="Không"
                 zIndex={1001}
             >
-                <p>Các thay đổi chưa được lưu sẽ bị mất.</p>
+                <p>Các thay đổi chưa được lưu sẽ bị mất. Bạn có chắc muốn tiếp tục?</p>
             </Modal>
         </div>
     );
 }
 
-const AddMemberTableModal = ({ open, onCancel, onOk, dataSource, title, selectionLimit }: any) => {
+const AddMemberTableModal = ({ open, onCancel, onOk, dataSource, title }: any) => {
     const [selectedRows, setSelectedRows] = useState<any[]>([]);
 
     const columns = [
@@ -231,10 +257,6 @@ const AddMemberTableModal = ({ open, onCancel, onOk, dataSource, title, selectio
         onChange: (_: React.Key[], selectedRows: any[]) => {
             setSelectedRows(selectedRows);
         },
-        getCheckboxProps: (record: any) => ({
-            disabled: selectionLimit && selectedRows.length >= selectionLimit && !selectedRows.some(row => row._id === record._id),
-            name: record.fullName,
-        }),
     };
 
     const handleOk = () => {
@@ -259,6 +281,9 @@ const AddMemberTableModal = ({ open, onCancel, onOk, dataSource, title, selectio
             width={600}
             okText="Thêm"
             cancelText="Hủy"
+            okButtonProps={{ icon: <PlusOutlined /> }}
+            cancelButtonProps={{ icon: <CloseCircleOutlined /> }}
+            destroyOnClose
         >
             <Table
                 rowSelection={{

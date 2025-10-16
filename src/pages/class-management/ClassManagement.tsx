@@ -14,6 +14,7 @@ import { SchoolYearListItem } from '../../types/schoolYear';
 import { classApis, schoolYearApis } from '../../services/apiServices';
 import { constants } from '../../constants';
 import { useNavigate } from 'react-router-dom';
+import { usePagePermission } from '../../hooks/usePagePermission';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -21,12 +22,14 @@ const { Search } = Input;
 
 function ClassManagement() {
     const navigate = useNavigate();
+    const { canSyncData, canCreate, canLock, canUnLock } = usePagePermission();
     const [originalClassList, setOriginalClassList] = useState<ClassListItem[]>([]);
     const [filteredClassList, setFilteredClassList] = useState<ClassListItem[]>([]);
     const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [syncLoading, setSyncLoading] = useState(false); // State cho nút đồng bộ
+    const [syncLoading, setSyncLoading] = useState(false);
     const [selectedSchoolYear, setSelectedSchoolYear] = useState<string | undefined>(undefined);
+    const [isCurrentYearExpired, setIsCurrentYearExpired] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [pagination, setPagination] = useState({
         current: 1,
@@ -54,17 +57,16 @@ function ClassManagement() {
         }
     }, []);
 
-    // Hàm xử lý đồng bộ dữ liệu
     const handleSync = async () => {
         setSyncLoading(true);
         try {
             await classApis.asyncClass();
             toast.success('Đồng bộ dữ liệu thành công!');
             if (selectedSchoolYear) {
-                await fetchClassList(selectedSchoolYear); // Tải lại danh sách lớp sau khi đồng bộ
+                await fetchClassList(selectedSchoolYear);
             }
         } catch (error) {
-            toast.error('Đồng bộ dữ liệu thất bại. Vui lòng thử lại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Đồng bộ dữ liệu thất bại. Vui lòng thử lại.');
             console.error("Sync failed:", error);
         } finally {
             setSyncLoading(false);
@@ -75,24 +77,42 @@ function ClassManagement() {
         const fetchSchoolYears = async () => {
             try {
                 const response = await schoolYearApis.getSchoolYearList({ page: 1, limit: 100 });
-                const activeOrLatestYear = response.data.find(y => y.state === 'Đang hoạt động') || response.data[0];
-                setSchoolYears(response.data);
-                if (activeOrLatestYear) {
-                    setSelectedSchoolYear(activeOrLatestYear.schoolYear);
+                if (response.data && response.data.length > 0) {
+                    const sorted = [...response.data].sort((a, b) => {
+                        const startA = parseInt(a.schoolYear.split('-')[0]);
+                        const startB = parseInt(b.schoolYear.split('-')[0]);
+                        return startB - startA;
+                    });
+
+                    const latestYear = sorted[0];
+
+                    setSchoolYears(sorted);
+                    setSelectedSchoolYear(latestYear.schoolYear);
                 }
             } catch (error) {
-                typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách năm học.');
+                typeof error === "string"
+                    ? toast.warn(error)
+                    : toast.error('Không thể tải danh sách năm học.');
             }
         };
+
         fetchSchoolYears();
     }, []);
 
     useEffect(() => {
         if (selectedSchoolYear) {
+            const currentYearObject = schoolYears.find(year => year.schoolYear === selectedSchoolYear);
+            if (currentYearObject) {
+                const isExpired = currentYearObject.state === 'Hết thời hạn';
+                setIsCurrentYearExpired(isExpired);
+                if (isExpired) {
+                    toast.info(`Năm học ${selectedSchoolYear} đã hết hạn. Bạn chỉ có thể xem thông tin.`);
+                }
+            }
             setSearchTerm('');
             fetchClassList(selectedSchoolYear);
         }
-    }, [selectedSchoolYear, fetchClassList]);
+    }, [selectedSchoolYear, fetchClassList, schoolYears]);
 
     useEffect(() => {
         const lowercasedFilter = searchTerm.toLowerCase();
@@ -106,8 +126,8 @@ function ClassManagement() {
         setPagination(prev => ({ ...prev, total: filteredData.length }));
     }, [searchTerm, originalClassList]);
 
-    const handleLock = (id: string) => console.log('Lock class:', id);
-    const handleUnlock = (id: string) => console.log('Unlock class:', id);
+    const handleLock = (id: string) => toast.info(`Khóa lớp: ${id} (chức năng chưa hoàn thiện)`);
+    const handleUnlock = (id: string) => toast.info(`Mở khóa lớp: ${id} (chức năng chưa hoàn thiện)`);
 
     const columns: ColumnsType<ClassListItem> = [
         { title: 'Mã Lớp', dataIndex: 'classCode', key: 'classCode' },
@@ -125,15 +145,19 @@ function ClassManagement() {
                     <Tooltip title="Xem chi tiết">
                         <Button type="text" icon={<EyeOutlined />} onClick={() => navigate(`${constants.APP_PREFIX}/classes/view/${record._id}`)} />
                     </Tooltip>
-                    <Tooltip title="Chỉnh sửa">
-                        <Button type="text" icon={<EditOutlined style={{ color: '#1890ff' }} />} onClick={() => navigate(`${constants.APP_PREFIX}/classes/update/${record._id}`)} />
-                    </Tooltip>
-                    <Tooltip title="Khóa lớp">
-                        <Button type="text" danger icon={<LockOutlined />} onClick={() => handleLock(record._id)} />
-                    </Tooltip>
-                    <Tooltip title="Mở khóa">
-                        <Button type="text" icon={<UnlockOutlined style={{ color: 'green' }} />} onClick={() => handleUnlock(record._id)} />
-                    </Tooltip>
+                    {!isCurrentYearExpired && (
+                        <>
+                            <Tooltip title="Chỉnh sửa">
+                                <Button type="text" icon={<EditOutlined style={{ color: '#1890ff' }} />} onClick={() => navigate(`${constants.APP_PREFIX}/classes/update/${record._id}`)} />
+                            </Tooltip>
+                            <Tooltip title="Khóa lớp">
+                                {canLock && (<Button type="text" danger icon={<LockOutlined />} onClick={() => handleLock(record._id)} />)}
+                            </Tooltip>
+                            <Tooltip title="Mở khóa">
+                                {canUnLock && (<Button type="text" icon={<UnlockOutlined style={{ color: 'green' }} />} onClick={() => handleUnlock(record._id)} />)}
+                            </Tooltip>
+                        </>
+                    )}
                 </Space>
             ),
         },
@@ -168,14 +192,23 @@ function ClassManagement() {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 style={{ width: 200 }}
                             />
-                            <Button
+                            {canSyncData && (<Button
                                 icon={<SyncOutlined />}
                                 onClick={handleSync}
                                 loading={syncLoading}
+                                disabled={isCurrentYearExpired}
                             >
                                 Đồng bộ dữ liệu
-                            </Button>
-                            <Button onClick={() => navigate(`${constants.APP_PREFIX}/classes/create`)} type="primary" icon={<PlusOutlined />}>Tạo mới</Button>
+                            </Button>)}
+                            {canCreate && (<Button
+                                onClick={() => navigate(`${constants.APP_PREFIX}/classes/create`)}
+                                type="primary"
+                                icon={<PlusOutlined />}
+                                disabled={isCurrentYearExpired}
+                            >
+                                Tạo mới
+                            </Button>)}
+
                         </Space>
                     </Col>
                 </Row>
