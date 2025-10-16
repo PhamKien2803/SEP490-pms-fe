@@ -52,6 +52,7 @@ import {
 import {
   CreateMenuParams,
   ListFoodParams,
+  MenuDetail,
   MenuListParams,
   MenuListResponse,
   MenuRecord,
@@ -412,8 +413,8 @@ export const menuApis = {
     return response.data;
   },
 
-  getMenuById: async (menuId: string): Promise<MenuRecord> => {
-    const response = await axiosAuth.get<MenuRecord>(
+  getMenuById: async (menuId: string): Promise<MenuDetail> => {
+    const response = await axiosAuth.get<MenuDetail>(
       apiEndPoint.GET_MENU_BY_ID(menuId)
     );
     return response.data;
