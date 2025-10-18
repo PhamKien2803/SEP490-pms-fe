@@ -29,3 +29,34 @@ body {
 .ant-picker-disabled {
   color: rgba(0, 0, 0, 0.7) !important;
 }
+
+/* --- Tùy chỉnh Scrollbar cho toàn bộ trang --- */
+
+/* Áp dụng cho Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #d6e4ff transparent;
+}
+
+/* Áp dụng cho các trình duyệt WebKit (Chrome, Safari, Edge) */
+
+/* Toàn bộ thanh cuộn */
+body::-webkit-scrollbar {
+  width: 6px; /* Có thể chỉnh độ rộng lớn hơn một chút so với sidebar */
+}
+
+/* Phần nền của thanh cuộn (track) */
+body::-webkit-scrollbar-track {
+  background: transparent; /* Ẩn phần nền đi */
+}
+
+/* Phần tay cầm có thể kéo (thumb) */
+body::-webkit-scrollbar-thumb {
+  background-color: #d6e4ff; /* Màu xanh rất nhẹ */
+  border-radius: 10px; /* Bo tròn các góc */
+}
+
+/* Hiệu ứng khi di chuột qua tay cầm */
+body::-webkit-scrollbar-thumb:hover {
+  background-color: #eef5ff; /* Nhạt hơn khi hover */
+}

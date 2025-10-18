@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Table, Input, Button, Space, Typography, Row, Col, Tooltip, Avatar, Tag } from 'antd';
-import { SearchOutlined, UserOutlined, CrownOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { SearchOutlined, UserOutlined, CrownOutlined, EditOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { toast } from 'react-toastify';
 import { accountsApis } from '../../services/apiServices';
@@ -33,7 +33,7 @@ const AccountManagement: React.FC = () => {
             const response = await accountsApis.getAccountList({ page: 1, limit: 1000 });
             setAllAccounts(response.data);
         } catch (error) {
-            toast.error('Tải danh sách tài khoản thất bại.');
+            toast.info('Hiện chưa có tài khoản nào.');
         } finally {
             setLoading(false);
         }
@@ -173,6 +173,11 @@ const AccountManagement: React.FC = () => {
                 </Col>
                 <Col>
                     <Space>
+                        <Tooltip title="Làm mới danh sách">
+                            <Button icon={<ReloadOutlined />}
+                                onClick={fetchAllAccounts}
+                                loading={loading}>Làm mới danh sách</Button>
+                        </Tooltip>
                         <Input
                             placeholder="Tìm kiếm theo email, tên..."
                             prefix={<SearchOutlined />}

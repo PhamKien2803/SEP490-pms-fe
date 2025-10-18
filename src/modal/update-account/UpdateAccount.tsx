@@ -33,7 +33,7 @@ const UpdateAccount: React.FC<UpdateAccountProps> = ({ open, loading, initialDat
                 const rolesRes = await accountsApis.getRoleNameList();
                 setRoles(rolesRes);
             } catch (error) {
-                toast.error('Không thể tải danh sách vai trò.');
+                typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách vai trò.');
             }
         };
         fetchRoles();

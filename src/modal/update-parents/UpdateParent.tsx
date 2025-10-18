@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-// THAY ĐỔI: Import thêm Row và Col
 import { Modal, Form, Input, Button, DatePicker, Radio, Row, Col } from 'antd';
 import { UpdateParentDto, Parent } from '../../types/auth';
 import { toast } from 'react-toastify';
@@ -14,7 +13,6 @@ export interface UpdateParentFormValues {
     gender?: "male" | "female" | "other";
     students?: string[];
     address?: string;
-    // THAY ĐỔI: Bổ sung các trường còn thiếu
     nation?: string;
     religion?: string;
     updatedBy: string;
@@ -52,10 +50,9 @@ const UpdateParent: React.FC<UpdateParentProps> = ({ open, loading, initialData,
             email: values.email,
             gender: values.gender,
             address: values.address,
-            // THAY ĐỔI: Thêm các trường mới vào object submit
             nation: values.nation,
             religion: values.religion,
-            updatedBy: "" // sẽ gán trong parentManagement
+            updatedBy: ""
         };
         onSubmit(finalValues);
     };
@@ -79,7 +76,7 @@ const UpdateParent: React.FC<UpdateParentProps> = ({ open, loading, initialData,
                 open={open}
                 onCancel={handleCancel}
                 confirmLoading={loading}
-                width={800} // Tăng chiều rộng để hiển thị 2 cột
+                width={800}
                 destroyOnClose
                 footer={[
                     <Button key="back" onClick={handleCancel} disabled={loading}>
@@ -96,9 +93,7 @@ const UpdateParent: React.FC<UpdateParentProps> = ({ open, loading, initialData,
                     onFinish={handleFinish}
                     onFinishFailed={handleFinishFailed}
                 >
-                    {/* THAY ĐỔI: Sử dụng Row và Col để chia layout */}
                     <Row gutter={24}>
-                        {/* Cột trái */}
                         <Col span={12}>
                             <Form.Item
                                 name="fullName"
@@ -113,7 +108,6 @@ const UpdateParent: React.FC<UpdateParentProps> = ({ open, loading, initialData,
                                 label="Ngày sinh"
                                 rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}
                             >
-                                {/* THAY ĐỔI: Cập nhật format ngày cho thân thiện */}
                                 <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} />
                             </Form.Item>
 
@@ -134,9 +128,8 @@ const UpdateParent: React.FC<UpdateParentProps> = ({ open, loading, initialData,
                             </Form.Item>
                         </Col>
 
-                        {/* Cột phải */}
                         <Col span={12}>
-                             <Form.Item
+                            <Form.Item
                                 name="IDCard"
                                 label="CMND/CCCD"
                             >
@@ -163,8 +156,7 @@ const UpdateParent: React.FC<UpdateParentProps> = ({ open, loading, initialData,
                                 <Input placeholder="e.g., Không" />
                             </Form.Item>
                         </Col>
-                        
-                        {/* Hàng cho địa chỉ */}
+
                         <Col span={24}>
                             <Form.Item
                                 name="address"

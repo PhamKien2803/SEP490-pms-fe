@@ -7,7 +7,7 @@ import PMSHome from '../pages/homepage/PMShome';
 import Login from '../pages/login/Login';
 import ForgotPassword from '../pages/forgot-password/ForgotPassword';
 import UnauthorizedPage from '../pages/not-found/UnauthorizedPage';
-import Enrollment from '../pages/enrollment/Enrollment';
+import Enrollment from '../pages/enrollment-management/enrollment/Enrollment';
 
 const router = createBrowserRouter([
     {

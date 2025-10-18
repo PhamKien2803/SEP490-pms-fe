@@ -54,10 +54,6 @@ const ViewParentDetails: React.FC<ViewParentDetailsProps> = ({
         <Descriptions.Item label="Giới tính">
           {formatGender(parentData.gender)}
         </Descriptions.Item>
-        <Descriptions.Item label="Ngày sinh">
-          {formatDate(parentData.dob)}
-        </Descriptions.Item>
-
         <Descriptions.Item label="Số điện thoại">
           {parentData.phoneNumber}
         </Descriptions.Item>

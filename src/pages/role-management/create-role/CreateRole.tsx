@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, Space, Typography, Card, Select, Tooltip, Modal, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { ArrowLeftOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { rolesApis } from '../../services/apiServices';
-import { CreateRoleDto } from '../../types/role';
-import { RoleFunctionItem, RoleModuleItem } from '../../types/role';
+import { useCurrentUser } from '../../../hooks/useCurrentUser';
+import { CreateRoleDto, RoleFunctionItem, RoleModuleItem } from '../../../types/role';
+import { rolesApis } from '../../../services/apiServices';
+import { constants } from '../../../constants';
+
 
 const hardcodedActions = [
     { label: 'Xem', value: 'view' },
@@ -40,7 +41,7 @@ const CreateRole: React.FC = () => {
                 setFunctions(functionsRes);
                 setModules(modulesRes);
             } catch (error) {
-                toast.error('Không thể tải dữ liệu cho các lựa chọn.');
+                typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải dữ liệu cho các dropdown.');
             }
         };
         fetchDataForDropdowns();
@@ -102,10 +103,10 @@ const CreateRole: React.FC = () => {
         try {
             await rolesApis.createRole(payload);
             toast.success('Tạo vai trò thành công!');
-            navigate('/pms/roles');
+            navigate(`${constants.APP_PREFIX}/roles`);
             window.location.reload();
         } catch (error) {
-            toast.error('Tạo vai trò thất bại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Tạo vai trò thất bại. Vui lòng thử lại!');
         } finally {
             setLoading(false);
         }

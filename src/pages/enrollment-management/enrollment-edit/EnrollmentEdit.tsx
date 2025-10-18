@@ -2,13 +2,14 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Form, Input, Button, Space, Typography, Card, Select, DatePicker, Row, Col, Tooltip, Spin, Flex, Upload, Popconfirm, Modal } from 'antd';
 import { ArrowLeftOutlined, CheckCircleOutlined, CloseCircleOutlined, UploadOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
 import type { RcFile, UploadFile } from 'antd/es/upload/interface';
-import { useCurrentUser } from '../../hooks/useCurrentUser';
+import { useCurrentUser } from '../../../hooks/useCurrentUser';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { enrollmentApis } from '../../services/apiServices';
-import { ApproveEnrollmentDto, EnrollmentListItem } from '../../types/enrollment';
+import { enrollmentApis } from '../../../services/apiServices';
+import { ApproveEnrollmentDto, EnrollmentListItem } from '../../../types/enrollment';
 import dayjs from 'dayjs';
 import TextArea from 'antd/es/input/TextArea';
+import { constants } from '../../../constants';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -71,7 +72,7 @@ const EnrollmentEdit: React.FC = () => {
                 setHealthCertFile([]);
             }
         } catch (error) {
-            toast.error("Không thể tải dữ liệu đơn tuyển sinh.");
+            typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải chi tiết đơn đăng ký.');
             navigate(-1);
         } finally {
             setPageLoading(false);
@@ -93,7 +94,7 @@ const EnrollmentEdit: React.FC = () => {
             setIsEditing(false);
             fetchData();
         } catch (formError) {
-            toast.error('Vui lòng điền đầy đủ các thông tin bắt buộc.');
+            typeof formError === "string" ? toast.warn(formError) : toast.error('Dữ liệu chưa hợp lệ để cập nhật. Vui lòng kiểm tra lại.');
         } finally {
             setIsUpdating(false);
         }
@@ -106,7 +107,7 @@ const EnrollmentEdit: React.FC = () => {
             const fileURL = URL.createObjectURL(blob);
             window.open(fileURL, '_blank');
         } catch (error) {
-            toast.error("Không thể xem file PDF.");
+            typeof error === "string" ? toast.warn(error) : toast.error('Không thể mở file PDF.');
         }
     }, []);
 
@@ -122,9 +123,9 @@ const EnrollmentEdit: React.FC = () => {
             const payload = { _id: id, ...values, studentDob: dayjs(values.studentDob).toISOString(), birthCertId, healthCertId, approvedBy: user.email };
             await enrollmentApis.approveEnrollment(payload as ApproveEnrollmentDto);
             toast.success('Duyệt đơn đăng ký thành công!');
-            navigate('/pms/enrollments');
+            navigate(`${constants.APP_PREFIX}/enrollments`);
         } catch (formError) {
-            toast.error('Dữ liệu chưa hợp lệ để duyệt. Vui lòng kiểm tra lại.');
+            typeof formError === "string" ? toast.warn(formError) : toast.error('Dữ liệu chưa hợp lệ để duyệt. Vui lòng kiểm tra lại.');
         } finally {
             setIsApproving(false);
         }
@@ -140,9 +141,9 @@ const EnrollmentEdit: React.FC = () => {
             await enrollmentApis.rejectEnrollment(id, { _id: id, reason: rejectReason });
             toast.success('Đã từ chối đơn đăng ký thành công.');
             setIsRejectModalVisible(false);
-            navigate('/pms/enrollments');
+            navigate(`${constants.APP_PREFIX}/enrollments`);
         } catch (error) {
-            toast.error('Có lỗi xảy ra khi từ chối đơn.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Từ chối đơn đăng ký thất bại. Vui lòng thử lại!');
         } finally {
             setIsRejecting(false);
         }
@@ -190,7 +191,7 @@ const EnrollmentEdit: React.FC = () => {
             }
             toast.success(`Tải lên ${type === 'birth' ? 'giấy khai sinh' : 'giấy khám sức khỏe'} thành công!`);
         } catch (error) {
-            toast.error('Tải file thất bại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Tải file thất bại. Vui lòng thử lại!');
         }
     }, []);
 

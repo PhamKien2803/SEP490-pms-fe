@@ -24,6 +24,7 @@ import { logout } from "../../redux/authSlice";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { LocalStorageKey } from "../../types/local-storage";
 import ErrorBoundary from "../../components/error-boundary/Error";
+import './Dashboard.css';
 
 const { Header, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -92,6 +93,10 @@ const Dashboard: React.FC = () => {
           style={{
             backgroundColor: "#fff",
             borderRight: "1px solid #f0f0f0",
+            position: 'sticky',
+            top: 0,
+            height: '95vh',
+            overflow: 'auto',
           }}
         >
           <div
@@ -108,6 +113,7 @@ const Dashboard: React.FC = () => {
           >
             {collapsed ? "PMS" : "PMS"}
           </div>
+
           <Menu
             mode="inline"
             theme="light"
@@ -184,14 +190,13 @@ const Dashboard: React.FC = () => {
         <Content
           style={{
             backgroundColor: "#f9fafb",
-            padding: 24,
-            height: "calc(100vh - 64px)",
-            overflowY: "auto",
           }}
         >
-          <ErrorBoundary>
-            <Outlet />
-          </ErrorBoundary>
+          <div style={{ padding: 24 }}>
+            <ErrorBoundary>
+              <Outlet />
+            </ErrorBoundary>
+          </div>
         </Content>
       </Layout>
     </Layout>

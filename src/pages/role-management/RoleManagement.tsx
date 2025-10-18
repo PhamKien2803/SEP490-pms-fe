@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Table, Input, Button, Space, Typography, Row, Col, Card, Tooltip } from 'antd';
-import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -8,6 +8,7 @@ import { rolesApis } from '../../services/apiServices';
 import { usePagePermission } from '../../hooks/usePagePermission';
 import { RoleListItem } from '../../types/role';
 import DeleteModal from '../../modal/delete-modal/DeleteModal';
+import { constants } from './../../constants/index';
 
 const RoleManagement: React.FC = () => {
     const navigate = useNavigate();
@@ -34,7 +35,8 @@ const RoleManagement: React.FC = () => {
             const response = await rolesApis.getRolesList({ page: 1, limit: 1000 });
             setAllRoles(response.data);
         } catch (error) {
-            toast.error('Tải danh sách vai trò thất bại.');
+            // typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách vai trò.');
+            toast.info('Hiện chưa có vai trò nào. Vui lòng tạo mới!');
         } finally {
             setLoading(false);
         }
@@ -82,7 +84,7 @@ const RoleManagement: React.FC = () => {
             setIsDeleteModalOpen(false);
             fetchAllRoles();
         } catch (error) {
-            toast.error('Xóa vai trò thất bại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Xóa vai trò thất bại. Vui lòng thử lại!');
         } finally {
             setIsDeleting(false);
             setDeletingId(null);
@@ -149,6 +151,11 @@ const RoleManagement: React.FC = () => {
             </Col>
             <Col>
                 <Space>
+                    <Tooltip title="Làm mới danh sách">
+                        <Button icon={<ReloadOutlined />}
+                            onClick={fetchAllRoles}
+                            loading={loading}>Làm mới danh sách</Button>
+                    </Tooltip>
                     <Input
                         placeholder="Tìm kiếm vai trò..."
                         style={{ width: 250 }}
@@ -158,7 +165,7 @@ const RoleManagement: React.FC = () => {
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                     {canCreate && (
-                        <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/pms/roles/create')}>
+                        <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate(`${constants.APP_PREFIX}/roles/create`)}>
                             Tạo mới
                         </Button>
                     )}

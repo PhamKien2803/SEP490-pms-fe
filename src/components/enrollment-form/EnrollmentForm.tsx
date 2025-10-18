@@ -12,6 +12,8 @@ import {
     Col,
     Divider,
     Modal,
+    Checkbox,
+    Alert,
 } from 'antd';
 import {
     UserOutlined,
@@ -25,40 +27,66 @@ import dayjs from 'dayjs';
 import { enrollmentApis } from '../../services/apiServices';
 import { RegisterEnrollmentDto } from '../../types/enrollment';
 
-const { Title, Paragraph } = Typography;
+const { Title, Paragraph, Text } = Typography;
 const { Option } = Select;
 
 const EnrollmentForm: React.FC = () => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
-    const [formData, setFormData] = useState<RegisterEnrollmentDto | null>(null);
+    const [formData, setFormData] = useState<Partial<RegisterEnrollmentDto> | null>(null);
+    const [isExistingParent, setIsExistingParent] = useState(false);
 
     const onFinish = (values: any) => {
-        const payload: RegisterEnrollmentDto = {
-            ...values,
-            studentDob: values.studentDob ? dayjs(values.studentDob).toISOString() : '',
-        };
-        setFormData(payload);
+        let payload: Partial<RegisterEnrollmentDto>;
+        const { isExistingParentCheckbox, ...restValues } = values;
+
+        if (isExistingParent) {
+            payload = {
+                isCheck: true,
+                studentName: values.studentName,
+                studentDob: values.studentDob ? dayjs(values.studentDob).toISOString() : '',
+                studentGender: values.studentGender,
+                studentIdCard: values.studentIdCard,
+                studentNation: values.studentNation,
+                studentReligion: values.studentReligion,
+                address: values.address,
+                fatherIdCard: values.fatherIdCard,
+                motherIdCard: values.motherIdCard,
+            };
+        } else {
+            payload = {
+                ...restValues,
+                isCheck: false,
+                studentDob: values.studentDob ? dayjs(values.studentDob).toISOString() : '',
+            };
+        }
+
+        setFormData(payload as RegisterEnrollmentDto);
         setIsConfirmModalVisible(true);
     };
 
     const handleConfirmSubmit = async () => {
         if (!formData) return;
-
         setLoading(true);
         setIsConfirmModalVisible(false);
-
         try {
-            await enrollmentApis.registerEnrollment(formData);
+            await enrollmentApis.registerEnrollment(formData as RegisterEnrollmentDto);
             toast.success('Gửi đơn đăng ký thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.');
             form.resetFields();
+            setIsExistingParent(false);
         } catch (error) {
-            toast.error('Gửi đơn đăng ký thất bại. Vui lòng thử lại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Có lỗi xảy ra. Vui lòng thử lại!');
         } finally {
             setLoading(false);
             setFormData(null);
         }
+    };
+
+    const handleCheckboxChange = (e: any) => {
+        const checked = e.target.checked;
+        setIsExistingParent(checked);
+        form.resetFields(['fatherName', 'fatherJob', 'fatherPhoneNumber', 'fatherEmail', 'fatherIdCard', 'motherName', 'motherJob', 'motherPhoneNumber', 'motherEmail', 'motherIdCard']);
     };
 
     const phoneValidationRule = {
@@ -72,7 +100,7 @@ const EnrollmentForm: React.FC = () => {
     };
 
     const allowOnlyNumbers = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (!/[0-9]/.test(event.key) && event.key !== 'Backspace' && event.key !== 'Tab' && event.key !== 'ArrowLeft' && event.key !== 'ArrowRight' && event.key !== 'Delete') {
+        if (!/[0-9]/.test(event.key) && !['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete'].includes(event.key) && !event.ctrlKey) {
             event.preventDefault();
         }
     };
@@ -85,6 +113,19 @@ const EnrollmentForm: React.FC = () => {
                     Vui lòng điền đầy đủ và chính xác các thông tin dưới đây. Các mục có dấu <span style={{ color: 'red' }}>*</span> là bắt buộc.
                 </Paragraph>
                 <Form form={form} layout="vertical" onFinish={onFinish}>
+                    <Form.Item name="isExistingParentCheckbox" valuePropName="checked">
+                        <Alert
+                            type="info"
+                            message={
+                                <Checkbox onChange={handleCheckboxChange}>
+                                    <Text strong style={{ color: '#006d75' }}>
+                                        Phụ huynh đã có con theo học tại trường? (Chọn mục này để đăng ký nhanh)
+                                    </Text>
+                                </Checkbox>
+                            }
+                            style={{ marginBottom: '24px' }}
+                        />
+                    </Form.Item>
 
                     <Divider orientation="left"><UserOutlined /> Thông tin học sinh</Divider>
                     <Row gutter={24}>
@@ -105,25 +146,36 @@ const EnrollmentForm: React.FC = () => {
 
                     <Divider orientation="left"><ManOutlined /> Thông tin Cha</Divider>
                     <Row gutter={24}>
-                        <Col xs={24} sm={12}><Form.Item name="fatherName" label="Họ và tên Cha" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}><Input placeholder="Nguyễn Văn B" /></Form.Item></Col>
-                        <Col xs={24} sm={12}><Form.Item name="fatherJob" label="Nghề nghiệp"><Input placeholder="Kỹ sư" /></Form.Item></Col>
-                        <Col xs={24} sm={12}><Form.Item name="fatherPhoneNumber" label="Số điện thoại Cha" rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<PhoneOutlined />} placeholder="09xxxxxxxx" /></Form.Item></Col>
-                        <Col xs={24} sm={12}><Form.Item name="fatherEmail" label="Email Cha" rules={[{ type: 'email', message: "Email không hợp lệ!" }]}><Input placeholder="example@email.com" /></Form.Item></Col>
+                        {!isExistingParent && (
+                            <>
+                                <Col xs={24} sm={12}><Form.Item name="fatherName" label="Họ và tên Cha" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}><Input placeholder="Nguyễn Văn B" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="fatherJob" label="Nghề nghiệp"><Input placeholder="Kỹ sư" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="fatherPhoneNumber" label="Số điện thoại Cha" rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<PhoneOutlined />} placeholder="09xxxxxxxx" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="fatherEmail" label="Email Cha" rules={[{ type: 'email', message: "Email không hợp lệ!" }]}><Input placeholder="example@email.com" /></Form.Item></Col>
+                            </>
+                        )}
                         <Col xs={24} sm={12}><Form.Item name="fatherIdCard" label="CCCD Cha" rules={[{ required: true, message: "Vui lòng nhập CCCD!" }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<IdcardOutlined />} placeholder="012345678901" /></Form.Item></Col>
                     </Row>
 
                     <Divider orientation="left"><WomanOutlined /> Thông tin Mẹ</Divider>
                     <Row gutter={24}>
-                        <Col xs={24} sm={12}><Form.Item name="motherName" label="Họ và tên Mẹ" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}><Input placeholder="Lê Thị C" /></Form.Item></Col>
-                        <Col xs={24} sm={12}><Form.Item name="motherJob" label="Nghề nghiệp"><Input placeholder="Giáo viên" /></Form.Item></Col>
-                        <Col xs={24} sm={12}><Form.Item name="motherPhoneNumber" label="Số điện thoại Mẹ" rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<PhoneOutlined />} placeholder="09xxxxxxxx" /></Form.Item></Col>
-                        <Col xs={24} sm={12}><Form.Item name="motherEmail" label="Email Mẹ" rules={[{ type: 'email', message: "Email không hợp lệ!" }]}><Input placeholder="example@email.com" /></Form.Item></Col>
+                        {!isExistingParent && (
+                            <>
+                                <Col xs={24} sm={12}><Form.Item name="motherName" label="Họ và tên Mẹ" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}><Input placeholder="Lê Thị C" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="motherJob" label="Nghề nghiệp"><Input placeholder="Giáo viên" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="motherPhoneNumber" label="Số điện thoại Mẹ" rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<PhoneOutlined />} placeholder="09xxxxxxxx" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="motherEmail" label="Email Mẹ" rules={[{ type: 'email', message: "Email không hợp lệ!" }]}><Input placeholder="example@email.com" /></Form.Item></Col>
+                            </>
+                        )}
                         <Col xs={24} sm={12}><Form.Item name="motherIdCard" label="CCCD Mẹ" rules={[{ required: true, message: "Vui lòng nhập CCCD!" }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<IdcardOutlined />} placeholder="012345678901" /></Form.Item></Col>
                     </Row>
 
                     <Form.Item style={{ marginTop: 32, textAlign: 'right' }}>
                         <Space>
-                            <Button onClick={() => form.resetFields()}>Xóa hết</Button>
+                            <Button onClick={() => {
+                                form.resetFields();
+                                setIsExistingParent(false);
+                            }}>Xóa hết</Button>
                             <Button type="primary" htmlType="submit" loading={loading}>
                                 Gửi đơn đăng ký
                             </Button>
@@ -148,4 +200,3 @@ const EnrollmentForm: React.FC = () => {
 }
 
 export default EnrollmentForm;
-

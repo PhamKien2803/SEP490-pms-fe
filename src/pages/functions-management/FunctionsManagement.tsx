@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Table, Input, Button, Space, Typography, Row, Col, Card, Tooltip } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { CreateFunctionDto, Functions, UpdateFunctionDto } from '../../types/auth';
 import { functionsApis } from '../../services/apiServices';
@@ -55,7 +55,8 @@ const FunctionsManagement: React.FC = () => {
                 pageSize: response.page.limit,
             }));
         } catch (error) {
-            toast.error('Tải dữ liệu chức năng thất bại.');
+            // typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách chức năng.');
+            toast.info('Hiện chưa có chức năng nào. Vui lòng tạo mới!');
         } finally {
             setLoading(false);
         }
@@ -100,7 +101,7 @@ const FunctionsManagement: React.FC = () => {
                 fetchFunctions({ page: 1, limit: pagination.pageSize! });
             }
         } catch (error) {
-            toast.error('Tạo chức năng thất bại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Tạo chức năng thất bại. Vui lòng thử lại!');
         } finally {
             setIsSubmitting(false);
         }
@@ -125,7 +126,7 @@ const FunctionsManagement: React.FC = () => {
             setIsUpdateModalOpen(false);
             fetchFunctions({ page: pagination.current!, limit: pagination.pageSize! });
         } catch (error) {
-            toast.error('Cập nhật chức năng thất bại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Cập nhật chức năng thất bại. Vui lòng thử lại!');
         } finally {
             setIsUpdating(false);
         }
@@ -150,7 +151,7 @@ const FunctionsManagement: React.FC = () => {
                 fetchFunctions({ page: pagination.current!, limit: pagination.pageSize! });
             }
         } catch (error) {
-            toast.error('Xóa chức năng thất bại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Xóa chức năng thất bại. Vui lòng thử lại!');
         } finally {
             setIsDeleting(false);
             setDeletingId(null);
@@ -200,6 +201,11 @@ const FunctionsManagement: React.FC = () => {
             </Col>
             <Col>
                 <Space>
+                    <Tooltip title="Làm mới danh sách">
+                        <Button icon={<ReloadOutlined />}
+                            onClick={() => fetchFunctions({ page: pagination.current!, limit: pagination.pageSize! })}
+                            loading={loading}>Làm mới danh sách</Button>
+                    </Tooltip>
                     <Input.Search
                         placeholder="Tìm kiếm chức năng..."
                         style={{ width: 250 }}
