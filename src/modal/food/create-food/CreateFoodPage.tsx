@@ -13,6 +13,8 @@ import {
   Tooltip,
   Alert,
   Divider,
+  Flex,
+  Spin,
 } from "antd";
 import {
   SaveOutlined,
@@ -131,7 +133,7 @@ const CreateFoodPage: React.FC = () => {
     } catch (error: any) {
       console.error("Lỗi Tính Calo AI:", error);
       const errorMessage =
-        error?.response?.data?.message ||
+        error ||
         "Tính Calo AI thất bại. Vui lòng kiểm tra API hoặc tên nguyên liệu.";
       toast.error(errorMessage);
       return null;
@@ -200,8 +202,7 @@ const CreateFoodPage: React.FC = () => {
     } catch (error: any) {
       console.error("Lỗi Tạo món ăn:", error);
       const errorMessage =
-        error?.response?.data?.message ||
-        "Tạo món ăn thất bại. Vui lòng kiểm tra dữ liệu và thử lại.";
+        error || "Tạo món ăn thất bại. Vui lòng kiểm tra dữ liệu và thử lại.";
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -240,6 +241,18 @@ const CreateFoodPage: React.FC = () => {
     </Form.Item>
   );
 
+  if (loading || isAILoading) {
+    return (
+      <Flex
+        align="center"
+        justify="center"
+        style={{ minHeight: "calc(100vh - 150px)" }}
+      >
+        <Spin size="large" />
+      </Flex>
+    );
+  }
+
   return (
     <div style={{ padding: "16px 24px" }}>
       <Form
@@ -274,7 +287,7 @@ const CreateFoodPage: React.FC = () => {
               style={{ marginBottom: 20 }}
             >
               <Col>
-                <Title level={3} style={{ margin: 0 }}>
+                <Title level={3} style={{ margin: 0, paddingTop: "15px" }}>
                   <ArrowLeftOutlined
                     onClick={() => navigate(`${constants.APP_PREFIX}/foods`)}
                     style={{ marginRight: 16, cursor: "pointer" }}
@@ -303,7 +316,7 @@ const CreateFoodPage: React.FC = () => {
                   <Button
                     icon={<CalculatorOutlined />}
                     type="default"
-                    onClick={handleCalculateAI} 
+                    onClick={handleCalculateAI}
                     loading={isAILoading}
                     disabled={loading}
                   >
@@ -326,7 +339,7 @@ const CreateFoodPage: React.FC = () => {
                   <Button
                     type="primary"
                     icon={<SaveOutlined />}
-                    onClick={() => form.submit()} 
+                    onClick={() => form.submit()}
                     loading={loading}
                     disabled={isAILoading}
                   >

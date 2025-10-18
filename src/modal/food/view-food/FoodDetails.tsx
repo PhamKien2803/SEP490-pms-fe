@@ -65,6 +65,7 @@ const FoodDetailPage: React.FC = () => {
     const location = useLocation(); 
 
     const foodDetailFromState = location.state?.foodDetail as FoodRecord | undefined;
+    console.log("foodDetailFromState",foodDetailFromState)
     
     const [foodDetail, setFoodDetail] = useState<FoodRecord | null>(foodDetailFromState || null);
     const [loading, setLoading] = useState(!foodDetailFromState);
@@ -122,7 +123,7 @@ const FoodDetailPage: React.FC = () => {
             key: "calories",
             width: 100,
             align: "right" as const,
-            render: (text: number) => <Text strong style={{ color: '#fa541c' }}>{text.toFixed(2)}</Text>,
+            render: (text: number) => <Text strong style={{ color: '#fa541c' }}>{text?.toFixed(2)}</Text>,
         },
         {
             title: "Protein (g)",
@@ -130,7 +131,7 @@ const FoodDetailPage: React.FC = () => {
             key: "protein",
             width: 90,
             align: "right" as const,
-            render: (text: number) => <Text strong style={{ color: '#722ed1' }}>{text.toFixed(2)}</Text>,
+            render: (text: number) => <Text strong style={{ color: '#722ed1' }}>{text?.toFixed(2)}</Text>,
         },
         {
             title: "Lipid (g)",
@@ -138,7 +139,7 @@ const FoodDetailPage: React.FC = () => {
             key: "lipid",
             width: 90,
             align: "right" as const,
-            render: (text: number) => <Text strong style={{ color: '#fadb14' }}>{text.toFixed(2)}</Text>,
+            render: (text: number) => <Text strong style={{ color: '#fadb14' }}>{text?.toFixed(2)}</Text>,
         },
         {
             title: "Carb (g)",
@@ -146,7 +147,7 @@ const FoodDetailPage: React.FC = () => {
             key: "carb",
             width: 90,
             align: "right" as const,
-            render: (text: number) => <Text strong style={{ color: '#52c41a' }}>{text.toFixed(2)}</Text>,
+            render: (text: number) => <Text strong style={{ color: '#52c41a' }}>{text?.toFixed(2)}</Text>,
         },
     ]), []);
     
