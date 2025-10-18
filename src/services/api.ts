@@ -70,7 +70,11 @@ export const apiEndPoint = {
   GET_AVAILABEL_CLASS_STUDENT: "/classes/available-classStudent",
   GET_AVAILABEL_CLASS_TEACHER: "/classes/available-classTeacher",
   STUDENT_CHANGE_CLASS: "/classes/studentChangeClass",
-  TEACHER_CHANGE_CLASS: "/classes/teacherChangeClass"
+  TEACHER_CHANGE_CLASS: "/classes/teacherChangeClass",
+  GET_LIST_ROOM: "/rooms/list",
+  CREATE_ROOM: "/rooms/create",
+  UPDATE_ROOM: (id: string) => `/rooms/update/${id}`,
+  DELETE_ROOM: (id: string) => `/rooms/delete/${id}`,
 };
 
 export const apiConfig = {
