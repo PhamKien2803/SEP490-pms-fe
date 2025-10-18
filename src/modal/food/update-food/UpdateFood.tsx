@@ -417,7 +417,7 @@ const UpdateFoodPage: React.FC = () => {
           <Form.List name="ingredients">
             {(fields, { add, remove }) => (
               <>
-                {fields.map(({ key, name, fieldKey, ...restField }, index) => {
+                {fields.map(({ key, name, fieldKey, ...restField }, _) => {
                   const ingredient =
                     form.getFieldValue(["ingredients", name]) || {};
                   return (

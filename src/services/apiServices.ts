@@ -55,7 +55,6 @@ import {
   MenuDetail,
   MenuListParams,
   MenuListResponse,
-  MenuRecord,
 } from "../types/menu-management";
 import {
   CreateSchoolYearDto,
