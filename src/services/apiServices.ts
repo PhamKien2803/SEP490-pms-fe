@@ -73,6 +73,7 @@ import {
   UpdateFoodParams,
 } from "../types/food-management";
 import { AvailableClassForStudent, AvailableClassForTeacher, AvailableRoom, ClassDetail, ClassListResponse, CreateClassDto, StudentChangeClassDto, StudentInClass, TeacherChangeClassDto, TeacherInClass, UpdateClassDto } from "../types/class";
+import { CreateRoomData, RoomListResponse, RoomRecord, UpdateRoomData } from "../types/room-management";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -621,5 +622,41 @@ export const foodApis = {
       apiEndPoint.CALCULATE_TOTAL_CALO_AI
     );
     return response.data;
+  },
+};
+
+export const roomApis = {
+  getListRoom: async (params: {
+    page: number;
+    limit: number;
+  }): Promise<RoomListResponse> => {
+    const response = await axiosAuth.get<RoomListResponse>(
+      apiEndPoint.GET_LIST_ROOM,
+      { params }
+    );
+    return response.data;
+  },
+
+  createRoom: async (body: CreateRoomData): Promise<RoomRecord> => {
+    const response = await axiosAuth.post<RoomRecord>(
+      apiEndPoint.CREATE_ROOM,
+      body
+    );
+    return response.data;
+  },
+
+  updateRoom: async (
+    id: string,
+    body: UpdateRoomData
+  ): Promise<RoomRecord> => {
+    const response = await axiosAuth.put<RoomRecord>(
+      apiEndPoint.UPDATE_ROOM(id),
+      body
+    );
+    return response.data;
+  },
+
+  deleteRoom: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_STAFF(id));
   },
 };

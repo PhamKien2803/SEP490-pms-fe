@@ -32,6 +32,7 @@ import FoodDetailPage from "../../modal/food/view-food/FoodDetails";
 import UpdateFoodPage from "../../modal/food/update-food/UpdateFood";
 import CreateFoodPage from "../../modal/food/create-food/CreateFoodPage";
 import CurriculumManagement from "../../pages/curriculum-management/CurriculumManagement";
+import RoomManagement from "../../pages/room-management/RoomManagement";
 
 export const routes: RouteObject[] = [
   {
@@ -311,6 +312,33 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <FoodManagement />,
+              },
+              {
+                path: "view/:id",
+                element: <FoodDetailPage />,
+              },
+              {
+                path: "edit/:id",
+                element: <UpdateFoodPage />,
+              },
+              {
+                path: "create",
+                element: <CreateFoodPage />,
+              },
+            ],
+          },
+          {
+            path: "rooms",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/rooms`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <RoomManagement />,
               },
               {
                 path: "view/:id",
