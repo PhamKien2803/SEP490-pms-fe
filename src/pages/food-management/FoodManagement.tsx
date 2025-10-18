@@ -29,11 +29,10 @@ import { useNavigate } from "react-router-dom";
 import ModalConfirm from "../../modal/common/ModalConfirm/ModalConfirm";
 import { constants } from "../../constants";
 
-import { foodApis } from "../../services/apiServices"; 
+import { foodApis } from "../../services/apiServices";
 import type { ColumnsType } from "antd/es/table";
-import { FoodListParams, FoodListResponse, FoodRecord } from "../../types/food-management"; 
+import { FoodListParams, FoodListResponse, FoodRecord } from "../../types/food-management";
 
-// ... (Các định nghĩa constants, interfaces Pagination, AGE_GROUPS giữ nguyên)
 const { Title, Text } = Typography;
 const { Option } = Select;
 const { Search } = Input;
@@ -72,10 +71,9 @@ const FoodManagement: React.FC = () => {
         total: 0,
     });
 
-    // 🌟 Giữ lại state cho Checkbox chọn hàng (dù không dùng để tính calo)
-    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]); 
-    // -----------------------------------------------------------------------
-    
+    // Giữ lại state cho Checkbox chọn hàng (dù không dùng để tính calo)
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
     const [selectedAgeGroup, setSelectedAgeGroup] = useState<string>("");
     const [searchKeyword, setSearchKeyword] = useState<string>("");
     const [selectedDateRange, setSelectedDateRange] = useState<
@@ -86,21 +84,21 @@ const FoodManagement: React.FC = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
-    
-    // 🌟 State cho API kích hoạt tính calo chung (API GET không tham số)
-    const [isAITriggering, setIsAITriggering] = useState<boolean>(false); 
+
+    // State cho API kích hoạt tính calo chung (API GET không tham số)
+    const [isAITriggering, setIsAITriggering] = useState<boolean>(false);
 
     const { canCreate, canUpdate, canDelete } = usePagePermission();
 
-    // 🌟 Hàm gọi API KÍCH HOẠT TÍNH CALO CHUNG (API GET: /caculate-calo)
+    // Hàm gọi API KÍCH HOẠT TÍNH CALO CHUNG (API GET: /caculate-calo)
     const handleTriggerAICalculation = async () => {
         setIsAITriggering(true);
         try {
             // Gọi API GET không cần tham số
-            const response = await foodApis.triggerAICalculation(); 
-            
+            const response = await foodApis.triggerAICalculation();
+
             toast.success(response.message || "Kích hoạt tính toán Calo AI thành công!");
-            
+
             // Sau khi tính toán xong, tải lại danh sách
             fetchFoodList(
                 pagination.page,
@@ -117,7 +115,6 @@ const FoodManagement: React.FC = () => {
             setIsAITriggering(false);
         }
     };
-    // ----------------------------------------------------
 
     const fetchFoodList = useCallback(
         async (
@@ -203,7 +200,7 @@ const FoodManagement: React.FC = () => {
     const handleAgeGroupChange = (value: string) => {
         setSelectedAgeGroup(value);
         setPagination((prev) => ({ ...prev, page: 1 }));
-        setSelectedRowKeys([]); // Reset chọn hàng khi lọc
+        setSelectedRowKeys([]);
     };
 
     const handleDateRangeChange = (
@@ -227,9 +224,9 @@ const FoodManagement: React.FC = () => {
             toast.success("Xóa món ăn thành công!");
             setIsDeleteModalOpen(false);
             setDeletingId(null);
-            
+
             // Bỏ chọn nếu món bị xóa
-            setSelectedRowKeys(prev => prev.filter(key => key !== deletingId)); 
+            setSelectedRowKeys(prev => prev.filter(key => key !== deletingId));
 
             fetchFoodList(
                 pagination.page,
@@ -256,20 +253,18 @@ const FoodManagement: React.FC = () => {
         });
     }
 
-    // 🌟 Cấu hình Row Selection
+    // Cấu hình Row Selection
     const rowSelection = {
         selectedRowKeys,
         onChange: (newSelectedRowKeys: React.Key[]) => {
             setSelectedRowKeys(newSelectedRowKeys);
         },
-        getCheckboxProps: (record: FoodRecord) => ({
-            disabled: loading || isAITriggering, // Vô hiệu hóa khi đang xử lý
+        getCheckboxProps: (_: FoodRecord) => ({
+            disabled: loading || isAITriggering,
         }),
     };
-    // -----------------------------
 
     const columns: ColumnsType<FoodRecord> = [
-        // ... (Columns giữ nguyên)
         {
             title: "Tên Món Ăn",
             dataIndex: "foodName",
@@ -336,17 +331,17 @@ const FoodManagement: React.FC = () => {
             render: (_, record) => (
                 <Space size="middle">
                     <Tooltip title="Xem Chi tiết">
-                    <Button
-                        type="text"
-                        icon={<EyeOutlined style={{ color: "#52c41a" }} />}
-                        size="small"
-                        onClick={() =>
-                            navigate(`${constants.APP_PREFIX}/foods/view/${record._id}`, {
-                                state: { foodDetail: record }
-                            })
-                        }
-                    />
-                </Tooltip>
+                        <Button
+                            type="text"
+                            icon={<EyeOutlined style={{ color: "#52c41a" }} />}
+                            size="small"
+                            onClick={() =>
+                                navigate(`${constants.APP_PREFIX}/foods/view/${record._id}`, {
+                                    state: { foodDetail: record }
+                                })
+                            }
+                        />
+                    </Tooltip>
                     {canUpdate && (
                         <Tooltip title="Chỉnh sửa">
                             <Button
@@ -391,11 +386,11 @@ const FoodManagement: React.FC = () => {
                     </Title>
                 </Col>
 
-                {/* 🌟 Nút Kích hoạt Tính Calo AI chung (Dùng API GET không tham số) */}
+                {/* Nút Kích hoạt Tính Calo AI chung (Dùng API GET không tham số) */}
                 <Col xs={24} lg={12} style={{ textAlign: 'right' }}>
                     <Card size="small" style={{ display: 'inline-block', border: '1px solid #d9d9d9', marginTop: 15 }}>
                         <Text strong style={{ color: '#000', fontSize: '0.9em' }}>
-                            {selectedRowKeys.length > 0 ? 
+                            {selectedRowKeys.length > 0 ?
                                 `Đã chọn ${selectedRowKeys.length} món ăn.` :
                                 'Chưa chọn món ăn nào.'}
                         </Text>
@@ -412,7 +407,6 @@ const FoodManagement: React.FC = () => {
                         {isAITriggering ? 'Đang tính Calo AI...' : 'Kích hoạt Tính Calo AI (Calo=0)'}
                     </Button>
                 </Col>
-                {/* --------------------------- */}
 
                 <Col xs={24} style={{ marginBottom: 15 }}>
                     <Row justify="space-between" align="middle" gutter={[16, 16]}>
@@ -469,15 +463,14 @@ const FoodManagement: React.FC = () => {
             </Row>
         ),
         [
-            selectedAgeGroup, 
-            selectedDateRange, 
-            canCreate, 
-            loading, 
-            navigateToCreate, 
-            handleAgeGroupChange, 
-            handleDateRangeChange, 
+            selectedAgeGroup,
+            selectedDateRange,
+            canCreate,
+            loading,
+            navigateToCreate,
+            handleAgeGroupChange,
+            handleDateRangeChange,
             searchKeyword,
-            // Dependencies cho tính năng mới
             isAITriggering,
             handleTriggerAICalculation,
             selectedRowKeys.length
@@ -500,8 +493,8 @@ const FoodManagement: React.FC = () => {
                     loading={loading}
                     onChange={handlePaginationChange}
                     size="small"
-                    // 🌟 Áp dụng rowSelection để có checkbox
-                    rowSelection={rowSelection} 
+                    // Áp dụng rowSelection để có checkbox
+                    rowSelection={rowSelection}
                     pagination={{
                         current: pagination.page,
                         pageSize: pagination.limit,

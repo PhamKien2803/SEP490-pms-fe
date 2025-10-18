@@ -87,7 +87,7 @@ const foodColumns: any = [
     dataIndex: ["food", "foodName"],
     key: "foodName",
     width: 250,
-    render: (text: string, record: MealFoodItem) => (
+    render: (_: string, record: MealFoodItem) => (
       <Text strong>{record.food.foodName}</Text>
     ),
   },
@@ -96,7 +96,7 @@ const foodColumns: any = [
     dataIndex: "weight",
     key: "weight",
     width: 100,
-    render: (weight: number, record: MealFoodItem) => (
+    render: (_: number, record: MealFoodItem) => (
       <Text type="secondary">
         {Number(calculateIngredientSum(record, "gram") || 0)?.toLocaleString(
           "vi-VN"
@@ -111,7 +111,7 @@ const foodColumns: any = [
     dataIndex: "calo",
     key: "calo",
     width: 100,
-    render: (value: number, record: MealFoodItem) => {
+    render: (_: number, record: MealFoodItem) => {
       return (
         <Text style={{ color: "#faad14" }}>
           {Number(
@@ -129,7 +129,7 @@ const foodColumns: any = [
     dataIndex: "protein",
     key: "protein",
     width: 100,
-    render: (value: number, record: MealFoodItem) => {
+    render: (_: number, record: MealFoodItem) => {
       return (
         <Text>
           {Number(
@@ -147,7 +147,7 @@ const foodColumns: any = [
     dataIndex: "lipid",
     key: "lipid",
     width: 100,
-    render: (value: number, record: MealFoodItem) => {
+    render: (_: number, record: MealFoodItem) => {
       return (
         <Text>
           {Number(calculateIngredientSum(record, "lipid") || 0)?.toLocaleString(
@@ -166,7 +166,7 @@ const foodColumns: any = [
     dataIndex: "carb",
     key: "carb",
     width: 100,
-    render: (value: number, record: MealFoodItem) => {
+    render: (_: number, record: MealFoodItem) => {
       return (
         <Text>
           {Number(calculateIngredientSum(record, "card") || 0)?.toLocaleString(
