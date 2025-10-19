@@ -70,7 +70,17 @@ export const apiEndPoint = {
   GET_AVAILABEL_CLASS_STUDENT: "/classes/available-classStudent",
   GET_AVAILABEL_CLASS_TEACHER: "/classes/available-classTeacher",
   STUDENT_CHANGE_CLASS: "/classes/studentChangeClass",
-  TEACHER_CHANGE_CLASS: "/classes/teacherChangeClass"
+  TEACHER_CHANGE_CLASS: "/classes/teacherChangeClass",
+  GET_CURRICULUMS_LIST: "/curriculums/list",
+  GET_CURRICULUMS_BY_ID: (id: string) => `/curriculums/getById/${id}`,
+  CREATE_CURRICULUMS: "/curriculums/create",
+  UPDATE_CURRICULUMS: (id: string) => `/curriculums/update/${id}`,
+  DELETE_CURRICULUMS: (id: string) => `/curriculums/delete/${id}`,
+  GET_EVENT_LIST: "/events/list/",
+  GET_EVENT_BY_ID: (id: string) => `/events/getById/${id}`,
+  CREATE_EVENT: "/events/create",
+  UPDATE_EVENT: (id: string) => `/events/update/${id}`,
+  DELETE_EVENT: (id: string) => `/events/delete/${id}`,
 };
 
 export const apiConfig = {

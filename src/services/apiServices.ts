@@ -73,6 +73,8 @@ import {
   UpdateFoodParams,
 } from "../types/food-management";
 import { AvailableClassForStudent, AvailableClassForTeacher, AvailableRoom, ClassDetail, ClassListResponse, CreateClassDto, StudentChangeClassDto, StudentInClass, TeacherChangeClassDto, TeacherInClass, UpdateClassDto } from "../types/class";
+import { CreateCurriculumDto, CurriculumItem, CurriculumsListResponse, GetCurriculumsParams, UpdateCurriculumDto } from "../types/curriculums";
+import { CreateEventDto, EventItem, EventsListResponse, GetEventsParams, UpdateEventDto } from "../types/event";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -623,3 +625,94 @@ export const foodApis = {
     return response.data;
   },
 };
+
+export const curriculumsApis = {
+
+  getCurriculumsList: async (
+    params: GetCurriculumsParams
+  ): Promise<CurriculumsListResponse> => {
+    const response = await axiosAuth.get<CurriculumsListResponse>(
+      apiEndPoint.GET_CURRICULUMS_LIST,
+      { params }
+    );
+    return response.data;
+  },
+
+  getCurriculumById: async (id: string): Promise<CurriculumItem> => {
+    const response = await axiosAuth.get<CurriculumItem>(
+      apiEndPoint.GET_CURRICULUMS_BY_ID(id)
+    );
+    return response.data;
+  },
+
+  createCurriculum: async (
+    body: CreateCurriculumDto
+  ): Promise<CurriculumItem> => {
+    const response = await axiosAuth.post<CurriculumItem>(
+      apiEndPoint.CREATE_CURRICULUMS,
+      body
+    );
+    return response.data;
+  },
+
+  updateCurriculum: async (
+    id: string,
+    body: UpdateCurriculumDto
+  ): Promise<CurriculumItem> => {
+    const response = await axiosAuth.put<CurriculumItem>(
+      apiEndPoint.UPDATE_CURRICULUMS(id),
+      body
+    );
+    return response.data;
+  },
+
+  deleteCurriculum: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_CURRICULUMS(id));
+  },
+
+}
+
+export const eventApis = {
+  getEventList: async (
+    params: GetEventsParams
+  ): Promise<EventsListResponse> => {
+    const response = await axiosAuth.get<EventsListResponse>(
+      apiEndPoint.GET_EVENT_LIST,
+      { params }
+    );
+    return response.data;
+  },
+
+
+  getEventById: async (id: string): Promise<EventItem> => {
+    const response = await axiosAuth.get<EventItem>(
+      apiEndPoint.GET_EVENT_BY_ID(id)
+    );
+    return response.data;
+  },
+
+
+  createEvent: async (body: CreateEventDto): Promise<EventItem> => {
+    const response = await axiosAuth.post<EventItem>(
+      apiEndPoint.CREATE_EVENT,
+      body
+    );
+    return response.data;
+  },
+
+  updateEvent: async (
+    id: string,
+    body: UpdateEventDto
+  ): Promise<EventItem> => {
+    const response = await axiosAuth.put<EventItem>(
+      apiEndPoint.UPDATE_EVENT(id),
+      body
+    );
+    return response.data;
+  },
+
+  deleteEvent: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_EVENT(id));
+  },
+
+}
