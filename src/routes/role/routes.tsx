@@ -32,6 +32,11 @@ import FoodDetailPage from "../../modal/food/view-food/FoodDetails";
 import UpdateFoodPage from "../../modal/food/update-food/UpdateFood";
 import CreateFoodPage from "../../modal/food/create-food/CreateFoodPage";
 import CurriculumManagement from "../../pages/curriculum-management/CurriculumManagement";
+import RoomManagement from "../../pages/room-management/RoomManagement";
+import RoomDetails from "../../pages/room-management/room-details/RoomDetails";
+import CreateRoom from "../../pages/room-management/create-room/CreateRoom";
+import UpdateRoom from "../../pages/room-management/edit-room/UpdateRoom";
+import RoomReport from "../../pages/room-report/RoomReport";
 
 export const routes: RouteObject[] = [
   {
@@ -287,16 +292,16 @@ export const routes: RouteObject[] = [
               },
               {
                 path: "view/:id",
-                element: <ClassDetails />
+                element: <ClassDetails />,
               },
               {
                 path: "update/:id",
-                element: <UpdateClass />
+                element: <UpdateClass />,
               },
               {
                 path: "create",
-                element: <CreateClass />
-              }
+                element: <CreateClass />,
+              },
             ],
           },
           {
@@ -323,6 +328,48 @@ export const routes: RouteObject[] = [
               {
                 path: "create",
                 element: <CreateFoodPage />,
+              },
+            ],
+          },
+          {
+            path: "rooms",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/rooms`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <RoomManagement />,
+              },
+              {
+                path: "view/:id",
+                element: <RoomDetails />,
+              },
+              {
+                path: "edit/:id",
+                element: <UpdateRoom />,
+              },
+              {
+                path: "create",
+                element: <CreateRoom />,
+              },
+            ],
+          },
+          {
+            path: "rooms-report",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/rooms-report`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <RoomReport />,
               },
             ],
           },
