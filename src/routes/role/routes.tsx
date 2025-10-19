@@ -32,6 +32,11 @@ import FoodDetailPage from "../../modal/food/view-food/FoodDetails";
 import UpdateFoodPage from "../../modal/food/update-food/UpdateFood";
 import CreateFoodPage from "../../modal/food/create-food/CreateFoodPage";
 import CurriculumManagement from "../../pages/curriculum-management/CurriculumManagement";
+import CurriculumsCreate from "../../pages/curriculum-management/curriculums-create/CurriculumsCreate";
+import CurriculumsUpdate from "../../pages/curriculum-management/curriculums-update/CurriculumsUpdate";
+import EventManagement from "../../pages/event-management/EventManagement";
+import EventCreate from "../../pages/event-management/event-create/EventCreate";
+import EventUpdate from "../../pages/event-management/event-update/EventUpdate";
 import RoomManagement from "../../pages/room-management/RoomManagement";
 import RoomDetails from "../../pages/room-management/room-details/RoomDetails";
 import CreateRoom from "../../pages/room-management/create-room/CreateRoom";
@@ -275,6 +280,37 @@ export const routes: RouteObject[] = [
                 index: true,
                 element: <CurriculumManagement />,
               },
+              {
+                path: "create",
+                element: <CurriculumsCreate />
+              },
+              {
+                path: "update/:id",
+                element: <CurriculumsUpdate />
+              }
+            ],
+          },
+          {
+            path: "events",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/events`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <EventManagement />,
+              },
+              {
+                path: "create",
+                element: <EventCreate />
+              },
+              {
+                path: "update/:id",
+                element: <EventUpdate />
+              }
             ],
           },
           {
