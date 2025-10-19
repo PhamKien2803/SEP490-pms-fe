@@ -72,8 +72,25 @@ import {
   FoodRecord,
   UpdateFoodParams,
 } from "../types/food-management";
-import { AvailableClassForStudent, AvailableClassForTeacher, AvailableRoom, ClassDetail, ClassListResponse, CreateClassDto, StudentChangeClassDto, StudentInClass, TeacherChangeClassDto, TeacherInClass, UpdateClassDto } from "../types/class";
-import { CreateRoomData, RoomListResponse, RoomRecord, UpdateRoomData } from "../types/room-management";
+import {
+  AvailableClassForStudent,
+  AvailableClassForTeacher,
+  AvailableRoom,
+  ClassDetail,
+  ClassListResponse,
+  CreateClassDto,
+  StudentChangeClassDto,
+  StudentInClass,
+  TeacherChangeClassDto,
+  TeacherInClass,
+  UpdateClassDto,
+} from "../types/class";
+import {
+  CreateRoomData,
+  RoomListResponse,
+  RoomRecord,
+  UpdateRoomData,
+} from "../types/room-management";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -505,7 +522,7 @@ export const schoolYearApis = {
     );
     return response.data;
   },
-}
+};
 
 export const classApis = {
   getClassList: async (params: {
@@ -513,14 +530,19 @@ export const classApis = {
     page?: number;
     limit?: number;
   }): Promise<ClassListResponse> => {
-    const response = await axiosAuth.get<ClassListResponse>(apiEndPoint.GET_CLASS_LIST, {
-      params,
-    });
+    const response = await axiosAuth.get<ClassListResponse>(
+      apiEndPoint.GET_CLASS_LIST,
+      {
+        params,
+      }
+    );
     return response.data;
   },
 
   getClassById: async (id: string): Promise<ClassDetail> => {
-    const response = await axiosAuth.get<ClassDetail>(apiEndPoint.GET_CLASS_BY_ID(id));
+    const response = await axiosAuth.get<ClassDetail>(
+      apiEndPoint.GET_CLASS_BY_ID(id)
+    );
     return response.data;
   },
 
@@ -551,18 +573,27 @@ export const classApis = {
     await axiosAuth.post(apiEndPoint.ASYNC_CLASS);
   },
 
-  getAvailableClassForStudent: async (params: { classAge: number }): Promise<AvailableClassForStudent[]> => {
-    const response = await axiosAuth.get<AvailableClassForStudent[]>(apiEndPoint.GET_AVAILABEL_CLASS_STUDENT, {
-      params,
-    });
+  getAvailableClassForStudent: async (params: {
+    classAge: number;
+  }): Promise<AvailableClassForStudent[]> => {
+    const response = await axiosAuth.get<AvailableClassForStudent[]>(
+      apiEndPoint.GET_AVAILABEL_CLASS_STUDENT,
+      {
+        params,
+      }
+    );
     return response.data;
   },
 
-
-  getAvailableClassForTeacher: async (params: { classAge: number }): Promise<AvailableClassForTeacher[]> => {
-    const response = await axiosAuth.get<AvailableClassForTeacher[]>(apiEndPoint.GET_AVAILABEL_CLASS_TEACHER, {
-      params,
-    });
+  getAvailableClassForTeacher: async (params: {
+    classAge: number;
+  }): Promise<AvailableClassForTeacher[]> => {
+    const response = await axiosAuth.get<AvailableClassForTeacher[]>(
+      apiEndPoint.GET_AVAILABEL_CLASS_TEACHER,
+      {
+        params,
+      }
+    );
     return response.data;
   },
 
@@ -570,13 +601,10 @@ export const classApis = {
     await axiosAuth.post(apiEndPoint.STUDENT_CHANGE_CLASS, body);
   },
 
-
   teacherChangeClass: async (body: TeacherChangeClassDto): Promise<void> => {
     await axiosAuth.post(apiEndPoint.TEACHER_CHANGE_CLASS, body);
-  }
-
-}
-
+  },
+};
 
 export const foodApis = {
   getListFood: async (params: FoodListParams): Promise<FoodListResponse> => {
@@ -595,9 +623,11 @@ export const foodApis = {
     return response.data;
   },
 
-  calculateFoodNutrients: async (foodId: string): Promise<AICalculateResponse> => {
+  calculateFoodNutrients: async (
+    foodId: string
+  ): Promise<AICalculateResponse> => {
     const response = await axiosAuth.get<AICalculateResponse>(
-      apiEndPoint.CALCULATE_FOOD_AI(foodId),
+      apiEndPoint.CALCULATE_FOOD_AI(foodId)
     );
     return response.data;
   },
@@ -637,6 +667,13 @@ export const roomApis = {
     return response.data;
   },
 
+  getRoomById: async (id: string): Promise<RoomRecord> => {
+    const response = await axiosAuth.get<RoomRecord>(
+      apiEndPoint.GET_ROOM_BY_ID(id)
+    );
+    return response.data;
+  },
+
   createRoom: async (body: CreateRoomData): Promise<RoomRecord> => {
     const response = await axiosAuth.post<RoomRecord>(
       apiEndPoint.CREATE_ROOM,
@@ -645,10 +682,7 @@ export const roomApis = {
     return response.data;
   },
 
-  updateRoom: async (
-    id: string,
-    body: UpdateRoomData
-  ): Promise<RoomRecord> => {
+  updateRoom: async (id: string, body: UpdateRoomData): Promise<RoomRecord> => {
     const response = await axiosAuth.put<RoomRecord>(
       apiEndPoint.UPDATE_ROOM(id),
       body
@@ -657,6 +691,6 @@ export const roomApis = {
   },
 
   deleteRoom: async (id: string): Promise<void> => {
-    await axiosAuth.post(apiEndPoint.DELETE_STAFF(id));
+    await axiosAuth.post(apiEndPoint.DELETE_ROOM(id));
   },
 };

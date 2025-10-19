@@ -59,7 +59,7 @@ export const apiEndPoint = {
   EDIT_MENU: (menuId: string) => `/menus/update/${menuId}`,
   APPROVE_MENU: (menuId: string) => `/menus/approve-menu/${menuId}`,
   REJECT_MENU: (menuId: string) => `/menus/reject-menu/${menuId}`,
-  GET_CLASS_LIST: '/classes/list',
+  GET_CLASS_LIST: "/classes/list",
   GET_CLASS_BY_ID: (id: string) => `/classes/getById/${id}`,
   UPDATE_CLASS: (id: string) => `/classes/update/${id}`,
   CREATE_CLASS: "/classes/create",
@@ -75,6 +75,7 @@ export const apiEndPoint = {
   CREATE_ROOM: "/rooms/create",
   UPDATE_ROOM: (id: string) => `/rooms/update/${id}`,
   DELETE_ROOM: (id: string) => `/rooms/delete/${id}`,
+  GET_ROOM_BY_ID: (id: string) => `/rooms/getById/${id}`,
 };
 
 export const apiConfig = {
