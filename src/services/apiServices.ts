@@ -72,7 +72,6 @@ import {
   FoodRecord,
   UpdateFoodParams,
 } from "../types/food-management";
-import { AvailableClassForStudent, AvailableClassForTeacher, AvailableRoom, ClassDetail, ClassListResponse, CreateClassDto, StudentChangeClassDto, StudentInClass, TeacherChangeClassDto, TeacherInClass, UpdateClassDto } from "../types/class";
 import { CreateCurriculumDto, CurriculumItem, CurriculumsListResponse, GetCurriculumsParams, UpdateCurriculumDto } from "../types/curriculums";
 import { CreateEventDto, EventItem, EventsListResponse, GetEventsParams, UpdateEventDto } from "../types/event";
 import {
@@ -710,6 +709,45 @@ export const eventApis = {
   ): Promise<EventsListResponse> => {
     const response = await axiosAuth.get<EventsListResponse>(
       apiEndPoint.GET_EVENT_LIST,
+      { params }
+    );
+    return response.data;
+  },
+
+
+  getEventById: async (id: string): Promise<EventItem> => {
+    const response = await axiosAuth.get<EventItem>(
+      apiEndPoint.GET_EVENT_BY_ID(id)
+    );
+    return response.data;
+  },
+
+
+  createEvent: async (body: CreateEventDto): Promise<EventItem> => {
+    const response = await axiosAuth.post<EventItem>(
+      apiEndPoint.CREATE_EVENT,
+      body
+    );
+    return response.data;
+  },
+
+  updateEvent: async (
+    id: string,
+    body: UpdateEventDto
+  ): Promise<EventItem> => {
+    const response = await axiosAuth.put<EventItem>(
+      apiEndPoint.UPDATE_EVENT(id),
+      body
+    );
+    return response.data;
+  },
+
+  deleteEvent: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_EVENT(id));
+  },
+
+}
+
 export const roomApis = {
   getListRoom: async (params: {
     page: number;
@@ -722,10 +760,6 @@ export const roomApis = {
     return response.data;
   },
 
-
-  getEventById: async (id: string): Promise<EventItem> => {
-    const response = await axiosAuth.get<EventItem>(
-      apiEndPoint.GET_EVENT_BY_ID(id)
   getRoomById: async (id: string): Promise<RoomRecord> => {
     const response = await axiosAuth.get<RoomRecord>(
       apiEndPoint.GET_ROOM_BY_ID(id)
@@ -733,10 +767,6 @@ export const roomApis = {
     return response.data;
   },
 
-
-  createEvent: async (body: CreateEventDto): Promise<EventItem> => {
-    const response = await axiosAuth.post<EventItem>(
-      apiEndPoint.CREATE_EVENT,
   createRoom: async (body: CreateRoomData): Promise<RoomRecord> => {
     const response = await axiosAuth.post<RoomRecord>(
       apiEndPoint.CREATE_ROOM,
@@ -745,12 +775,6 @@ export const roomApis = {
     return response.data;
   },
 
-  updateEvent: async (
-    id: string,
-    body: UpdateEventDto
-  ): Promise<EventItem> => {
-    const response = await axiosAuth.put<EventItem>(
-      apiEndPoint.UPDATE_EVENT(id),
   updateRoom: async (id: string, body: UpdateRoomData): Promise<RoomRecord> => {
     const response = await axiosAuth.put<RoomRecord>(
       apiEndPoint.UPDATE_ROOM(id),
@@ -759,11 +783,6 @@ export const roomApis = {
     return response.data;
   },
 
-  deleteEvent: async (id: string): Promise<void> => {
-    await axiosAuth.post(apiEndPoint.DELETE_EVENT(id));
-  },
-
-}
   deleteRoom: async (id: string): Promise<void> => {
     await axiosAuth.post(apiEndPoint.DELETE_ROOM(id));
   },
