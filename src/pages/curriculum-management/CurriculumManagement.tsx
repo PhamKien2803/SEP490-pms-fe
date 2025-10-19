@@ -11,6 +11,7 @@ import { constants } from '../../constants';
 import { toast } from 'react-toastify';
 import { curriculumsApis } from '../../services/apiServices';
 import { CurriculumItem } from '../../types/curriculums';
+import { usePagePermission } from '../../hooks/usePagePermission';
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -25,6 +26,7 @@ const formatMinutesToTime = (minutes: number) => {
 
 function CurriculumManagement() {
     const navigate = useNavigate();
+    const { canCreate, canUpdate, canDelete } = usePagePermission();
     const [originalCurriculums, setOriginalCurriculums] = useState<CurriculumItem[]>([]);
     const [filteredCurriculums, setFilteredCurriculums] = useState<CurriculumItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -136,7 +138,8 @@ function CurriculumManagement() {
             align: 'center' as const,
             render: (_: any, record: CurriculumItem) => (
                 <Space size="middle">
-                    <Button type="text" icon={<EditOutlined style={{ color: '#1890ff' }} />} onClick={() => navigate(`${constants.APP_PREFIX}/curriculums/update/${record._id}`)} />
+                    {canUpdate && (<Button type="text" icon={<EditOutlined style={{ color: '#1890ff' }} />} onClick={() => navigate(`${constants.APP_PREFIX}/curriculums/update/${record._id}`)} />)}
+
                     <Popconfirm
                         title="Xóa chương trình học"
                         description="Bạn có chắc chắn muốn xóa chương trình này?"
@@ -144,7 +147,8 @@ function CurriculumManagement() {
                         okText="Đồng ý"
                         cancelText="Hủy"
                     >
-                        <Button type="text" danger icon={<DeleteOutlined />} />
+                        {canDelete && (<Button type="text" danger icon={<DeleteOutlined />} />)}
+
                     </Popconfirm>
                 </Space>
             ),
@@ -171,9 +175,10 @@ function CurriculumManagement() {
                                 loading={loading}
                             />
                         </Tooltip>
-                        <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate(`${constants.APP_PREFIX}/curriculums/create`)}>
+                        {canCreate && (<Button type="primary" icon={<PlusOutlined />} onClick={() => navigate(`${constants.APP_PREFIX}/curriculums/create`)}>
                             Thêm mới
-                        </Button>
+                        </Button>)}
+
                     </Space>
 
                 </div>

@@ -27,6 +27,7 @@ import { EventItem, GetEventsParams } from '../../types/event';
 import { SchoolYearListItem } from '../../types/schoolYear';
 import { useNavigate } from 'react-router-dom';
 import { constants } from '../../constants';
+import { usePagePermission } from '../../hooks/usePagePermission';
 
 
 const { Title } = Typography;
@@ -40,6 +41,7 @@ const formatDate = (dateString: string | undefined): string => {
 
 function EventManagement() {
     const navigate = useNavigate();
+    const { canCreate, canUpdate, canDelete } = usePagePermission();
     const [originalEvents, setOriginalEvents] = useState<EventItem[]>([]);
     const [filteredEvents, setFilteredEvents] = useState<EventItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -218,11 +220,12 @@ function EventManagement() {
             render: (_: any, record: EventItem) => (
                 <Space size="small">
                     <Tooltip title="Chỉnh sửa">
-                        <Button
+                        {canUpdate && (<Button
                             type="text"
                             icon={<EditOutlined style={{ color: '#1890ff' }} />}
                             onClick={() => navigate(`${constants.APP_PREFIX}/events/update/${record._id}`)}
-                        />
+                        />)}
+
                     </Tooltip>
                     <Popconfirm
                         title="Xóa sự kiện"
@@ -233,7 +236,9 @@ function EventManagement() {
                         placement="topRight"
                     >
                         <Tooltip title="Xóa">
-                            <Button type="text" danger icon={<DeleteOutlined />} />
+                            {canDelete && (
+                                <Button type="text" danger icon={<DeleteOutlined />} />
+                            )}
                         </Tooltip>
                     </Popconfirm>
                 </Space>
@@ -283,13 +288,14 @@ function EventManagement() {
                                     disabled={!selectedSchoolYear}
                                 />
                             </Tooltip>
-                            <Button
+                            {canCreate && (<Button
                                 type="primary"
                                 icon={<PlusOutlined />}
                                 onClick={() => navigate(`${constants.APP_PREFIX}/events/create`)}
                             >
                                 Thêm mới
-                            </Button>
+                            </Button>)}
+
                         </Space>
                     </Col>
                 </Row>
