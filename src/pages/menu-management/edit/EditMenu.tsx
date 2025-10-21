@@ -33,6 +33,7 @@ import {
   EditOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
+  ArrowLeftOutlined,
 } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
 import weekday from "dayjs/plugin/weekday";
@@ -101,7 +102,6 @@ const capitalizeFirstLetter = (string: string) => {
 };
 
 const AGE_GROUPS = [
-  { value: "1", label: "Dưới 1 tuổi" },
   { value: "2", label: "1-3 tuổi" },
   { value: "3", label: "4-5 tuổi" },
 ];
@@ -1039,9 +1039,12 @@ const EditMenu: React.FC = () => {
       >
         <Card
           title={
-            <Title level={3} style={{ margin: 0, padding: "10px 0" }}>
-              <EditOutlined style={{ marginRight: 8 }} /> **Cập nhật Thực đơn
-              Tuần**
+            <Title level={3} style={{ marginBottom: 20 }}>
+              <ArrowLeftOutlined
+                onClick={() => navigate(`${constants.APP_PREFIX}/menus`)}
+                style={{ marginRight: 16, cursor: "pointer", color: "#0050b3" }}
+              />
+              Chi Tiết Thực Đơn Tuần
               {isPending && (
                 <span
                   style={{ fontSize: 14, marginLeft: 16, color: "#faad14" }}

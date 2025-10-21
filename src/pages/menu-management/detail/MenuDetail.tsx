@@ -47,7 +47,6 @@ const { Title, Text } = Typography;
 const { Panel } = Collapse;
 
 const AGE_GROUPS = [
-  { value: "1", label: "Dưới 1 tuổi" },
   { value: "2", label: "1-3 tuổi" },
   { value: "3", label: "4-5 tuổi" },
 ];
