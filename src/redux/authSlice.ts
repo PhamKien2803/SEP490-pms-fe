@@ -24,9 +24,7 @@ export const login = createAsyncThunk<string, LoginRequest, { rejectValue: Login
             sessionStorage.setItem("token", token);
             return token;
         } catch (err: any) {
-            return rejectWithValue({
-                message: err.response?.data?.message || "Lỗi kết nối server",
-            });
+            return rejectWithValue(err || { message: "Lỗi kết nối server" });
         }
     }
 );
