@@ -58,8 +58,9 @@ const getStateTagColor = (state: RoomState) => {
     case "Chờ xử lý":
       return "gold";
     case "Dự thảo":
+      return "default";
     default:
-      return "volcano";
+      return "default";
   }
 };
 
@@ -82,6 +83,45 @@ const FacilityInputRow: React.FC<{
   const disabledDefectMissing = !isDefectMissingEditable;
   const isRemovable = isGeneralEditable;
 
+  const { name, fieldKey } = field;
+  const facilities = Form.useWatch("facilities");
+
+  const currentFacility = facilities?.[name];
+  const totalQuantity = currentFacility?.quantity ?? 0;
+  const currentQuantityDefect = currentFacility?.quantityDefect ?? 0;
+  const currentQuantityMissing = currentFacility?.quantityMissing ?? 0;
+
+  const maxMissing = totalQuantity - currentQuantityDefect;
+  const maxDefectWhileEditingMissing = totalQuantity - currentQuantityMissing;
+
+  const validateQuantityDefect = (
+    _: any,
+    value: number | undefined
+  ): Promise<void> => {
+    if (value !== undefined && value + currentQuantityMissing > totalQuantity) {
+      return Promise.reject(
+        new Error(
+          `Hỏng/Lỗi (${value}) + Thiếu (${currentQuantityMissing}) không được vượt quá Tổng (${totalQuantity})`
+        )
+      );
+    }
+    return Promise.resolve();
+  };
+
+  const validateQuantityMissing = (
+    _: any,
+    value: number | undefined
+  ): Promise<void> => {
+    if (value !== undefined && value + currentQuantityDefect > totalQuantity) {
+      return Promise.reject(
+        new Error(
+          `Thiếu (${value}) + Hỏng/Lỗi (${currentQuantityDefect}) không được vượt quá Tổng (${totalQuantity})`
+        )
+      );
+    }
+    return Promise.resolve();
+  };
+
   return (
     <Row
       key={field.key}
@@ -98,8 +138,8 @@ const FacilityInputRow: React.FC<{
       <Col xs={24} sm={10} md={6}>
         <Form.Item
           {...field}
-          name={[field.name, "facilityName"]}
-          fieldKey={[field.fieldKey, "facilityName"]}
+          name={[name, "facilityName"]}
+          fieldKey={[fieldKey, "facilityName"]}
           label={
             <Space>
               <TagOutlined /> Tên thiết bị
@@ -117,8 +157,8 @@ const FacilityInputRow: React.FC<{
       <Col xs={24} sm={7} md={5}>
         <Form.Item
           {...field}
-          name={[field.name, "facilityType"]}
-          fieldKey={[field.fieldKey, "facilityType"]}
+          name={[name, "facilityType"]}
+          fieldKey={[fieldKey, "facilityType"]}
           label={
             <Space>
               <ToolOutlined /> Loại
@@ -136,8 +176,8 @@ const FacilityInputRow: React.FC<{
       <Col xs={8} sm={3} md={3}>
         <Form.Item
           {...field}
-          name={[field.name, "quantity"]}
-          fieldKey={[field.fieldKey, "quantity"]}
+          name={[name, "quantity"]}
+          fieldKey={[fieldKey, "quantity"]}
           label="SL Tổng"
           rules={[{ required: true, message: "Nhập SL" }]}
         >
@@ -152,13 +192,20 @@ const FacilityInputRow: React.FC<{
       <Col xs={8} sm={4} md={3}>
         <Form.Item
           {...field}
-          name={[field.name, "quantityDefect"]}
-          fieldKey={[field.fieldKey, "quantityDefect"]}
+          name={[name, "quantityDefect"]}
+          fieldKey={[fieldKey, "quantityDefect"]}
           label="Hỏng/Lỗi"
-          rules={[{ required: true, message: "Nhập SL hỏng" }]}
+          rules={[
+            { required: true, message: "Nhập SL hỏng" },
+            {
+              validator: validateQuantityDefect,
+            },
+          ]}
+          validateTrigger={["onChange", "onBlur"]}
         >
           <InputNumber
             min={0}
+            max={maxDefectWhileEditingMissing}
             style={{ width: "100%" }}
             placeholder="0"
             disabled={disabledDefectMissing}
@@ -168,13 +215,20 @@ const FacilityInputRow: React.FC<{
       <Col xs={8} sm={4} md={3}>
         <Form.Item
           {...field}
-          name={[field.name, "quantityMissing"]}
-          fieldKey={[field.fieldKey, "quantityMissing"]}
+          name={[name, "quantityMissing"]}
+          fieldKey={[fieldKey, "quantityMissing"]}
           label="Thiếu"
-          rules={[{ required: true, message: "Nhập SL thiếu" }]}
+          rules={[
+            { required: true, message: "Nhập SL thiếu" },
+            {
+              validator: validateQuantityMissing,
+            },
+          ]}
+          validateTrigger={["onChange", "onBlur"]}
         >
           <InputNumber
             min={0}
+            max={maxMissing}
             style={{ width: "100%" }}
             placeholder="0"
             disabled={disabledDefectMissing}
@@ -184,8 +238,8 @@ const FacilityInputRow: React.FC<{
       <Col xs={24} md={3}>
         <Form.Item
           {...field}
-          name={[field.name, "notes"]}
-          fieldKey={[field.fieldKey, "notes"]}
+          name={[name, "notes"]}
+          fieldKey={[fieldKey, "notes"]}
           label="Ghi chú"
         >
           <Input
@@ -200,7 +254,7 @@ const FacilityInputRow: React.FC<{
           {isRemovable ? (
             <Tooltip title="Xóa thiết bị này">
               <MinusCircleOutlined
-                onClick={() => remove(field.name)}
+                onClick={() => remove(name)}
                 style={{ color: "#ff4d4f", fontSize: 18, cursor: "pointer" }}
               />
             </Tooltip>
@@ -334,14 +388,29 @@ const UpdateRoom: React.FC = () => {
                 facility.quantity &&
                 facility.quantity > 0
             )
-            .map((facility: any) => ({
-              facilityName: facility.facilityName,
-              facilityType: facility.facilityType,
-              quantity: facility.quantity,
-              quantityDefect: facility.quantityDefect || 0,
-              quantityMissing: facility.quantityMissing || 0,
-              notes: facility.notes || "",
-            }))
+            .map((facility: any) => {
+              const totalQuantity = facility.quantity;
+              let quantityDefect = facility.quantityDefect || 0;
+              let quantityMissing = facility.quantityMissing || 0;
+
+              if (quantityDefect + quantityMissing > totalQuantity) {
+                if (quantityDefect > totalQuantity) {
+                  quantityDefect = totalQuantity;
+                  quantityMissing = 0;
+                } else {
+                  quantityMissing = totalQuantity - quantityDefect;
+                }
+              }
+
+              return {
+                facilityName: facility.facilityName,
+                facilityType: facility.facilityType,
+                quantity: totalQuantity,
+                quantityDefect: quantityDefect,
+                quantityMissing: quantityMissing,
+                notes: facility.notes || "",
+              };
+            })
         : [];
 
       if (cleanedFacilities.length === 0) {
@@ -368,11 +437,7 @@ const UpdateRoom: React.FC = () => {
       };
 
       await roomApis.updateRoom(id, payload);
-      toast.success(
-        `Cập nhật Phòng học "${payload.roomName}" thành công! ${
-          newState ? `(Trạng thái mới: ${newState})` : ""
-        }`
-      );
+      toast.success(`Cập nhật Phòng học "${payload.roomName}" thành công! `);
 
       const newInitial = cleanDataForComparison({
         ...payload,
@@ -437,14 +502,14 @@ const UpdateRoom: React.FC = () => {
     if (isEditing) {
       let confirmButton: React.ReactNode = null;
 
-      const confirmDisabled = isDataDirty || isSaving;
+      const confirmDisabled = isSaving;
 
       if (currentState === "Dự thảo") {
         confirmButton = (
           <Tooltip
             title={
-              confirmDisabled
-                ? "Vui lòng Gửi Chỉnh Sửa trước khi Xác nhận"
+              isSaving
+                ? "Đang lưu..."
                 : "Chuyển trạng thái sang Chờ giáo viên duyệt"
             }
           >
@@ -502,7 +567,7 @@ const UpdateRoom: React.FC = () => {
               }}
               disabled={isSaving}
             >
-              Chỉnh Sửa Hỏng/Thiếu (GV)
+              Chỉnh Sửa Hỏng/Thiếu
             </Button>
             <Button
               type="primary"
@@ -511,7 +576,7 @@ const UpdateRoom: React.FC = () => {
               loading={isSaving}
               disabled={isSaving}
             >
-              Đồng Ý Tình Trạng (GV) & Chuyển NS
+              Xác nhận hoàn thành
             </Button>
           </Space>
         );
@@ -525,16 +590,16 @@ const UpdateRoom: React.FC = () => {
               onClick={() => setIsRejectModalVisible(true)}
               disabled={isSaving}
             >
-              Từ Chối (NS)
+              Từ Chối
             </Button>
             <Button
               type="primary"
               icon={<CheckCircleOutlined />}
-              onClick={() => handleSubmit(form.getFieldsValue(), "Hoàn thành")}
+              onClick={() => handleSubmit(form.getFieldsValue(), "Chờ xử lý")}
               loading={isSaving}
               disabled={isSaving}
             >
-              Xác Nhận Hoàn Thành (NS)
+              Xác Nhận
             </Button>
           </Space>
         );
@@ -797,17 +862,34 @@ const UpdateRoom: React.FC = () => {
                 >
                   Hủy Chỉnh Sửa
                 </Button>
-                <Button
-                  type="primary"
-                  icon={<SendOutlined />}
-                  onClick={() =>
-                    handleSubmit(form.getFieldsValue(), "Chờ nhân sự xác nhận")
-                  }
-                  loading={isSaving}
-                  disabled={isSaving || !isDataDirty}
-                >
-                  Gửi & Chờ NS Xác Nhận
-                </Button>
+                {roomDetail?.state === "Dự thảo" ? (
+                  <Button
+                    type="primary"
+                    icon={<SendOutlined />}
+                    onClick={() =>
+                      handleSubmit(form.getFieldsValue(), "Dự thảo")
+                    }
+                    loading={isSaving}
+                    disabled={isSaving || !isDataDirty}
+                  >
+                    Lưu chỉnh sửa
+                  </Button>
+                ) : (
+                  <Button
+                    type="primary"
+                    icon={<SendOutlined />}
+                    onClick={() =>
+                      handleSubmit(
+                        form.getFieldsValue(),
+                        "Chờ nhân sự xác nhận"
+                      )
+                    }
+                    loading={isSaving}
+                    disabled={isSaving || !isDataDirty}
+                  >
+                    Gửi & Chờ NS Xác Nhận
+                  </Button>
+                )}
               </Space>
             </Row>
           )}
