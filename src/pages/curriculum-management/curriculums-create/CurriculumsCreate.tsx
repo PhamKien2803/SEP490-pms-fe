@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import {
     Form,
     Button,
@@ -11,7 +12,8 @@ import {
     Spin,
     Space,
     Modal,
-    Divider
+    Divider,
+    Input
 } from 'antd';
 import {
     SaveOutlined,
@@ -25,49 +27,93 @@ import {
     ProfileOutlined,
     TagOutlined,
     NumberOutlined,
-    ExclamationCircleOutlined
+    ExclamationCircleOutlined,
+    CalendarOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import type { Dayjs } from 'dayjs';
 import { CreateCurriculumDto } from '../../../types/curriculums';
-import { curriculumsApis } from '../../../services/apiServices';
+import { curriculumsApis, eventApis, schoolYearApis } from '../../../services/apiServices';
 import { useCurrentUser } from '../../../hooks/useCurrentUser';
 import { ageOptions, categoryOptions } from '../../../components/hard-code-action';
+import { EventItem } from '../../../types/event';
 
 const { Title } = Typography;
 const { Option } = Select;
-
-
-const activityNameOptions = [
-    "Đón trẻ",
-    "Thể dục sáng",
-    "Hoạt động học",
-    "Chơi ngoài trời",
-    "Ăn trưa",
-    "Ngủ trưa",
-    "Ăn xế",
-    "Chơi và hoạt động chiều",
-    "Trả trẻ"
-];
-
 
 function CurriculumsCreate() {
     const user = useCurrentUser();
     const [form] = Form.useForm();
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [activityType, setActivityType] = useState<'Cố định' | 'Bình thường' | undefined>(undefined);
+    const [activityType, setActivityType] = useState<'Cố định' | 'Bình thường' | 'Sự kiện' | undefined>(undefined);
     const [isDirty, setIsDirty] = useState(false);
     const [isBackConfirmVisible, setIsBackConfirmVisible] = useState(false);
+    const [events, setEvents] = useState<EventItem[]>([]);
+    const [isLoadingEvents, setIsLoadingEvents] = useState(false);
+    const [currentSchoolYear, setCurrentSchoolYear] = useState<string | null>(null);
+    const [isLoadingSchoolYear, setIsLoadingSchoolYear] = useState<boolean>(true);
 
-    const handleTypeChange = (value: 'Cố định' | 'Bình thường') => {
+    useEffect(() => {
+        const fetchCurrentSchoolYear = async () => {
+            try {
+                const response = await schoolYearApis.getSchoolYearList({ page: 1, limit: 100 });
+
+                if (response.data && response.data.length > 0) {
+                    const sortedData = response.data.sort((a: any, b: any) =>
+                        b.schoolYear.localeCompare(a.schoolYear)
+                    );
+                    setCurrentSchoolYear(sortedData[0].schoolYear);
+                } else {
+                    toast.info('Không tìm thấy năm học nào.');
+                }
+            } catch (error) {
+                toast.error('Lỗi tải dữ liệu năm học.');
+            } finally {
+                setIsLoadingSchoolYear(false);
+            }
+        };
+
+        fetchCurrentSchoolYear();
+    }, []);
+
+    const handleTypeChange = async (value: 'Cố định' | 'Bình thường' | 'Sự kiện') => {
         setActivityType(value);
         form.setFieldsValue({
             age: [],
             category: null,
             timeRange: null,
+            eventName: null,
         });
+
+        if (value === 'Sự kiện') {
+            if (isLoadingSchoolYear) {
+                toast.info('Đang tải dữ liệu năm học, vui lòng đợi...');
+                return;
+            }
+
+            if (!currentSchoolYear) {
+                toast.warn('Không thể tải danh sách sự kiện do không có dữ liệu năm học.');
+                return;
+            }
+
+            if (events.length === 0) {
+                setIsLoadingEvents(true);
+                try {
+                    const response = await eventApis.getEventList({
+                        page: 1,
+                        limit: 1000,
+                        schoolYear: currentSchoolYear
+                    });
+                    setEvents(response.data);
+                } catch (error) {
+                    toast.error('Lỗi tải danh sách sự kiện.');
+                } finally {
+                    setIsLoadingEvents(false);
+                }
+            }
+        }
     };
 
     const handleBackNavigation = () => {
@@ -76,10 +122,6 @@ function CurriculumsCreate() {
         } else {
             navigate(-1);
         }
-    };
-
-    const handleActivityNameChange = (value: string) => {
-        form.setFieldsValue({ activityName: value });
     };
 
     const onFinish = async (values: any) => {
@@ -128,6 +170,16 @@ function CurriculumsCreate() {
                         curriculumsApis.createCurriculum(payload)
                     )
                 );
+            } else if (values.type === 'Sự kiện') {
+                const payload: CreateCurriculumDto = {
+                    activityName: values.activityName,
+                    type: values.type,
+                    active: values.active,
+                    createdBy: currentUser,
+                    updatedBy: currentUser,
+                    eventName: values.eventName,
+                };
+                await curriculumsApis.createCurriculum(payload);
             }
 
             toast.success('Tạo chương trình học thành công!');
@@ -188,10 +240,10 @@ function CurriculumsCreate() {
                     }
                     bordered={false}
                 >
-                    <Spin spinning={isSubmitting}>
+                    <Spin spinning={isSubmitting || isLoadingSchoolYear}>
                         <Row gutter={24}>
                             <Col xs={24} sm={12}>
-                                {/* <Form.Item
+                                <Form.Item
                                     name="activityName"
                                     label={
                                         <Space>
@@ -202,28 +254,6 @@ function CurriculumsCreate() {
                                     rules={[{ required: true, message: 'Vui lòng nhập tên hoạt động!' }]}
                                 >
                                     <Input placeholder="Ví dụ: Đón trẻ, Thể dục sáng..." />
-                                </Form.Item> */}
-                                <Form.Item
-                                    name="activityName"
-                                    label={
-                                        <Space>
-                                            <FileTextOutlined />
-                                            Tên Hoạt động
-                                        </Space>
-                                    }
-                                    rules={[{ required: true, message: 'Vui lòng chọn tên hoạt động!' }]}
-                                >
-                                    <Select
-                                        placeholder="Chọn tên hoạt động"
-                                        allowClear
-                                        onChange={handleActivityNameChange}
-                                    >
-                                        {activityNameOptions.map(name => (
-                                            <Option key={name} value={name}>
-                                                {name}
-                                            </Option>
-                                        ))}
-                                    </Select>
                                 </Form.Item>
                             </Col>
                             <Col xs={24} sm={6}>
@@ -240,6 +270,7 @@ function CurriculumsCreate() {
                                     <Select placeholder="Chọn loại hoạt động" onChange={handleTypeChange}>
                                         <Option value="Cố định">Cố định (hàng ngày)</Option>
                                         <Option value="Bình thường">Bình thường (theo chủ đề)</Option>
+                                        <Option value="Sự kiện">Sự kiện</Option>
                                     </Select>
                                 </Form.Item>
                             </Col>
@@ -327,6 +358,47 @@ function CurriculumsCreate() {
                                                 {ageOptions.map(age => (
                                                     <Option key={age.value} value={age.value}>
                                                         {age.label}
+                                                    </Option>
+                                                ))}
+                                            </Select>
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
+                            </>
+                        )}
+
+                        {activityType === 'Sự kiện' && (
+                            <>
+                                <Divider orientation="left">
+                                    <Space>
+                                        <CalendarOutlined />
+                                        Chi tiết (cho hoạt động Sự kiện)
+                                    </Space>
+                                </Divider>
+                                <Row gutter={24}>
+                                    <Col xs={24} sm={12}>
+                                        <Form.Item
+                                            name="eventName"
+                                            label={
+                                                <Space>
+                                                    <TagOutlined />
+                                                    Tên Sự kiện
+                                                </Space>
+                                            }
+                                            rules={[{ required: true, message: 'Vui lòng chọn sự kiện!' }]}
+                                        >
+                                            <Select
+                                                placeholder="Chọn sự kiện"
+                                                loading={isLoadingEvents}
+                                                showSearch
+                                                optionFilterProp="children"
+                                                filterOption={(input, option) =>
+                                                    (option?.children?.toString() ?? '').toLowerCase().includes(input.toLowerCase())
+                                                }
+                                            >
+                                                {events.map(event => (
+                                                    <Option key={event._id} value={event.eventName}>
+                                                        {event.eventName}
                                                     </Option>
                                                 ))}
                                             </Select>
