@@ -1,4 +1,4 @@
-import { Form, Input, Button, Typography, Checkbox, Alert, Row, Col, Tooltip } from 'antd';
+import { Form, Input, Button, Typography, Checkbox, Row, Col, Tooltip } from 'antd';
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { getCurrentUser, login } from '../../redux/authSlice';
@@ -8,6 +8,7 @@ import { LocalStorageKey } from '../../types/local-storage';
 import { constants } from '../../constants';
 import { LockOutlined, UserOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import Paragraph from 'antd/lib/typography/Paragraph';
+import { toast } from 'react-toastify';
 
 const { Title, Link } = Typography;
 
@@ -19,7 +20,6 @@ const Login = () => {
     const [email, setEmail] = useLocalStorage<string>(LocalStorageKey.EMAIL, '');
     const [password, setPassword] = useState('');
     const [remember, setRemember] = useState(true);
-    const [fieldError, setFieldError] = useState<string | null>(null);
 
     const handleLogin = async (values: { email: string; password: string }) => {
         const result = await dispatch(login(values));
@@ -32,18 +32,19 @@ const Login = () => {
             }
             const getUserResult = await dispatch(getCurrentUser());
             if (getCurrentUser.fulfilled.match(getUserResult)) {
+                toast.success("Đăng nhập thành công");
                 navigate(constants.APP_PREFIX, { replace: true });
             } else {
-                setFieldError("Không lấy được thông tin người dùng");
+                toast.error("Không lấy được thông tin người dùng");
             }
         } else if (login.rejected.match(result)) {
             const error = result.payload;
             if (typeof error === "string") {
-                setFieldError(error);
+                toast.error(error);
             } else if (error?.errorField) {
                 form.setFields([{ name: error.errorField, errors: [error.message] }]);
             } else {
-                setFieldError(error?.message || "Login failed");
+                toast.error(error?.message || "Đăng nhập thất bại");
             }
         }
     };
@@ -142,8 +143,6 @@ const Login = () => {
                             <Form.Item label="Mật khẩu" name="password" rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}>
                                 <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu" size="large" onChange={(e) => setPassword(e.target.value)} />
                             </Form.Item>
-
-                            {fieldError && <Alert message={fieldError} type="error" showIcon style={{ marginBottom: 24 }} />}
 
                             <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
                                 <Form.Item name="remember" valuePropName="checked" noStyle>
