@@ -110,27 +110,52 @@ function CurriculumManagement() {
             filters: [
                 { text: 'Cố định', value: 'Cố định' },
                 { text: 'Bình thường', value: 'Bình thường' },
+                { text: 'Sự kiện', value: 'Sự kiện' },
             ],
             onFilter: (value: any, record: CurriculumItem) => record.type === value,
             render: (type: string) => {
-                const color = type === 'Cố định' ? 'blue' : 'purple';
-                return <Tag color={color}>{type.toUpperCase()}</Tag>;
+                let color = 'default';
+                switch (type) {
+                    case 'Cố định':
+                        color = 'blue';
+                        break;
+                    case 'Bình thường':
+                        color = 'purple';
+                        break;
+                    case 'Sự kiện':
+                        color = 'geekblue';
+                        break;
+                }
+                return <Tag color={color}>{type ? type.toUpperCase() : 'N/A'}</Tag>;
             }
         },
         {
             title: 'Chi tiết',
             key: 'details',
             sorter: (a: CurriculumItem, b: CurriculumItem) => {
-                // Ưu tiên 'Cố định' lên trước
-                if (a.type === 'Cố định' && b.type === 'Bình thường') return -1;
-                if (a.type === 'Bình thường' && b.type === 'Cố định') return 1;
+                const typePriority = {
+                    'Cố định': 1,
+                    'Bình thường': 2,
+                    'Sự kiện': 3,
+                };
+
+                const priorityA = typePriority[a.type as keyof typeof typePriority] || 99;
+                const priorityB = typePriority[b.type as keyof typeof typePriority] || 99;
+
+                if (priorityA !== priorityB) {
+                    return priorityA - priorityB;
+                }
 
                 if (a.type === 'Cố định') {
                     return (a.startTime ?? 0) - (b.startTime ?? 0);
                 }
-
                 if (a.type === 'Bình thường') {
+                    const categoryCompare = (a.category ?? '').localeCompare(b.category ?? '');
+                    if (categoryCompare !== 0) return categoryCompare;
                     return (a.age ?? 0) - (b.age ?? 0);
+                }
+                if (a.type === 'Sự kiện') {
+                    return (a.eventName ?? '').localeCompare(b.eventName ?? '');
                 }
                 return 0;
             },
@@ -142,6 +167,9 @@ function CurriculumManagement() {
                 if (record.type === 'Bình thường') {
                     const ageText = record.age === 0 ? "Dưới 1 tuổi" : (record.age || 'N/A');
                     return `Độ tuổi: ${ageText}, Danh mục: ${record.category || 'N/A'}`;
+                }
+                if (record.type === 'Sự kiện') {
+                    return `Sự kiện: ${record.eventName || 'N/A'}`;
                 }
                 return 'N/A';
             },

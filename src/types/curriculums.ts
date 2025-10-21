@@ -2,13 +2,14 @@ export interface CurriculumItem {
     _id: string;
     activityCode: string;
     activityName: string;
-    type: "Cố định" | "Bình thường";
+    type: "Cố định" | "Bình thường" | "Sự kiện";
     active: boolean;
     createdBy: string;
     updatedBy: string;
     createdAt: string;
     updatedAt: string;
     age?: number;
+    eventName?: string;
     category?: string;
     startTime?: number;
     endTime?: number;
@@ -33,12 +34,13 @@ export interface CurriculumsListResponse {
 
 export interface CreateCurriculumDto {
     activityName: string;
-    type: "Cố định" | "Bình thường";
+    type: "Cố định" | "Bình thường" | "Sự kiện";
     active: boolean;
     createdBy: string;
     updatedBy: string;
     age?: number;
     category?: string;
+    eventName?: string;
     startTime?: number;
     endTime?: number;
 }
