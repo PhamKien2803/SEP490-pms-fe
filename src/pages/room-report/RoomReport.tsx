@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Table, Button, Space, Typography, Row, Col, Card, Select, Tag, Modal, App } from 'antd';
-import { DownloadOutlined, CheckCircleOutlined, WarningOutlined } from '@ant-design/icons';
+import { Table, Button, Space, Typography, Row, Col, Card, Select, Tag, Modal, App, Tooltip } from 'antd';
+import { DownloadOutlined, CheckCircleOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { toast } from 'react-toastify';
-import { roomApis } from '../../services/apiServices'; 
+import { roomApis } from '../../services/apiServices';
 import { useExcelExport } from '../../hooks/useExcelExport';
 import { usePagePermission } from "../../hooks/usePagePermission";
 import dayjs from 'dayjs';
-import { FacilityExportRecord, RoomRecord, RoomState, UpdateRoomData } from '../../types/room-management'; 
-
+import { FacilityExportRecord, RoomRecord, RoomState, UpdateRoomData } from '../../types/room-management';
 const { Title, Text } = Typography;
 
 const PENDING_STATE: RoomState = 'Chờ xử lý' as RoomState;
@@ -19,7 +18,7 @@ const RoomReportComponent: React.FC = () => {
     const [allRooms, setAllRooms] = useState<RoomRecord[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [selectedYear, setSelectedYear] = useState<number>(dayjs().year());
-    
+
     const [isProcessing, setIsProcessing] = useState(false);
     const [modal, contextHolder] = Modal.useModal();
 
@@ -45,7 +44,7 @@ const RoomReportComponent: React.FC = () => {
             .filter(item => item.state === PENDING_STATE || item.state === APPROVED_STATE)
             .filter(item => {
                 if (!selectedYear) return true;
-                return dayjs(item.createdAt).year() === selectedYear; 
+                return dayjs(item.createdAt).year() === selectedYear;
             });
     }, [allRooms, selectedYear]);
 
@@ -69,20 +68,20 @@ const RoomReportComponent: React.FC = () => {
                     quantityMissing: f.quantityMissing,
                     notes: f.notes,
                 })),
-                state: newState, 
-                notes: roomData.notesTeacher, 
+                state: newState,
+                notes: roomData.notesTeacher,
                 createdBy: roomData.createdBy,
                 updatedBy: roomData.updatedBy,
             };
 
-            await roomApis.updateRoom(roomData._id, payload); 
-            
+            await roomApis.updateRoom(roomData._id, payload);
+
             toast.success(`Phòng học ${roomData.roomName} đã được duyệt!`);
-            await fetchAllRooms(); 
+            await fetchAllRooms();
         } catch (error) {
             toast.error(`Cập nhật trạng thái thất bại.`);
         } finally {
-            setIsProcessing(false); 
+            setIsProcessing(false);
         }
     };
 
@@ -101,7 +100,7 @@ const RoomReportComponent: React.FC = () => {
             onOk: () => updateRoomData(record, APPROVED_STATE),
         });
     };
-    
+
     const getExportDataForRoom = (room: RoomRecord): FacilityExportRecord[] => {
         const data: FacilityExportRecord[] = [];
         room.facilities.forEach(facility => {
@@ -122,14 +121,14 @@ const RoomReportComponent: React.FC = () => {
         });
         return data;
     };
-    
+
     const exportDataTotal = useMemo<FacilityExportRecord[]>(() => {
         const data: FacilityExportRecord[] = [];
         allRooms
-            .filter(room => room.state === PENDING_STATE) 
+            .filter(room => room.state === PENDING_STATE)
             .filter(item => {
                 if (!selectedYear) return true;
-                return dayjs(item.createdAt).year() === selectedYear; 
+                return dayjs(item.createdAt).year() === selectedYear;
             })
             .forEach(room => {
                 room.facilities.forEach(facility => {
@@ -152,46 +151,58 @@ const RoomReportComponent: React.FC = () => {
         return data;
     }, [allRooms, selectedYear]);
 
-    const { exportToExcel, isExporting: isExportingExcel } = useExcelExport({
+    const { exportToExcel, isExporting: isExportingExcel, exportDetailsToExcel, isExportingDetails } = useExcelExport({
         data: exportDataTotal,
-        fileName: `BC_CSVC_BaoCaoTongHop_${selectedYear}_${dayjs().format('YYYYMMDD')}`, 
+        fileName: `BC_CSVC_BaoCaoTongHop_${selectedYear}_${dayjs().format('YYYYMMDD')}`,
     });
-    
+
+    // const handleExportRoomDetails = (record: RoomRecord) => {
+    //     const dataToExport = getExportDataForRoom(record);
+    //     if (dataToExport.length === 0) {
+    //         toast.info(`Phòng ${record.roomName} không có thiết bị hỏng hoặc thiếu nào cần báo cáo.`);
+    //         return;
+    //     }
+    //     exportToExcel({
+    //         data: dataToExport,
+    //         fileName: `BC_Loi_${record.roomName}_${dayjs().format('YYYYMMDDHHmmss')}`,
+    //     });
+    // };
     const handleExportRoomDetails = (record: RoomRecord) => {
         const dataToExport = getExportDataForRoom(record);
         if (dataToExport.length === 0) {
             toast.info(`Phòng ${record.roomName} không có thiết bị hỏng hoặc thiếu nào cần báo cáo.`);
             return;
         }
-        
-        exportToExcel({
+        exportDetailsToExcel({
             data: dataToExport,
             fileName: `BC_Loi_${record.roomName}_${dayjs().format('YYYYMMDDHHmmss')}`,
+            sheetName: record.roomName
         });
     };
+
 
     const getTagColor = (state: RoomState) => {
         switch (state) {
             case PENDING_STATE:
-                return 'gold'; 
+                return 'gold';
             case APPROVED_STATE:
-                return 'success'; 
+                return 'success';
             default:
                 return 'default';
         }
     }
 
     const columns: ColumnsType<RoomRecord> = useMemo(() => [
-        { 
-            title: 'Mã Phòng', 
-            dataIndex: '_id', 
-            key: '_id', 
+        {
+            title: 'Mã Phòng',
+            dataIndex: '_id',
+            key: '_id',
             width: 100,
             render: (text) => <Text copyable>{text.slice(-6)}</Text>
         },
-        { 
-            title: 'Tên Phòng', 
-            dataIndex: 'roomName', 
+        {
+            title: 'Tên Phòng',
+            dataIndex: 'roomName',
             key: 'roomName',
             width: 200,
             render: (text, record) => (
@@ -200,23 +211,23 @@ const RoomReportComponent: React.FC = () => {
                 </Button>
             )
         },
-        { 
-            title: 'Loại Phòng', 
-            dataIndex: 'roomType', 
-            key: 'roomType', 
-            width: 150 
+        {
+            title: 'Loại Phòng',
+            dataIndex: 'roomType',
+            key: 'roomType',
+            width: 150
         },
-        { 
-            title: 'Ngày Báo Cáo', 
-            dataIndex: 'updatedAt', 
-            key: 'updatedAt', 
+        {
+            title: 'Ngày Báo Cáo',
+            dataIndex: 'updatedAt',
+            key: 'updatedAt',
             width: 160,
-            render: (text) => dayjs(text).format('DD/MM/YYYY HH:mm') 
+            render: (text) => dayjs(text).format('DD/MM/YYYY HH:mm')
         },
-        { 
-            title: 'Trạng Thái', 
-            dataIndex: 'state', 
-            key: 'state', 
+        {
+            title: 'Trạng Thái',
+            dataIndex: 'state',
+            key: 'state',
             width: 150,
             render: (state: RoomState) => (
                 <Tag color={getTagColor(state)}>
@@ -232,22 +243,23 @@ const RoomReportComponent: React.FC = () => {
             render: (_, record) => (
                 <Space size="small">
                     {record.state === PENDING_STATE && (
-                        <Button 
-                            icon={<CheckCircleOutlined />} 
-                            type="primary" 
+                        <Button
+                            icon={<CheckCircleOutlined />}
+                            type="primary"
                             size="small"
-                            onClick={() => handleApprove(record)} 
+                            onClick={() => handleApprove(record)}
                             loading={isProcessing}
                             disabled={isProcessing}
                         >
                             Duyệt
                         </Button>
                     )}
-                    
+
                     <Button
                         icon={<DownloadOutlined />}
                         size="small"
                         onClick={() => handleExportRoomDetails(record)}
+                        loading={isExportingDetails}
                         disabled={isProcessing}
                     >
                         Chi tiết
@@ -288,11 +300,16 @@ const RoomReportComponent: React.FC = () => {
                                 options={yearOptions}
                                 placeholder="Chọn năm"
                             />
+                            <Tooltip title="Làm mới danh sách">
+                                <Button icon={<ReloadOutlined />}
+                                    onClick={fetchAllRooms}
+                                    loading={loading}></Button>
+                            </Tooltip>
                             {canExportfile && (
                                 <Button
                                     type="primary"
                                     icon={<DownloadOutlined />}
-                                    onClick={() => exportToExcel()} 
+                                    onClick={() => exportToExcel()}
                                     loading={isExportingExcel}
                                 >
                                     Xuất Báo cáo Tổng hợp
@@ -306,7 +323,7 @@ const RoomReportComponent: React.FC = () => {
                     columns={columns}
                     dataSource={filteredData}
                     loading={loading}
-                    rowKey="_id" 
+                    rowKey="_id"
                     bordered
                     pagination={{
                         showTotal: (total) => `Tổng số: ${total} báo cáo`,

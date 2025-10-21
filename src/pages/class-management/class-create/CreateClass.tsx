@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Card, Spin, Alert, Button, Row, Col, Typography, Flex, Table,
     Form, Input, Modal, Popconfirm,
-    Space, Select, InputNumber
+    Space, Select
 } from 'antd';
 import {
     ArrowLeftOutlined, UserAddOutlined, DeleteOutlined, SaveOutlined,
@@ -15,6 +15,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { toast } from 'react-toastify';
 import { StudentInClass, TeacherInClass, CreateClassDto, AvailableRoom } from '../../../types/class';
 import { classApis } from '../../../services/apiServices';
+import { ageOptions } from '../../../components/hard-code-action';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -90,12 +91,6 @@ function CreateClass() {
         setIsDirty(true);
     };
 
-    const allowOnlyNumbers = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (!/[0-9]/.test(event.key) && !['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete'].includes(event.key) && !event.ctrlKey) {
-            event.preventDefault();
-        }
-    };
-
     const onFinish = async (values: { className: string; age: number; room?: string; teachers?: string[] }) => {
         setIsSubmitting(true);
         const payload: CreateClassDto = {
@@ -163,13 +158,18 @@ function CreateClass() {
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12} md={8}>
-                            <Form.Item name="age" label="Độ tuổi" rules={[{ required: true, message: 'Vui lòng nhập độ tuổi!' }]}>
-                                <InputNumber
-                                    onKeyPress={allowOnlyNumbers}
-                                    min={1} max={10} style={{ width: '100%' }}
-                                    placeholder="Ví dụ: 3"
-                                    prefix={<NumberOutlined />}
-                                />
+                            <Form.Item name="age" label="Độ tuổi" rules={[{ required: true, message: 'Vui lòng chọn độ tuổi!' }]}>
+                                <Select
+                                    placeholder="Chọn độ tuổi"
+                                    style={{ width: '100%' }}
+                                    allowClear
+                                >
+                                    {ageOptions.map(age => (
+                                        <Option key={age.value} value={age.value}>
+                                            <NumberOutlined style={{ marginRight: 8 }} /> {age.label}
+                                        </Option>
+                                    ))}
+                                </Select>
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12} md={8}>

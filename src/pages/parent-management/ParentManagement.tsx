@@ -285,7 +285,7 @@ const ParentManagement: React.FC = () => {
                         <Tooltip title="Làm mới danh sách">
                             <Button icon={<ReloadOutlined />}
                                 onClick={() => fetchParents({ page: pagination.current!, limit: pagination.pageSize! })}
-                                loading={loading}>Làm mới danh sách</Button>
+                                loading={loading}></Button>
                         </Tooltip>
                         <Input.Search
                             placeholder="Tìm kiếm phụ huynh..."

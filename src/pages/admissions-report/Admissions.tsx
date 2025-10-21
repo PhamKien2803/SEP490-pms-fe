@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Table, Button, Space, Typography, Row, Col, Card, Select, Tag } from 'antd';
-import { DownloadOutlined } from '@ant-design/icons';
+import { Table, Button, Space, Typography, Row, Col, Card, Select, Tag, Tooltip } from 'antd';
+import { DownloadOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { toast } from 'react-toastify';
 import { enrollmentApis } from '../../services/apiServices';
@@ -97,6 +97,11 @@ const Admissions: React.FC = () => {
                                 options={yearOptions}
                                 placeholder="Chọn năm"
                             />
+                            <Tooltip title="Làm mới danh sách">
+                                <Button icon={<ReloadOutlined />}
+                                    onClick={fetchAllEnrollments}
+                                    loading={loading}></Button>
+                            </Tooltip>
                             {canExportfile && (
                                 <Button
                                     type="primary"

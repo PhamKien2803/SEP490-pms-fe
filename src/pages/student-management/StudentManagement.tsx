@@ -328,7 +328,6 @@ const StudentManagement: React.FC = () => {
                 }
                 loading={loading}
               >
-                Làm mới danh sách
               </Button>
             </Tooltip>
             <Input.Search
@@ -356,20 +355,20 @@ const StudentManagement: React.FC = () => {
 
   const initialUpdateData = editingStudent
     ? {
-        _id: editingStudent._id,
-        studentCode: editingStudent.studentCode,
-        fullName: editingStudent.fullName,
-        dob: editingStudent.dob,
-        idCard: editingStudent.idCard,
-        gender: editingStudent.gender,
-        address: editingStudent.address,
-        relationship: editingStudent.relationship,
-        nation: editingStudent.nation,
-        religion: editingStudent.religion,
-        active: editingStudent.active,
-        birthCertId: editingStudent.birthCertId,
-        healthCertId: editingStudent.healthCertId,
-      }
+      _id: editingStudent._id,
+      studentCode: editingStudent.studentCode,
+      fullName: editingStudent.fullName,
+      dob: editingStudent.dob,
+      idCard: editingStudent.idCard,
+      gender: editingStudent.gender,
+      address: editingStudent.address,
+      relationship: editingStudent.relationship,
+      nation: editingStudent.nation,
+      religion: editingStudent.religion,
+      active: editingStudent.active,
+      birthCertId: editingStudent.birthCertId,
+      healthCertId: editingStudent.healthCertId,
+    }
     : null;
 
   return (
@@ -386,7 +385,7 @@ const StudentManagement: React.FC = () => {
           rowKey="_id"
           pagination={searchKeyword.trim() ? false : pagination}
           onChange={handleTableChange}
-          // scroll={{ x: 1300, y: 500 }}
+        // scroll={{ x: 1300, y: 500 }}
         />
       </Card>
 

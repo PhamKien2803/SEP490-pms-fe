@@ -46,9 +46,13 @@ function CurriculumManagement() {
             });
             setOriginalCurriculums(response.data);
             setFilteredCurriculums(response.data);
-            setPagination(prev => ({ ...prev, total: response.page.totalCount, current: 1 }));
+            setPagination(prev => ({
+                ...prev,
+                total: response.data.length,
+                current: 1
+            }));
         } catch (error) {
-            toast.error('Không thể tải danh sách chương trình học.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Lấy danh sách chương trình học thất bại!');
             setOriginalCurriculums([]);
             setFilteredCurriculums([]);
         } finally {
@@ -67,6 +71,12 @@ function CurriculumManagement() {
             item.activityCode.toLowerCase().includes(lowercasedFilter)
         );
         setFilteredCurriculums(filteredData);
+
+        setPagination(prev => ({
+            ...prev,
+            total: filteredData.length,
+            current: 1,
+        }));
     }, [searchTerm, originalCurriculums]);
 
 
@@ -74,10 +84,9 @@ function CurriculumManagement() {
         try {
             await curriculumsApis.deleteCurriculum(id);
             toast.success('Xóa chương trình học thành công!');
-            // Cập nhật lại list sau khi xóa thành công
             fetchCurriculums();
         } catch (error) {
-            toast.error('Xóa chương trình học thất bại.');
+            typeof error === "string" ? toast.warn(error) : toast.error('Xóa chương trình học thất bại. Vui lòng thử lại.');
         }
     };
 
@@ -103,16 +112,36 @@ function CurriculumManagement() {
                 { text: 'Bình thường', value: 'Bình thường' },
             ],
             onFilter: (value: any, record: CurriculumItem) => record.type === value,
+            render: (type: string) => {
+                const color = type === 'Cố định' ? 'blue' : 'purple';
+                return <Tag color={color}>{type.toUpperCase()}</Tag>;
+            }
         },
         {
             title: 'Chi tiết',
             key: 'details',
+            sorter: (a: CurriculumItem, b: CurriculumItem) => {
+                // Ưu tiên 'Cố định' lên trước
+                if (a.type === 'Cố định' && b.type === 'Bình thường') return -1;
+                if (a.type === 'Bình thường' && b.type === 'Cố định') return 1;
+
+                if (a.type === 'Cố định') {
+                    return (a.startTime ?? 0) - (b.startTime ?? 0);
+                }
+
+                if (a.type === 'Bình thường') {
+                    return (a.age ?? 0) - (b.age ?? 0);
+                }
+                return 0;
+            },
+            defaultSortOrder: 'ascend',
             render: (_: any, record: CurriculumItem) => {
                 if (record.type === 'Cố định') {
                     return `Thời gian: ${formatMinutesToTime(record.startTime as number)} - ${formatMinutesToTime(record.endTime as number)}`;
                 }
                 if (record.type === 'Bình thường') {
-                    return `Độ tuổi: ${record.age || 'N/A'}, Danh mục: ${record.category || 'N/A'}`;
+                    const ageText = record.age === 0 ? "Dưới 1 tuổi" : (record.age || 'N/A');
+                    return `Độ tuổi: ${ageText}, Danh mục: ${record.category || 'N/A'}`;
                 }
                 return 'N/A';
             },
@@ -153,13 +182,13 @@ function CurriculumManagement() {
                 </Space>
             ),
         },
-    ], [handleDelete]);
+    ], [handleDelete, canUpdate, canDelete, navigate]);
 
 
     return (
         <Card>
             <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
-                <Title level={2}>Quản lý Chương trình học</Title>
+                <Title level={2}>Quản lý hoạt động</Title>
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <Space>
                         <Search
@@ -195,8 +224,11 @@ function CurriculumManagement() {
                         pagination={{
                             current: pagination.current,
                             pageSize: pagination.pageSize,
-                            total: filteredCurriculums.length,
+                            total: pagination.total,
                             onChange: (page, pageSize) => setPagination({ ...pagination, current: page, pageSize: pageSize }),
+                            showSizeChanger: true,
+                            pageSizeOptions: ['10', '20', '50'],
+                            showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} mục`,
                         }}
                     />
                 )}

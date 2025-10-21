@@ -8,17 +8,8 @@ import { useCurrentUser } from '../../../hooks/useCurrentUser';
 import { CreateRoleDto, RoleFunctionItem, RoleModuleItem } from '../../../types/role';
 import { rolesApis } from '../../../services/apiServices';
 import { constants } from '../../../constants';
+import { hardcodedActions } from '../../../components/hard-code-action';
 
-
-const hardcodedActions = [
-    { label: 'Xem', value: 'view' },
-    { label: 'Tạo', value: 'create' },
-    { label: 'Sửa', value: 'update' },
-    { label: 'Xóa', value: 'delete' },
-    { label: 'Duyệt đơn', value: 'approve' },
-    { label: 'Xuất file', value: 'export' },
-    { label: 'Nhập file', value: 'import' },
-];
 
 const CreateRole: React.FC = () => {
     const [form] = Form.useForm();

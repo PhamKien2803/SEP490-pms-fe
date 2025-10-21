@@ -147,7 +147,7 @@ function SchoolyearsReport() {
                             <Tooltip title="Làm mới danh sách">
                                 <Button icon={<ReloadOutlined />}
                                     onClick={handleRefresh}
-                                    loading={loading}>Làm mới danh sách</Button>
+                                    loading={loading}></Button>
                             </Tooltip>
                             <Select
                                 value={selectedYearId}

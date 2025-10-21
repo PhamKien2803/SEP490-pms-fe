@@ -3,9 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
     Card, Spin, Alert, Button, Row, Col, Typography, Flex, Table,
     Form, Input, Modal, Popconfirm,
-    Space, Select, InputNumber, Upload, Tooltip
+    Space, Select, Upload, Tooltip
 } from 'antd';
-import { ArrowLeftOutlined, UserAddOutlined, DeleteOutlined, UploadOutlined, SaveOutlined, FileExcelOutlined, SwapOutlined, UsergroupDeleteOutlined, SlidersOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, UserAddOutlined, DeleteOutlined, UploadOutlined, SaveOutlined, FileExcelOutlined, SwapOutlined, UsergroupDeleteOutlined, SlidersOutlined, NumberOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { toast } from 'react-toastify';
 import {
@@ -20,7 +20,7 @@ import {
 } from '../../../services/uploadService';
 import AddMemberTableModal from '../../../modal/class-modal/AddMemberTableModal';
 import TransferModal from '../../../modal/class-modal/TransferModal';
-
+import { ageOptions } from '../../../components/hard-code-action';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -295,8 +295,18 @@ function UpdateClass() {
                             </Form.Item>
                         </Col>
                         <Col span={8}>
-                            <Form.Item name="age" label="Độ tuổi" rules={[{ required: true, message: 'Vui lòng nhập độ tuổi!' }]}>
-                                <InputNumber min={1} max={10} style={{ width: '100%' }} placeholder="Ví dụ: 3" />
+                            <Form.Item name="age" label="Độ tuổi" rules={[{ required: true, message: 'Vui lòng chọn độ tuổi!' }]}>
+                                <Select
+                                    placeholder="Chọn độ tuổi"
+                                    style={{ width: '100%' }}
+                                    allowClear
+                                >
+                                    {ageOptions.map(age => (
+                                        <Option key={age.value} value={age.value}>
+                                            <NumberOutlined style={{ marginRight: 8 }} /> {age.label}
+                                        </Option>
+                                    ))}
+                                </Select>
                             </Form.Item>
                         </Col>
                         <Col span={8}>
