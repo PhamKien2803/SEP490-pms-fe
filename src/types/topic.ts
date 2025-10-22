@@ -98,9 +98,25 @@ export interface AvailableTopicActivitiesResponse {
     activitiEvent: ActivityReference[];
 }
 
-// export interface ActivityReference {
-//     _id: string;
-//     activityName: string;
-//     type: string;
-//     category?: string;
-// }
+export interface ManualActivityRow {
+    key: string;
+    activityId?: string;
+    sessions?: number;
+    activityName?: string;
+    activityTypeDisplay?: string;
+    startTime?: number;
+    endTime?: number;
+    eventName?: string;
+}
+
+export interface UnifiedActivityRow {
+    key: string;
+    type: 'suggested' | 'manual';
+    activityId?: string;
+    activityName?: string;
+    activityTypeDisplay?: string;
+    sessions?: number;
+    startTime?: number;
+    endTime?: number;
+    eventName?: string;
+}

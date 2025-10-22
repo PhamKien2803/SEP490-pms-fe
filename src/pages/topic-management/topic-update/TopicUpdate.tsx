@@ -8,8 +8,6 @@ import {
     Row,
     Col,
     Tabs,
-    Table,
-    InputNumber,
     Spin,
     Flex,
     Typography,
@@ -24,23 +22,20 @@ import {
     ClusterOutlined,
     AppstoreOutlined,
     CalendarOutlined,
-    DeleteOutlined,
-    PlusOutlined,
     ExclamationCircleOutlined,
 } from '@ant-design/icons';
-import type { TableProps } from 'antd';
 import {
-    ActivityReference,
     AvailableTopicActivitiesResponse,
     UpdateTopicDto,
     ActivityInput,
     TopicActivityDetail,
+    ManualActivityRow,
 } from '../../../types/topic';
 import { topicApis } from '../../../services/apiServices';
 import { ageOptions } from '../../../components/hard-code-action';
-
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
+import ManualActivityTable from '../../../components/table/ManualActivityTable';
+import { useCurrentUser } from '../../../hooks/useCurrentUser';
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -49,124 +44,6 @@ const monthOptions = Array.from({ length: 12 }, (_, i) => ({
     label: `Tháng ${i + 1}`,
     value: (i + 1).toString(),
 }));
-interface ManualActivityRow {
-    key: string;
-    activityId?: string;
-    sessions?: number;
-}
-
-interface ManualActivityTableProps {
-    rows: ManualActivityRow[];
-    options: ActivityReference[];
-    onChange: (rows: ManualActivityRow[]) => void;
-}
-
-const ManualActivityTable: React.FC<ManualActivityTableProps> = ({
-    rows,
-    options,
-    onChange,
-}) => {
-    const handleAddRow = () => {
-        const newKey = Date.now().toString();
-        onChange([...rows, { key: newKey }]);
-    };
-
-    const handleDeleteRow = (key: string) => {
-        onChange(rows.filter((row) => row.key !== key));
-    };
-
-    const handleUpdateRow = (
-        key: string,
-        field: 'activityId' | 'sessions',
-        value: string | number | null
-    ) => {
-        onChange(
-            rows.map((row) =>
-                row.key === key ? { ...row, [field]: value } : row
-            )
-        );
-    };
-
-    const activityOptions = options.map((opt) => ({
-        label: opt.activityName,
-        value: opt._id,
-    }));
-
-    const columns: TableProps<ManualActivityRow>['columns'] = [
-        {
-            title: 'Tên hoạt động',
-            key: 'activityId',
-            width: '65%',
-            render: (_, record) => (
-                <Select
-                    showSearch
-                    placeholder="Chọn hoạt động"
-                    style={{ width: '100%' }}
-                    options={activityOptions}
-                    value={record.activityId}
-                    onChange={(value) => handleUpdateRow(record.key, 'activityId', value)}
-                    filterOption={(input, option) =>
-                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                    }
-                />
-            ),
-        },
-        {
-            title: 'Số buổi / tuần',
-            key: 'sessions',
-            width: '25%',
-            render: (_, record) => (
-                <InputNumber
-                    min={0}
-                    max={10}
-                    placeholder="Số buổi"
-                    style={{ width: '100px' }}
-                    value={record.sessions}
-                    onChange={(value) => handleUpdateRow(record.key, 'sessions', value)}
-                />
-            ),
-        },
-        {
-            title: 'Hành động',
-            key: 'action',
-            width: '10%',
-            align: 'center',
-            render: (_, record) => (
-                <Button
-                    type="text"
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() => handleDeleteRow(record.key)}
-                />
-            ),
-        },
-    ];
-
-    return (
-        <div style={{ marginTop: 16 }}>
-            <Table
-                columns={columns}
-                dataSource={rows}
-                rowKey="key"
-                pagination={false}
-                bordered
-                size="small"
-                locale={{
-                    emptyText:
-                        'Chưa có hoạt động nào được thêm thủ công. Nhấn nút bên dưới.',
-                }}
-            />
-            <Button
-                type="dashed"
-                icon={<PlusOutlined />}
-                onClick={handleAddRow}
-                style={{ width: '100%', marginTop: 8 }}
-            >
-                Thêm hoạt động
-            </Button>
-        </div>
-    );
-};
 
 function TopicUpdate() {
     const [form] = Form.useForm();
@@ -174,7 +51,7 @@ function TopicUpdate() {
     const { id } = useParams<{ id: string }>();
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
-
+    const user = useCurrentUser();
     const [availableActivities, setAvailableActivities] =
         useState<AvailableTopicActivitiesResponse | null>(null);
 
@@ -194,6 +71,14 @@ function TopicUpdate() {
             key: item._id,
             activityId: item.activity._id,
             sessions: item.sessionsPerWeek,
+            activityName: item.activity.activityName,
+            activityTypeDisplay:
+                item.activity.type === 'Bình thường'
+                    ? item.activity.category
+                    : item.activity.type,
+            startTime: item.activity.startTime,
+            endTime: item.activity.endTime,
+            eventName: item.activity.eventName,
         }));
     };
 
@@ -258,7 +143,16 @@ function TopicUpdate() {
 
         setIsSaving(true);
 
-        const formatManualRows = (rows: ManualActivityRow[]): ActivityInput[] => {
+        const formatFixRows = (rows: ManualActivityRow[]): ActivityInput[] => {
+            return rows
+                .filter((row) => row.activityId)
+                .map((row) => ({
+                    activity: row.activityId!,
+                    sessionsPerWeek: 1,
+                }));
+        };
+
+        const formatCoreOrEventRows = (rows: ManualActivityRow[]): ActivityInput[] => {
             return rows
                 .filter((row) => row.activityId && (row.sessions ?? 0) > 0)
                 .map((row) => ({
@@ -267,9 +161,9 @@ function TopicUpdate() {
                 }));
         };
 
-        const finalFix = formatManualRows(manualFixRows);
-        const finalCore = formatManualRows(manualCoreRows);
-        const finalEvent = formatManualRows(manualEventRows);
+        const finalFix = formatFixRows(manualFixRows);
+        const finalCore = formatCoreOrEventRows(manualCoreRows);
+        const finalEvent = formatCoreOrEventRows(manualEventRows);
 
         if (
             finalFix.length === 0 &&
@@ -277,7 +171,7 @@ function TopicUpdate() {
             finalEvent.length === 0
         ) {
             toast.warn(
-                'Vui lòng chọn ít nhất một hoạt động (bằng cách nhập số buổi).'
+                'Vui lòng chọn ít nhất một hoạt động (và nhập số buổi nếu cần).'
             );
             setIsSaving(false);
             return;
@@ -290,7 +184,7 @@ function TopicUpdate() {
             activitiFix: finalFix,
             activitiCore: finalCore,
             activitiEvent: finalEvent,
-            updatedBy: 'admin_user_updater',
+            updatedBy: user?.email,
         };
 
         try {
@@ -314,17 +208,6 @@ function TopicUpdate() {
 
     return (
         <>
-            <ToastContainer
-                position="top-right"
-                autoClose={3000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-            />
             <Form
                 form={form}
                 layout="vertical"
@@ -400,6 +283,7 @@ function TopicUpdate() {
                                     rows={manualFixRows}
                                     options={availableActivities.activitiFix}
                                     onChange={(rows) => updateManualRows(setManualFixRows, rows)}
+                                    tableType="fix"
                                 />
                             </TabPane>
                             <TabPane
@@ -417,6 +301,7 @@ function TopicUpdate() {
                                     onChange={(rows) =>
                                         updateManualRows(setManualCoreRows, rows)
                                     }
+                                    tableType="core"
                                 />
                             </TabPane>
                             <TabPane
@@ -434,6 +319,7 @@ function TopicUpdate() {
                                     onChange={(rows) =>
                                         updateManualRows(setManualEventRows, rows)
                                     }
+                                    tableType="event"
                                 />
                             </TabPane>
                         </Tabs>

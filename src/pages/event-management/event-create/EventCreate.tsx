@@ -10,7 +10,8 @@ import {
     DatePicker,
     Spin,
     Space,
-    Modal
+    Modal,
+    Checkbox,
 } from 'antd';
 import {
     SaveOutlined,
@@ -19,19 +20,21 @@ import {
     FileTextOutlined,
     ClockCircleOutlined,
     ExclamationCircleOutlined,
-    FormOutlined
+    FormOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import type { Dayjs } from 'dayjs';
 import { CreateEventDto } from '../../../types/event';
 import { eventApis } from '../../../services/apiServices';
+import { useCurrentUser } from '../../../hooks/useCurrentUser';
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 
 function EventCreate() {
+    const user = useCurrentUser();
     const [form] = Form.useForm();
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,7 +51,7 @@ function EventCreate() {
 
     const onFinish = async (values: any) => {
         setIsSubmitting(true);
-        const currentUser = "admin_pms_creator";
+        const currentUser = user?.email;
 
         const [startDate, endDate]: [Dayjs, Dayjs] = values.dateRange;
 
@@ -63,6 +66,7 @@ function EventCreate() {
             holidayStartDate: startDate.startOf('day').toISOString(),
             holidayEndDate: endDate.startOf('day').toISOString(),
             note: values.note,
+            isHoliday: values.isHoliday || false,
             createdBy: currentUser,
             updatedBy: currentUser,
         };
@@ -87,6 +91,7 @@ function EventCreate() {
                 layout="vertical"
                 onFinish={onFinish}
                 onValuesChange={() => setIsDirty(true)}
+                initialValues={{ isHoliday: false }}
             >
                 <Row justify="space-between" align="middle" style={{ marginBottom: '24px' }}>
                     <Col>
@@ -129,6 +134,7 @@ function EventCreate() {
                 >
                     <Spin spinning={isSubmitting}>
                         <Row gutter={24}>
+                            {/* Event Name */}
                             <Col xs={24} sm={12}>
                                 <Form.Item
                                     name="eventName"
@@ -163,6 +169,19 @@ function EventCreate() {
                             </Col>
                             <Col xs={24}>
                                 <Form.Item
+                                    name="isHoliday"
+                                    valuePropName="checked"
+                                >
+                                    <Checkbox>
+                                        <Space>
+                                            Đánh dấu là ngày nghỉ lễ (toàn trường nghỉ)
+                                        </Space>
+                                    </Checkbox>
+                                </Form.Item>
+                            </Col>
+                            {/* Note */}
+                            <Col xs={24}>
+                                <Form.Item
                                     name="note"
                                     label={
                                         <Space>
@@ -190,7 +209,10 @@ function EventCreate() {
                     </span>
                 }
                 open={isBackConfirmVisible}
-                onOk={() => navigate(-1)}
+                onOk={() => {
+                    setIsDirty(false);
+                    navigate(-1);
+                }}
                 onCancel={() => setIsBackConfirmVisible(false)}
                 okText="Đồng ý"
                 cancelText="Không"
