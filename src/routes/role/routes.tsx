@@ -46,6 +46,7 @@ import TopicManagement from "../../pages/topic-management/TopicManagement";
 import TopicCreate from "../../pages/topic-management/topic-create/TopicCreate";
 import TopicUpdate from "../../pages/topic-management/topic-update/TopicUpdate";
 import SchedulesManagement from "../../pages/schedules-management/SchedulesManagement";
+import ClassInfor from "../../pages/teacher/ClassInfor";
 
 export const routes: RouteObject[] = [
   {
@@ -353,6 +354,22 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <SchedulesManagement />,
+              }
+
+            ],
+          },
+          {
+            path: "teachers",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/teachers`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <ClassInfor />,
               }
 
             ],
