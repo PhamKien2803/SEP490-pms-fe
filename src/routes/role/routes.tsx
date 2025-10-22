@@ -45,6 +45,7 @@ import RoomReport from "../../pages/room-report/RoomReport";
 import TopicManagement from "../../pages/topic-management/TopicManagement";
 import TopicCreate from "../../pages/topic-management/topic-create/TopicCreate";
 import TopicUpdate from "../../pages/topic-management/topic-update/TopicUpdate";
+import SchedulesManagement from "../../pages/schedules-management/SchedulesManagement";
 
 export const routes: RouteObject[] = [
   {
@@ -336,6 +337,22 @@ export const routes: RouteObject[] = [
               {
                 path: "update/:id",
                 element: <TopicUpdate />
+              }
+
+            ],
+          },
+          {
+            path: "schedules",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/schedules`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <SchedulesManagement />,
               }
 
             ],
