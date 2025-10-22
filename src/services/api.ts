@@ -86,6 +86,12 @@ export const apiEndPoint = {
   UPDATE_ROOM: (id: string) => `/rooms/update/${id}`,
   DELETE_ROOM: (id: string) => `/rooms/delete/${id}`,
   GET_ROOM_BY_ID: (id: string) => `/rooms/getById/${id}`,
+  GET_TOPIC_LIST: "/topics/list",
+  GET_TOPIC_BY_ID: (id: string) => `/topics/getById/${id}`,
+  GET_AVAILABEL_TOPIC: `/topics/getAvailable`,
+  CREATE_TOPIC: "/topics/create",
+  UPDATE_TOPIC: (id: string) => `/topics/update/${id}`,
+  DELETE_TOPIC: (id: string) => `/topics/delete/${id}`
 };
 
 export const apiConfig = {

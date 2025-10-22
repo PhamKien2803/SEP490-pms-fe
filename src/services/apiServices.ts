@@ -93,6 +93,7 @@ import {
   RoomRecord,
   UpdateRoomData,
 } from "../types/room-management";
+import { AvailableTopicActivitiesResponse, CreateTopicDto, GetAvailableTopicActivitiesParams, GetTopicsParams, TopicDetails, TopicsListResponse, UpdateTopicDto } from "../types/topic";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -744,6 +745,66 @@ export const eventApis = {
 
   deleteEvent: async (id: string): Promise<void> => {
     await axiosAuth.post(apiEndPoint.DELETE_EVENT(id));
+  },
+
+}
+
+export const topicApis = {
+  getTopicsList: async (
+    params: GetTopicsParams
+  ): Promise<TopicsListResponse> => {
+    const response = await axiosAuth.get<TopicsListResponse>(
+      apiEndPoint.GET_TOPIC_LIST,
+      { params }
+    );
+    return response.data;
+  },
+
+
+  getTopicById: async (
+    id: string
+  ): Promise<TopicDetails> => {
+    const response = await axiosAuth.get<TopicDetails>(
+      apiEndPoint.GET_TOPIC_BY_ID(id)
+    );
+    return response.data;
+  },
+
+
+  createTopic: async (
+    data: CreateTopicDto
+  ): Promise<TopicDetails> => {
+    const response = await axiosAuth.post<TopicDetails>(
+      apiEndPoint.CREATE_TOPIC,
+      data
+    );
+    return response.data;
+  },
+
+
+  updateTopic: async (
+    id: string,
+    data: UpdateTopicDto
+  ): Promise<TopicDetails> => {
+    const response = await axiosAuth.put<TopicDetails>(
+      apiEndPoint.UPDATE_TOPIC(id),
+      data
+    );
+    return response.data;
+  },
+
+  deleteTopic: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_TOPIC(id));
+  },
+
+  getAvailableTopicActivities: async (
+    params: GetAvailableTopicActivitiesParams
+  ): Promise<AvailableTopicActivitiesResponse> => {
+    const response = await axiosAuth.get<AvailableTopicActivitiesResponse>(
+      apiEndPoint.GET_AVAILABEL_TOPIC,
+      { params }
+    );
+    return response.data;
   },
 
 }

@@ -163,7 +163,6 @@ function EventManagement() {
         }));
     };
 
-    // --- Columns ---
     const columns = useMemo((): any[] => [
         {
             title: 'Mã Sự kiện',

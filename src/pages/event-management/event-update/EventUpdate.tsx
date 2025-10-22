@@ -11,7 +11,8 @@ import {
     Spin,
     Space,
     Modal,
-    Flex
+    Flex,
+    Checkbox,
 } from 'antd';
 import {
     SaveOutlined,
@@ -20,7 +21,7 @@ import {
     FileTextOutlined,
     ClockCircleOutlined,
     ExclamationCircleOutlined,
-    FormOutlined
+    FormOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -28,6 +29,7 @@ import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import { UpdateEventDto } from '../../../types/event';
 import { eventApis } from '../../../services/apiServices';
+import { useCurrentUser } from '../../../hooks/useCurrentUser';
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
@@ -37,7 +39,7 @@ function EventUpdate() {
     const [form] = Form.useForm();
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-
+    const user = useCurrentUser();
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
@@ -59,7 +61,8 @@ function EventUpdate() {
                 dateRange: [
                     data.holidayStartDate ? dayjs(data.holidayStartDate) : null,
                     data.holidayEndDate ? dayjs(data.holidayEndDate) : null
-                ]
+                ],
+                isHoliday: data.isHoliday || false,
             };
 
             form.setFieldsValue(formData);
@@ -89,7 +92,7 @@ function EventUpdate() {
         if (!id) return;
 
         setIsSubmitting(true);
-        const currentUser = "admin_pms_updater";
+        const currentUser = user?.email;
 
         const [startDate, endDate]: [Dayjs, Dayjs] = values.dateRange;
 
@@ -104,6 +107,7 @@ function EventUpdate() {
             holidayStartDate: startDate.startOf('day').toISOString(),
             holidayEndDate: endDate.startOf('day').toISOString(),
             note: values.note,
+            isHoliday: values.isHoliday || false,
             updatedBy: currentUser,
         };
 
@@ -123,7 +127,7 @@ function EventUpdate() {
     if (loading) {
         return (
             <Flex align="center" justify="center" style={{ minHeight: 'calc(100vh - 200px)' }}>
-                <Spin size="large" />
+                <Spin size="large" tip="Đang tải dữ liệu..." />
             </Flex>
         );
     }
@@ -177,15 +181,11 @@ function EventUpdate() {
                 >
                     <Spin spinning={isSubmitting}>
                         <Row gutter={24}>
+                            {/* Event Name */}
                             <Col xs={24} sm={12}>
                                 <Form.Item
                                     name="eventName"
-                                    label={
-                                        <Space>
-                                            <FileTextOutlined />
-                                            Tên Sự kiện / Ngày lễ
-                                        </Space>
-                                    }
+                                    label={<Space><FileTextOutlined />Tên Sự kiện / Ngày lễ</Space>}
                                     rules={[{ required: true, message: 'Vui lòng nhập tên sự kiện!' }]}
                                 >
                                     <Input placeholder="Ví dụ: Tết Trung Thu, Ngày Hội Thể Thao..." />
@@ -194,12 +194,7 @@ function EventUpdate() {
                             <Col xs={24} sm={12}>
                                 <Form.Item
                                     name="dateRange"
-                                    label={
-                                        <Space>
-                                            <ClockCircleOutlined />
-                                            Thời gian diễn ra (Từ ngày - Đến ngày)
-                                        </Space>
-                                    }
+                                    label={<Space><ClockCircleOutlined />Thời gian diễn ra (Từ ngày - Đến ngày)</Space>}
                                     rules={[{ required: true, message: 'Vui lòng chọn thời gian!' }]}
                                 >
                                     <RangePicker
@@ -209,15 +204,24 @@ function EventUpdate() {
                                     />
                                 </Form.Item>
                             </Col>
+
+                            <Col xs={24}>
+                                <Form.Item
+                                    name="isHoliday"
+                                    valuePropName="checked"
+                                >
+                                    <Checkbox>
+                                        <Space>
+                                            Đánh dấu là ngày nghỉ lễ (toàn trường nghỉ)
+                                        </Space>
+                                    </Checkbox>
+                                </Form.Item>
+                            </Col>
+
                             <Col xs={24}>
                                 <Form.Item
                                     name="note"
-                                    label={
-                                        <Space>
-                                            <FormOutlined />
-                                            Ghi chú (nếu có)
-                                        </Space>
-                                    }
+                                    label={<Space><FormOutlined />Ghi chú (nếu có)</Space>}
                                 >
                                     <TextArea
                                         rows={4}
@@ -238,7 +242,10 @@ function EventUpdate() {
                     </span>
                 }
                 open={isBackConfirmVisible}
-                onOk={() => navigate(-1)}
+                onOk={() => {
+                    setIsDirty(false);
+                    navigate(-1);
+                }}
                 onCancel={() => setIsBackConfirmVisible(false)}
                 okText="Đồng ý"
                 cancelText="Không"

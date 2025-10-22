@@ -5,6 +5,7 @@ export interface EventItem {
     holidayStartDate: string;
     holidayEndDate: string;
     note?: string;
+    isHoliday?: boolean;
     active: boolean;
     createdBy: string;
     createdAt: string;
@@ -14,9 +15,9 @@ export interface EventItem {
 
 
 export interface GetEventsParams {
-  page: number;
-  limit: number;
-  schoolYear?: string; 
+    page: number;
+    limit: number;
+    schoolYear?: string;
 }
 
 export interface EventsListResponse {
@@ -34,6 +35,7 @@ export interface CreateEventDto {
     holidayStartDate: string;
     holidayEndDate: string;
     note?: string;
+    isHoliday?: boolean;
     createdBy?: string;
     updatedBy?: string;
 }
@@ -44,6 +46,7 @@ export interface UpdateEventDto {
     holidayStartDate: string;
     holidayEndDate: string;
     note?: string;
+    isHoliday?: boolean;
     createdBy?: string;
     updatedBy?: string;
 }
