@@ -42,6 +42,9 @@ import RoomDetails from "../../pages/room-management/room-details/RoomDetails";
 import CreateRoom from "../../pages/room-management/create-room/CreateRoom";
 import UpdateRoom from "../../pages/room-management/edit-room/UpdateRoom";
 import RoomReport from "../../pages/room-report/RoomReport";
+import TopicManagement from "../../pages/topic-management/TopicManagement";
+import TopicCreate from "../../pages/topic-management/topic-create/TopicCreate";
+import TopicUpdate from "../../pages/topic-management/topic-update/TopicUpdate";
 
 export const routes: RouteObject[] = [
   {
@@ -311,6 +314,30 @@ export const routes: RouteObject[] = [
                 path: "update/:id",
                 element: <EventUpdate />
               }
+            ],
+          },
+          {
+            path: "topics",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/topics`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <TopicManagement />,
+              },
+              {
+                path: "create",
+                element: <TopicCreate />,
+              },
+              {
+                path: "update/:id",
+                element: <TopicUpdate />
+              }
+
             ],
           },
           {

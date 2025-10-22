@@ -1,0 +1,492 @@
+import React, { useState, useEffect } from 'react';
+import {
+    Form,
+    Input,
+    Select,
+    Button,
+    Card,
+    Row,
+    Col,
+    Tabs,
+    Table,
+    InputNumber,
+    Spin,
+    Flex,
+    Typography,
+    Space,
+    Affix,
+    Modal,
+} from 'antd';
+import { useNavigate, useParams } from 'react-router-dom';
+import {
+    SaveOutlined,
+    ArrowLeftOutlined,
+    ClusterOutlined,
+    AppstoreOutlined,
+    CalendarOutlined,
+    DeleteOutlined,
+    PlusOutlined,
+    ExclamationCircleOutlined,
+} from '@ant-design/icons';
+import type { TableProps } from 'antd';
+import {
+    ActivityReference,
+    AvailableTopicActivitiesResponse,
+    UpdateTopicDto,
+    ActivityInput,
+    TopicActivityDetail,
+} from '../../../types/topic';
+import { topicApis } from '../../../services/apiServices';
+import { ageOptions } from '../../../components/hard-code-action';
+
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+const { Title } = Typography;
+const { TabPane } = Tabs;
+
+const monthOptions = Array.from({ length: 12 }, (_, i) => ({
+    label: `Tháng ${i + 1}`,
+    value: (i + 1).toString(),
+}));
+interface ManualActivityRow {
+    key: string;
+    activityId?: string;
+    sessions?: number;
+}
+
+interface ManualActivityTableProps {
+    rows: ManualActivityRow[];
+    options: ActivityReference[];
+    onChange: (rows: ManualActivityRow[]) => void;
+}
+
+const ManualActivityTable: React.FC<ManualActivityTableProps> = ({
+    rows,
+    options,
+    onChange,
+}) => {
+    const handleAddRow = () => {
+        const newKey = Date.now().toString();
+        onChange([...rows, { key: newKey }]);
+    };
+
+    const handleDeleteRow = (key: string) => {
+        onChange(rows.filter((row) => row.key !== key));
+    };
+
+    const handleUpdateRow = (
+        key: string,
+        field: 'activityId' | 'sessions',
+        value: string | number | null
+    ) => {
+        onChange(
+            rows.map((row) =>
+                row.key === key ? { ...row, [field]: value } : row
+            )
+        );
+    };
+
+    const activityOptions = options.map((opt) => ({
+        label: opt.activityName,
+        value: opt._id,
+    }));
+
+    const columns: TableProps<ManualActivityRow>['columns'] = [
+        {
+            title: 'Tên hoạt động',
+            key: 'activityId',
+            width: '65%',
+            render: (_, record) => (
+                <Select
+                    showSearch
+                    placeholder="Chọn hoạt động"
+                    style={{ width: '100%' }}
+                    options={activityOptions}
+                    value={record.activityId}
+                    onChange={(value) => handleUpdateRow(record.key, 'activityId', value)}
+                    filterOption={(input, option) =>
+                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                    }
+                />
+            ),
+        },
+        {
+            title: 'Số buổi / tuần',
+            key: 'sessions',
+            width: '25%',
+            render: (_, record) => (
+                <InputNumber
+                    min={0}
+                    max={10}
+                    placeholder="Số buổi"
+                    style={{ width: '100px' }}
+                    value={record.sessions}
+                    onChange={(value) => handleUpdateRow(record.key, 'sessions', value)}
+                />
+            ),
+        },
+        {
+            title: 'Hành động',
+            key: 'action',
+            width: '10%',
+            align: 'center',
+            render: (_, record) => (
+                <Button
+                    type="text"
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={() => handleDeleteRow(record.key)}
+                />
+            ),
+        },
+    ];
+
+    return (
+        <div style={{ marginTop: 16 }}>
+            <Table
+                columns={columns}
+                dataSource={rows}
+                rowKey="key"
+                pagination={false}
+                bordered
+                size="small"
+                locale={{
+                    emptyText:
+                        'Chưa có hoạt động nào được thêm thủ công. Nhấn nút bên dưới.',
+                }}
+            />
+            <Button
+                type="dashed"
+                icon={<PlusOutlined />}
+                onClick={handleAddRow}
+                style={{ width: '100%', marginTop: 8 }}
+            >
+                Thêm hoạt động
+            </Button>
+        </div>
+    );
+};
+
+function TopicUpdate() {
+    const [form] = Form.useForm();
+    const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+
+    const [availableActivities, setAvailableActivities] =
+        useState<AvailableTopicActivitiesResponse | null>(null);
+
+    const [manualFixRows, setManualFixRows] = useState<ManualActivityRow[]>([]);
+    const [manualCoreRows, setManualCoreRows] = useState<ManualActivityRow[]>([]);
+    const [manualEventRows, setManualEventRows] = useState<ManualActivityRow[]>(
+        []
+    );
+
+    const [isBackConfirmVisible, setIsBackConfirmVisible] = useState(false);
+    const [isDirty, setIsDirty] = useState(false);
+
+    const transformApiToRows = (
+        details: TopicActivityDetail[]
+    ): ManualActivityRow[] => {
+        return details.map((item) => ({
+            key: item._id,
+            activityId: item.activity._id,
+            sessions: item.sessionsPerWeek,
+        }));
+    };
+
+    useEffect(() => {
+        if (!id) {
+            toast.error('Không tìm thấy ID chủ đề.');
+            navigate(-1);
+            return;
+        }
+
+        const fetchData = async () => {
+            try {
+                const topicData = await topicApis.getTopicById(id);
+
+                form.setFieldsValue({
+                    topicName: topicData.topicName,
+                    age: topicData.age,
+                    month: topicData.month,
+                });
+
+                const availableData = await topicApis.getAvailableTopicActivities({
+                    age: topicData.age,
+                    month: topicData.month,
+                });
+                setAvailableActivities(availableData);
+
+                setManualFixRows(transformApiToRows(topicData.activitiFix));
+                setManualCoreRows(transformApiToRows(topicData.activitiCore));
+                setManualEventRows(transformApiToRows(topicData.activitiEvent));
+            } catch (error) {
+                toast.error('Lỗi khi tải dữ liệu chủ đề.');
+                navigate(-1);
+            } finally {
+                setIsLoading(false);
+                setIsDirty(false);
+            }
+        };
+
+        fetchData();
+    }, [id, navigate, form]);
+
+    const checkDirtyState = () => isDirty;
+
+    const handleBackClick = () => {
+        if (checkDirtyState()) {
+            setIsBackConfirmVisible(true);
+        } else {
+            navigate(-1);
+        }
+    };
+
+    const updateManualRows = (
+        setter: React.Dispatch<React.SetStateAction<ManualActivityRow[]>>,
+        rows: ManualActivityRow[]
+    ) => {
+        setIsDirty(true);
+        setter(rows);
+    };
+
+    const onFinish = async (values: any) => {
+        if (!id) return;
+
+        setIsSaving(true);
+
+        const formatManualRows = (rows: ManualActivityRow[]): ActivityInput[] => {
+            return rows
+                .filter((row) => row.activityId && (row.sessions ?? 0) > 0)
+                .map((row) => ({
+                    activity: row.activityId!,
+                    sessionsPerWeek: row.sessions!,
+                }));
+        };
+
+        const finalFix = formatManualRows(manualFixRows);
+        const finalCore = formatManualRows(manualCoreRows);
+        const finalEvent = formatManualRows(manualEventRows);
+
+        if (
+            finalFix.length === 0 &&
+            finalCore.length === 0 &&
+            finalEvent.length === 0
+        ) {
+            toast.warn(
+                'Vui lòng chọn ít nhất một hoạt động (bằng cách nhập số buổi).'
+            );
+            setIsSaving(false);
+            return;
+        }
+
+        const payload: UpdateTopicDto = {
+            topicName: values.topicName,
+            age: values.age,
+            month: values.month,
+            activitiFix: finalFix,
+            activitiCore: finalCore,
+            activitiEvent: finalEvent,
+            updatedBy: 'admin_user_updater',
+        };
+
+        try {
+            await topicApis.updateTopic(id, payload);
+            toast.success('Cập nhật chủ đề thành công!');
+            navigate(-1);
+        } catch (error) {
+            toast.error('Cập nhật chủ đề thất bại!');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <Flex justify="center" align="center" style={{ minHeight: '60vh' }}>
+                <Spin tip="Đang tải dữ liệu chủ đề..." size="large" />
+            </Flex>
+        );
+    }
+
+    return (
+        <>
+            <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+            />
+            <Form
+                form={form}
+                layout="vertical"
+                onFinish={onFinish}
+                onValuesChange={() => setIsDirty(true)}
+                style={{ paddingBottom: 80 }}
+            >
+                <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
+                    <Title level={3} style={{ margin: 0 }}>
+                        Cập nhật Chủ đề
+                    </Title>
+                    <Button icon={<ArrowLeftOutlined />} onClick={handleBackClick}>
+                        Quay lại
+                    </Button>
+                </Flex>
+
+                <Card title="Thông tin chung" style={{ marginBottom: 24 }}>
+                    <Row gutter={24}>
+                        <Col span={24}>
+                            <Form.Item
+                                name="topicName"
+                                label="Tên chủ đề"
+                                rules={[{ required: true, message: 'Vui lòng nhập tên chủ đề' }]}
+                            >
+                                <Input placeholder="Ví dụ: Chủ đề Gia đình" />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+
+                    <Row gutter={24} align="bottom">
+                        <Col xs={24} sm={12}>
+                            <Form.Item
+                                name="age"
+                                label="Độ tuổi"
+                                rules={[{ required: true, message: 'Vui lòng chọn độ tuổi' }]}
+                            >
+                                <Select
+                                    placeholder="Chọn độ tuổi"
+                                    options={ageOptions}
+                                    disabled
+                                />
+                            </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={12}>
+                            <Form.Item
+                                name="month"
+                                label="Tháng"
+                                rules={[{ required: true, message: 'Vui lòng chọn tháng' }]}
+                            >
+                                <Select
+                                    placeholder="Chọn tháng"
+                                    options={monthOptions}
+                                    disabled
+                                />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                </Card>
+
+                {availableActivities && (
+                    <Card title="Danh sách hoạt động">
+                        <Tabs defaultActiveKey="fix">
+                            <TabPane
+                                tab={
+                                    <Space>
+                                        <ClusterOutlined style={{ color: '#1890ff' }} />
+                                        Hoạt động cố định
+                                    </Space>
+                                }
+                                key="fix"
+                            >
+                                <ManualActivityTable
+                                    rows={manualFixRows}
+                                    options={availableActivities.activitiFix}
+                                    onChange={(rows) => updateManualRows(setManualFixRows, rows)}
+                                />
+                            </TabPane>
+                            <TabPane
+                                tab={
+                                    <Space>
+                                        <AppstoreOutlined style={{ color: '#fa8c16' }} />
+                                        Hoạt động học (Core)
+                                    </Space>
+                                }
+                                key="core"
+                            >
+                                <ManualActivityTable
+                                    rows={manualCoreRows}
+                                    options={availableActivities.activitiCore}
+                                    onChange={(rows) =>
+                                        updateManualRows(setManualCoreRows, rows)
+                                    }
+                                />
+                            </TabPane>
+                            <TabPane
+                                tab={
+                                    <Space>
+                                        <CalendarOutlined style={{ color: '#52c41a' }} />
+                                        Hoạt động sự kiện
+                                    </Space>
+                                }
+                                key="event"
+                            >
+                                <ManualActivityTable
+                                    rows={manualEventRows}
+                                    options={availableActivities.activitiEvent}
+                                    onChange={(rows) =>
+                                        updateManualRows(setManualEventRows, rows)
+                                    }
+                                />
+                            </TabPane>
+                        </Tabs>
+                    </Card>
+                )}
+
+                <Affix offsetBottom={0}>
+                    <Card
+                        bordered={false}
+                        style={{
+                            backgroundColor: '#ffffff',
+                            borderTop: '1px solid #f0f0f0',
+                        }}
+                    >
+                        <Flex justify="end">
+                            <Space>
+                                <Button onClick={handleBackClick} disabled={isSaving}>
+                                    Hủy
+                                </Button>
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    loading={isSaving}
+                                    icon={<SaveOutlined />}
+                                >
+                                    Lưu
+                                </Button>
+                            </Space>
+                        </Flex>
+                    </Card>
+                </Affix>
+            </Form>
+
+            <Modal
+                title={
+                    <span style={{ display: 'flex', alignItems: 'center' }}>
+                        <ExclamationCircleOutlined
+                            style={{ color: '#faad14', marginRight: 8, fontSize: '22px' }}
+                        />
+                        Xác nhận quay lại
+                    </span>
+                }
+                open={isBackConfirmVisible}
+                onOk={() => navigate(-1)}
+                onCancel={() => setIsBackConfirmVisible(false)}
+                okText="Đồng ý"
+                cancelText="Không"
+                zIndex={1001}
+            >
+                <p>Các thay đổi chưa được lưu sẽ bị mất. Bạn có chắc muốn tiếp tục?</p>
+            </Modal>
+        </>
+    );
+}
+
+export default TopicUpdate;
