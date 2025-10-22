@@ -94,6 +94,7 @@ import {
   UpdateRoomData,
 } from "../types/room-management";
 import { AvailableTopicActivitiesResponse, CreateTopicDto, GetAvailableTopicActivitiesParams, GetTopicsParams, TopicDetails, TopicsListResponse, UpdateTopicDto } from "../types/topic";
+import { ITeacherClassStudentResponse } from "../types/teacher";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -807,6 +808,17 @@ export const topicApis = {
     return response.data;
   },
 
+}
+
+export const teacherApis = {
+  getClassAndStudentByTeacher: async (
+    id: string
+  ): Promise<ITeacherClassStudentResponse> => {
+    const response = await axiosAuth.get<ITeacherClassStudentResponse>(
+      apiEndPoint.GET_CLASS_AND_STUDENT_BY_TEACHER(id)
+    );
+    return response.data;
+  },
 }
 
 export const roomApis = {

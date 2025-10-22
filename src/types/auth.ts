@@ -22,6 +22,7 @@ export interface UserProfile {
   email: string;
   roleList: string[];
   active: boolean;
+  staff?: string;
   isAdmin: boolean;
   isTeacher: boolean;
 }
