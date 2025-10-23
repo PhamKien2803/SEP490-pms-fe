@@ -95,6 +95,7 @@ import {
 } from "../types/room-management";
 import { AvailableTopicActivitiesResponse, CreateTopicDto, GetAvailableTopicActivitiesParams, GetTopicsParams, TopicDetails, TopicsListResponse, UpdateTopicDto } from "../types/topic";
 import { ITeacherClassStudentResponse } from "../types/teacher";
+import { ICreateSchedulePayload, IDailySchedule, TCreateScheduleResponse, TScheduleDetailResponse } from "../types/timetable";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -819,6 +820,72 @@ export const teacherApis = {
     );
     return response.data;
   },
+}
+
+export const scheduleApis = {
+  getScheduleById: async (id: string): Promise<TScheduleDetailResponse> => {
+    const response = await axiosAuth.get<TScheduleDetailResponse>(
+      apiEndPoint.GET_SCHEDULE_BY_ID(id)
+    );
+    return response.data;
+  },
+
+  createSchedule: async (payload: ICreateSchedulePayload): Promise<TCreateScheduleResponse> => {
+    const response = await axiosAuth.post<TCreateScheduleResponse>(
+      apiEndPoint.CREATE_SCHEDULE,
+      payload
+    );
+    return response.data;
+  },
+
+  getSchoolYearList: async (params: {
+    page: number;
+    limit: number;
+  }): Promise<SchoolYearsListResponse> => {
+    const response = await axiosAuth.get<SchoolYearsListResponse>(
+      apiEndPoint.GET_SCHOOLYEARS_LIST,
+      { params }
+    );
+    return response.data;
+  },
+
+  getClassList: async (params: {
+    year: string;
+    page?: number;
+    limit?: number;
+  }): Promise<ClassListResponse> => {
+    const response = await axiosAuth.get<ClassListResponse>(
+      apiEndPoint.GET_CLASS_LIST,
+      {
+        params,
+      }
+    );
+    return response.data;
+  },
+
+  getScheduleParams: async (params: {
+    schoolYear: string;
+    class: string;
+    month: number;
+    status?: string;
+  }): Promise<TScheduleDetailResponse> => {
+    const response = await axiosAuth.get<TScheduleDetailResponse>(
+      apiEndPoint.GET_SCHEDULE_PARAMS,
+      { params }
+    );
+    return response.data;
+  },
+
+  getPreviewSchedule: async (params: {
+    year: string;
+    month: string;
+    classId: string;
+  }): Promise<{ message: string; schedule: { scheduleDays: IDailySchedule[] } }> => {
+    const response = await axiosAuth.get(apiEndPoint.PREVIEWS_SCHEDULE, { params });
+    return response.data;
+  }
+
+
 }
 
 export const roomApis = {

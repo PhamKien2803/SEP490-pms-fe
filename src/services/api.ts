@@ -92,7 +92,11 @@ export const apiEndPoint = {
   CREATE_TOPIC: "/topics/create",
   UPDATE_TOPIC: (id: string) => `/topics/update/${id}`,
   DELETE_TOPIC: (id: string) => `/topics/delete/${id}`,
-  GET_CLASS_AND_STUDENT_BY_TEACHER: (id: string) => `/teachers/getClassByTeacher/${id}`
+  GET_CLASS_AND_STUDENT_BY_TEACHER: (id: string) => `/teachers/getClassByTeacher/${id}`,
+  GET_SCHEDULE_BY_ID: (id: string) => `/schedules/getById/${id}`,
+  GET_SCHEDULE_PARAMS: "/schedules/getByParams",
+  CREATE_SCHEDULE: "/schedules/create",
+  PREVIEWS_SCHEDULE: "/schedules/previewSchedules"
 };
 
 export const apiConfig = {

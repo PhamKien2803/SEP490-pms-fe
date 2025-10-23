@@ -47,6 +47,7 @@ import TopicCreate from "../../pages/topic-management/topic-create/TopicCreate";
 import TopicUpdate from "../../pages/topic-management/topic-update/TopicUpdate";
 import SchedulesManagement from "../../pages/schedules-management/SchedulesManagement";
 import ClassInfor from "../../pages/teacher/ClassInfor";
+import ScheduleCreate from "../../pages/schedules-management/schedule-create/ScheduleCreate";
 
 export const routes: RouteObject[] = [
   {
@@ -354,6 +355,10 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <SchedulesManagement />,
+              },
+              {
+                path: "create",
+                element: <ScheduleCreate />
               }
 
             ],
