@@ -46,7 +46,12 @@ import TopicManagement from "../../pages/topic-management/TopicManagement";
 import TopicCreate from "../../pages/topic-management/topic-create/TopicCreate";
 import TopicUpdate from "../../pages/topic-management/topic-update/TopicUpdate";
 import SchedulesManagement from "../../pages/schedules-management/SchedulesManagement";
-import ClassInfor from "../../pages/teacher/ClassInfor";
+import ClassInfor from "../../pages/teacher/class-information/ClassInfor";
+import Attendance from "../../pages/teacher/attendance-student/Attendance";
+import TakeAttendance from "../../pages/teacher/attendance-student/take-attendance/TakeAttendance";
+import EditAttendance from "../../pages/teacher/attendance-student/edit-attendance/EditAttendance";
+import AttendanceDetails from "../../pages/teacher/attendance-student/attendance-details/AttendanceDetails";
+import StudentDetails from "../../pages/teacher/class-information/student-details/StudentDetails";
 
 export const routes: RouteObject[] = [
   {
@@ -370,8 +375,38 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <ClassInfor />,
+              },
+              {
+                path: "students/detail/:id",
+                element: <StudentDetails />,
               }
-
+            ],
+          },
+          {
+            path: "attendances",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/attendances`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <Attendance />,
+              },
+              {
+                path: "take-attendance",
+                element: <TakeAttendance />
+              },
+              {
+                path: "update/:id",
+                element: <EditAttendance />
+              },
+              {
+                path: "detail/:id",
+                element: <AttendanceDetails />
+              }
             ],
           },
           {

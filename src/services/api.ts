@@ -92,7 +92,16 @@ export const apiEndPoint = {
   CREATE_TOPIC: "/topics/create",
   UPDATE_TOPIC: (id: string) => `/topics/update/${id}`,
   DELETE_TOPIC: (id: string) => `/topics/delete/${id}`,
-  GET_CLASS_AND_STUDENT_BY_TEACHER: (id: string) => `/teachers/getClassByTeacher/${id}`
+  GET_CLASS_AND_STUDENT_BY_TEACHER: (id: string) => `/teachers/getClassByTeacher/${id}`,
+  GET_ATTENDANCE_LIST: "/attendances/list",
+  CREATE_ATTENDANCE: "/attendances/create",
+  UPDATE_ATTENDANCE: (id: string) => `/attendances/update/${id}`,
+  DELETE_ATTENDANCE: (id: string) => `/attendances/delete/${id}`,
+  GET_ATTENDANCE_BY_ID: (id: string) => `/attendances/getById/${id}`,
+  GET_ATTENDANCE_BY_CLASS_AND_SCHOOLYEAR: (classId: string, schoolYearId: string) => `/attendances/getByClassAndSchoolYear/${classId}/${schoolYearId}`,
+  GET_ATTENDANCE_BY_CLASS_AND_DATE: (id: string, date: string) => `/attendances/getByClassAndDate/${id}/${date}`,
+
+
 };
 
 export const apiConfig = {
