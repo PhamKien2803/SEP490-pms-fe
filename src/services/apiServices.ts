@@ -95,7 +95,7 @@ import {
 } from "../types/room-management";
 import { AvailableTopicActivitiesResponse, CreateTopicDto, GetAvailableTopicActivitiesParams, GetTopicsParams, TopicDetails, TopicsListResponse, UpdateTopicDto } from "../types/topic";
 import { ITeacherClassStudentResponse } from "../types/teacher";
-import { ICreateSchedulePayload, IDailySchedule, TCreateScheduleResponse, TScheduleDetailResponse } from "../types/timetable";
+import { AvailableActivityItem, FixActivityResponseItem, IClassBySchoolYearItem, ICreateSchedulePayload, IDailySchedule, TCreateScheduleResponse, TScheduleDetailResponse } from "../types/timetable";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -863,11 +863,18 @@ export const scheduleApis = {
     return response.data;
   },
 
+  getClassListByActiveSchoolYear: async (): Promise<IClassBySchoolYearItem[]> => {
+    const response = await axiosAuth.get<IClassBySchoolYearItem[]>(
+      apiEndPoint.GET_CLASS_BY_SCHOOLYEAR
+    );
+    return response.data;
+  },
+
   getScheduleParams: async (params: {
     schoolYear: string;
     class: string;
     month: number;
-    status?: string;
+    // status?: string;
   }): Promise<TScheduleDetailResponse> => {
     const response = await axiosAuth.get<TScheduleDetailResponse>(
       apiEndPoint.GET_SCHEDULE_PARAMS,
@@ -883,8 +890,44 @@ export const scheduleApis = {
   }): Promise<{ message: string; schedule: { scheduleDays: IDailySchedule[] } }> => {
     const response = await axiosAuth.get(apiEndPoint.PREVIEWS_SCHEDULE, { params });
     return response.data;
-  }
+  },
 
+  updateSchedule: async (
+    id: string,
+    payload: ICreateSchedulePayload
+  ): Promise<TCreateScheduleResponse> => {
+    const response = await axiosAuth.put<TCreateScheduleResponse>(
+      apiEndPoint.UPDATE_SCHEDULE(id),
+      payload
+    );
+    return response.data;
+  },
+
+  confirmSchedule: async (id: string): Promise<{ message: string }> => {
+    const response = await axiosAuth.put(apiEndPoint.CONFIRM_SCHEDULE(id));
+    return response.data;
+  },
+
+  getFixActivity: async (params: {
+    year: string;
+    month: string;
+    classId: string;
+  }): Promise<FixActivityResponseItem[]> => {
+    const response = await axiosAuth.get(apiEndPoint.GET_FIX_ACTIVITY, {
+      params,
+    });
+    return response.data;
+  },
+
+  getAvailableActivities: async (params: {
+    month: string;
+    classId: string;
+  }): Promise<AvailableActivityItem[]> => {
+    const response = await axiosAuth.get(apiEndPoint.GET_AVAILABEL_ACTIVITY, {
+      params,
+    });
+    return response.data;
+  },
 
 }
 

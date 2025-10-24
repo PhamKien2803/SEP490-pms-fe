@@ -229,7 +229,7 @@ function SchedulesManagement() {
                 schoolYear: selectedSchoolYearId,
                 class: selectedClassId,
                 month: selectedMonth,
-                status: 'Xác nhận'
+                // status: 'Dự thảo'
             });
             setScheduleData(res);
             if (res.length > 0) setIsConfirmed(true);

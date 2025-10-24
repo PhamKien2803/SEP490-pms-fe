@@ -95,8 +95,14 @@ export const apiEndPoint = {
   GET_CLASS_AND_STUDENT_BY_TEACHER: (id: string) => `/teachers/getClassByTeacher/${id}`,
   GET_SCHEDULE_BY_ID: (id: string) => `/schedules/getById/${id}`,
   GET_SCHEDULE_PARAMS: "/schedules/getByParams",
-  CREATE_SCHEDULE: "/schedules/create",
-  PREVIEWS_SCHEDULE: "/schedules/previewSchedules"
+  CREATE_SCHEDULE: "/schedules/createSchedule",
+  UPDATE_SCHEDULE: (id: string) => `/schedules/updateSchedule/${id}`,
+  PREVIEWS_SCHEDULE: "/schedules/previewSchedules",
+  GET_FIX_ACTIVITY: "/schedules/getFixActivity",
+  GET_AVAILABEL_ACTIVITY: "/schedules/getListAvailable",
+  CONFIRM_SCHEDULE: (id: string) => `/schedules/confirm/${id}`,
+  GET_CLASS_BY_SCHOOLYEAR: "/schedules/getClassBySchoolYear",
+
 };
 
 export const apiConfig = {
