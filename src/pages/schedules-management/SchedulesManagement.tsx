@@ -361,15 +361,6 @@ function SchedulesManagement() {
                                     >
                                         Tạo lịch học
                                     </Button>
-                                    {hasSuggestedSchedule && (
-                                        <Button
-                                            icon={<EditOutlined />}
-                                            onClick={() => setEditMode(prev => !prev)}
-                                            type={editMode ? 'default' : 'dashed'}
-                                        >
-                                            {editMode ? 'Thoát chỉnh sửa' : 'Chỉnh sửa lịch'}
-                                        </Button>
-                                    )}
                                 </>
                             )}
                         </Space>
@@ -401,6 +392,18 @@ function SchedulesManagement() {
                                         Tuần sau
                                     </Button>
                                 </Col>
+                            </Row>
+                            <Row style={{ display: "flex", justifyContent: "flex-end" }}>
+                                {hasSuggestedSchedule && (
+                                    <Button
+                                        style={{ backgroundColor: "#006d75", color: "white" }}
+                                        icon={<EditOutlined />}
+                                        onClick={() => setEditMode(prev => !prev)}
+                                        type={editMode ? 'default' : 'text'}
+                                    >
+                                        {editMode ? 'Thoát chỉnh sửa' : 'Chỉnh sửa lịch'}
+                                    </Button>
+                                )}
                             </Row>
 
                             <div style={{ position: 'relative' }}>
@@ -444,7 +447,7 @@ function SchedulesManagement() {
                                                     } : { background: '#fff' })
                                                 }}>
                                                     <Text strong>{dayjs(day.date).format('dddd, DD/MM')}</Text>
-                                                    <Tooltip title="Thêm/Sửa hoạt động"> <Button size="small" type="text" icon={<PlusOutlined />} />
+                                                    <Tooltip title="Thêm hoạt động"> <Button size="small" type="text" icon={<PlusOutlined />} />
                                                     </Tooltip>
                                                 </div>
                                                 <div style={{
