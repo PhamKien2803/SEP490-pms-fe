@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
     Card, Typography, Row, Col, Select, Spin, Tag, Space, Button,
-    Empty, theme, Alert, Flex, Input
+    theme, Alert, Flex, Input,
+    Tooltip
 } from 'antd';
 import {
-    ScheduleOutlined, PlusOutlined, ArrowLeftOutlined,
-    LeftOutlined, RightOutlined
+    ScheduleOutlined, ArrowLeftOutlined,
+    LeftOutlined, RightOutlined, CloseCircleOutlined, SwapOutlined, PlusOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
@@ -37,7 +38,6 @@ const formatMinutesToTime = (minutes: number | null | undefined): string => {
 const ScheduleCreate = () => {
     const { token } = useToken();
     const navigate = useNavigate();
-
     const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>();
     const [selectedMonth, setSelectedMonth] = useState<number>(dayjs().month() + 1);
     const [classId, setClassId] = useState<string>();
@@ -46,9 +46,38 @@ const ScheduleCreate = () => {
     const [isLoadingFix, setIsLoadingFix] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [weekIndex, setWeekIndex] = useState(0);
-    const [selectingDay, setSelectingDay] = useState<string | null>(null);
     const [availableActivities, setAvailableActivities] = useState<AvailableActivityItem[]>([]);
     const [isFetchingActivities, setIsFetchingActivities] = useState(false);
+    const [addingToSlot, setAddingToSlot] = useState<{ date: string; startTime: number } | null>(null);
+    const [selectedActivity1, setSelectedActivity1] = useState<{
+        date: string;
+        index: number;
+    } | null>(null);
+
+    const [selectedActivity2, setSelectedActivity2] = useState<{
+        date: string;
+        index: number;
+    } | null>(null);
+
+
+    const fetchAvailableActivities = async () => {
+        if (!selectedMonth || !classId) return;
+
+        try {
+            setIsFetchingActivities(true);
+            const res = await scheduleApis.getAvailableActivities({
+                month: selectedMonth.toString(),
+                classId: classId,
+            });
+
+            setAvailableActivities(res);
+        } catch (error) {
+            console.error('Lỗi khi lấy danh sách hoạt động:', error);
+            toast.error('Không thể tải danh sách hoạt động.');
+        } finally {
+            setIsFetchingActivities(false);
+        }
+    };
 
 
     const fetchFixActivities = async () => {
@@ -71,6 +100,48 @@ const ScheduleCreate = () => {
             setIsLoadingFix(false);
         }
     };
+    useEffect(() => {
+        if (selectedActivity1 && selectedActivity2) {
+            const updated = [...fixedActivities];
+            const day1 = updated.find(d => dayjs(d.date).format('YYYY-MM-DD') === selectedActivity1.date);
+            const day2 = updated.find(d => dayjs(d.date).format('YYYY-MM-DD') === selectedActivity2.date);
+
+            if (day1 && day2) {
+                const act1 = day1.activities[selectedActivity1.index];
+                const act2 = day2.activities[selectedActivity2.index];
+
+                if (act1?.type === 'Bình thường' && act2?.type === 'Bình thường') {
+                    // Swap
+                    day1.activities[selectedActivity1.index] = { ...act2, _justSwapped: true };
+                    day2.activities[selectedActivity2.index] = { ...act1, _justSwapped: true };
+                    setFixedActivities([...updated]);
+
+                    setTimeout(() => {
+                        const cleaned = [...updated];
+                        const day1Clean = cleaned.find(d => dayjs(d.date).format('YYYY-MM-DD') === selectedActivity1.date);
+                        const day2Clean = cleaned.find(d => dayjs(d.date).format('YYYY-MM-DD') === selectedActivity2.date);
+
+                        if (day1Clean?.activities[selectedActivity1.index]) {
+                            day1Clean.activities[selectedActivity1.index] = { ...act2 };
+                        }
+                        if (day2Clean?.activities[selectedActivity2.index]) {
+                            day2Clean.activities[selectedActivity2.index] = { ...act1 };
+                        }
+
+                        setFixedActivities([...cleaned]);
+                    }, 600);
+
+                    toast.success('Hoán đổi tiết học thành công!');
+                } else {
+                    toast.warning('Chỉ có thể hoán đổi các hoạt động “Bình thường”.');
+                }
+            }
+
+            setSelectedActivity1(null);
+            setSelectedActivity2(null);
+        }
+    }, [selectedActivity1, selectedActivity2]);
+
 
     useEffect(() => {
         scheduleApis.getClassListByActiveSchoolYear()
@@ -89,6 +160,7 @@ const ScheduleCreate = () => {
 
     useEffect(() => {
         fetchFixActivities();
+        fetchAvailableActivities();
     }, [selectedSchoolYear, selectedMonth, classId]);
 
     const groupedByDate = useMemo(() => {
@@ -121,7 +193,6 @@ const ScheduleCreate = () => {
             const date = dayjs(dayStr);
             currentWeek.push(dayStr);
 
-            // Nếu là Chủ nhật hoặc là ngày cuối tháng thì kết thúc tuần
             if (date.day() === 0 || idx === allDaysInMonth.length - 1) {
                 weeks.push(currentWeek);
                 currentWeek = [];
@@ -132,7 +203,7 @@ const ScheduleCreate = () => {
     }, [allDaysInMonth]);
 
     const currentWeekDays = groupedWeeks[weekIndex] || [];
-  
+
     const handleCreateSchedule = async () => {
         if (!selectedSchoolYear || !selectedMonth || !classId) {
             toast.error('Vui lòng chọn đầy đủ năm học, tháng và lớp học.');
@@ -169,19 +240,79 @@ const ScheduleCreate = () => {
         }
     };
 
-    const handleAddActivity = async (date: string) => {
-        setSelectingDay(date);
-        setIsFetchingActivities(true);
-        try {
-            const data = await scheduleApis.getAvailableActivities({
-                month: selectedMonth.toString(),
-                classId: classId!,
+
+    const handleSelectActivity = (activityId: string) => {
+        const selected = availableActivities.find(act => act._id === activityId);
+
+        if (!selected || !addingToSlot) return;
+
+        const { date, startTime } = addingToSlot;
+
+        const targetDay = fixedActivities.find(day => dayjs(day.date).format('YYYY-MM-DD') === date);
+
+        if (targetDay) {
+            // Kiểm tra xem activityId này đã tồn tại trong mảng activities của ngày đó chưa
+            const isDuplicate = targetDay.activities.some(act => act.activity === selected._id);
+            if (isDuplicate) {
+                toast.info('Hoạt động này đã có trong ngày.');
+                setAddingToSlot(null);
+                return;
+            }
+        }
+        const newActivityData = {
+            activity: selected._id,
+            activityName: selected.activityName,
+            activityCode: selected.activityCode,
+            category: selected.category,
+            eventName: selected.eventName,
+            type: selected.type,
+        };
+
+        const updatedFixedActivities = fixedActivities.map(day => {
+            if (dayjs(day.date).format('YYYY-MM-DD') !== date) {
+                return day;
+            }
+
+            const updatedActivities = day.activities.map(slot => {
+                if (slot.startTime !== startTime) {
+                    return slot;
+                }
+
+                return {
+                    ...slot,
+                    ...newActivityData,
+                    startTime: startTime,
+                };
             });
-            setAvailableActivities(data);
-        } catch (err) {
-            toast.error("Không thể tải hoạt động khả dụng.");
-        } finally {
-            setIsFetchingActivities(false);
+
+            return {
+                ...day,
+                activities: updatedActivities,
+            };
+        });
+
+        setFixedActivities(updatedFixedActivities);
+        setAddingToSlot(null);
+        toast.success('Đã thêm hoạt động!');
+    };
+
+    const handleRemoveActivityContent = (date: string, startTime: number) => {
+        const updated = [...fixedActivities];
+        const idx = updated.findIndex(d => dayjs(d.date).format('YYYY-MM-DD') === date);
+        if (idx !== -1) {
+            const activityIdx = updated[idx].activities.findIndex(act => act.startTime === startTime);
+            if (activityIdx !== -1) {
+                updated[idx].activities[activityIdx] = {
+                    ...updated[idx].activities[activityIdx],
+                    activity: '',
+                    activityName: '',
+                    // activityCode: '',
+                    type: 'Bình thường',
+                    // category: null,
+                    // eventName: null,
+                };
+                setFixedActivities(updated);
+            }
         }
     };
 
@@ -282,7 +413,6 @@ const ScheduleCreate = () => {
                                     title={
                                         <Flex justify="space-between" align="center">
                                             <Text strong style={{ fontSize: 13 }}>{displayDay}</Text>
-                                            <Button type="text" icon={<PlusOutlined />} onClick={() => handleAddActivity(date)} />
                                         </Flex>
                                     }
                                     style={{
@@ -295,53 +425,209 @@ const ScheduleCreate = () => {
                                     }}
                                     bodyStyle={{ flexGrow: 1, overflowY: 'auto', padding: 12 }}
                                 >
-                                    {!activity || activity.activities.length === 0 ? (
-                                        <Empty description="Chưa có hoạt động" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-                                    ) : (
-                                        <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                                            {activity.activities
-                                                .sort((a, b) => a.startTime - b.startTime)
-                                                .map((a: IScheduleActivity, index) => (
+                                    <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                                        {activity && activity.activities
+                                            .sort((a, b) => a.startTime - b.startTime)
+                                            .map((a: IScheduleActivity, index) => {
+                                                const isAddingToThisSlot =
+                                                    addingToSlot?.date === date &&
+                                                    addingToSlot?.startTime === a.startTime;
+
+                                                const isFixed = a.type === 'Cố định';
+
+                                                const isSelectedForSwap =
+                                                    (selectedActivity1?.date === date && selectedActivity1.index === index) ||
+                                                    (selectedActivity2?.date === date && selectedActivity2.index === index);
+
+                                                if (isAddingToThisSlot) {
+                                                    return (
+                                                        <Card
+                                                            key={`select-${a.startTime}-${index}`}
+                                                            size="small"
+                                                            style={{
+                                                                border: `1px dashed ${token.colorBorderSecondary}`,
+                                                                borderRadius: 8,
+                                                                background: token.colorBgContainer,
+                                                                minHeight: 76,
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                            }}
+                                                            bodyStyle={{ padding: 10 }}
+                                                        >
+                                                            <Select
+                                                                style={{ width: '100%' }}
+                                                                size="large"
+                                                                placeholder="Chọn hoạt động"
+                                                                loading={isFetchingActivities}
+                                                                onChange={(value) => handleSelectActivity(value)}
+                                                                options={availableActivities.map((act) => {
+                                                                    const eventInfo = act.type === 'Sự kiện' && act.eventName ? ` (${act.eventName})` : '';
+                                                                    const label = `${act.activityName}${eventInfo} - [${act.type}]`;
+                                                                    return { label, value: act._id };
+                                                                })}
+                                                                onBlur={() => setAddingToSlot(null)}
+                                                                autoFocus
+                                                            />
+                                                        </Card>
+                                                    );
+                                                }
+
+                                                return (
                                                     <Card
-                                                        key={index}
+                                                        key={`card-${a.startTime}-${index}`}
                                                         size="small"
                                                         style={{
-                                                            border: `1px solid ${token.colorBorder}`,
+                                                            border: isSelectedForSwap
+                                                                ? `2px solid ${token.colorPrimary}`
+                                                                : isFixed
+                                                                    ? `1px solid ${token.colorBorder}`
+                                                                    : `1px dashed ${token.colorPrimary}`,
                                                             borderRadius: 8,
-                                                            background: token.colorBgElevated,
-                                                            boxShadow: token.boxShadowTertiary
+                                                            background: isFixed
+                                                                ? token.colorBgContainerDisabled
+                                                                : token.colorBgElevated,
+                                                            minHeight: 76,
+                                                            position: 'relative',
+                                                            transition: 'all 0.2s',
                                                         }}
                                                         bodyStyle={{ padding: 10 }}
+                                                        onClick={() => {
+                                                            if (!isFixed) {
+                                                                fetchAvailableActivities();
+                                                                setAddingToSlot({ date: date, startTime: a.startTime });
+                                                            }
+                                                        }}
                                                     >
                                                         <Text strong style={{ fontSize: 13 }}>
                                                             {formatMinutesToTime(a.startTime)} - {formatMinutesToTime(a.endTime)}
                                                         </Text>
-                                                        <div style={{ marginTop: 4, fontSize: 13, color: token.colorText }}>
-                                                            {a.activityName}
-                                                        </div>
-                                                        <Tag
-                                                            bordered
-                                                            color="default"
+
+                                                        <div
                                                             style={{
-                                                                fontSize: 11,
-                                                                marginTop: 6,
-                                                                borderRadius: 6
+                                                                marginTop: 4,
+                                                                fontSize: 13,
+                                                                display: 'flex',
+                                                                justifyContent: 'space-between',
+                                                                alignItems: 'center',
+                                                                gap: '8px',
+                                                                color: a.activityName ? token.colorText : token.colorTextSecondary,
+                                                                whiteSpace: 'nowrap',
                                                             }}
                                                         >
-                                                            {a.type}
-                                                        </Tag>
+                                                            <span
+                                                                style={{
+                                                                    flex: 1,
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis',
+                                                                    cursor: 'pointer',
+                                                                }}
+                                                            >
+                                                                {a.activityName || 'Click để thêm hoạt động'}
+                                                            </span>
+
+                                                            <div
+                                                                style={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: 6,
+                                                                    flexShrink: 0,
+                                                                }}
+                                                            >
+                                                                {a.activityName && (
+                                                                    <Tag
+                                                                        bordered
+                                                                        color={a.type === 'Cố định' ? 'default' : 'blue'}
+                                                                        style={{
+                                                                            fontSize: 11,
+                                                                            borderRadius: 6,
+                                                                            flexShrink: 0,
+                                                                            margin: 0,
+                                                                        }}
+                                                                    >
+                                                                        {a.type}
+                                                                    </Tag>
+                                                                )}
+
+                                                                {/* Icon Swap chỉ hiện nếu là “Bình thường” */}
+                                                                {a.type === 'Bình thường' && (
+                                                                    <Tooltip
+                                                                        title={
+                                                                            isSelectedForSwap
+                                                                                ? 'Đã chọn để hoán đổi'
+                                                                                : 'Chọn hoạt động này để hoán đổi'
+                                                                        }
+                                                                    >
+                                                                        <SwapOutlined
+                                                                            style={{
+                                                                                color: isSelectedForSwap
+                                                                                    ? token.colorPrimary
+                                                                                    : token.colorTextSecondary,
+                                                                                cursor: 'pointer',
+                                                                                fontSize: 15,
+                                                                            }}
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                const selected = { date, index };
+                                                                                if (!selectedActivity1) {
+                                                                                    setSelectedActivity1(selected);
+                                                                                } else if (!selectedActivity2) {
+                                                                                    setSelectedActivity2(selected);
+                                                                                } else {
+                                                                                    setSelectedActivity1(selected);
+                                                                                    setSelectedActivity2(null);
+                                                                                }
+                                                                            }}
+                                                                        />
+                                                                    </Tooltip>
+                                                                )}
+
+                                                                {a.type !== 'Cố định' && a.activityName && (
+                                                                    <Tooltip title="Xóa hoạt động này">
+                                                                        <CloseCircleOutlined
+                                                                            style={{
+                                                                                color: token.colorError,
+                                                                                cursor: 'pointer',
+                                                                                fontSize: 14,
+                                                                            }}
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                handleRemoveActivityContent(date, a.startTime);
+                                                                            }}
+                                                                        />
+                                                                    </Tooltip>
+                                                                )}
+                                                            </div>
+                                                        </div>
                                                     </Card>
-                                                ))}
-                                        </Space>
-                                    )}
+                                                );
+                                            })}
+
+                                        {(!activity || activity.activities.length === 0) && (
+                                            <div
+                                                onClick={() => {
+                                                    fetchAvailableActivities();
+                                                    setAddingToSlot({ date: date, startTime: 0 });
+                                                }}
+                                                style={{
+                                                    border: `1px dashed ${token.colorBorderSecondary}`,
+                                                    borderRadius: 8,
+                                                    padding: 12,
+                                                    minHeight: 76,
+                                                    textAlign: 'center',
+                                                    cursor: 'pointer',
+                                                    color: token.colorTextSecondary,
+                                                }}
+                                            >
+                                                <PlusOutlined /> Thêm hoạt động
+                                            </div>
+                                        )}
+                                    </Space>
                                 </Card>
                             </Col>
                         );
                     })}
                 </Row>
             </Spin>
-
-
         </div>
     );
 };
