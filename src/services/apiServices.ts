@@ -96,6 +96,7 @@ import {
 import { AvailableTopicActivitiesResponse, CreateTopicDto, GetAvailableTopicActivitiesParams, GetTopicsParams, TopicDetails, TopicsListResponse, UpdateTopicDto } from "../types/topic";
 import { ITeacherClassStudentResponse } from "../types/teacher";
 import { AvailableActivityItem, FixActivityResponseItem, IClassBySchoolYearItem, ICreateSchedulePayload, IDailySchedule, TCreateScheduleResponse, TScheduleByIdResponse, TScheduleParamsResponse } from "../types/timetable";
+import { HealthCertCreateData, HealthCertListResponse, HealthCertRecord, HealthCertUpdateData } from "../types/medical-management";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -971,4 +972,45 @@ export const roomApis = {
   deleteRoom: async (id: string): Promise<void> => {
     await axiosAuth.post(apiEndPoint.DELETE_ROOM(id));
   },
+};
+
+export const medicalApis = {
+  getListMedical: async (params: {
+    page: number;
+    limit: number;
+  }): Promise<HealthCertListResponse> => {
+    const response = await axiosAuth.get<HealthCertListResponse>(
+      apiEndPoint.GET_LIST_MEDICAL,
+      { params }
+    );
+    return response.data;
+  },
+
+  getMedicalById: async (id: string): Promise<HealthCertRecord> => {
+    const response = await axiosAuth.get<HealthCertRecord>(
+      apiEndPoint.GET_MEDICAL_BY_ID(id)
+    );
+    return response.data;
+  },
+
+  createMedical: async (body: HealthCertCreateData): Promise<HealthCertRecord> => {
+    const response = await axiosAuth.post<HealthCertRecord>(
+      apiEndPoint.CREATE_MEDICAL,
+      body
+    );
+    return response.data;
+  },
+
+  updateMedical: async (id: string, body: HealthCertUpdateData): Promise<HealthCertRecord> => {
+    const response = await axiosAuth.put<HealthCertRecord>(
+      apiEndPoint.UPDATE_MEDICAL(id),
+      body
+    );
+    return response.data;
+  },
+
+  deleteMedical: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_MEDICAL(id));
+  },
+  
 };

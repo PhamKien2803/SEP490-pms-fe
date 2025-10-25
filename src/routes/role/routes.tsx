@@ -48,6 +48,10 @@ import TopicUpdate from "../../pages/topic-management/topic-update/TopicUpdate";
 import SchedulesManagement from "../../pages/schedules-management/SchedulesManagement";
 import ClassInfor from "../../pages/teacher/ClassInfor";
 import ScheduleCreate from "../../pages/schedules-management/schedule-create/ScheduleCreate";
+import MedicalManagement from "../../pages/medical-management/MedicalManagement";
+import MedicalDetail from "../../pages/medical-management/medical-details/MedicalDetails";
+import CreateMedical from "../../pages/medical-management/create-medical/CreateMedical";
+import UpdateMedical from "../../pages/medical-management/edit-medical/EditMedical";
 
 export const routes: RouteObject[] = [
   {
@@ -471,6 +475,33 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <RoomReport />,
+              },
+            ],
+          },
+           {
+            path: "medicals",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/medicals`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <MedicalManagement />,
+              },
+              {
+                path: "view/:id",
+                element: <MedicalDetail />,
+              },
+              {
+                path: "edit/:id",
+                element: <UpdateMedical />,
+              },
+              {
+                path: "create",
+                element: <CreateMedical />,
               },
             ],
           },

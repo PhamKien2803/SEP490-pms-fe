@@ -103,6 +103,11 @@ export const apiEndPoint = {
   CONFIRM_SCHEDULE: (id: string) => `/schedules/confirm/${id}`,
   GET_CLASS_BY_SCHOOLYEAR: "/schedules/getClassBySchoolYear",
 
+  GET_LIST_MEDICAL: "/medicals/list",
+  GET_MEDICAL_BY_ID: (id: string) => `/medicals/getById/${id}`,
+  CREATE_MEDICAL: "/medicals/create",
+  UPDATE_MEDICAL: (id: string) => `/medicals/update/${id}`,
+  DELETE_MEDICAL: (id: string) => `/medicals/delete/${id}`,
 };
 
 export const apiConfig = {
