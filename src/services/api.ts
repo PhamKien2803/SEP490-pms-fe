@@ -102,6 +102,21 @@ export const apiEndPoint = {
   GET_ATTENDANCE_BY_CLASS_AND_DATE: (id: string, date: string) => `/attendances/getByClassAndDate/${id}/${date}`,
 
 
+  GET_SCHEDULE_BY_ID: (id: string) => `/schedules/getById/${id}`,
+  GET_SCHEDULE_PARAMS: "/schedules/getByParams",
+  CREATE_SCHEDULE: "/schedules/createSchedule",
+  UPDATE_SCHEDULE: (id: string) => `/schedules/updateSchedule/${id}`,
+  PREVIEWS_SCHEDULE: "/schedules/previewSchedules",
+  GET_FIX_ACTIVITY: "/schedules/getFixActivity",
+  GET_AVAILABEL_ACTIVITY: "/schedules/getListAvailable",
+  CONFIRM_SCHEDULE: (id: string) => `/schedules/confirm/${id}`,
+  GET_CLASS_BY_SCHOOLYEAR: "/schedules/getClassBySchoolYear",
+
+  GET_LIST_MEDICAL: "/medicals/list",
+  GET_MEDICAL_BY_ID: (id: string) => `/medicals/getById/${id}`,
+  CREATE_MEDICAL: "/medicals/create",
+  UPDATE_MEDICAL: (id: string) => `/medicals/update/${id}`,
+  DELETE_MEDICAL: (id: string) => `/medicals/delete/${id}`,
 };
 
 export const apiConfig = {

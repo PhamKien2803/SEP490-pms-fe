@@ -1,187 +1,841 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import {
-    Card, Typography, Row, Col, Select, Spin, Tag, List, Tooltip, Space, Button, Collapse, Empty
+    Card, Typography, Row, Col, Select, Spin, Tag, Space, Button, Empty,
+    Tooltip,
+    Popconfirm,
+    List,
+    Popover
 } from 'antd';
-import { ScheduleOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+    ScheduleOutlined, PlusOutlined, LeftOutlined, RightOutlined, BulbOutlined,
+    EditOutlined, CloseCircleOutlined, SaveOutlined
+} from '@ant-design/icons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
+import { IDailySchedule, TScheduleDetailResponse, ICreateSchedulePayload, IClassBySchoolYearItem, AvailableActivityItem } from '../../types/timetable';
+import { scheduleApis } from '../../services/apiServices';
+import { useNavigate, useParams } from 'react-router-dom';
+import { constants } from '../../constants';
+import { toast } from 'react-toastify';
 
-dayjs.extend(weekOfYear);
+
 dayjs.locale('vi');
+dayjs.extend(weekOfYear);
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
-const { Panel } = Collapse;
 
-const formatMinutesToTime = (minutes: number | null | undefined): string => {
-    if (minutes === null || minutes === undefined || isNaN(minutes)) return '--:--';
-    const hours = Math.floor(minutes / 60).toString().padStart(2, '0');
-    const mins = (minutes % 60).toString().padStart(2, '0');
-    return `${hours}:${mins}`;
+const formatMinutesToTime = (minutes?: number | null): string => {
+    if (minutes == null || isNaN(minutes)) return '--:--';
+    const h = Math.floor(minutes / 60).toString().padStart(2, '0');
+    const m = (minutes % 60).toString().padStart(2, '0');
+    return `${h}:${m}`;
 };
 
-interface MockActivity { _id: string; name: string; }
-interface ScheduleActivity { activity: MockActivity; startTime?: number; endTime?: number; _id: string; }
-interface ScheduleDay { date: string; activities: ScheduleActivity[]; isHoliday: boolean; notes?: string; }
-interface MockSchedule { _id: string; schoolYear: string; class: string; month: number; scheduleDays: ScheduleDay[]; status: "Dự thảo" | "Xác nhận"; }
+const monthOptions = Array.from({ length: 12 }, (_, i) => ({
+    value: i + 1, label: `Tháng ${i + 1}`
+}));
 
-const mockScheduleData: MockSchedule | null = {
-    _id: 'sched001', schoolYear: 'sy001', class: 'class001', month: 10, status: "Dự thảo",
-    scheduleDays: [
-        { date: '2025-10-20', isHoliday: false, activities: [{ _id: 'actSched1', activity: { _id: 'act1', name: 'Đón trẻ' }, startTime: 450, endTime: 510 }, { _id: 'actSched2', activity: { _id: 'act2', name: 'Thể dục sáng' }, startTime: 510, endTime: 540 }, { _id: 'actSched3', activity: { _id: 'act3', name: 'Hoạt động học (Toán)' }, startTime: 540, endTime: 600 }, { _id: 'actSched4', activity: { _id: 'act7', name: 'Ăn trưa' }, startTime: 660, endTime: 720 }, { _id: 'actSched5', activity: { _id: 'act8', name: 'Ngủ trưa' }, startTime: 720, endTime: 840 },], notes: 'Buổi học Toán quan trọng.' },
-        { date: '2025-10-21', isHoliday: false, activities: [{ _id: 'actSched6', activity: { _id: 'act1', name: 'Đón trẻ' }, startTime: 450, endTime: 510 }, { _id: 'actSched7', activity: { _id: 'act4', name: 'Hoạt động ngoài trời' }, startTime: 540, endTime: 600 }, { _id: 'actSched8', activity: { _id: 'act7', name: 'Ăn trưa' }, startTime: 660, endTime: 720 }, { _id: 'actSched9', activity: { _id: 'act8', name: 'Ngủ trưa' }, startTime: 720, endTime: 840 },] },
-        { date: '2025-10-22', isHoliday: true, activities: [], notes: 'Nghỉ lễ Quốc Khánh (Ví dụ)' },
-        { date: '2025-10-27', isHoliday: false, activities: [{ _id: 'actSched10', activity: { _id: 'act1', name: 'Đón trẻ' }, startTime: 450, endTime: 510 }] },
-    ]
-};
+const groupDaysByWeek = (days: TScheduleDetailResponse, year: number, month: number) => {
+    const weeksMap = new Map<number, IDailySchedule[]>();
+    const first = dayjs().year(year).month(month - 1).startOf('month');
+    const last = dayjs().year(year).month(month - 1).endOf('month');
+    const map = new Map(days.map(d => [dayjs(d.date).format('YYYY-MM-DD'), d]));
 
-const groupDaysByWeek = (days: ScheduleDay[], year: number, month: number): { week: number; days: ScheduleDay[] }[] => {
-    const weeksMap = new Map<number, ScheduleDay[]>();
-    const firstDayOfMonth = dayjs().year(year).month(month - 1).startOf('month');
-    const lastDayOfMonth = dayjs().year(year).month(month - 1).endOf('month');
-    const daysDataMap = new Map(days.map(d => [dayjs(d.date).format('YYYY-MM-DD'), d]));
-
-    let currentDay = firstDayOfMonth;
-    while (currentDay.isBefore(lastDayOfMonth) || currentDay.isSame(lastDayOfMonth, 'day')) {
-        const weekNumber = currentDay.week();
-        if (!weeksMap.has(weekNumber)) {
-            weeksMap.set(weekNumber, []);
-        }
-        const dayData = daysDataMap.get(currentDay.format('YYYY-MM-DD'));
-        weeksMap.get(weekNumber)?.push(dayData || { date: currentDay.toISOString(), activities: [], isHoliday: false });
-        currentDay = currentDay.add(1, 'day');
+    let day = first;
+    while (day.isBefore(last) || day.isSame(last, 'day')) {
+        const w = day.week();
+        if (!weeksMap.has(w)) weeksMap.set(w, []);
+        const d = map.get(day.format('YYYY-MM-DD'));
+        weeksMap.get(w)?.push(d || {
+            date: day.toISOString(),
+            dayName: day.format('dddd'),
+            schoolYear: {} as any,
+            class: {} as any,
+            isHoliday: false,
+            notes: '',
+            activities: [],
+            status: 'Dự thảo'
+        });
+        day = day.add(1, 'day');
     }
 
     return Array.from(weeksMap.entries())
         .map(([week, days]) => ({ week, days }))
-        .sort((a, b) => {
-            const firstDayA = dayjs(a.days[0].date);
-            const firstDayB = dayjs(b.days[0].date);
-            return firstDayA.valueOf() - firstDayB.valueOf();
-        });
+        .sort((a, b) => dayjs(a.days[0].date).valueOf() - dayjs(b.days[0].date).valueOf());
 };
 
-
 function SchedulesManagement() {
+    const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
     const [loading, setLoading] = useState(false);
-    const [selectedSchoolYear, setSelectedSchoolYear] = useState<string | undefined>('sy001');
-    const [selectedClass, setSelectedClass] = useState<string | undefined>('class001');
-    const [selectedMonth, setSelectedMonth] = useState<number>(10);
-    const [scheduleData, setScheduleData] = useState<MockSchedule | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [classes, setClasses] = useState<IClassBySchoolYearItem[]>([]);
+    const [selectedClassId, setSelectedClassId] = useState<string>();
+    const [selectedMonth, setSelectedMonth] = useState<number>(dayjs().month() + 1);
+    const [scheduleData, setScheduleData] = useState<TScheduleDetailResponse>([]);
+    const [currentWeekIndex, setCurrentWeekIndex] = useState(0);
+    const currentSchoolYear = dayjs().year().toString();
+    const [scheduleStatus, setScheduleStatus] = useState<'Dự thảo' | 'Xác nhận' | null>(null);
+    const [scheduleId, setScheduleId] = useState<string | null>(null)
+    const [editMode, setEditMode] = useState(false);
+    const currentYear = dayjs().year();
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const dragStateRef = useRef({ isDragging: false, startX: 0, scrollLeftStart: 0 });
+    const [isPreview, setIsPreview] = useState(false);
+    const [availableActivities, setAvailableActivities] = useState<AvailableActivityItem[]>([]);
+    const [popoverSlot, setPopoverSlot] = useState<null | { date: string; startTime: number }>(null);
+    const [isFetchingActivities, setIsFetchingActivities] = useState(false);
+    const [selectedActivity1, setSelectedActivity1] = useState<{
+        date: string;
+        index: number;
+    } | null>(null);
 
-    const mockSchoolYears = [{ _id: 'sy001', name: 'Năm học 2025-2026' }];
-    const mockClasses = [{ _id: 'class001', name: 'Lớp Mầm 1' }];
-    const monthOptions = Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: `Tháng ${i + 1}` }));
+    const [selectedActivity2, setSelectedActivity2] = useState<{
+        date: string;
+        index: number;
+    } | null>(null);
 
-    const currentYear = 2025;
+
+    const handleActivityClick = (date: string, index: number) => {
+        if (!editMode) return;
+
+        if (!selectedActivity1) {
+            setSelectedActivity1({ date, index });
+        } else if (!selectedActivity2) {
+            setSelectedActivity2({ date, index });
+        }
+    };
 
     useEffect(() => {
-        const fetchData = async () => {
-            if (!selectedSchoolYear || !selectedClass || !selectedMonth) {
-                setScheduleData(null);
-                return;
+        if (selectedActivity1 && selectedActivity2) {
+            const updated = [...scheduleData];
+            const day1 = updated.find(d => d.date === selectedActivity1.date);
+            const day2 = updated.find(d => d.date === selectedActivity2.date);
+
+            if (day1 && day2) {
+                const slot1 = day1.activities[selectedActivity1.index];
+                const slot2 = day2.activities[selectedActivity2.index];
+
+                if (slot1?.type === 'Bình thường' && slot2?.type === 'Bình thường') {
+                    const newSlot1 = {
+                        ...slot1,
+                        activity: slot2.activity,
+                        activityName: slot2.activityName,
+                        type: slot2.type,
+                        category: slot2.category || null,
+                        eventName: slot2.eventName || null,
+                        _justSwapped: true,
+                    };
+
+                    const newSlot2 = {
+                        ...slot2,
+                        activity: slot1.activity,
+                        activityName: slot1.activityName,
+                        type: slot1.type,
+                        category: slot1.category || null,
+                        eventName: slot1.eventName || null,
+                        _justSwapped: true,
+                    };
+
+                    day1.activities[selectedActivity1.index] = newSlot1;
+                    day2.activities[selectedActivity2.index] = newSlot2;
+
+                    setScheduleData([...updated]);
+
+                    setTimeout(() => {
+                        const cleaned = [...updated];
+                        const d1 = cleaned.find(d => d.date === selectedActivity1.date);
+                        const d2 = cleaned.find(d => d.date === selectedActivity2.date);
+                        if (d1) {
+                            d1.activities[selectedActivity1.index]._justSwapped = false;
+                        }
+                        if (d2) {
+                            d2.activities[selectedActivity2.index]._justSwapped = false;
+                        }
+                        setScheduleData([...cleaned]);
+                    }, 600);
+
+                    toast.success('Hoán đổi tiết học thành công!');
+                } else {
+                    toast.warning('Chỉ có thể hoán đổi các hoạt động “Bình thường”.');
+                }
             }
-            setLoading(true);
-            await new Promise(resolve => setTimeout(resolve, 500));
-            if (selectedSchoolYear === 'sy001' && selectedClass === 'class001' && selectedMonth === 10) {
-                setScheduleData(mockScheduleData);
-            } else {
-                setScheduleData(null);
-            }
-            setLoading(false);
+
+            setSelectedActivity1(null);
+            setSelectedActivity2(null);
+        }
+    }, [selectedActivity1, selectedActivity2, scheduleData]);
+
+
+    const handleDeleteActivity = (date: string, index: number) => {
+        setScheduleData((prev) => {
+            const updated = [...prev];
+            const day = updated.find(d => d.date === date);
+            if (!day) return prev;
+
+            const activities = [...day.activities];
+            const target = activities[index];
+
+            activities[index] = {
+                ...target,
+                activity: '',
+                activityName: '',
+                type: 'Bình thường',
+                category: null,
+                eventName: null
+            };
+
+            day.activities = activities;
+            return updated;
+        });
+    };
+
+    const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+        const container = scrollRef.current;
+        if (!container) return;
+        e.preventDefault();
+        dragStateRef.current = {
+            isDragging: true,
+            startX: e.clientX,
+            scrollLeftStart: container.scrollLeft
         };
-        fetchData();
-    }, [selectedSchoolYear, selectedClass, selectedMonth]);
+        container.style.cursor = 'grabbing';
+        container.style.userSelect = 'none';
+    }, []);
+
+    const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+        if (!dragStateRef.current.isDragging || !scrollRef.current) return;
+        e.preventDefault();
+        const x = e.clientX;
+        const walk = x - dragStateRef.current.startX;
+        scrollRef.current.scrollLeft = dragStateRef.current.scrollLeftStart - walk;
+    }, []);
+
+    const stopDragging = useCallback(() => {
+        const container = scrollRef.current;
+        if (container) {
+            container.style.cursor = 'grab';
+            container.style.userSelect = 'auto';
+        }
+        dragStateRef.current.isDragging = false;
+    }, []);
+
+    const fetchClassList = useCallback(async () => {
+        try {
+            const res = await scheduleApis.getClassListByActiveSchoolYear();
+            setClasses(res);
+            if (!id) {
+                setSelectedClassId(res?.[0]?._id);
+            }
+        } catch {
+            setClasses([]);
+        }
+    }, [id]);
+
+
+    useEffect(() => {
+        fetchClassList();
+    }, [fetchClassList]);
+
+
+
+    const fetchScheduleData = useCallback(async () => {
+        if (!selectedClassId || !selectedMonth) return;
+
+        setLoading(true);
+        setScheduleStatus(null);
+        setScheduleData([]);
+        setEditMode(false);
+        setIsPreview(false);
+
+        try {
+            const res = await scheduleApis.getScheduleParams({
+                schoolYear: currentSchoolYear,
+                class: selectedClassId,
+                month: selectedMonth,
+            });
+
+            if (res && Array.isArray(res.scheduleDays)) {
+                setScheduleData(res.scheduleDays);
+                setScheduleStatus(res.status || 'Dự thảo');
+
+                if (res._id) {
+                    setScheduleId(res._id);
+                }
+            } else {
+                setScheduleData([]);
+                setScheduleStatus(null);
+            }
+        } catch {
+            setScheduleData([]);
+            setScheduleStatus(null);
+        } finally {
+            setLoading(false);
+        }
+    }, [currentSchoolYear, selectedClassId, selectedMonth]);
+
+    const fetchAvailableActivities = async () => {
+        if (!selectedMonth || !selectedClassId) return;
+
+        try {
+            setIsFetchingActivities(true);
+            const res = await scheduleApis.getAvailableActivities({
+                month: selectedMonth.toString(),
+                classId: selectedClassId,
+            });
+
+            setAvailableActivities(res);
+        } catch (error) {
+            toast.error('Không thể tải danh sách hoạt động');
+            setAvailableActivities([]);
+        } finally {
+            setIsFetchingActivities(false);
+        }
+    };
+    const handleSelectActivity = (activityId: string) => {
+        if (!popoverSlot) return;
+
+        const { date, startTime } = popoverSlot;
+        const selected = availableActivities.find(act => act._id === activityId);
+        if (!selected) return;
+
+        const updated = [...scheduleData];
+        const day = updated.find(d => d.date === date);
+        if (!day) return;
+
+        const slotIdx = day.activities.findIndex(act => act.startTime === startTime);
+        if (slotIdx !== -1) {
+            day.activities[slotIdx] = {
+                ...day.activities[slotIdx],
+                activity: selected._id,
+                activityName: selected.activityName,
+                activityCode: selected.activityCode,
+                category: selected.category,
+                eventName: selected.eventName,
+                type: selected.type,
+            };
+        }
+
+        setScheduleData(updated);
+        setPopoverSlot(null);
+        toast.success('Đã thêm hoạt động!');
+    };
+
+
+
+
+    useEffect(() => {
+        if (selectedClassId && selectedMonth && !id) {
+            fetchScheduleData();
+        }
+    }, [selectedClassId, selectedMonth, fetchScheduleData, id]);
+
+    useEffect(() => {
+        if (scheduleStatus === 'Xác nhận') {
+            setEditMode(false);
+        }
+    }, [scheduleStatus]);
+
+    const handleFetchSuggestion = async () => {
+        if (!selectedClassId || !selectedMonth) {
+            toast.warning('Vui lòng chọn Lớp và Tháng trước khi gợi ý lịch học.');
+            return;
+        }
+
+        const year = currentSchoolYear;
+        setLoading(true);
+        setScheduleData([]);
+        setScheduleStatus(null);
+
+        try {
+            const res = await scheduleApis.getPreviewSchedule({
+                year,
+                month: selectedMonth.toString(),
+                classId: selectedClassId,
+            });
+
+            if (res && Array.isArray(res.schedule?.scheduleDays) && res.schedule.scheduleDays.length > 0) {
+                setScheduleData(res.schedule.scheduleDays);
+                setIsPreview(true);
+                setScheduleStatus('Dự thảo');
+                toast.success('Đã tải gợi ý lịch học thành công!');
+            } else {
+                toast.info('Không có dữ liệu gợi ý lịch học.');
+                setScheduleData([]);
+                setScheduleStatus(null);
+            }
+        } catch (error) {
+            console.error('Lỗi khi gợi ý lịch học:', error);
+            toast.error('Không thể tải gợi ý lịch học. Vui lòng thử lại.');
+            setScheduleData([]);
+            setScheduleStatus(null);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    const handleUpdateSchedule = async () => {
+        if (!scheduleId) {
+            toast.error('Không xác định được ID lịch học để cập nhật.');
+            return;
+        }
+
+        if (!selectedClassId || !selectedMonth) {
+            toast.error('Thiếu thông tin Lớp hoặc Tháng.');
+            return;
+        }
+
+        const payload: ICreateSchedulePayload = {
+            schoolYear: currentSchoolYear,
+            class: selectedClassId,
+            month: selectedMonth.toString(),
+            scheduleDays: scheduleData
+        };
+        console.log(payload);
+
+
+        setIsSaving(true);
+        try {
+            await scheduleApis.updateSchedule(scheduleId, payload);
+            toast.success('Cập nhật lịch học thành công!');
+            setEditMode(false);
+            fetchScheduleData();
+        } catch (error) {
+            console.error('Lỗi khi cập nhật lịch học:', error);
+            toast.error('Cập nhật lịch học thất bại. Vui lòng thử lại.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+
+    const handleConfirmSchedule = async () => {
+        if (!scheduleId) {
+            toast.error('Không xác định được ID lịch học để xác nhận.');
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            await scheduleApis.confirmSchedule(scheduleId);
+            toast.success('Lịch học đã được xác nhận!');
+            fetchScheduleData();
+        } catch (error) {
+            console.error('Lỗi khi xác nhận lịch học:', error);
+            toast.error('Xác nhận lịch học thất bại. Vui lòng thử lại.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleCreateSchedule = async () => {
+        if (!selectedClassId || !selectedMonth) {
+            toast.error('Thiếu thông tin Lớp hoặc Tháng.');
+            return;
+        }
+
+        const payload: ICreateSchedulePayload = {
+            schoolYear: currentSchoolYear,
+            class: selectedClassId,
+            month: selectedMonth.toString(),
+            scheduleDays: scheduleData
+        };
+
+        setIsSaving(true);
+        try {
+            await scheduleApis.createSchedule(payload);
+            toast.success('Tạo lịch học thành công!');
+            fetchScheduleData();
+        } catch (error) {
+            console.error('Lỗi khi tạo lịch học:', error);
+            toast.error('Tạo lịch học thất bại. Vui lòng thử lại.');
+        } finally {
+            setIsSaving(false);
+            setIsPreview(false);
+        }
+    };
 
     const weeklyGroupedDays = useMemo(() => {
-        if (!scheduleData) return [];
-        return groupDaysByWeek(scheduleData.scheduleDays, currentYear, selectedMonth);
+        if (!scheduleData.length) return [];
+        return groupDaysByWeek(scheduleData, currentYear, selectedMonth);
     }, [scheduleData, currentYear, selectedMonth]);
 
-    const renderDayActivities = (day: ScheduleDay) => {
-        if (day.isHoliday) {
-            return (
-                <Tag color="red" style={{ margin: '10px 0' }}>Ngày nghỉ {day.notes ? `- ${day.notes}` : ''}</Tag>
-            );
-        }
-        if (!day.activities || day.activities.length === 0) {
-            return <Text type="secondary" style={{ fontStyle: 'italic', display: 'block', marginTop: '10px' }}>Chưa có hoạt động</Text>;
-        }
-        return (
-            <List
-                size="small"
-                dataSource={day.activities}
-                renderItem={(item) => (
-                    <List.Item style={{ padding: '4px 0', fontSize: '13px' }}>
-                        <Text strong style={{ marginRight: '8px', minWidth: '80px', display: 'inline-block' }}>
-                            {formatMinutesToTime(item.startTime)}-{formatMinutesToTime(item.endTime)}:
-                        </Text>
-                        <Text >{item.activity?.name ?? 'N/A'}</Text>
-                    </List.Item>
-                )}
-            />
-        );
-    };
+    useEffect(() => {
+        setCurrentWeekIndex(0);
+    }, [selectedClassId, selectedMonth]);
+
+    const currentWeek = weeklyGroupedDays?.[currentWeekIndex];
+
+    let weekHeader = '';
+    if (currentWeek) {
+        const first = dayjs(currentWeek.days[0].date);
+        const last = dayjs(currentWeek.days[currentWeek.days.length - 1].date);
+        const weekOfMonth = first.week() - first.startOf('month').week() + 1;
+        weekHeader = `Tuần ${weekOfMonth} (${first.format('DD/MM')} - ${last.format('DD/MM')})`;
+    }
 
     return (
         <div style={{ padding: '24px', background: '#f0f2f5' }}>
             <Card bordered={false}>
                 <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
-                    <Col> <Title level={3} style={{ margin: 0 }}> <Space><ScheduleOutlined /> Quản lý Lịch trình Tháng </Space> </Title> </Col>
-                    <Col> <Space wrap> <Select style={{ width: 180 }} placeholder="Chọn năm học" value={selectedSchoolYear} onChange={setSelectedSchoolYear} disabled={loading}> {mockSchoolYears.map(sy => <Option key={sy._id} value={sy._id}>{sy.name}</Option>)} </Select> <Select style={{ width: 150 }} placeholder="Chọn lớp" value={selectedClass} onChange={setSelectedClass} disabled={loading}> {mockClasses.map(cls => <Option key={cls._id} value={cls._id}>{cls.name}</Option>)} </Select> <Select style={{ width: 120 }} placeholder="Chọn tháng" value={selectedMonth} onChange={setSelectedMonth} options={monthOptions} disabled={loading} /> </Space> </Col>
+                    <Col>
+                        <Title level={3} style={{ margin: 0 }}>
+                            <Space>
+                                <ScheduleOutlined />
+                                {id ? 'Chỉnh sửa Lịch trình Tháng' : 'Quản lý Lịch trình Tháng'}
+                                <Text type="secondary">(Năm {currentSchoolYear})</Text>
+                                {scheduleStatus === 'Xác nhận' && <Tag color="success">ĐÃ XÁC NHẬN</Tag>}
+                                {scheduleStatus === 'Dự thảo' && <Tag color="blue">DỰ THẢO</Tag>}
+                            </Space>
+                        </Title>
+                    </Col>
+                    <Col>
+                        <Space wrap>
+                            <Select
+                                style={{ width: 150 }}
+                                placeholder="Chọn lớp"
+                                value={selectedClassId}
+                                onChange={setSelectedClassId}
+                                disabled={loading || !!id}
+                            >
+                                {classes.map(cls => (
+                                    <Option key={cls._id} value={cls._id}>{cls.className}</Option>
+                                ))}
+                            </Select>
+                            <Select
+                                style={{ width: 120 }}
+                                placeholder="Chọn tháng"
+                                value={selectedMonth}
+                                onChange={setSelectedMonth}
+                                options={monthOptions}
+                                disabled={loading || !!id}
+                            />
+                            {!scheduleStatus && !id && (
+                                <>
+                                    <Button icon={<BulbOutlined />} onClick={handleFetchSuggestion}>
+                                        Gợi ý lịch học
+                                    </Button>
+                                    <Button
+                                        type="primary"
+                                        icon={<PlusOutlined />}
+                                        onClick={() => navigate(`${constants.APP_PREFIX}/schedules/create`)}
+                                    >
+                                        Tạo lịch học
+                                    </Button>
+                                </>
+                            )}
+                        </Space>
+                    </Col>
                 </Row>
 
-                {scheduleData && (
-                    <Row justify="space-between" align="middle" style={{ marginBottom: 16, padding: '0 8px' }}>
-                        <Col> <Space> <Text strong>Trạng thái:</Text> <Tag color={scheduleData.status === 'Xác nhận' ? 'success' : 'processing'}>{scheduleData.status}</Tag> </Space> </Col>
-                        <Col> <Space> {scheduleData.status === 'Dự thảo' && (<Button icon={<CheckCircleOutlined />} type="primary" ghost> Xác nhận </Button>)} <Button icon={<EditOutlined />}>Sửa</Button> <Button icon={<DeleteOutlined />} danger>Xóa</Button> </Space> </Col>
-                    </Row>
-                )}
+                <Spin spinning={loading || isSaving}>
+                    {!loading && weeklyGroupedDays.length > 0 && currentWeek && (
+                        <>
+                            <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
+                                <Col>
+                                    <Button
+                                        icon={<LeftOutlined />}
+                                        onClick={() => setCurrentWeekIndex(i => i - 1)}
+                                        disabled={currentWeekIndex === 0}
+                                    >
+                                        Tuần trước
+                                    </Button>
+                                </Col>
+                                <Col>
+                                    <Title level={4} style={{ margin: 0 }}>{weekHeader}</Title>
+                                </Col>
+                                <Col>
+                                    <Button
+                                        icon={<RightOutlined />}
+                                        onClick={() => setCurrentWeekIndex(i => i + 1)}
+                                        disabled={currentWeekIndex === weeklyGroupedDays.length - 1}
+                                    >
+                                        Tuần sau
+                                    </Button>
+                                </Col>
+                            </Row>
 
-                <Spin spinning={loading} tip="Đang tải lịch trình...">
-                    {!loading && scheduleData && weeklyGroupedDays.length > 0 && (
-                        <Collapse defaultActiveKey={weeklyGroupedDays.map(w => w.week)} ghost accordion>
-                            {weeklyGroupedDays.map(({ week, days }) => {
-                                const firstDayOfWeek = dayjs(days[0].date);
-                                const lastDayOfWeek = dayjs(days[days.length - 1].date);
-                                const weekOfMonth = firstDayOfWeek.week() - firstDayOfWeek.startOf('month').week() + 1;
-                                const weekHeader = `Tuần ${weekOfMonth} (${firstDayOfWeek.format('DD/MM')} - ${lastDayOfWeek.format('DD/MM')})`;
+                            <Row style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 16 }}>
+                                {isPreview ? (
+                                    <Button
+                                        type="primary"
+                                        icon={<SaveOutlined />}
+                                        onClick={handleCreateSchedule}
+                                        loading={isSaving}
+                                        disabled={!scheduleData.length}
+                                    >
+                                        Tạo lịch học
+                                    </Button>
+                                ) : scheduleStatus === 'Dự thảo' && (
+                                    <>
+                                        <Button
+                                            icon={editMode ? <CloseCircleOutlined /> : <EditOutlined />}
+                                            onClick={() => setEditMode(prev => !prev)}
+                                            type={editMode ? 'default' : 'primary'}
+                                        >
+                                            {editMode ? 'Thoát chỉnh sửa' : 'Chỉnh sửa lịch'}
+                                        </Button>
 
-                                return (
-                                    <Panel header={<Title level={5}>{weekHeader}</Title>} key={week}>
-                                        <Row gutter={[16, 16]}>
-                                            {days.map(day => (
-                                                <Col xs={24} md={12} lg={24 / 7} key={day.date} style={{ flexBasis: `${100 / 7}%`, maxWidth: `${100 / 7}%` }} /* Cố định 7 cột */ >
-                                                    <Card
-                                                        size="small"
-                                                        title={dayjs(day.date).format('dddd, DD/MM')}
-                                                        headStyle={day.isHoliday ? { backgroundColor: '#fff1f0', color: '#cf1322', fontWeight: 'bold' } : { fontWeight: 'bold' }}
-                                                        extra={!day.isHoliday && <Tooltip title="Thêm/Sửa hoạt động"><Button size="small" type="text" icon={<PlusOutlined />} /></Tooltip>}
-                                                        style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-                                                        bodyStyle={{ flexGrow: 1, overflowY: 'auto' }} // Cho phép scroll nếu nội dung dài
-                                                    >
-                                                        {renderDayActivities(day)}
-                                                        {day.notes && !day.isHoliday && <Paragraph italic type="secondary" style={{ marginTop: '8px', fontSize: '12px', marginBottom: 0 }}>* {day.notes}</Paragraph>}
-                                                    </Card>
-                                                </Col>
-                                            ))}
-                                        </Row>
-                                    </Panel>
-                                );
-                            })}
-                        </Collapse>
+                                        {editMode && (
+                                            <Button
+                                                type="primary"
+                                                icon={<SaveOutlined />}
+                                                onClick={handleUpdateSchedule}
+                                                loading={isSaving}
+                                            >
+                                                Lưu thay đổi
+                                            </Button>
+                                        )}
+
+                                        <Popconfirm
+                                            title="Xác nhận lịch học?"
+                                            description="Sau khi xác nhận, bạn sẽ không thể chỉnh sửa lịch học nữa."
+                                            onConfirm={handleConfirmSchedule}
+                                            okText="Xác nhận"
+                                            cancelText="Hủy"
+                                        >
+                                            <Button
+                                                danger
+                                                type="default"
+                                                disabled={!scheduleData.length}
+                                            >
+                                                Xác nhận lịch học
+                                            </Button>
+                                        </Popconfirm>
+                                    </>
+                                )}
+                            </Row>
+
+                            <div style={{ position: 'relative' }}>
+                                <div
+                                    ref={scrollRef}
+                                    onMouseDown={handleMouseDown}
+                                    onMouseMove={handleMouseMove}
+                                    onMouseUp={stopDragging}
+                                    onMouseLeave={stopDragging}
+                                    style={{
+                                        width: '100%',
+                                        overflowX: 'auto',
+                                        padding: '16px 40px',
+                                        cursor: 'grab'
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', gap: '16px' }}>
+                                        {currentWeek.days.map(day => (
+                                            <div
+                                                key={day.date}
+                                                style={{
+                                                    flex: '0 0 260px',
+                                                    width: 260,
+                                                    background: '#f7f7f7',
+                                                    borderRadius: 8,
+                                                    border: '1px solid #e8e8e8',
+                                                    display: 'flex',
+                                                    flexDirection: 'column'
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        padding: '12px 16px',
+                                                        borderBottom: '1px solid #e8e8e8',
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        alignItems: 'center',
+                                                        position: 'relative',
+                                                        ...(day.isHoliday ? {
+                                                            backgroundColor: '#fff1f0',
+                                                            color: '#cf1322',
+                                                            borderBottomColor: '#ffccc7'
+                                                        } : { background: '#fff' })
+                                                    }}
+                                                >
+                                                    <Text strong>{dayjs(day.date).format('dddd, DD/MM')}</Text>
+                                                </div>
+
+                                                <div
+                                                    style={{
+                                                        padding: '12px 16px',
+                                                        minHeight: '200px',
+                                                        overflowY: 'auto',
+                                                        flexGrow: 1,
+                                                        ...(day.isHoliday ? { backgroundColor: '#fff1f0' } : {})
+                                                    }}
+                                                >
+                                                    {day.isHoliday ? (
+                                                        <Tag color="red" style={{ margin: '8px 0' }}>
+                                                            Ngày nghỉ lễ {day.notes ? `- ${day.notes}` : ''}
+                                                        </Tag>
+                                                    ) : day.activities.length === 0 ? (
+                                                        <Text type="secondary" italic>Chưa có hoạt động</Text>
+                                                    ) : (
+                                                        <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                                                            {day.activities.map((item, index) => {
+                                                                const isFrozen = item.type === 'Cố định';
+                                                                const isSelected =
+                                                                    (selectedActivity1?.date === day.date && selectedActivity1.index === index) ||
+                                                                    (selectedActivity2?.date === day.date && selectedActivity2.index === index);
+
+                                                                return (
+                                                                    <div
+                                                                        key={index}
+                                                                        style={{
+                                                                            position: 'relative',
+                                                                            background: isFrozen ? '#fafafa' : isSelected ? '#e6f7ff' : '#fff',
+                                                                            borderRadius: 6,
+                                                                            padding: '8px 12px 28px',
+                                                                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                                                            border: isFrozen
+                                                                                ? '1px solid #d9d9d9'
+                                                                                : isSelected
+                                                                                    ? '2px solid #1890ff'
+                                                                                    : '1px solid #f0f0f0',
+                                                                            opacity: isSelected ? 0.6 : 1,
+                                                                            display: 'flex',
+                                                                            flexDirection: 'column',
+                                                                            gap: 4,
+                                                                            cursor: editMode && !isFrozen ? 'pointer' : 'default',
+                                                                        }}
+                                                                        onClick={() => {
+                                                                            if (editMode && !isFrozen && !popoverSlot) {
+                                                                                handleActivityClick(day.date, index); // chỉ để swap
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        {/* Thời gian */}
+                                                                        <Text strong style={{ fontSize: 13 }}>
+                                                                            {formatMinutesToTime(item.startTime)} - {formatMinutesToTime(item.endTime)}
+                                                                        </Text>
+
+                                                                        {/* Nội dung hoạt động */}
+                                                                        <Paragraph
+                                                                            style={{
+                                                                                marginBottom: 0,
+                                                                                fontSize: 13,
+                                                                                whiteSpace: 'pre-wrap',
+                                                                                color: isFrozen ? '#888' : undefined,
+                                                                                minHeight: 40,
+                                                                                display: 'flex',
+                                                                                alignItems: 'center'
+                                                                            }}
+                                                                        >
+                                                                            {item.activityName || <Text type="secondary" italic>Chưa có hoạt động</Text>}
+                                                                        </Paragraph>
+
+                                                                        {/* Tag */}
+                                                                        {item.type && (
+                                                                            <Tag
+                                                                                color={
+                                                                                    item.type === 'Cố định'
+                                                                                        ? 'default'
+                                                                                        : item.type === 'Bình thường'
+                                                                                            ? 'green'
+                                                                                            : item.type === 'Sự kiện'
+                                                                                                ? 'purple'
+                                                                                                : 'blue'
+                                                                                }
+                                                                                style={{ alignSelf: 'flex-start' }}
+                                                                            >
+                                                                                {item.type}
+                                                                            </Tag>
+                                                                        )}
+
+                                                                        {/* ❌ Nút xoá luôn hiển khi editMode */}
+                                                                        {/* ❌ Nút xoá chỉ hiện khi editMode và KHÔNG phải Cố định */}
+                                                                        {editMode && item.type !== 'Cố định' && (
+                                                                            <Tooltip title="Xóa nội dung hoạt động">
+                                                                                <CloseCircleOutlined
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        handleDeleteActivity(day.date, index);
+                                                                                    }}
+                                                                                    style={{
+                                                                                        position: 'absolute',
+                                                                                        top: 6,
+                                                                                        right: 6,
+                                                                                        fontSize: 16,
+                                                                                        color: '#ff4d4f',
+                                                                                        cursor: 'pointer'
+                                                                                    }}
+                                                                                />
+                                                                            </Tooltip>
+                                                                        )}
+
+
+                                                                        {/* Nút Chọn ở góc phải dưới */}
+                                                                        {editMode && !isFrozen && (
+                                                                            <div style={{ position: 'absolute', bottom: 6, right: 6 }}>
+                                                                                <Popover
+                                                                                    trigger="click"
+                                                                                    open={popoverSlot?.date === day.date && popoverSlot?.startTime === item.startTime}
+                                                                                    onOpenChange={(visible) => !visible && setPopoverSlot(null)}
+                                                                                    placement="topRight"
+                                                                                    content={
+                                                                                        <List
+                                                                                            size="small"
+                                                                                            loading={isFetchingActivities}
+                                                                                            dataSource={availableActivities}
+                                                                                            renderItem={(act) => (
+                                                                                                <List.Item
+                                                                                                    key={act._id}
+                                                                                                    style={{ cursor: 'pointer', padding: '6px 10px' }}
+                                                                                                    onClick={() => {
+                                                                                                        handleSelectActivity(act._id);
+                                                                                                        setPopoverSlot(null);
+                                                                                                    }}
+                                                                                                >
+                                                                                                    <div>
+                                                                                                        <strong>{act.activityName}</strong>
+                                                                                                        {act.type === 'Sự kiện' && act.eventName ? ` (${act.eventName})` : ''} - [{act.type}]
+                                                                                                    </div>
+                                                                                                </List.Item>
+                                                                                            )}
+                                                                                        />
+                                                                                    }
+                                                                                >
+                                                                                    <Button
+                                                                                        size="small"
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            fetchAvailableActivities();
+                                                                                            setPopoverSlot({ date: day.date, startTime: item.startTime });
+                                                                                        }}
+                                                                                    >
+                                                                                        Chọn
+                                                                                    </Button>
+                                                                                </Popover>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </Space>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </>
                     )}
-                    {!loading && !scheduleData && selectedSchoolYear && selectedClass && selectedMonth && (
-                        <Empty description="Không tìm thấy lịch trình cho lựa chọn này." style={{ marginTop: 32 }} />
-                    )}
-                    {!loading && weeklyGroupedDays.length === 0 && scheduleData && (
-                        <Empty description="Không có dữ liệu ngày nào trong lịch trình này." style={{ marginTop: 32 }} />
+                    {!loading && weeklyGroupedDays.length === 0 && selectedClassId && selectedMonth && (
+                        <Empty
+                            description={
+                                scheduleStatus === 'Xác nhận'
+                                    ? "Lịch xác nhận không có dữ liệu."
+                                    : (id ? "Không tải được dữ liệu lịch học." : "Không tìm thấy lịch trình. Bạn có thể 'Gợi ý lịch học' hoặc 'Tạo lịch học' mới.")
+                            }
+                            style={{ marginTop: 32 }}
+                        />
                     )}
                 </Spin>
+
             </Card>
         </div>
     );
 }
 
-export default SchedulesManagement; // Đổi tên export thành SchedulesManagement nếu bạn muốn thay thế hoàn toàn component cũ
+export default SchedulesManagement;

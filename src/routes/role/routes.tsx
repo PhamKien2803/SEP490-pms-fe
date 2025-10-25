@@ -52,6 +52,12 @@ import TakeAttendance from "../../pages/teacher/attendance-student/take-attendan
 import EditAttendance from "../../pages/teacher/attendance-student/edit-attendance/EditAttendance";
 import AttendanceDetails from "../../pages/teacher/attendance-student/attendance-details/AttendanceDetails";
 import StudentDetails from "../../pages/teacher/class-information/student-details/StudentDetails";
+import ClassInfor from "../../pages/teacher/ClassInfor";
+import ScheduleCreate from "../../pages/schedules-management/schedule-create/ScheduleCreate";
+import MedicalManagement from "../../pages/medical-management/MedicalManagement";
+import MedicalDetail from "../../pages/medical-management/medical-details/MedicalDetails";
+import CreateMedical from "../../pages/medical-management/create-medical/CreateMedical";
+import UpdateMedical from "../../pages/medical-management/edit-medical/EditMedical";
 
 export const routes: RouteObject[] = [
   {
@@ -359,8 +365,11 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <SchedulesManagement />,
+              },
+              {
+                path: "create",
+                element: <ScheduleCreate />
               }
-
             ],
           },
           {
@@ -502,6 +511,33 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <RoomReport />,
+              },
+            ],
+          },
+           {
+            path: "medicals",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/medicals`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <MedicalManagement />,
+              },
+              {
+                path: "view/:id",
+                element: <MedicalDetail />,
+              },
+              {
+                path: "edit/:id",
+                element: <UpdateMedical />,
+              },
+              {
+                path: "create",
+                element: <CreateMedical />,
               },
             ],
           },

@@ -95,6 +95,9 @@ import {
 } from "../types/room-management";
 import { AvailableTopicActivitiesResponse, CreateTopicDto, GetAvailableTopicActivitiesParams, GetTopicsParams, TopicDetails, TopicsListResponse, UpdateTopicDto } from "../types/topic";
 import { IAttendanceCreatePayload, IAttendanceDetailResponse, IAttendanceListResponse, IAttendanceUpdatePayload, IPaginatedResponse, ITeacherClassStudentResponse } from "../types/teacher";
+import { ITeacherClassStudentResponse } from "../types/teacher";
+import { AvailableActivityItem, FixActivityResponseItem, IClassBySchoolYearItem, ICreateSchedulePayload, IDailySchedule, TCreateScheduleResponse, TScheduleByIdResponse, TScheduleParamsResponse } from "../types/timetable";
+import { HealthCertCreateData, HealthCertListResponse, HealthCertRecord, HealthCertUpdateData } from "../types/medical-management";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -901,6 +904,117 @@ export const teacherApis = {
   },
 }
 
+export const scheduleApis = {
+  getScheduleById: async (id: string): Promise<TScheduleByIdResponse> => {
+    const response = await axiosAuth.get<TScheduleByIdResponse>(
+      apiEndPoint.GET_SCHEDULE_BY_ID(id)
+    );
+    return response.data;
+  },
+
+
+  createSchedule: async (payload: ICreateSchedulePayload): Promise<TCreateScheduleResponse> => {
+    const response = await axiosAuth.post<TCreateScheduleResponse>(
+      apiEndPoint.CREATE_SCHEDULE,
+      payload
+    );
+    return response.data;
+  },
+
+  getSchoolYearList: async (params: {
+    page: number;
+    limit: number;
+  }): Promise<SchoolYearsListResponse> => {
+    const response = await axiosAuth.get<SchoolYearsListResponse>(
+      apiEndPoint.GET_SCHOOLYEARS_LIST,
+      { params }
+    );
+    return response.data;
+  },
+
+  getClassList: async (params: {
+    year: string;
+    page?: number;
+    limit?: number;
+  }): Promise<ClassListResponse> => {
+    const response = await axiosAuth.get<ClassListResponse>(
+      apiEndPoint.GET_CLASS_LIST,
+      {
+        params,
+      }
+    );
+    return response.data;
+  },
+
+  getClassListByActiveSchoolYear: async (): Promise<IClassBySchoolYearItem[]> => {
+    const response = await axiosAuth.get<IClassBySchoolYearItem[]>(
+      apiEndPoint.GET_CLASS_BY_SCHOOLYEAR
+    );
+    return response.data;
+  },
+
+ 
+  getScheduleParams: async (params: {
+    schoolYear: string;
+    class: string;
+    month: number;
+  }): Promise<TScheduleParamsResponse> => {
+    const response = await axiosAuth.get<TScheduleParamsResponse>(
+      apiEndPoint.GET_SCHEDULE_PARAMS,
+      { params }
+    );
+    return response.data;
+  },
+
+
+  getPreviewSchedule: async (params: {
+    year: string;
+    month: string;
+    classId: string;
+  }): Promise<{ message: string; schedule: { scheduleDays: IDailySchedule[] } }> => {
+    const response = await axiosAuth.get(apiEndPoint.PREVIEWS_SCHEDULE, { params });
+    return response.data;
+  },
+
+  updateSchedule: async (
+    id: string,
+    payload: ICreateSchedulePayload
+  ): Promise<TCreateScheduleResponse> => {
+    const response = await axiosAuth.put<TCreateScheduleResponse>(
+      apiEndPoint.UPDATE_SCHEDULE(id),
+      payload
+    );
+    return response.data;
+  },
+
+  confirmSchedule: async (id: string): Promise<{ message: string }> => {
+    const response = await axiosAuth.put(apiEndPoint.CONFIRM_SCHEDULE(id));
+    return response.data;
+  },
+
+  getFixActivity: async (params: {
+    year: string;
+    month: string;
+    classId: string;
+  }): Promise<FixActivityResponseItem[]> => {
+    const response = await axiosAuth.get(apiEndPoint.GET_FIX_ACTIVITY, {
+      params,
+    });
+    return response.data;
+  },
+
+  getAvailableActivities: async (params: {
+    month: string;
+    classId: string;
+  }): Promise<AvailableActivityItem[]> => {
+    const response = await axiosAuth.get(apiEndPoint.GET_AVAILABEL_ACTIVITY, {
+      params,
+    });
+    return response.data;
+  },
+
+}
+
 export const roomApis = {
   getListRoom: async (params: {
     page: number;
@@ -939,4 +1053,45 @@ export const roomApis = {
   deleteRoom: async (id: string): Promise<void> => {
     await axiosAuth.post(apiEndPoint.DELETE_ROOM(id));
   },
+};
+
+export const medicalApis = {
+  getListMedical: async (params: {
+    page: number;
+    limit: number;
+  }): Promise<HealthCertListResponse> => {
+    const response = await axiosAuth.get<HealthCertListResponse>(
+      apiEndPoint.GET_LIST_MEDICAL,
+      { params }
+    );
+    return response.data;
+  },
+
+  getMedicalById: async (id: string): Promise<HealthCertRecord> => {
+    const response = await axiosAuth.get<HealthCertRecord>(
+      apiEndPoint.GET_MEDICAL_BY_ID(id)
+    );
+    return response.data;
+  },
+
+  createMedical: async (body: HealthCertCreateData): Promise<HealthCertRecord> => {
+    const response = await axiosAuth.post<HealthCertRecord>(
+      apiEndPoint.CREATE_MEDICAL,
+      body
+    );
+    return response.data;
+  },
+
+  updateMedical: async (id: string, body: HealthCertUpdateData): Promise<HealthCertRecord> => {
+    const response = await axiosAuth.put<HealthCertRecord>(
+      apiEndPoint.UPDATE_MEDICAL(id),
+      body
+    );
+    return response.data;
+  },
+
+  deleteMedical: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_MEDICAL(id));
+  },
+  
 };
