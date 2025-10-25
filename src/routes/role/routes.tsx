@@ -360,7 +360,6 @@ export const routes: RouteObject[] = [
                 path: "create",
                 element: <ScheduleCreate />
               }
-
             ],
           },
           {

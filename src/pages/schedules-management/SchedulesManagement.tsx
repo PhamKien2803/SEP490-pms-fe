@@ -1,22 +1,24 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import {
     Card, Typography, Row, Col, Select, Spin, Tag, Space, Button, Empty,
-    Tooltip
+    Tooltip,
+    Popconfirm,
+    List,
+    Popover
 } from 'antd';
 import {
     ScheduleOutlined, PlusOutlined, LeftOutlined, RightOutlined, BulbOutlined,
-    EditOutlined, CloseCircleOutlined
+    EditOutlined, CloseCircleOutlined, SaveOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
-import { IDailySchedule, TScheduleDetailResponse } from '../../types/timetable';
-import { SchoolYearListItem } from '../../types/schoolYear';
-import { ClassListItem } from '../../types/class';
+import { IDailySchedule, TScheduleDetailResponse, ICreateSchedulePayload, IClassBySchoolYearItem, AvailableActivityItem } from '../../types/timetable';
 import { scheduleApis } from '../../services/apiServices';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { constants } from '../../constants';
 import { toast } from 'react-toastify';
+
 
 dayjs.locale('vi');
 dayjs.extend(weekOfYear);
@@ -66,21 +68,25 @@ const groupDaysByWeek = (days: TScheduleDetailResponse, year: number, month: num
 
 function SchedulesManagement() {
     const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
     const [loading, setLoading] = useState(false);
-    const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
-    const [classes, setClasses] = useState<ClassListItem[]>([]);
-    const [selectedSchoolYearId, setSelectedSchoolYearId] = useState<string>();
-    const [_, setSelectedSchoolYearName] = useState<string>();
+    const [isSaving, setIsSaving] = useState(false);
+    const [classes, setClasses] = useState<IClassBySchoolYearItem[]>([]);
     const [selectedClassId, setSelectedClassId] = useState<string>();
     const [selectedMonth, setSelectedMonth] = useState<number>(dayjs().month() + 1);
     const [scheduleData, setScheduleData] = useState<TScheduleDetailResponse>([]);
     const [currentWeekIndex, setCurrentWeekIndex] = useState(0);
-    const [isConfirmed, setIsConfirmed] = useState(false);
+    const currentSchoolYear = dayjs().year().toString();
+    const [scheduleStatus, setScheduleStatus] = useState<'Dự thảo' | 'Xác nhận' | null>(null);
+    const [scheduleId, setScheduleId] = useState<string | null>(null)
     const [editMode, setEditMode] = useState(false);
     const currentYear = dayjs().year();
     const scrollRef = useRef<HTMLDivElement>(null);
     const dragStateRef = useRef({ isDragging: false, startX: 0, scrollLeftStart: 0 });
-    const [hasSuggestedSchedule, setHasSuggestedSchedule] = useState(false);
+    const [isPreview, setIsPreview] = useState(false);
+    const [availableActivities, setAvailableActivities] = useState<AvailableActivityItem[]>([]);
+    const [popoverSlot, setPopoverSlot] = useState<null | { date: string; startTime: number }>(null);
+    const [isFetchingActivities, setIsFetchingActivities] = useState(false);
     const [selectedActivity1, setSelectedActivity1] = useState<{
         date: string;
         index: number;
@@ -102,7 +108,6 @@ function SchedulesManagement() {
         }
     };
 
-
     useEffect(() => {
         if (selectedActivity1 && selectedActivity2) {
             const updated = [...scheduleData];
@@ -110,25 +115,44 @@ function SchedulesManagement() {
             const day2 = updated.find(d => d.date === selectedActivity2.date);
 
             if (day1 && day2) {
-                const act1 = day1.activities[selectedActivity1.index];
-                const act2 = day2.activities[selectedActivity2.index];
+                const slot1 = day1.activities[selectedActivity1.index];
+                const slot2 = day2.activities[selectedActivity2.index];
 
-                // Chỉ swap nếu cả 2 là “Bình thường”
-                if (act1?.type === 'Bình thường' && act2?.type === 'Bình thường') {
-                    day1.activities[selectedActivity1.index] = { ...act2, _justSwapped: true };
-                    day2.activities[selectedActivity2.index] = { ...act1, _justSwapped: true };
+                if (slot1?.type === 'Bình thường' && slot2?.type === 'Bình thường') {
+                    const newSlot1 = {
+                        ...slot1,
+                        activity: slot2.activity,
+                        activityName: slot2.activityName,
+                        type: slot2.type,
+                        category: slot2.category || null,
+                        eventName: slot2.eventName || null,
+                        _justSwapped: true,
+                    };
+
+                    const newSlot2 = {
+                        ...slot2,
+                        activity: slot1.activity,
+                        activityName: slot1.activityName,
+                        type: slot1.type,
+                        category: slot1.category || null,
+                        eventName: slot1.eventName || null,
+                        _justSwapped: true,
+                    };
+
+                    day1.activities[selectedActivity1.index] = newSlot1;
+                    day2.activities[selectedActivity2.index] = newSlot2;
+
                     setScheduleData([...updated]);
 
                     setTimeout(() => {
                         const cleaned = [...updated];
-                        const day1 = cleaned.find(d => d.date === selectedActivity1.date);
-                        const day2 = cleaned.find(d => d.date === selectedActivity2.date);
-
-                        if (day1?.activities[selectedActivity1.index]) {
-                            day1.activities[selectedActivity1.index] = { ...act2 };
+                        const d1 = cleaned.find(d => d.date === selectedActivity1.date);
+                        const d2 = cleaned.find(d => d.date === selectedActivity2.date);
+                        if (d1) {
+                            d1.activities[selectedActivity1.index]._justSwapped = false;
                         }
-                        if (day2?.activities[selectedActivity2.index]) {
-                            day2.activities[selectedActivity2.index] = { ...act1 };
+                        if (d2) {
+                            d2.activities[selectedActivity2.index]._justSwapped = false;
                         }
                         setScheduleData([...cleaned]);
                     }, 600);
@@ -144,12 +168,28 @@ function SchedulesManagement() {
         }
     }, [selectedActivity1, selectedActivity2, scheduleData]);
 
+
     const handleDeleteActivity = (date: string, index: number) => {
-        const updated = [...scheduleData];
-        const day = updated.find(d => d.date === date);
-        if (!day) return;
-        day.activities.splice(index, 1);
-        setScheduleData(updated);
+        setScheduleData((prev) => {
+            const updated = [...prev];
+            const day = updated.find(d => d.date === date);
+            if (!day) return prev;
+
+            const activities = [...day.activities];
+            const target = activities[index];
+
+            activities[index] = {
+                ...target,
+                activity: '',
+                activityName: '',
+                type: 'Bình thường',
+                category: null,
+                eventName: null
+            };
+
+            day.activities = activities;
+            return updated;
+        });
     };
 
     const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -182,69 +222,121 @@ function SchedulesManagement() {
         dragStateRef.current.isDragging = false;
     }, []);
 
-    const fetchClassList = useCallback(async (schoolYearId: string) => {
+    const fetchClassList = useCallback(async () => {
         try {
-            const year = schoolYears.find(y => y._id === schoolYearId)?.schoolYear;
-            if (!year) return;
-            const res = await scheduleApis.getClassList({ year, page: 1, limit: 1000 });
-            setClasses(res.data);
-            setSelectedClassId(res.data?.[0]?._id);
+            const res = await scheduleApis.getClassListByActiveSchoolYear();
+            setClasses(res);
+            if (!id) {
+                setSelectedClassId(res?.[0]?._id);
+            }
         } catch {
             setClasses([]);
         }
-    }, [schoolYears]);
+    }, [id]);
+
 
     useEffect(() => {
-        const fetchSchoolYears = async () => {
-            setLoading(true);
-            try {
-                const res = await scheduleApis.getSchoolYearList({ page: 1, limit: 100 });
-                const sorted = res.data.sort((a, b) => (
-                    parseInt(b.schoolYear.split('-')[0]) - parseInt(a.schoolYear.split('-')[0])
-                ));
-                const latest = sorted[0];
-                setSchoolYears(sorted);
-                setSelectedSchoolYearId(latest._id);
-                setSelectedSchoolYearName(latest.schoolYear);
-            } catch { } finally {
-                setLoading(false);
-            }
-        };
-        fetchSchoolYears();
-    }, []);
+        fetchClassList();
+    }, [fetchClassList]);
 
-    useEffect(() => {
-        if (!selectedSchoolYearId) return;
-        fetchClassList(selectedSchoolYearId);
-    }, [selectedSchoolYearId, fetchClassList]);
 
-    const fetchConfirmedSchedule = useCallback(async () => {
-        if (!selectedSchoolYearId || !selectedClassId || !selectedMonth) return;
+
+    const fetchScheduleData = useCallback(async () => {
+        if (!selectedClassId || !selectedMonth) return;
+
         setLoading(true);
-        setIsConfirmed(false);
+        setScheduleStatus(null);
         setScheduleData([]);
+        setEditMode(false);
+        setIsPreview(false);
 
         try {
             const res = await scheduleApis.getScheduleParams({
-                schoolYear: selectedSchoolYearId,
+                schoolYear: currentSchoolYear,
                 class: selectedClassId,
                 month: selectedMonth,
-                // status: 'Dự thảo'
             });
-            setScheduleData(res);
-            if (res.length > 0) setIsConfirmed(true);
+
+            if (res && Array.isArray(res.scheduleDays)) {
+                setScheduleData(res.scheduleDays);
+                setScheduleStatus(res.status || 'Dự thảo');
+
+                if (res._id) {
+                    setScheduleId(res._id);
+                }
+            } else {
+                setScheduleData([]);
+                setScheduleStatus(null);
+            }
         } catch {
             setScheduleData([]);
+            setScheduleStatus(null);
         } finally {
             setLoading(false);
         }
-    }, [selectedSchoolYearId, selectedClassId, selectedMonth]);
+    }, [currentSchoolYear, selectedClassId, selectedMonth]);
+
+    const fetchAvailableActivities = async () => {
+        if (!selectedMonth || !selectedClassId) return;
+
+        try {
+            setIsFetchingActivities(true);
+            const res = await scheduleApis.getAvailableActivities({
+                month: selectedMonth.toString(),
+                classId: selectedClassId,
+            });
+
+            setAvailableActivities(res);
+        } catch (error) {
+            toast.error('Không thể tải danh sách hoạt động');
+            setAvailableActivities([]);
+        } finally {
+            setIsFetchingActivities(false);
+        }
+    };
+    const handleSelectActivity = (activityId: string) => {
+        if (!popoverSlot) return;
+
+        const { date, startTime } = popoverSlot;
+        const selected = availableActivities.find(act => act._id === activityId);
+        if (!selected) return;
+
+        const updated = [...scheduleData];
+        const day = updated.find(d => d.date === date);
+        if (!day) return;
+
+        const slotIdx = day.activities.findIndex(act => act.startTime === startTime);
+        if (slotIdx !== -1) {
+            day.activities[slotIdx] = {
+                ...day.activities[slotIdx],
+                activity: selected._id,
+                activityName: selected.activityName,
+                activityCode: selected.activityCode,
+                category: selected.category,
+                eventName: selected.eventName,
+                type: selected.type,
+            };
+        }
+
+        setScheduleData(updated);
+        setPopoverSlot(null);
+        toast.success('Đã thêm hoạt động!');
+    };
+
+
+
 
     useEffect(() => {
-        if (selectedSchoolYearId && selectedClassId && selectedMonth) {
-            fetchConfirmedSchedule();
+        if (selectedClassId && selectedMonth && !id) {
+            fetchScheduleData();
         }
-    }, [selectedSchoolYearId, selectedClassId, selectedMonth, fetchConfirmedSchedule]);
+    }, [selectedClassId, selectedMonth, fetchScheduleData, id]);
+
+    useEffect(() => {
+        if (scheduleStatus === 'Xác nhận') {
+            setEditMode(false);
+        }
+    }, [scheduleStatus]);
 
     const handleFetchSuggestion = async () => {
         if (!selectedClassId || !selectedMonth) {
@@ -252,9 +344,10 @@ function SchedulesManagement() {
             return;
         }
 
-        const year = dayjs().year().toString();
+        const year = currentSchoolYear;
         setLoading(true);
         setScheduleData([]);
+        setScheduleStatus(null);
 
         try {
             const res = await scheduleApis.getPreviewSchedule({
@@ -265,21 +358,105 @@ function SchedulesManagement() {
 
             if (res && Array.isArray(res.schedule?.scheduleDays) && res.schedule.scheduleDays.length > 0) {
                 setScheduleData(res.schedule.scheduleDays);
-                setHasSuggestedSchedule(true);
+                setIsPreview(true);
+                setScheduleStatus('Dự thảo');
                 toast.success('Đã tải gợi ý lịch học thành công!');
             } else {
                 toast.info('Không có dữ liệu gợi ý lịch học.');
                 setScheduleData([]);
+                setScheduleStatus(null);
             }
         } catch (error) {
             console.error('Lỗi khi gợi ý lịch học:', error);
             toast.error('Không thể tải gợi ý lịch học. Vui lòng thử lại.');
             setScheduleData([]);
+            setScheduleStatus(null);
         } finally {
             setLoading(false);
         }
     };
 
+
+    const handleUpdateSchedule = async () => {
+        if (!scheduleId) {
+            toast.error('Không xác định được ID lịch học để cập nhật.');
+            return;
+        }
+
+        if (!selectedClassId || !selectedMonth) {
+            toast.error('Thiếu thông tin Lớp hoặc Tháng.');
+            return;
+        }
+
+        const payload: ICreateSchedulePayload = {
+            schoolYear: currentSchoolYear,
+            class: selectedClassId,
+            month: selectedMonth.toString(),
+            scheduleDays: scheduleData
+        };
+        console.log(payload);
+
+
+        setIsSaving(true);
+        try {
+            await scheduleApis.updateSchedule(scheduleId, payload);
+            toast.success('Cập nhật lịch học thành công!');
+            setEditMode(false);
+            fetchScheduleData();
+        } catch (error) {
+            console.error('Lỗi khi cập nhật lịch học:', error);
+            toast.error('Cập nhật lịch học thất bại. Vui lòng thử lại.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+
+    const handleConfirmSchedule = async () => {
+        if (!scheduleId) {
+            toast.error('Không xác định được ID lịch học để xác nhận.');
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            await scheduleApis.confirmSchedule(scheduleId);
+            toast.success('Lịch học đã được xác nhận!');
+            fetchScheduleData();
+        } catch (error) {
+            console.error('Lỗi khi xác nhận lịch học:', error);
+            toast.error('Xác nhận lịch học thất bại. Vui lòng thử lại.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleCreateSchedule = async () => {
+        if (!selectedClassId || !selectedMonth) {
+            toast.error('Thiếu thông tin Lớp hoặc Tháng.');
+            return;
+        }
+
+        const payload: ICreateSchedulePayload = {
+            schoolYear: currentSchoolYear,
+            class: selectedClassId,
+            month: selectedMonth.toString(),
+            scheduleDays: scheduleData
+        };
+
+        setIsSaving(true);
+        try {
+            await scheduleApis.createSchedule(payload);
+            toast.success('Tạo lịch học thành công!');
+            fetchScheduleData();
+        } catch (error) {
+            console.error('Lỗi khi tạo lịch học:', error);
+            toast.error('Tạo lịch học thất bại. Vui lòng thử lại.');
+        } finally {
+            setIsSaving(false);
+            setIsPreview(false);
+        }
+    };
 
     const weeklyGroupedDays = useMemo(() => {
         if (!scheduleData.length) return [];
@@ -288,7 +465,7 @@ function SchedulesManagement() {
 
     useEffect(() => {
         setCurrentWeekIndex(0);
-    }, [selectedSchoolYearId, selectedClassId, selectedMonth]);
+    }, [selectedClassId, selectedMonth]);
 
     const currentWeek = weeklyGroupedDays?.[currentWeekIndex];
 
@@ -308,34 +485,21 @@ function SchedulesManagement() {
                         <Title level={3} style={{ margin: 0 }}>
                             <Space>
                                 <ScheduleOutlined />
-                                Quản lý Lịch trình Tháng
-                                {isConfirmed && <Tag color="success">ĐÃ XÁC NHẬN</Tag>}
+                                {id ? 'Chỉnh sửa Lịch trình Tháng' : 'Quản lý Lịch trình Tháng'}
+                                <Text type="secondary">(Năm {currentSchoolYear})</Text>
+                                {scheduleStatus === 'Xác nhận' && <Tag color="success">ĐÃ XÁC NHẬN</Tag>}
+                                {scheduleStatus === 'Dự thảo' && <Tag color="blue">DỰ THẢO</Tag>}
                             </Space>
                         </Title>
                     </Col>
                     <Col>
                         <Space wrap>
                             <Select
-                                style={{ width: 180 }}
-                                placeholder="Chọn năm học"
-                                value={selectedSchoolYearId}
-                                onChange={(val) => {
-                                    setSelectedSchoolYearId(val);
-                                    const y = schoolYears.find(sy => sy._id === val);
-                                    if (y) setSelectedSchoolYearName(y.schoolYear);
-                                }}
-                                disabled={loading}
-                            >
-                                {schoolYears.map(sy => (
-                                    <Option key={sy._id} value={sy._id}>{sy.schoolYear}</Option>
-                                ))}
-                            </Select>
-                            <Select
                                 style={{ width: 150 }}
                                 placeholder="Chọn lớp"
                                 value={selectedClassId}
                                 onChange={setSelectedClassId}
-                                disabled={loading}
+                                disabled={loading || !!id}
                             >
                                 {classes.map(cls => (
                                     <Option key={cls._id} value={cls._id}>{cls.className}</Option>
@@ -347,9 +511,9 @@ function SchedulesManagement() {
                                 value={selectedMonth}
                                 onChange={setSelectedMonth}
                                 options={monthOptions}
-                                disabled={loading}
+                                disabled={loading || !!id}
                             />
-                            {!isConfirmed && (
+                            {!scheduleStatus && !id && (
                                 <>
                                     <Button icon={<BulbOutlined />} onClick={handleFetchSuggestion}>
                                         Gợi ý lịch học
@@ -367,7 +531,7 @@ function SchedulesManagement() {
                     </Col>
                 </Row>
 
-                <Spin spinning={loading}>
+                <Spin spinning={loading || isSaving}>
                     {!loading && weeklyGroupedDays.length > 0 && currentWeek && (
                         <>
                             <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
@@ -393,16 +557,55 @@ function SchedulesManagement() {
                                     </Button>
                                 </Col>
                             </Row>
-                            <Row style={{ display: "flex", justifyContent: "flex-end" }}>
-                                {hasSuggestedSchedule && (
+
+                            <Row style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 16 }}>
+                                {isPreview ? (
                                     <Button
-                                        style={{ backgroundColor: "#006d75", color: "white" }}
-                                        icon={<EditOutlined />}
-                                        onClick={() => setEditMode(prev => !prev)}
-                                        type={editMode ? 'default' : 'text'}
+                                        type="primary"
+                                        icon={<SaveOutlined />}
+                                        onClick={handleCreateSchedule}
+                                        loading={isSaving}
+                                        disabled={!scheduleData.length}
                                     >
-                                        {editMode ? 'Thoát chỉnh sửa' : 'Chỉnh sửa lịch'}
+                                        Tạo lịch học
                                     </Button>
+                                ) : scheduleStatus === 'Dự thảo' && (
+                                    <>
+                                        <Button
+                                            icon={editMode ? <CloseCircleOutlined /> : <EditOutlined />}
+                                            onClick={() => setEditMode(prev => !prev)}
+                                            type={editMode ? 'default' : 'primary'}
+                                        >
+                                            {editMode ? 'Thoát chỉnh sửa' : 'Chỉnh sửa lịch'}
+                                        </Button>
+
+                                        {editMode && (
+                                            <Button
+                                                type="primary"
+                                                icon={<SaveOutlined />}
+                                                onClick={handleUpdateSchedule}
+                                                loading={isSaving}
+                                            >
+                                                Lưu thay đổi
+                                            </Button>
+                                        )}
+
+                                        <Popconfirm
+                                            title="Xác nhận lịch học?"
+                                            description="Sau khi xác nhận, bạn sẽ không thể chỉnh sửa lịch học nữa."
+                                            onConfirm={handleConfirmSchedule}
+                                            okText="Xác nhận"
+                                            cancelText="Hủy"
+                                        >
+                                            <Button
+                                                danger
+                                                type="default"
+                                                disabled={!scheduleData.length}
+                                            >
+                                                Xác nhận lịch học
+                                            </Button>
+                                        </Popconfirm>
+                                    </>
                                 )}
                             </Row>
 
@@ -434,29 +637,33 @@ function SchedulesManagement() {
                                                     flexDirection: 'column'
                                                 }}
                                             >
-                                                <div style={{
-                                                    padding: '12px 16px',
-                                                    borderBottom: '1px solid #e8e8e8',
-                                                    display: 'flex',
-                                                    justifyContent: 'space-between',
-                                                    alignItems: 'center',
-                                                    ...(day.isHoliday ? {
-                                                        backgroundColor: '#fff1f0',
-                                                        color: '#cf1322',
-                                                        borderBottomColor: '#ffccc7'
-                                                    } : { background: '#fff' })
-                                                }}>
+                                                <div
+                                                    style={{
+                                                        padding: '12px 16px',
+                                                        borderBottom: '1px solid #e8e8e8',
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        alignItems: 'center',
+                                                        position: 'relative',
+                                                        ...(day.isHoliday ? {
+                                                            backgroundColor: '#fff1f0',
+                                                            color: '#cf1322',
+                                                            borderBottomColor: '#ffccc7'
+                                                        } : { background: '#fff' })
+                                                    }}
+                                                >
                                                     <Text strong>{dayjs(day.date).format('dddd, DD/MM')}</Text>
-                                                    <Tooltip title="Thêm hoạt động"> <Button size="small" type="text" icon={<PlusOutlined />} />
-                                                    </Tooltip>
                                                 </div>
-                                                <div style={{
-                                                    padding: '12px 16px',
-                                                    minHeight: '200px',
-                                                    overflowY: 'auto',
-                                                    flexGrow: 1,
-                                                    ...(day.isHoliday ? { backgroundColor: '#fff1f0' } : {})
-                                                }}>
+
+                                                <div
+                                                    style={{
+                                                        padding: '12px 16px',
+                                                        minHeight: '200px',
+                                                        overflowY: 'auto',
+                                                        flexGrow: 1,
+                                                        ...(day.isHoliday ? { backgroundColor: '#fff1f0' } : {})
+                                                    }}
+                                                >
                                                     {day.isHoliday ? (
                                                         <Tag color="red" style={{ margin: '8px 0' }}>
                                                             Ngày nghỉ lễ {day.notes ? `- ${day.notes}` : ''}
@@ -474,25 +681,71 @@ function SchedulesManagement() {
                                                                 return (
                                                                     <div
                                                                         key={index}
-                                                                        onClick={() => handleActivityClick(day.date, index)}
                                                                         style={{
                                                                             position: 'relative',
                                                                             background: isFrozen ? '#fafafa' : isSelected ? '#e6f7ff' : '#fff',
                                                                             borderRadius: 6,
-                                                                            padding: '8px 12px',
+                                                                            padding: '8px 12px 28px',
                                                                             boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
                                                                             border: isFrozen
                                                                                 ? '1px solid #d9d9d9'
                                                                                 : isSelected
                                                                                     ? '2px solid #1890ff'
                                                                                     : '1px solid #f0f0f0',
-                                                                            cursor: isFrozen ? 'not-allowed' : editMode ? 'pointer' : 'default',
                                                                             opacity: isSelected ? 0.6 : 1,
-                                                                            transition: 'opacity 0.2s ease-in-out'
+                                                                            display: 'flex',
+                                                                            flexDirection: 'column',
+                                                                            gap: 4,
+                                                                            cursor: editMode && !isFrozen ? 'pointer' : 'default',
+                                                                        }}
+                                                                        onClick={() => {
+                                                                            if (editMode && !isFrozen && !popoverSlot) {
+                                                                                handleActivityClick(day.date, index); // chỉ để swap
+                                                                            }
                                                                         }}
                                                                     >
-                                                                        {editMode && item.type === 'Bình thường' && (
-                                                                            <Tooltip title="Xóa hoạt động">
+                                                                        {/* Thời gian */}
+                                                                        <Text strong style={{ fontSize: 13 }}>
+                                                                            {formatMinutesToTime(item.startTime)} - {formatMinutesToTime(item.endTime)}
+                                                                        </Text>
+
+                                                                        {/* Nội dung hoạt động */}
+                                                                        <Paragraph
+                                                                            style={{
+                                                                                marginBottom: 0,
+                                                                                fontSize: 13,
+                                                                                whiteSpace: 'pre-wrap',
+                                                                                color: isFrozen ? '#888' : undefined,
+                                                                                minHeight: 40,
+                                                                                display: 'flex',
+                                                                                alignItems: 'center'
+                                                                            }}
+                                                                        >
+                                                                            {item.activityName || <Text type="secondary" italic>Chưa có hoạt động</Text>}
+                                                                        </Paragraph>
+
+                                                                        {/* Tag */}
+                                                                        {item.type && (
+                                                                            <Tag
+                                                                                color={
+                                                                                    item.type === 'Cố định'
+                                                                                        ? 'default'
+                                                                                        : item.type === 'Bình thường'
+                                                                                            ? 'green'
+                                                                                            : item.type === 'Sự kiện'
+                                                                                                ? 'purple'
+                                                                                                : 'blue'
+                                                                                }
+                                                                                style={{ alignSelf: 'flex-start' }}
+                                                                            >
+                                                                                {item.type}
+                                                                            </Tag>
+                                                                        )}
+
+                                                                        {/* ❌ Nút xoá luôn hiển khi editMode */}
+                                                                        {/* ❌ Nút xoá chỉ hiện khi editMode và KHÔNG phải Cố định */}
+                                                                        {editMode && item.type !== 'Cố định' && (
+                                                                            <Tooltip title="Xóa nội dung hoạt động">
                                                                                 <CloseCircleOutlined
                                                                                     onClick={(e) => {
                                                                                         e.stopPropagation();
@@ -508,41 +761,56 @@ function SchedulesManagement() {
                                                                                     }}
                                                                                 />
                                                                             </Tooltip>
-
                                                                         )}
-                                                                        <Text strong style={{ fontSize: 13, display: 'block', marginBottom: 4 }}>
-                                                                            {formatMinutesToTime(item.startTime)}-{formatMinutesToTime(item.endTime)}
-                                                                        </Text>
 
-                                                                        <Paragraph
-                                                                            style={{
-                                                                                marginBottom: 0,
-                                                                                fontSize: 13,
-                                                                                whiteSpace: 'pre-wrap',
-                                                                                color: isFrozen ? '#888' : undefined
-                                                                            }}
-                                                                        >
-                                                                            {item.activityName}
-                                                                        </Paragraph>
 
-                                                                        <Tag
-                                                                            color={
-                                                                                item.type === 'Cố định'
-                                                                                    ? 'default'
-                                                                                    : item.type === 'Bình thường'
-                                                                                        ? 'green'
-                                                                                        : item.type === 'Sự kiện'
-                                                                                            ? 'purple'
-                                                                                            : 'blue'
-                                                                            }
-                                                                            style={{ marginTop: 4 }}
-                                                                        >
-                                                                            {item.type}
-                                                                        </Tag>
+                                                                        {/* Nút Chọn ở góc phải dưới */}
+                                                                        {editMode && !isFrozen && (
+                                                                            <div style={{ position: 'absolute', bottom: 6, right: 6 }}>
+                                                                                <Popover
+                                                                                    trigger="click"
+                                                                                    open={popoverSlot?.date === day.date && popoverSlot?.startTime === item.startTime}
+                                                                                    onOpenChange={(visible) => !visible && setPopoverSlot(null)}
+                                                                                    placement="topRight"
+                                                                                    content={
+                                                                                        <List
+                                                                                            size="small"
+                                                                                            loading={isFetchingActivities}
+                                                                                            dataSource={availableActivities}
+                                                                                            renderItem={(act) => (
+                                                                                                <List.Item
+                                                                                                    key={act._id}
+                                                                                                    style={{ cursor: 'pointer', padding: '6px 10px' }}
+                                                                                                    onClick={() => {
+                                                                                                        handleSelectActivity(act._id);
+                                                                                                        setPopoverSlot(null);
+                                                                                                    }}
+                                                                                                >
+                                                                                                    <div>
+                                                                                                        <strong>{act.activityName}</strong>
+                                                                                                        {act.type === 'Sự kiện' && act.eventName ? ` (${act.eventName})` : ''} - [{act.type}]
+                                                                                                    </div>
+                                                                                                </List.Item>
+                                                                                            )}
+                                                                                        />
+                                                                                    }
+                                                                                >
+                                                                                    <Button
+                                                                                        size="small"
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            fetchAvailableActivities();
+                                                                                            setPopoverSlot({ date: day.date, startTime: item.startTime });
+                                                                                        }}
+                                                                                    >
+                                                                                        Chọn
+                                                                                    </Button>
+                                                                                </Popover>
+                                                                            </div>
+                                                                        )}
                                                                     </div>
                                                                 );
                                                             })}
-
                                                         </Space>
                                                     )}
                                                 </div>
@@ -553,13 +821,18 @@ function SchedulesManagement() {
                             </div>
                         </>
                     )}
-                    {!loading && weeklyGroupedDays.length === 0 && selectedSchoolYearId && selectedClassId && selectedMonth && (
+                    {!loading && weeklyGroupedDays.length === 0 && selectedClassId && selectedMonth && (
                         <Empty
-                            description={isConfirmed ? "Lịch xác nhận không có dữ liệu." : "Không tìm thấy lịch trình. Bạn có thể 'Gợi ý lịch học' hoặc 'Tạo lịch học' mới."}
+                            description={
+                                scheduleStatus === 'Xác nhận'
+                                    ? "Lịch xác nhận không có dữ liệu."
+                                    : (id ? "Không tải được dữ liệu lịch học." : "Không tìm thấy lịch trình. Bạn có thể 'Gợi ý lịch học' hoặc 'Tạo lịch học' mới.")
+                            }
                             style={{ marginTop: 32 }}
                         />
                     )}
                 </Spin>
+
             </Card>
         </div>
     );

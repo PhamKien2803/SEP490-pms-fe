@@ -93,9 +93,9 @@
 
 
 export interface IScheduleActivity {
-    _id?: string;
+    activity?: string;
     activityCode?: string;
-    activity: string;
+    // activity: string;
     activityName: string;
     type: 'Cố định' | 'Bình thường' | 'Sự kiện';
     startTime: number;
@@ -117,6 +117,7 @@ export interface IScheduleClassRef {
 }
 
 export interface IDailySchedule {
+    activity?: string;
     date: string;
     dayName: string;
     isHoliday: boolean;
@@ -135,13 +136,31 @@ export interface ICreateSchedulePayload {
     scheduleDays: IDailySchedule[];
 }
 
+
+export interface TScheduleParamsResponse {
+    _id: string;
+    schoolYear: string;
+    className: string;
+    month: string;
+    class?: IScheduleClassRef;
+    status: 'Dự thảo' | 'Xác nhận';
+    scheduleDays: IDailySchedule[];
+}
+
+
 export type IUpdateSchedulePayload = ICreateSchedulePayload;
 
-// =============================
-// 📤 API Responses
-// =============================
+export interface TScheduleByIdResponse {
+    _id: string; // đây là ID của toàn bộ lịch
+    schoolYear: string;
+    class: string;
+    month: string;
+    status: 'Dự thảo' | 'Xác nhận';
+    scheduleDays: IDailySchedule[];
+}
 
 export interface IPreviewScheduleResponse {
+    _id: string;
     schoolYear: string;
     class: string;
     month: string;
