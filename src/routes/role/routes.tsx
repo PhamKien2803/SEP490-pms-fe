@@ -52,7 +52,6 @@ import TakeAttendance from "../../pages/teacher/attendance-student/take-attendan
 import EditAttendance from "../../pages/teacher/attendance-student/edit-attendance/EditAttendance";
 import AttendanceDetails from "../../pages/teacher/attendance-student/attendance-details/AttendanceDetails";
 import StudentDetails from "../../pages/teacher/class-information/student-details/StudentDetails";
-import ClassInfor from "../../pages/teacher/ClassInfor";
 import ScheduleCreate from "../../pages/schedules-management/schedule-create/ScheduleCreate";
 import MedicalManagement from "../../pages/medical-management/MedicalManagement";
 import MedicalDetail from "../../pages/medical-management/medical-details/MedicalDetails";
@@ -514,7 +513,7 @@ export const routes: RouteObject[] = [
               },
             ],
           },
-           {
+          {
             path: "medicals",
             element: (
               <PrivateRoute
