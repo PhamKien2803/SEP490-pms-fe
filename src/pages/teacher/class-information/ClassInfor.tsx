@@ -15,60 +15,26 @@ import {
     Space,
     Divider,
     theme,
+    Tooltip,
 } from 'antd';
-import { UserOutlined, TeamOutlined } from '@ant-design/icons';
+import { UserOutlined, TeamOutlined, EyeOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import type { TableProps } from 'antd';
 import dayjs from 'dayjs';
-import { useCurrentUser } from '../../hooks/useCurrentUser';
-import { IClassInfo, IStudent, ITeacherClassStudentResponse } from '../../types/teacher';
-import { teacherApis } from '../../services/apiServices';
+import { useCurrentUser } from '../../../hooks/useCurrentUser';
+import { IClassInfo, IStudent, ITeacherClassStudentResponse } from '../../../types/teacher';
+import { teacherApis } from '../../../services/apiServices';
 import { toast } from 'react-toastify';
+import { constants } from '../../../constants';
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 const { useToken } = theme;
 
-const studentColumns: TableProps<IStudent>['columns'] = [
-    {
-        title: 'Mã HS',
-        dataIndex: 'studentCode',
-        key: 'studentCode',
-        width: 150,
-        fixed: 'left',
-    },
-    {
-        title: 'Họ và Tên',
-        dataIndex: 'fullName',
-        key: 'fullName',
-        ellipsis: true,
-    },
-    {
-        title: 'Ngày sinh',
-        dataIndex: 'dob',
-        key: 'dob',
-        width: 120,
-        render: (dob: string) => (dob ? dayjs(dob).format('DD/MM/YYYY') : '-'),
-    },
-    {
-        title: 'Giới tính',
-        dataIndex: 'gender',
-        key: 'gender',
-        width: 100,
-        align: 'center',
-        render: (gender: string) => (
-            <Tag color={gender === 'Nam' ? 'blue' : 'pink'} style={{ margin: 0 }}>{gender}</Tag>
-        ),
-    },
-    {
-        title: 'Địa chỉ',
-        dataIndex: 'address',
-        key: 'address',
-        ellipsis: true,
-    },
-];
 
 function ClassInfor() {
     const user = useCurrentUser();
+    const navigate = useNavigate();
     const { token } = useToken();
     const [isLoadingData, setIsLoadingData] = useState(true);
     const [classData, setClassData] =
@@ -76,6 +42,62 @@ function ClassInfor() {
     const [hasFetched, setHasFetched] = useState(false);
 
     const teacherId = user?.staff;
+
+    const studentColumns: TableProps<IStudent>['columns'] = [
+        {
+            title: 'Mã HS',
+            dataIndex: 'studentCode',
+            key: 'studentCode',
+            width: 150,
+            fixed: 'left',
+        },
+        {
+            title: 'Họ và Tên',
+            dataIndex: 'fullName',
+            key: 'fullName',
+            ellipsis: true,
+        },
+        {
+            title: 'Ngày sinh',
+            dataIndex: 'dob',
+            key: 'dob',
+            width: 120,
+            render: (dob: string) => (dob ? dayjs(dob).format('DD/MM/YYYY') : '-'),
+        },
+        {
+            title: 'Giới tính',
+            dataIndex: 'gender',
+            key: 'gender',
+            width: 100,
+            align: 'center',
+            render: (gender: string) => (
+                <Tag color={gender === 'Nam' ? 'blue' : 'pink'} style={{ margin: 0 }}>{gender}</Tag>
+            ),
+        },
+        {
+            title: 'Địa chỉ',
+            dataIndex: 'address',
+            key: 'address',
+            ellipsis: true,
+        },
+        {
+            title: 'Xem chi tiết',
+            key: 'action',
+            align: 'center',
+            fixed: 'right',
+            width: 100,
+            render: (_, record) => (
+                <Space>
+                    <Tooltip title="Xem chi tiết học sinh">
+                        <EyeOutlined
+                            style={{ color: '#1890ff', fontSize: 18, cursor: 'pointer' }}
+                            onClick={() => navigate(`${constants.APP_PREFIX}/teachers/students/detail/${record._id}`)}
+                        />
+                    </Tooltip>
+                </Space>
+            ),
+        },
+    ];
 
     useEffect(() => {
         if (!teacherId || hasFetched) {
