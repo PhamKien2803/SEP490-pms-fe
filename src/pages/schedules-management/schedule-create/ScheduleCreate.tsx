@@ -25,6 +25,8 @@ import {
 } from '../../../types/timetable';
 import { useNavigate } from 'react-router-dom';
 
+import './ScheduleCreate.css';
+
 dayjs.extend(weekOfYear);
 dayjs.locale('vi');
 
@@ -51,7 +53,6 @@ const ScheduleCreate = () => {
     const [weekIndex, setWeekIndex] = useState(0);
     const [availableActivities, setAvailableActivities] = useState<AvailableActivityItem[]>([]);
     const [isFetchingActivities, setIsFetchingActivities] = useState(false);
-    const [addingToSlot, setAddingToSlot] = useState<{ date: string; startTime: number } | null>(null);
     const [selectedActivity1, setSelectedActivity1] = useState<{
         date: string;
         index: number;
@@ -86,17 +87,14 @@ const ScheduleCreate = () => {
         setIsDragging(false);
     };
 
-
     const fetchAvailableActivities = async () => {
         if (!selectedMonth || !classId) return;
-
         try {
             setIsFetchingActivities(true);
             const res = await scheduleApis.getAvailableActivities({
                 month: selectedMonth.toString(),
                 classId: classId,
             });
-
             setAvailableActivities(res);
         } catch (error) {
             console.error('Lỗi khi lấy danh sách hoạt động:', error);
@@ -105,7 +103,6 @@ const ScheduleCreate = () => {
             setIsFetchingActivities(false);
         }
     };
-
 
     const fetchFixActivities = async () => {
         if (!selectedSchoolYear || !selectedMonth || !classId) return;
@@ -127,6 +124,7 @@ const ScheduleCreate = () => {
             setIsLoadingFix(false);
         }
     };
+
     useEffect(() => {
         if (selectedActivity1 && selectedActivity2) {
             const updated = [...fixedActivities];
@@ -158,11 +156,10 @@ const ScheduleCreate = () => {
                     toast.warning('Chỉ có thể hoán đổi các hoạt động “Bình thường”.');
                 }
             }
-
             setSelectedActivity1(null);
             setSelectedActivity2(null);
         }
-    }, [selectedActivity1, selectedActivity2]);
+    }, [selectedActivity1, selectedActivity2, fixedActivities]);
 
 
     useEffect(() => {
@@ -181,8 +178,13 @@ const ScheduleCreate = () => {
     }, []);
 
     useEffect(() => {
-        fetchFixActivities();
-        fetchAvailableActivities();
+        if (selectedSchoolYear && selectedMonth && classId) {
+            fetchFixActivities();
+            fetchAvailableActivities();
+        } else {
+            setFixedActivities([]);
+            setAvailableActivities([]);
+        }
     }, [selectedSchoolYear, selectedMonth, classId]);
 
     const groupedByDate = useMemo(() => {
@@ -194,8 +196,9 @@ const ScheduleCreate = () => {
     }, [fixedActivities]);
 
     const allDaysInMonth = useMemo(() => {
+        if (!selectedSchoolYear || !selectedMonth) return [];
         const days: string[] = [];
-        const start = dayjs().year(parseInt(selectedSchoolYear || '') || dayjs().year())
+        const start = dayjs().year(parseInt(selectedSchoolYear) || dayjs().year())
             .month(selectedMonth - 1)
             .startOf('month');
         const end = start.endOf('month');
@@ -210,17 +213,14 @@ const ScheduleCreate = () => {
     const groupedWeeks = useMemo(() => {
         const weeks: string[][] = [];
         let currentWeek: string[] = [];
-
         allDaysInMonth.forEach((dayStr, idx) => {
             const date = dayjs(dayStr);
             currentWeek.push(dayStr);
-
             if (date.day() === 0 || idx === allDaysInMonth.length - 1) {
                 weeks.push(currentWeek);
                 currentWeek = [];
             }
         });
-
         return weeks;
     }, [allDaysInMonth]);
 
@@ -231,7 +231,6 @@ const ScheduleCreate = () => {
             toast.error('Vui lòng chọn đầy đủ năm học, tháng và lớp học.');
             return;
         }
-
         try {
             const payload: ICreateSchedulePayload = {
                 schoolYear: selectedSchoolYear,
@@ -251,8 +250,6 @@ const ScheduleCreate = () => {
                     }))
                 }))
             };
-
-
             await scheduleApis.createSchedule(payload);
             toast.success('Tạo lịch học thành công!');
             navigate(-1);
@@ -262,22 +259,17 @@ const ScheduleCreate = () => {
         }
     };
 
-
     const handleSelectActivity = (activityId: string) => {
         const selected = availableActivities.find(act => act._id === activityId);
-
-        if (!selected || !addingToSlot) return;
-
-        const { date, startTime } = addingToSlot;
-
+        if (!selected || !popoverSlot) return;
+        const { date, startTime } = popoverSlot;
         const targetDay = fixedActivities.find(day => dayjs(day.date).format('YYYY-MM-DD') === date);
 
         if (targetDay) {
-            // Kiểm tra xem activityId này đã tồn tại trong mảng activities của ngày đó chưa
-            const isDuplicate = targetDay.activities.some(act => act.activity === selected._id);
+            const isDuplicate = targetDay.activities.some(act => act.activity === selected._id && act.startTime !== startTime);
             if (isDuplicate) {
                 toast.info('Hoạt động này đã có trong ngày.');
-                setAddingToSlot(null);
+                setPopoverSlot(null);
                 return;
             }
         }
@@ -294,27 +286,22 @@ const ScheduleCreate = () => {
             if (dayjs(day.date).format('YYYY-MM-DD') !== date) {
                 return day;
             }
-
             const updatedActivities = day.activities.map(slot => {
                 if (slot.startTime !== startTime) {
                     return slot;
                 }
-
                 return {
                     ...slot,
                     ...newActivityData,
-                    startTime: startTime,
                 };
             });
-
             return {
                 ...day,
                 activities: updatedActivities,
             };
         });
-
         setFixedActivities(updatedFixedActivities);
-        setAddingToSlot(null);
+        setPopoverSlot(null);
         toast.success('Đã thêm hoạt động!');
     };
 
@@ -328,7 +315,6 @@ const ScheduleCreate = () => {
                     ...updated[idx].activities[activityIdx],
                     activity: '',
                     activityName: '',
-                    // activityCode: '',
                     type: 'Bình thường',
                     // category: null,
                     // eventName: null,
@@ -338,32 +324,30 @@ const ScheduleCreate = () => {
         }
     };
 
-
-
     return (
-        <div style={{ padding: 24, background: token.colorBgLayout }}>
+        <div className="schedule-create-page" style={{ background: token.colorBgLayout }}>
             <Title level={3}>
                 <Button
                     type="link"
                     icon={<ArrowLeftOutlined />}
                     onClick={() => navigate(-1)}
-                    style={{ marginBottom: 16, paddingLeft: 0 }}
+                    className="schedule-create-back-button"
                 >
                     Quay lại
                 </Button>
-                <Space><ScheduleOutlined /> Lịch trình Cố định - Tháng {selectedMonth}</Space>
+                <Space><ScheduleOutlined /> Tạo Lịch trình Tháng {selectedMonth}</Space>
             </Title>
 
-            <Card bordered={false} style={{ marginBottom: 24 }}>
+            <Card bordered={false} className="schedule-create-filter-card">
                 <Row gutter={[16, 16]}>
                     <Col xs={24} sm={8}>
-                        <Text strong>Năm học</Text>
-                        <Input value={selectedSchoolYear} readOnly style={{ marginTop: 8 }} />
+                        <Text strong className="schedule-create-filter-label">Năm học</Text>
+                        <Input value={selectedSchoolYear} readOnly className="schedule-create-filter-input" />
                     </Col>
                     <Col xs={24} sm={8}>
-                        <Text strong>Tháng</Text>
+                        <Text strong className="schedule-create-filter-label">Tháng</Text>
                         <Select
-                            style={{ width: '100%', marginTop: 8 }}
+                            className="schedule-create-filter-input"
                             placeholder="Chọn tháng"
                             value={selectedMonth}
                             onChange={(value) => {
@@ -375,9 +359,9 @@ const ScheduleCreate = () => {
                         />
                     </Col>
                     <Col xs={24} sm={8}>
-                        <Text strong>Lớp học</Text>
+                        <Text strong className="schedule-create-filter-label">Lớp học</Text>
                         <Select
-                            style={{ width: '100%', marginTop: 8 }}
+                            className="schedule-create-filter-input"
                             placeholder="Chọn lớp"
                             value={classId}
                             onChange={(value) => {
@@ -389,13 +373,14 @@ const ScheduleCreate = () => {
                         />
                     </Col>
                 </Row>
-                <Row justify="end" style={{ marginTop: 24 }}>
+                <Row justify="end" className="schedule-create-action-row">
                     <Col>
                         <Button
                             type="primary"
                             icon={<ScheduleOutlined />}
-                            disabled={!selectedSchoolYear || !selectedMonth || !classId || fixedActivities.length === 0}
+                            disabled={!selectedSchoolYear || !selectedMonth || !classId || fixedActivities.length === 0 || isLoadingFix}
                             onClick={handleCreateSchedule}
+                            loading={isLoadingFix}
                         >
                             Tạo lịch học
                         </Button>
@@ -403,17 +388,17 @@ const ScheduleCreate = () => {
                 </Row>
             </Card>
 
-            <Flex justify="space-between" align="center" style={{ marginBottom: 12 }}>
+            <Flex justify="space-between" align="center" className="schedule-create-week-nav">
                 <Button
-                    disabled={weekIndex === 0}
+                    disabled={weekIndex === 0 || isLoadingFix}
                     icon={<LeftOutlined />}
                     onClick={() => setWeekIndex(prev => Math.max(prev - 1, 0))}
                 >
                     Tuần trước
                 </Button>
-                <Text strong>Tuần {weekIndex + 1} / {groupedWeeks.length}</Text>
+                {groupedWeeks.length > 0 && <Text strong>Tuần {weekIndex + 1} / {groupedWeeks.length}</Text>}
                 <Button
-                    disabled={weekIndex === groupedWeeks.length - 1}
+                    disabled={weekIndex === groupedWeeks.length - 1 || isLoadingFix}
                     icon={<RightOutlined />}
                     onClick={() => setWeekIndex(prev => Math.min(prev + 1, groupedWeeks.length - 1))}
                 >
@@ -429,81 +414,168 @@ const ScheduleCreate = () => {
                     onMouseMove={handleMouseMove}
                     onMouseUp={stopDragging}
                     onMouseLeave={stopDragging}
+                    className="schedule-create-scroll-container"
                     style={{
-                        overflowX: 'auto',
                         cursor: isDragging ? 'grabbing' : 'grab',
-                        paddingBottom: 8,
                         userSelect: isDragging ? 'none' : 'auto',
                     }}
                 >
-                    <div style={{ display: 'flex', gap: 16, minWidth: 'max-content' }}>
+                    <div className="schedule-create-days-row">
                         {currentWeekDays.map(date => {
-                            const activity = groupedByDate[date];
+                            const activityData = groupedByDate[date];
                             const displayDay = dayjs(date).format('dddd, DD/MM');
+                            const dayIsHoliday = activityData?.isHoliday;
 
                             return (
-                                <div key={date} style={{ flex: '0 0 260px', width: 260 }}>
+                                <div key={date} className="schedule-create-day-column">
                                     <Card
                                         size="small"
-                                        title={
-                                            <Flex justify="space-between" align="center">
-                                                <Text strong style={{ fontSize: 13 }}>{displayDay}</Text>
-                                            </Flex>
-                                        }
-                                        style={{
-                                            height: '100%',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            border: `1px solid ${token.colorBorderSecondary}`,
-                                            borderRadius: 10,
-                                            background: token.colorBgContainer,
+                                        title={<Text>{displayDay}</Text>}
+                                        className="schedule-create-day-card"
+                                        headStyle={{
+                                            ...(dayIsHoliday ? {
+                                                backgroundColor: '#fff1f0',
+                                                color: '#cf1322',
+                                                borderBottomColor: '#ffccc7'
+                                            } : {})
                                         }}
-                                        bodyStyle={{ flexGrow: 1, overflowY: 'auto', padding: 12 }}
+                                        bodyStyle={{
+                                            ...(dayIsHoliday ? { backgroundColor: '#fff1f0' } : {})
+                                        }}
                                     >
                                         <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                                            {activity && activity.activities
-                                                .sort((a, b) => a.startTime - b.startTime)
-                                                .map((a: IScheduleActivity, index) => {
-                                                    const isAddingToThisSlot =
-                                                        addingToSlot?.date === date &&
-                                                        addingToSlot?.startTime === a.startTime;
+                                            {dayIsHoliday ? (
+                                                <Tag color="red">
+                                                    Ngày nghỉ lễ {activityData.notes ? `- ${activityData.notes}` : ''}
+                                                </Tag>
+                                            ) : activityData && activityData.activities.length > 0 ? (
+                                                activityData.activities
+                                                    .sort((a, b) => a.startTime - b.startTime)
+                                                    .map((a: IScheduleActivity, index) => {
+                                                        const isFixed = a.type === 'Cố định';
+                                                        const isSelectedForSwap =
+                                                            (selectedActivity1?.date === date && selectedActivity1.index === index) ||
+                                                            (selectedActivity2?.date === date && selectedActivity2.index === index);
 
-                                                    const isFixed = a.type === 'Cố định';
-
-                                                    const isSelectedForSwap =
-                                                        (selectedActivity1?.date === date && selectedActivity1.index === index) ||
-                                                        (selectedActivity2?.date === date && selectedActivity2.index === index);
-
-                                                    if (isAddingToThisSlot) {
                                                         return (
                                                             <Card
-                                                                key={`select-${a.startTime}-${index}`}
+                                                                key={`card-${a.startTime}-${index}`}
                                                                 size="small"
+                                                                className={`schedule-create-activity-card ${!isFixed ? 'schedule-create-activity-display-card' : ''}`}
                                                                 style={{
-                                                                    border: `1px dashed ${token.colorBorderSecondary}`,
-                                                                    borderRadius: 8,
-                                                                    background: token.colorBgContainer,
-                                                                    minHeight: 76,
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
+                                                                    border: isSelectedForSwap
+                                                                        ? `2px solid ${token.colorPrimary}`
+                                                                        : isFixed
+                                                                            ? `1px solid ${token.colorBorder}`
+                                                                            : `1px solid ${token.colorBorderSecondary}`,
+                                                                    background: isFixed
+                                                                        ? token.colorBgContainerDisabled
+                                                                        : isSelectedForSwap
+                                                                            ? token.colorInfoBg
+                                                                            : token.colorBgElevated,
                                                                 }}
                                                                 bodyStyle={{ padding: 10 }}
+                                                                onClick={() => {
+                                                                    if (!isFixed) {
+                                                                        fetchAvailableActivities();
+                                                                        setPopoverSlot({ date: date, startTime: a.startTime });
+                                                                    }
+                                                                }}
                                                             >
+                                                                <Text className="schedule-create-activity-time">
+                                                                    {formatMinutesToTime(a.startTime)} - {formatMinutesToTime(a.endTime)}
+                                                                </Text>
+
+                                                                <div className="schedule-create-activity-content">
+                                                                    <span
+                                                                        className="schedule-create-activity-name"
+                                                                        style={{
+                                                                            color: a.activityName ? token.colorText : token.colorTextSecondary,
+                                                                            fontStyle: a.activityName ? 'normal' : 'italic',
+                                                                        }}
+                                                                    >
+                                                                        {a.activityName || 'Click để thêm'}
+                                                                    </span>
+
+                                                                    <div className="schedule-create-activity-controls">
+                                                                        {a.activityName && (
+                                                                            <Tag
+                                                                                bordered
+                                                                                className="schedule-create-activity-tag"
+                                                                                color={
+                                                                                    a.type === 'Cố định' ? 'default'
+                                                                                        : a.type === 'Sự kiện' ? 'purple'
+                                                                                            : 'blue'
+                                                                                }
+                                                                            >
+                                                                                {a.type}
+                                                                            </Tag>
+                                                                        )}
+
+                                                                        {a.type !== 'Cố định' && a.activityName && (
+                                                                            <Tooltip title="Xóa hoạt động này">
+                                                                                <CloseCircleOutlined
+                                                                                    className="schedule-create-activity-delete-icon"
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        handleRemoveActivityContent(date, a.startTime);
+                                                                                    }}
+                                                                                />
+                                                                            </Tooltip>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+
+                                                                {a.type === 'Bình thường' && (
+                                                                    <Tooltip
+                                                                        title={
+                                                                            isSelectedForSwap
+                                                                                ? 'Bỏ chọn'
+                                                                                : selectedActivity1
+                                                                                    ? 'Chọn hoạt động thứ 2 để hoán đổi'
+                                                                                    : 'Chọn hoạt động đầu tiên để hoán đổi'
+                                                                        }
+                                                                    >
+                                                                        <CheckCircleOutlined
+                                                                            className="schedule-create-activity-swap-icon"
+                                                                            style={{
+                                                                                color: isSelectedForSwap ? token.colorPrimaryActive : token.colorTextQuaternary,
+                                                                                right: a.type !== ('Cố định' as IScheduleActivity['type']) && a.activityName ? 26 : 6,
+                                                                            }}
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                const selected = { date, index };
+                                                                                if (isSelectedForSwap) {
+                                                                                    if (selectedActivity1?.date === date && selectedActivity1.index === index) setSelectedActivity1(null);
+                                                                                    if (selectedActivity2?.date === date && selectedActivity2.index === index) setSelectedActivity2(null);
+                                                                                } else if (!selectedActivity1) {
+                                                                                    setSelectedActivity1(selected);
+                                                                                } else if (!selectedActivity2) {
+                                                                                    setSelectedActivity2(selected);
+                                                                                } else {
+                                                                                    setSelectedActivity1(selected);
+                                                                                    setSelectedActivity2(null);
+                                                                                }
+                                                                            }}
+                                                                        />
+                                                                    </Tooltip>
+                                                                )}
+
                                                                 <Popover
-                                                                    trigger="click"
                                                                     open={popoverSlot?.date === date && popoverSlot?.startTime === a.startTime}
-                                                                    onOpenChange={(visible) => {
-                                                                        if (!visible) setPopoverSlot(null);
-                                                                    }}
+                                                                    onOpenChange={(visible) => { if (!visible) setPopoverSlot(null); }}
+                                                                    trigger="click"
                                                                     placement="bottomLeft"
+                                                                    arrow={false}
                                                                     content={
                                                                         <List
+                                                                            className="schedule-create-popover-list"
                                                                             size="small"
                                                                             loading={isFetchingActivities}
                                                                             dataSource={availableActivities}
                                                                             renderItem={(item) => (
                                                                                 <List.Item
-                                                                                    style={{ cursor: 'pointer', padding: '6px 10px' }}
+                                                                                    key={item._id}
                                                                                     onClick={() => {
                                                                                         handleSelectActivity(item._id);
                                                                                         setPopoverSlot(null);
@@ -518,140 +590,19 @@ const ScheduleCreate = () => {
                                                                         />
                                                                     }
                                                                 >
-                                                                    <Button
-                                                                        block
-                                                                        size="small"
-                                                                        onClick={() => setPopoverSlot({ date, startTime: a.startTime })}
-                                                                    >
-                                                                        Chọn hoạt động
-                                                                    </Button>
+                                                                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}></div>
                                                                 </Popover>
 
                                                             </Card>
                                                         );
-                                                    }
-
-                                                    return (
-                                                        <Card
-                                                            key={`card-${a.startTime}-${index}`}
-                                                            size="small"
-                                                            style={{
-                                                                border: isSelectedForSwap
-                                                                    ? `2px solid ${token.colorPrimary}`
-                                                                    : isFixed
-                                                                        ? `1px solid ${token.colorBorder}`
-                                                                        : `1px dashed ${token.colorPrimary}`,
-                                                                borderRadius: 8,
-                                                                background: isFixed
-                                                                    ? token.colorBgContainerDisabled
-                                                                    : token.colorBgElevated,
-                                                                minHeight: 76,
-                                                                position: 'relative',
-                                                                transition: 'all 0.2s',
-                                                            }}
-                                                            bodyStyle={{ padding: 10 }}
-                                                            onClick={() => {
-                                                                if (!isFixed) {
-                                                                    fetchAvailableActivities();
-                                                                    setAddingToSlot({ date: date, startTime: a.startTime });
-                                                                }
-                                                            }}
-                                                        >
-                                                            <Text strong style={{ fontSize: 13 }}>
-                                                                {formatMinutesToTime(a.startTime)} - {formatMinutesToTime(a.endTime)}
-                                                            </Text>
-
-                                                            <div
-                                                                style={{
-                                                                    marginTop: 4,
-                                                                    fontSize: 13,
-                                                                    display: 'flex',
-                                                                    justifyContent: 'space-between',
-                                                                    alignItems: 'center',
-                                                                    gap: '8px',
-                                                                    color: a.activityName ? token.colorText : token.colorTextSecondary,
-                                                                    whiteSpace: 'nowrap',
-                                                                }}
-                                                            >
-                                                                <span
-                                                                    style={{
-                                                                        flex: 1,
-                                                                        overflow: 'hidden',
-                                                                        textOverflow: 'ellipsis',
-                                                                        cursor: 'pointer',
-                                                                    }}
-                                                                >
-                                                                    {a.activityName || 'Click để thêm hoạt động'}
-                                                                </span>
-
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                                                                    {a.activityName && (
-                                                                        <Tag
-                                                                            bordered
-                                                                            color={a.type === 'Cố định' ? 'default' : 'blue'}
-                                                                            style={{ fontSize: 11, borderRadius: 6, flexShrink: 0, margin: 0 }}
-                                                                        >
-                                                                            {a.type}
-                                                                        </Tag>
-                                                                    )}
-
-                                                                    {a.type === 'Bình thường' && (
-                                                                        <Tooltip
-                                                                            title={
-                                                                                isSelectedForSwap
-                                                                                    ? 'Đã chọn để hoán đổi'
-                                                                                    : 'Chọn hoạt động này để hoán đổi'
-                                                                            }
-                                                                        >
-                                                                            <CheckCircleOutlined
-                                                                                style={{
-                                                                                    position: 'absolute',
-                                                                                    top: 6,
-                                                                                    right: 6 + (a.type !== ('Cố định' as IScheduleActivity['type']) && a.activityName ? 20 : 0),
-                                                                                    color: isSelectedForSwap ? token.colorPrimary : token.colorTextSecondary,
-                                                                                    cursor: 'pointer',
-                                                                                    fontSize: 18,
-                                                                                    zIndex: 2
-                                                                                }}
-                                                                                onClick={(e) => {
-                                                                                    e.stopPropagation();
-                                                                                    const selected = { date, index };
-                                                                                    if (!selectedActivity1) {
-                                                                                        setSelectedActivity1(selected);
-                                                                                    } else if (!selectedActivity2) {
-                                                                                        setSelectedActivity2(selected);
-                                                                                    } else {
-                                                                                        setSelectedActivity1(selected);
-                                                                                        setSelectedActivity2(null);
-                                                                                    }
-                                                                                }}
-                                                                            />
-                                                                        </Tooltip>
-                                                                    )}
-
-
-                                                                    {a.type !== 'Cố định' && a.activityName && (
-                                                                        <Tooltip title="Xóa hoạt động này">
-                                                                            <CloseCircleOutlined
-                                                                                style={{ color: token.colorError, cursor: 'pointer', fontSize: 14 }}
-                                                                                onClick={(e) => {
-                                                                                    e.stopPropagation();
-                                                                                    handleRemoveActivityContent(date, a.startTime);
-                                                                                }}
-                                                                            />
-                                                                        </Tooltip>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        </Card>
-                                                    );
-                                                })}
-
-                                            {(!activity || activity.activities.length === 0) && (
+                                                    })
+                                            ) : (
                                                 <div
                                                     onClick={() => {
-                                                        fetchAvailableActivities();
-                                                        setAddingToSlot({ date: date, startTime: 0 });
+                                                        if (!dayIsHoliday) {
+                                                            fetchAvailableActivities();
+                                                            setPopoverSlot({ date: date, startTime: 0 });
+                                                        }
                                                     }}
                                                     style={{
                                                         border: `1px dashed ${token.colorBorderSecondary}`,
@@ -659,11 +610,44 @@ const ScheduleCreate = () => {
                                                         padding: 12,
                                                         minHeight: 76,
                                                         textAlign: 'center',
-                                                        cursor: 'pointer',
+                                                        cursor: dayIsHoliday ? 'not-allowed' : 'pointer',
                                                         color: token.colorTextSecondary,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center'
                                                     }}
                                                 >
-                                                    <PlusOutlined /> Thêm hoạt động
+                                                    <Popover
+                                                        open={popoverSlot?.date === date && popoverSlot?.startTime === 0}
+                                                        onOpenChange={(visible) => { if (!visible) setPopoverSlot(null); }}
+                                                        trigger="click"
+                                                        placement="bottomLeft"
+                                                        arrow={false}
+                                                        content={
+                                                            <List
+                                                                className="schedule-create-popover-list"
+                                                                size="small"
+                                                                loading={isFetchingActivities}
+                                                                dataSource={availableActivities}
+                                                                renderItem={(item) => (
+                                                                    <List.Item
+                                                                        key={item._id}
+                                                                        onClick={() => {
+                                                                            handleSelectActivity(item._id);
+                                                                            setPopoverSlot(null);
+                                                                        }}
+                                                                    >
+                                                                        <div>
+                                                                            <strong>{item.activityName}</strong>
+                                                                            {item.type === 'Sự kiện' && item.eventName ? ` (${item.eventName})` : ''} - [{item.type}]
+                                                                        </div>
+                                                                    </List.Item>
+                                                                )}
+                                                            />
+                                                        }
+                                                    >
+                                                        <div><PlusOutlined /> Thêm HĐ</div>
+                                                    </Popover>
                                                 </div>
                                             )}
                                         </Space>

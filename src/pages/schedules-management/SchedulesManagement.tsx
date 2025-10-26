@@ -19,6 +19,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { constants } from '../../constants';
 import { toast } from 'react-toastify';
 
+import './SchedulesManagement.css';
 
 dayjs.locale('vi');
 dayjs.extend(weekOfYear);
@@ -149,13 +150,13 @@ function SchedulesManagement() {
                         const d1 = cleaned.find(d => d.date === selectedActivity1.date);
                         const d2 = cleaned.find(d => d.date === selectedActivity2.date);
                         if (d1) {
-                            d1.activities[selectedActivity1.index]._justSwapped = false;
+                            (d1.activities[selectedActivity1.index] as any)._justSwapped = false;
                         }
                         if (d2) {
-                            d2.activities[selectedActivity2.index]._justSwapped = false;
+                            (d2.activities[selectedActivity2.index] as any)._justSwapped = false;
                         }
                         setScheduleData([...cleaned]);
-                    }, 600);
+                    }, 600); // 600ms
 
                     toast.success('Hoán đổi tiết học thành công!');
                 } else {
@@ -478,9 +479,9 @@ function SchedulesManagement() {
     }
 
     return (
-        <div style={{ padding: '24px', background: '#f0f2f5' }}>
+        <div className="schedule-management-page">
             <Card bordered={false}>
-                <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
+                <Row justify="space-between" align="middle" className="schedule-header-row">
                     <Col>
                         <Title level={3} style={{ margin: 0 }}>
                             <Space>
@@ -506,7 +507,7 @@ function SchedulesManagement() {
                                 ))}
                             </Select>
                             <Select
-                                style={{ width: 120 }}
+                                style={{ width: 120 }} // Giữ lại
                                 placeholder="Chọn tháng"
                                 value={selectedMonth}
                                 onChange={setSelectedMonth}
@@ -534,7 +535,7 @@ function SchedulesManagement() {
                 <Spin spinning={loading || isSaving}>
                     {!loading && weeklyGroupedDays.length > 0 && currentWeek && (
                         <>
-                            <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
+                            <Row justify="space-between" align="middle" className="week-navigation-row">
                                 <Col>
                                     <Button
                                         icon={<LeftOutlined />}
@@ -558,7 +559,7 @@ function SchedulesManagement() {
                                 </Col>
                             </Row>
 
-                            <Row style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 16 }}>
+                            <Row className="schedule-action-buttons">
                                 {isPreview ? (
                                     <Button
                                         type="primary"
@@ -609,42 +610,24 @@ function SchedulesManagement() {
                                 )}
                             </Row>
 
-                            <div style={{ position: 'relative' }}>
+                            <div className="scroll-container-wrapper">
                                 <div
                                     ref={scrollRef}
                                     onMouseDown={handleMouseDown}
                                     onMouseMove={handleMouseMove}
                                     onMouseUp={stopDragging}
                                     onMouseLeave={stopDragging}
-                                    style={{
-                                        width: '100%',
-                                        overflowX: 'auto',
-                                        padding: '16px 40px',
-                                        cursor: 'grab'
-                                    }}
+                                    className="week-scroll-container"
                                 >
-                                    <div style={{ display: 'flex', gap: '16px' }}>
+                                    <div className="week-days-flex-row">
                                         {currentWeek.days.map(day => (
                                             <div
                                                 key={day.date}
-                                                style={{
-                                                    flex: '0 0 260px',
-                                                    width: 260,
-                                                    background: '#f7f7f7',
-                                                    borderRadius: 8,
-                                                    border: '1px solid #e8e8e8',
-                                                    display: 'flex',
-                                                    flexDirection: 'column'
-                                                }}
+                                                className="day-column-card"
                                             >
                                                 <div
+                                                    className="day-column-header"
                                                     style={{
-                                                        padding: '12px 16px',
-                                                        borderBottom: '1px solid #e8e8e8',
-                                                        display: 'flex',
-                                                        justifyContent: 'space-between',
-                                                        alignItems: 'center',
-                                                        position: 'relative',
                                                         ...(day.isHoliday ? {
                                                             backgroundColor: '#fff1f0',
                                                             color: '#cf1322',
@@ -656,11 +639,8 @@ function SchedulesManagement() {
                                                 </div>
 
                                                 <div
+                                                    className="day-activities-list"
                                                     style={{
-                                                        padding: '12px 16px',
-                                                        minHeight: '200px',
-                                                        overflowY: 'auto',
-                                                        flexGrow: 1,
                                                         ...(day.isHoliday ? { backgroundColor: '#fff1f0' } : {})
                                                     }}
                                                 >
@@ -678,29 +658,33 @@ function SchedulesManagement() {
                                                                     (selectedActivity1?.date === day.date && selectedActivity1.index === index) ||
                                                                     (selectedActivity2?.date === day.date && selectedActivity2.index === index);
 
+                                                                const isSwappable = editMode && !isFrozen;
+
                                                                 return (
                                                                     <div
                                                                         key={index}
+                                                                        className={`activity-item-card ${isSwappable ? 'swappable' : ''}`}
+
                                                                         style={{
-                                                                            position: 'relative',
-                                                                            background: isFrozen ? '#fafafa' : isSelected ? '#e6f7ff' : '#fff',
-                                                                            borderRadius: 6,
-                                                                            padding: '8px 12px 28px',
-                                                                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                                                            background: (item as any)._justSwapped
+                                                                                ? '#d6e4ff'
+                                                                                : isFrozen
+                                                                                    ? '#fafafa'
+                                                                                    : isSelected
+                                                                                        ? '#e6f7ff'
+                                                                                        : '#fff',
                                                                             border: isFrozen
                                                                                 ? '1px solid #d9d9d9'
                                                                                 : isSelected
                                                                                     ? '2px solid #1890ff'
                                                                                     : '1px solid #f0f0f0',
                                                                             opacity: isSelected ? 0.6 : 1,
-                                                                            display: 'flex',
-                                                                            flexDirection: 'column',
-                                                                            gap: 4,
-                                                                            cursor: editMode && !isFrozen ? 'pointer' : 'default',
+                                                                            cursor: isSwappable ? 'pointer' : 'default',
+                                                                            transition: (item as any)._justSwapped ? 'background 0.3s ease-in-out' : 'all 0.2s ease',
                                                                         }}
                                                                         onClick={() => {
-                                                                            if (editMode && !isFrozen && !popoverSlot) {
-                                                                                handleActivityClick(day.date, index); // chỉ để swap
+                                                                            if (isSwappable && !popoverSlot) {
+                                                                                handleActivityClick(day.date, index);
                                                                             }
                                                                         }}
                                                                     >
@@ -711,14 +695,10 @@ function SchedulesManagement() {
 
                                                                         {/* Nội dung hoạt động */}
                                                                         <Paragraph
+                                                                            className="activity-item-name"
+
                                                                             style={{
-                                                                                marginBottom: 0,
-                                                                                fontSize: 13,
-                                                                                whiteSpace: 'pre-wrap',
                                                                                 color: isFrozen ? '#888' : undefined,
-                                                                                minHeight: 40,
-                                                                                display: 'flex',
-                                                                                alignItems: 'center'
                                                                             }}
                                                                         >
                                                                             {item.activityName || <Text type="secondary" italic>Chưa có hoạt động</Text>}
@@ -727,6 +707,7 @@ function SchedulesManagement() {
                                                                         {/* Tag */}
                                                                         {item.type && (
                                                                             <Tag
+                                                                                className="activity-item-tag"
                                                                                 color={
                                                                                     item.type === 'Cố định'
                                                                                         ? 'default'
@@ -736,37 +717,28 @@ function SchedulesManagement() {
                                                                                                 ? 'purple'
                                                                                                 : 'blue'
                                                                                 }
-                                                                                style={{ alignSelf: 'flex-start' }}
                                                                             >
                                                                                 {item.type}
                                                                             </Tag>
                                                                         )}
 
-                                                                        {/* ❌ Nút xoá luôn hiển khi editMode */}
-                                                                        {/* ❌ Nút xoá chỉ hiện khi editMode và KHÔNG phải Cố định */}
+                                                                        {/* Nút Xóa */}
                                                                         {editMode && item.type !== 'Cố định' && (
                                                                             <Tooltip title="Xóa nội dung hoạt động">
                                                                                 <CloseCircleOutlined
+                                                                                    className="activity-item-delete-btn"
                                                                                     onClick={(e) => {
                                                                                         e.stopPropagation();
                                                                                         handleDeleteActivity(day.date, index);
-                                                                                    }}
-                                                                                    style={{
-                                                                                        position: 'absolute',
-                                                                                        top: 6,
-                                                                                        right: 6,
-                                                                                        fontSize: 16,
-                                                                                        color: '#ff4d4f',
-                                                                                        cursor: 'pointer'
                                                                                     }}
                                                                                 />
                                                                             </Tooltip>
                                                                         )}
 
 
-                                                                        {/* Nút Chọn ở góc phải dưới */}
+                                                                        {/* Nút Chọn (Popover) */}
                                                                         {editMode && !isFrozen && (
-                                                                            <div style={{ position: 'absolute', bottom: 6, right: 6 }}>
+                                                                            <div className="activity-item-popover-btn">
                                                                                 <Popover
                                                                                     trigger="click"
                                                                                     open={popoverSlot?.date === day.date && popoverSlot?.startTime === item.startTime}
@@ -780,7 +752,7 @@ function SchedulesManagement() {
                                                                                             renderItem={(act) => (
                                                                                                 <List.Item
                                                                                                     key={act._id}
-                                                                                                    style={{ cursor: 'pointer', padding: '6px 10px' }}
+                                                                                                    className="popover-activity-item"
                                                                                                     onClick={() => {
                                                                                                         handleSelectActivity(act._id);
                                                                                                         setPopoverSlot(null);

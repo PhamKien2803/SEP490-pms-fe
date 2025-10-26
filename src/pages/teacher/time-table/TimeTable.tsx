@@ -13,6 +13,7 @@ import 'dayjs/locale/vi';
 import type { Dayjs } from 'dayjs';
 import viVN from 'antd/locale/vi_VN';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
+import './TimeTable.module.scss';
 
 dayjs.locale('vi');
 dayjs.extend(weekOfYear);
@@ -22,9 +23,7 @@ const { useToken } = theme;
 type Token = ReturnType<typeof useToken>['token'];
 type ViewMode = 'month' | 'week' | 'day';
 
-// ===================================================================
-// DỮ LIỆU GIẢ (MOCK DATA) CHO LỊCH THÁNG
-// ===================================================================
+
 const getMonthMockData = (value: Dayjs) => {
     if (value.month() !== 9 || value.year() !== 2025) {
         return null;
@@ -47,9 +46,6 @@ const getMonthMockData = (value: Dayjs) => {
     }
 };
 
-// ===================================================================
-// COMPONENT LỊCH TUẦN (WEEK VIEW)
-// ===================================================================
 const ActivityCell: React.FC<{ title: string; color: string; token: Token }> = ({ title, color, token }) => {
     const colorMap: { [key: string]: { bg: string; border: string; text: string } } = {
         blue: { bg: token.colorPrimaryBg, border: token.colorPrimaryBorder, text: token.colorPrimary },
@@ -74,7 +70,7 @@ const ActivityCell: React.FC<{ title: string; color: string; token: Token }> = (
 
 const getWeekColumns = (token: Token, currentDate: Dayjs): TableProps<any>['columns'] => {
     const startOfWeek = currentDate.startOf('week');
-    
+
     const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'];
     const dataIndex = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
@@ -126,9 +122,6 @@ const WeekView: React.FC<{ token: Token; currentDate: Dayjs }> = ({ token, curre
     );
 };
 
-// ===================================================================
-// COMPONENT LỊCH NGÀY (DAY VIEW)
-// ===================================================================
 const dayMockData = (token: Token) => [
     { key: '1', time: '07:15 - 07:30', title: 'Đón trẻ', duration: '30 phút', color: token.colorPrimary, tagColor: 'blue' },
     { key: '2', time: '07:30 - 08:30', title: 'Ăn sáng', duration: '30 phút', color: token.colorSuccess, tagColor: 'green' },
@@ -186,9 +179,7 @@ const DayView: React.FC<{ token: Token; currentDate: Dayjs }> = ({ token, curren
     );
 };
 
-// ===================================================================
-// COMPONENT HEADER CHUNG
-// ===================================================================
+
 interface TimeTableHeaderProps {
     viewMode: ViewMode;
     setViewMode: (mode: ViewMode) => void;
@@ -245,9 +236,7 @@ const TimeTableHeader: React.FC<TimeTableHeaderProps> = ({
     );
 };
 
-// ===================================================================
-// COMPONENT CHÍNH (TIME TABLE)
-// ===================================================================
+
 const TimeTable: React.FC = () => {
     const { token } = useToken();
     const [viewMode, setViewMode] = useState<ViewMode>('month');
@@ -315,7 +304,7 @@ const TimeTable: React.FC = () => {
                             value={currentDate}
                             onChange={setCurrentDate}
                             dateCellRender={dateCellRender}
-                            headerRender={() => null} // Tắt header mặc định của Calendar
+                            headerRender={() => null}
                             fullscreen
                             className="teacher-timetable-calendar"
                         />
@@ -324,66 +313,11 @@ const TimeTable: React.FC = () => {
                     {viewMode === 'week' && (
                         <WeekView token={token} currentDate={currentDate} />
                     )}
-                    
+
                     {viewMode === 'day' && (
-                         <DayView token={token} currentDate={currentDate} />
+                        <DayView token={token} currentDate={currentDate} />
                     )}
                 </Card>
-
-                <style>{`
-                    .teacher-timetable-calendar .ant-picker-content th {
-                        text-align: center;
-                        font-weight: 500;
-                        color: ${token.colorTextSecondary};
-                        padding-bottom: 8px;
-                        text-transform: capitalize;
-                    }
-                    .teacher-timetable-calendar .ant-picker-cell-inner {
-                        padding: 4px;
-                        margin: 0 4px;
-                    }
-                    .teacher-timetable-calendar .ant-picker-calendar-date-value {
-                        text-align: left;
-                        font-size: 14px;
-                        font-weight: 500;
-                        padding-left: 4px;
-                    }
-                    .teacher-timetable-calendar .ant-picker-cell-selected .ant-picker-cell-inner,
-                    .teacher-timetable-calendar .ant-picker-cell-today .ant-picker-cell-inner {
-                        background: #fff;
-                    }
-                    .teacher-timetable-calendar .ant-picker-cell-today .ant-picker-calendar-date-value {
-                        color: ${token.colorPrimary};
-                    }
-                    .teacher-timetable-calendar .ant-picker-calendar-date {
-                        border-top: 0;
-                        padding: 0;
-                    }
-                    .teacher-timetable-calendar .ant-picker-calendar-header {
-                        display: none; // Ẩn hoàn toàn header mặc định
-                    }
-                    .teacher-timetable-calendar .ant-picker-body {
-                        padding: 0 12px 12px;
-                    }
-                    .teacher-timetable-calendar .ant-picker-cell-other .ant-picker-calendar-date-value {
-                        color: ${token.colorTextDisabled} !important;
-                    }
-
-                    .week-timetable .ant-table-cell {
-                        padding: 8px;
-                    }
-                    .week-timetable .ant-table-cell.time-cell {
-                        font-weight: 500;
-                        color: ${token.colorTextSecondary};
-                    }
-
-                    .day-timetable-list .ant-list-item {
-                        border-block-end: 1px solid ${token.colorBorderSecondary} !important;
-                    }
-                    .day-timetable-list .ant-list-item:last-child {
-                        border-block-end: none !important;
-                    }
-                `}</style>
             </div>
         </ConfigProvider>
     );

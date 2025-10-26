@@ -1,0 +1,209 @@
+.schedule-management-page {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: 100vh;
+}
+
+.schedule-header-row {
+  margin-bottom: 24px;
+}
+
+.week-navigation-row {
+  margin-bottom: 24px;
+}
+
+.schedule-action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.scroll-container-wrapper {
+  position: relative;
+}
+
+.week-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  padding: 16px 4px;
+  cursor: grab;
+  scroll-behavior: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.week-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+.week-scroll-container {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.week-scroll-container:active {
+  cursor: grabbing;
+}
+
+.week-days-flex-row {
+  display: flex;
+  gap: 16px;
+}
+
+.day-column-card {
+  flex: 0 0 260px;
+  width: 260px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+
+.day-column-card:hover {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.day-column-header {
+  padding: 12px 16px;
+  background: linear-gradient(90deg, #e6f7ff 0%, #f9f0ff 100%);
+  border-bottom: 1px solid #f0f0f0;
+  font-weight: 600;
+  color: #333;
+  text-transform: capitalize;
+  font-size: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.day-activities-list {
+  padding: 12px;
+  min-height: 200px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.day-activities-list::-webkit-scrollbar {
+  width: 4px;
+}
+.day-activities-list::-webkit-scrollbar-track {
+  background: #fafafa;
+}
+.day-activities-list::-webkit-scrollbar-thumb {
+  background: #d9d9d9;
+  border-radius: 4px;
+}
+.day-activities-list::-webkit-scrollbar-thumb:hover {
+  background: #bfbfbf;
+}
+
+.activity-item-card {
+  position: relative;
+  border-radius: 10px;
+  padding: 12px 14px 30px;
+  background-color: #ffffff;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.25s ease;
+}
+
+.activity-item-card.swappable:hover {
+  transform: translateY(-3px) scale(1.015);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  background-color: #f0f5ff !important;
+  border-color: #d0d9ff !important;
+}
+
+.activity-item-name {
+  font-size: 14px;
+  white-space: pre-wrap;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  color: #444;
+  font-weight: 500;
+}
+
+.activity-item-tag {
+  align-self: flex-start;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.activity-item-delete-btn,
+.activity-item-popover-btn {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: all 0.2s ease;
+}
+
+.activity-item-card:hover .activity-item-delete-btn,
+.activity-item-card:hover .activity-item-popover-btn {
+  opacity: 0.85;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.activity-item-delete-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 16px;
+  color: #ff4d4f;
+  cursor: pointer;
+}
+.activity-item-delete-btn:hover {
+  opacity: 1;
+}
+
+.activity-item-popover-btn {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+}
+.activity-item-popover-btn:hover {
+  opacity: 1;
+}
+
+.popover-activity-item {
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+.popover-activity-item:hover {
+  background-color: #e6f7ff;
+}
+
+.activity-fixed {
+  background: #fffbe6;
+  border-color: #ffe58f;
+}
+.activity-fixed .activity-item-tag {
+  background: #ffe58f;
+  color: #ad6800;
+}
+.activity-event {
+  background: #f9f0ff;
+  border-color: #d3adf7;
+}
+.activity-event .activity-item-tag {
+  background: #d3adf7;
+  color: #531dab;
+}
+.activity-normal {
+  background: #f0f5ff;
+  border-color: #adc6ff;
+}
+.activity-normal .activity-item-tag {
+  background: #adc6ff;
+  color: #2f54eb;
+}

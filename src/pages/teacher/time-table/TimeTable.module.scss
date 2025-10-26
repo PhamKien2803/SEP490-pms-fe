@@ -1,0 +1,65 @@
+/* CẢNH BÁO: Các giá trị màu này được "hardcode" 
+  và sẽ không thay đổi theo theme (ví dụ: Dark Mode).
+*/
+
+.teacher-timetable-calendar .ant-picker-content th {
+  text-align: center;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.45); /* Giá trị cũ: token.colorTextSecondary */
+  padding-bottom: 8px;
+  text-transform: capitalize;
+}
+.teacher-timetable-calendar .ant-picker-cell-inner {
+  padding: 4px;
+  margin: 0 4px;
+}
+.teacher-timetable-calendar .ant-picker-calendar-date-value {
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  padding-left: 4px;
+}
+.teacher-timetable-calendar .ant-picker-cell-selected .ant-picker-cell-inner,
+.teacher-timetable-calendar .ant-picker-cell-today .ant-picker-cell-inner {
+  background: #fff;
+}
+.teacher-timetable-calendar
+  .ant-picker-cell-today
+  .ant-picker-calendar-date-value {
+  color: #1677ff; /* Giá trị cũ: token.colorPrimary */
+}
+.teacher-timetable-calendar .ant-picker-calendar-date {
+  border-top: 0;
+  padding: 0;
+}
+.teacher-timetable-calendar .ant-picker-calendar-header {
+  display: none; /* Ẩn hoàn toàn header mặc định */
+}
+.teacher-timetable-calendar .ant-picker-body {
+  padding: 0 12px 12px;
+}
+.teacher-timetable-calendar
+  .ant-picker-cell-other
+  .ant-picker-calendar-date-value {
+  color: rgba(
+    0,
+    0,
+    0,
+    0.25
+  ) !important; /* Giá trị cũ: token.colorTextDisabled */
+}
+
+.week-timetable .ant-table-cell {
+  padding: 8px;
+}
+.week-timetable .ant-table-cell.time-cell {
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.45); /* Giá trị cũ: token.colorTextSecondary */
+}
+
+.day-timetable-list .ant-list-item {
+  border-block-end: 1px solid #f0f0f0 !important; /* Giá trị cũ: token.colorBorderSecondary */
+}
+.day-timetable-list .ant-list-item:last-child {
+  border-block-end: none !important;
+}
