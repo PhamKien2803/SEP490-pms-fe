@@ -87,7 +87,7 @@ const CreateMedical: React.FC = () => {
     const [isCancelConfirmVisible, setIsCancelConfirmVisible] = useState(false);
     const [students, setStudents] = useState<StudentInfo[]>([]);
     const [studentLoading, setStudentLoading] = useState(true);
-    const [selectedStudent, setSelectedStudent] = useState<StudentInfo | null>(null);
+    const [_, setSelectedStudent] = useState<StudentInfo | null>(null);
 
     useEffect(() => {
         const fetchStudents = async () => {

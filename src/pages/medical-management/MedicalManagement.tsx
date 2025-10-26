@@ -20,13 +20,12 @@ import {
 } from "@ant-design/icons";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { medicalApis } from "../../services/apiServices";
-import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { usePagePermission } from "../../hooks/usePagePermission";
 import { toast } from "react-toastify";
 import { constants } from "../../constants";
 import { useNavigate } from "react-router-dom";
 import ModalConfirm from "../../modal/common/ModalConfirm/ModalConfirm";
-import { HealthCertRecord } from "../../types/medical-management"; 
+import { HealthCertRecord } from "../../types/medical-management";
 import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
@@ -40,8 +39,6 @@ const MedicalManagement: React.FC = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
-
-    const user = useCurrentUser();
 
     const { canCreate, canUpdate, canDelete } = usePagePermission();
 
@@ -59,7 +56,7 @@ const MedicalManagement: React.FC = () => {
         async (params: { page: number; limit: number }) => {
             setLoading(true);
             try {
-                const response = await medicalApis.getListMedical(params); 
+                const response = await medicalApis.getListMedical(params);
                 setDataMedicals(response.data);
                 setPagination((prev) => ({
                     ...prev,
@@ -114,10 +111,10 @@ const MedicalManagement: React.FC = () => {
         if (!deletingId) return;
         setIsDeleting(true);
         try {
-            await medicalApis.deleteMedical(deletingId); 
+            await medicalApis.deleteMedical(deletingId);
             toast.success("Xóa hồ sơ sức khỏe thành công!");
             setIsDeleteModalOpen(false);
-            
+
             if (dataMedicals.length === 1 && pagination.current! > 1) {
                 setPagination((prev) => ({ ...prev, current: prev.current! - 1 }));
             } else {
@@ -193,8 +190,8 @@ const MedicalManagement: React.FC = () => {
                 width: 150,
                 className: "ant-table-header-nowrap",
                 render: (status: string) => (
-                    <Tag 
-                        color="default" 
+                    <Tag
+                        color="default"
                         style={{ whiteSpace: "nowrap" }}
                     >
                         {status}
@@ -217,9 +214,9 @@ const MedicalManagement: React.FC = () => {
                 fixed: "right",
                 className: "ant-table-header-nowrap",
                 render: (_: unknown, record: HealthCertRecord) => {
-                    
+
                     const medicalPrefix = `${constants.APP_PREFIX}/medicals`;
-                    
+
                     return (
                         <Space size="small">
                             <Tooltip title="Xem chi tiết">

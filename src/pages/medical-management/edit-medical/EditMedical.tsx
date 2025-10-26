@@ -32,7 +32,7 @@ import { constants } from "../../../constants";
 import { medicalApis } from "../../../services/apiServices";
 import { ComprehensiveExamination, HealthCertRecord, HealthCertUpdateData } from "../../../types/medical-management";
 
-const { Title, Text: TextAnt } = Typography; 
+const { Title, Text: TextAnt } = Typography;
 const { TextArea } = Input;
 const { Item } = Descriptions;
 
@@ -49,16 +49,16 @@ const UpdateMedical: React.FC = () => {
     const [medicalDetail, setMedicalDetail] = useState<HealthCertRecord | null>(null);
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
-    
-    const [isEditing] = useState(true); 
-    
+
+    const [isEditing] = useState(true);
+
     const [isCancelConfirmVisible, setIsCancelConfirmVisible] = useState(false);
     const [isDataDirty, setIsDataDirty] = useState(false);
     const [initialValues, setInitialValues] = useState<any>(null);
     const [bmi, setBmi] = useState<number>(0);
 
     const CurrentUserName = "Admin User";
-    
+
     const updateBMI = useCallback(() => {
         const weight = form.getFieldValue(['physicalDevelopment', 'weight']);
         const height = form.getFieldValue(['physicalDevelopment', 'height']);
@@ -97,15 +97,15 @@ const UpdateMedical: React.FC = () => {
         );
     };
 
-    const onFieldsChange = useCallback((changedFields: any, allFields: any) => {
-        const isDimensionChanged = changedFields.some((f: any) => 
+    const onFieldsChange = useCallback((changedFields: any, _: any) => {
+        const isDimensionChanged = changedFields.some((f: any) =>
             f.name.includes('weight') || f.name.includes('height')
         );
         if (isDimensionChanged) {
             updateBMI();
         }
 
-        if (!initialValues) { 
+        if (!initialValues) {
             setIsDataDirty(false);
             return;
         }
@@ -127,23 +127,23 @@ const UpdateMedical: React.FC = () => {
                 const response: HealthCertRecord = await medicalApis.getMedicalById(
                     medicalId || ""
                 );
-                
+
                 const initialData = {
                     physicalDevelopment: response.physicalDevelopment,
                     comprehensiveExamination: response.comprehensiveExamination,
                     conclusion: response.conclusion,
                 };
-                
+
                 const initialForComparison = cleanDataForComparison(initialData);
 
                 setMedicalDetail(response);
-                setInitialValues(initialForComparison); 
+                setInitialValues(initialForComparison);
 
                 setBmi(response.physicalDevelopment.bodyMassIndex);
 
                 // Định dạng ngày sinh chỉ hiển thị DD/MM/YYYY
-                const formattedDob = response.student.dob 
-                    ? dayjs(response.student.dob).format("DD/MM/YYYY") 
+                const formattedDob = response.student.dob
+                    ? dayjs(response.student.dob).format("DD/MM/YYYY")
                     : '';
 
                 form.setFieldsValue({
@@ -151,7 +151,7 @@ const UpdateMedical: React.FC = () => {
                     studentCode: response.student.studentCode,
                     dob: formattedDob, // <-- Đã áp dụng định dạng
                     gender: response.student.gender,
-                    
+
                     ...initialData,
                     comprehensiveExamination: {
                         ...response.comprehensiveExamination,
@@ -161,7 +161,7 @@ const UpdateMedical: React.FC = () => {
                     }
                 });
 
-                setIsDataDirty(false); 
+                setIsDataDirty(false);
             } catch (error) {
                 toast.error("Tải chi tiết hồ sơ sức khỏe thất bại.");
                 setMedicalDetail(null);
@@ -184,31 +184,31 @@ const UpdateMedical: React.FC = () => {
         setIsSaving(true);
 
         try {
-             const ce = values.comprehensiveExamination;
-             const parseToArray = (value: string) => 
-                 value ? value.split(',').map(item => item.trim()).filter(item => item.length > 0) : [];
-             
-             const comprehensiveExaminationPayload: ComprehensiveExamination = {
-                 ...ce,
-                 diseasesDetected: parseToArray(ce.diseasesDetected),
-                 abnormalSigns: parseToArray(ce.abnormalSigns),
-                 diseaseRisk: parseToArray(ce.diseaseRisk),
-             };
+            const ce = values.comprehensiveExamination;
+            const parseToArray = (value: string) =>
+                value ? value.split(',').map(item => item.trim()).filter(item => item.length > 0) : [];
+
+            const comprehensiveExaminationPayload: ComprehensiveExamination = {
+                ...ce,
+                diseasesDetected: parseToArray(ce.diseasesDetected),
+                abnormalSigns: parseToArray(ce.abnormalSigns),
+                diseaseRisk: parseToArray(ce.diseaseRisk),
+            };
 
             const payload: HealthCertUpdateData = {
-                student: medicalDetail.student._id, 
-                
+                student: medicalDetail.student._id,
+
                 physicalDevelopment: {
                     ...values.physicalDevelopment,
                     bodyMassIndex: calculateBMI(values.physicalDevelopment.weight, values.physicalDevelopment.height),
                 },
-                
+
                 comprehensiveExamination: comprehensiveExaminationPayload,
-                
+
                 conclusion: values.conclusion,
 
-                createdBy: medicalDetail.createdBy, 
-                updatedBy: CurrentUserName, 
+                createdBy: medicalDetail.createdBy,
+                updatedBy: CurrentUserName,
             };
 
             await medicalApis.updateMedical(id, payload);
@@ -255,7 +255,7 @@ const UpdateMedical: React.FC = () => {
                 <Button
                     type="primary"
                     icon={<SaveOutlined />}
-                    onClick={() => form.submit()} 
+                    onClick={() => form.submit()}
                     loading={isSaving}
                     disabled={isSaving || !isDataDirty}
                 >
@@ -266,18 +266,18 @@ const UpdateMedical: React.FC = () => {
     };
 
     if (loading) {
-         return (
-             <div
-                 style={{
-                     display: "flex",
-                     alignItems: "center",
-                     justifyContent: "center",
-                     height: "80vh",
-                 }}
-             >
-                 <Spin tip="Đang tải chi tiết hồ sơ sức khỏe..." size="large" />
-             </div>
-         );
+        return (
+            <div
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "80vh",
+                }}
+            >
+                <Spin tip="Đang tải chi tiết hồ sơ sức khỏe..." size="large" />
+            </div>
+        );
     }
 
     if (!medicalDetail) {
@@ -354,7 +354,7 @@ const UpdateMedical: React.FC = () => {
                             </Form.Item>
                         </Col>
                     </Row>
-                    
+
                     <Title
                         level={5}
                         style={{
@@ -409,7 +409,7 @@ const UpdateMedical: React.FC = () => {
                             </Form.Item>
                         </Col>
                         <Col span={24}>
-                            <Form.Item 
+                            <Form.Item
                                 label="Đánh giá phát triển thể chất"
                                 name={['physicalDevelopment', 'evaluation']}
                             >
@@ -434,66 +434,66 @@ const UpdateMedical: React.FC = () => {
                         <ReadOutlined /> II. Khám tổng quát
                     </Title>
                     <Row gutter={24}>
-                           <Col xs={24} md={12}>
-                                <Form.Item label="Phát triển tinh thần" name={['comprehensiveExamination', 'mentalDevelopment']}>
-                                    <Input disabled={!isEditing} placeholder="Ví dụ: Bình thường, Cần theo dõi..." />
-                                </Form.Item>
-                            </Col>
-                            <Col xs={24} md={12}>
-                                <Form.Item label="Phát triển vận động" name={['comprehensiveExamination', 'motorDevelopment']}>
-                                    <Input disabled={!isEditing} placeholder="Ví dụ: Bình thường, Hạn chế..." />
-                                </Form.Item>
-                            </Col>
-                            <Col span={24}>
-                                   <Form.Item 
-                                        label={<Space><WarningOutlined style={{ color: '#faad14' }}/> Các bệnh được phát hiện</Space>} 
-                                        name={['comprehensiveExamination', 'diseasesDetected']}
-                                        tooltip="Nhập các bệnh, cách nhau bằng dấu phẩy (Ví dụ: Cận thị, Sâu răng)"
-                                    >
-                                        <TextArea
-                                            rows={1}
-                                            disabled={!isEditing}
-                                            placeholder="Ví dụ: Cận thị, Sâu răng, Bệnh lý hô hấp"
-                                        />
-                                    </Form.Item>
-                            </Col>
-                            <Col span={24}>
-                                   <Form.Item 
-                                        label="Dấu hiệu bất thường khác" 
-                                        name={['comprehensiveExamination', 'abnormalSigns']}
-                                        tooltip="Nhập các dấu hiệu, cách nhau bằng dấu phẩy"
-                                    >
-                                        <TextArea
-                                            rows={1}
-                                            disabled={!isEditing}
-                                            placeholder="Ví dụ: Da vàng, Hạch cổ sưng nhẹ"
-                                        />
-                                    </Form.Item>
-                            </Col>
-                            <Col span={24}>
-                                    <Form.Item 
-                                        label="Nguy cơ bệnh tật" 
-                                        name={['comprehensiveExamination', 'diseaseRisk']}
-                                        tooltip="Nhập các nguy cơ, cách nhau bằng dấu phẩy"
-                                    >
-                                        <TextArea
-                                            rows={1}
-                                            disabled={!isEditing}
-                                            placeholder="Ví dụ: Nguy cơ béo phì, Nguy cơ dị ứng"
-                                        />
-                                    </Form.Item>
-                            </Col>
-                            <Col span={24}>
-                                <Form.Item label="Ghi chú tổng quát" name={['comprehensiveExamination', 'notes']}>
-                                    <TextArea
-                                        rows={2}
-                                        disabled={!isEditing}
-                                        placeholder="Ghi chú tổng quát về tình trạng sức khỏe..."
-                                    />
-                                </Form.Item>
-                            </Col>
+                        <Col xs={24} md={12}>
+                            <Form.Item label="Phát triển tinh thần" name={['comprehensiveExamination', 'mentalDevelopment']}>
+                                <Input disabled={!isEditing} placeholder="Ví dụ: Bình thường, Cần theo dõi..." />
+                            </Form.Item>
+                        </Col>
+                        <Col xs={24} md={12}>
+                            <Form.Item label="Phát triển vận động" name={['comprehensiveExamination', 'motorDevelopment']}>
+                                <Input disabled={!isEditing} placeholder="Ví dụ: Bình thường, Hạn chế..." />
+                            </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                            <Form.Item
+                                label={<Space><WarningOutlined style={{ color: '#faad14' }} /> Các bệnh được phát hiện</Space>}
+                                name={['comprehensiveExamination', 'diseasesDetected']}
+                                tooltip="Nhập các bệnh, cách nhau bằng dấu phẩy (Ví dụ: Cận thị, Sâu răng)"
+                            >
+                                <TextArea
+                                    rows={1}
+                                    disabled={!isEditing}
+                                    placeholder="Ví dụ: Cận thị, Sâu răng, Bệnh lý hô hấp"
+                                />
+                            </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                            <Form.Item
+                                label="Dấu hiệu bất thường khác"
+                                name={['comprehensiveExamination', 'abnormalSigns']}
+                                tooltip="Nhập các dấu hiệu, cách nhau bằng dấu phẩy"
+                            >
+                                <TextArea
+                                    rows={1}
+                                    disabled={!isEditing}
+                                    placeholder="Ví dụ: Da vàng, Hạch cổ sưng nhẹ"
+                                />
+                            </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                            <Form.Item
+                                label="Nguy cơ bệnh tật"
+                                name={['comprehensiveExamination', 'diseaseRisk']}
+                                tooltip="Nhập các nguy cơ, cách nhau bằng dấu phẩy"
+                            >
+                                <TextArea
+                                    rows={1}
+                                    disabled={!isEditing}
+                                    placeholder="Ví dụ: Nguy cơ béo phì, Nguy cơ dị ứng"
+                                />
+                            </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                            <Form.Item label="Ghi chú tổng quát" name={['comprehensiveExamination', 'notes']}>
+                                <TextArea
+                                    rows={2}
+                                    disabled={!isEditing}
+                                    placeholder="Ghi chú tổng quát về tình trạng sức khỏe..."
+                                />
+                            </Form.Item>
+                        </Col>
                     </Row>
-                    
+
                     <Title
                         level={5}
                         style={{
@@ -506,8 +506,8 @@ const UpdateMedical: React.FC = () => {
                         <CheckCircleOutlined /> III. Kết luận
                     </Title>
                     <Col span={24}>
-                        <Form.Item 
-                            label="Tình trạng sức khỏe" 
+                        <Form.Item
+                            label="Tình trạng sức khỏe"
                             name={['conclusion', 'healthStatus']}
                             rules={[{ required: true, message: "Vui lòng nhập tình trạng sức khỏe" }]}
                         >
@@ -519,8 +519,8 @@ const UpdateMedical: React.FC = () => {
                         </Form.Item>
                     </Col>
                     <Col span={24}>
-                        <Form.Item 
-                            label="Lời khuyên" 
+                        <Form.Item
+                            label="Lời khuyên"
                             name={['conclusion', 'advice']}
                         >
                             <TextArea
@@ -544,13 +544,13 @@ const UpdateMedical: React.FC = () => {
                     </Descriptions>
 
                 </Card>
-                
+
                 {isEditing && (
                     <Row
                         justify="end"
                         style={{
                             marginTop: 20,
-                            marginBottom: 20, 
+                            marginBottom: 20,
                         }}
                     >
                         {renderActionButtons()}
