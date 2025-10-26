@@ -100,8 +100,7 @@ export const apiEndPoint = {
   GET_ATTENDANCE_BY_ID: (id: string) => `/attendances/getById/${id}`,
   GET_ATTENDANCE_BY_CLASS_AND_SCHOOLYEAR: (classId: string, schoolYearId: string) => `/attendances/getByClassAndSchoolYear/${classId}/${schoolYearId}`,
   GET_ATTENDANCE_BY_CLASS_AND_DATE: (id: string, date: string) => `/attendances/getByClassAndDate/${id}/${date}`,
-
-
+  GET_STUDENT_DETAILS: (id: string) => `/teachers/getByIdStudent/${id}`,
   GET_SCHEDULE_BY_ID: (id: string) => `/schedules/getById/${id}`,
   GET_SCHEDULE_PARAMS: "/schedules/getByParams",
   CREATE_SCHEDULE: "/schedules/createSchedule",
@@ -111,7 +110,6 @@ export const apiEndPoint = {
   GET_AVAILABEL_ACTIVITY: "/schedules/getListAvailable",
   CONFIRM_SCHEDULE: (id: string) => `/schedules/confirm/${id}`,
   GET_CLASS_BY_SCHOOLYEAR: "/schedules/getClassBySchoolYear",
-
   GET_LIST_MEDICAL: "/medicals/list",
   GET_MEDICAL_BY_ID: (id: string) => `/medicals/getById/${id}`,
   CREATE_MEDICAL: "/medicals/create",

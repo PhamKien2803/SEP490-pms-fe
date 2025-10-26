@@ -1,47 +1,42 @@
 import { useState, useEffect } from 'react';
 import {
-    Spin,
-    Card,
-    Typography,
-    Tabs,
-    Table,
-    Tag,
-    Flex,
-    Empty,
-    Avatar,
-    Statistic,
-    Row,
-    Col,
-    Space,
-    Divider,
-    theme,
-    Tooltip,
+    Spin, Card, Typography, Tabs, Table, Tag, Flex, Empty, Avatar,
+    Statistic, Row, Col, Space, Divider, theme, Tooltip, Select, Button
 } from 'antd';
-import { UserOutlined, TeamOutlined, EyeOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import {
+    UserOutlined, TeamOutlined, EyeOutlined, ReadOutlined, CalendarOutlined,
+    HomeOutlined, BarcodeOutlined, SmileOutlined, UsergroupAddOutlined,
+    ManOutlined, WomanOutlined
+} from '@ant-design/icons';
 import type { TableProps } from 'antd';
 import dayjs from 'dayjs';
 import { useCurrentUser } from '../../../hooks/useCurrentUser';
 import { IClassInfo, IStudent, ITeacherClassStudentResponse } from '../../../types/teacher';
-import { teacherApis } from '../../../services/apiServices';
+import { teacherApis, schoolYearApis } from '../../../services/apiServices';
 import { toast } from 'react-toastify';
-import { constants } from '../../../constants';
+import { SchoolYearListItem } from '../../../types/schoolYear';
+import StudentDetailModal from '../../../modal/student-details/StudentDetailModal';
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 const { useToken } = theme;
-
+const { Option } = Select;
 
 function ClassInfor() {
     const user = useCurrentUser();
-    const navigate = useNavigate();
     const { token } = useToken();
-    const [isLoadingData, setIsLoadingData] = useState(true);
-    const [classData, setClassData] =
-        useState<ITeacherClassStudentResponse | null>(null);
-    const [hasFetched, setHasFetched] = useState(false);
 
     const teacherId = user?.staff;
+    const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
+    const [selectedYear, setSelectedYear] = useState<string>();
+    const [classData, setClassData] = useState<ITeacherClassStudentResponse | null>(null);
+    const [isLoadingData, setIsLoadingData] = useState(true);
+    const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+    const getAvatarLetter = (name: string) => {
+        return name?.[0]?.toUpperCase() || <UserOutlined />;
+    };
 
     const studentColumns: TableProps<IStudent>['columns'] = [
         {
@@ -56,6 +51,15 @@ function ClassInfor() {
             dataIndex: 'fullName',
             key: 'fullName',
             ellipsis: true,
+            fixed: 'left',
+            render: (fullName: string) => (
+                <Space>
+                    <Avatar size="small" style={{ backgroundColor: token.colorPrimary, color: '#fff' }}>
+                        {getAvatarLetter(fullName)}
+                    </Avatar>
+                    <Text>{fullName}</Text>
+                </Space>
+            )
         },
         {
             title: 'Ngày sinh',
@@ -70,9 +74,18 @@ function ClassInfor() {
             key: 'gender',
             width: 100,
             align: 'center',
-            render: (gender: string) => (
-                <Tag color={gender === 'Nam' ? 'blue' : 'pink'} style={{ margin: 0 }}>{gender}</Tag>
-            ),
+            render: (gender: string) => {
+                const isMale = gender === 'Nam';
+                return (
+                    <Tag
+                        color={isMale ? 'blue' : 'pink'}
+                        icon={isMale ? <ManOutlined /> : <WomanOutlined />}
+                        style={{ margin: 0 }}
+                    >
+                        {gender}
+                    </Tag>
+                );
+            },
         },
         {
             title: 'Địa chỉ',
@@ -87,42 +100,51 @@ function ClassInfor() {
             fixed: 'right',
             width: 100,
             render: (_, record) => (
-                <Space>
-                    <Tooltip title="Xem chi tiết học sinh">
-                        <EyeOutlined
-                            style={{ color: '#1890ff', fontSize: 18, cursor: 'pointer' }}
-                            onClick={() => navigate(`${constants.APP_PREFIX}/teachers/students/detail/${record._id}`)}
-                        />
-                    </Tooltip>
-                </Space>
+                <Tooltip title="Xem chi tiết học sinh">
+                    <Button
+                        type="text"
+                        shape="circle"
+                        icon={<EyeOutlined style={{ color: token.colorPrimary }} />}
+                        onClick={() => {
+                            setSelectedStudentId(record._id);
+                            setIsDetailModalOpen(true);
+                        }}
+                    />
+                </Tooltip>
             ),
         },
     ];
 
     useEffect(() => {
-        if (!teacherId || hasFetched) {
-            if (!teacherId && user !== undefined) {
-                toast.error('Không thể xác định thông tin giáo viên.');
-                setIsLoadingData(false);
-            }
-            return;
-        }
+        schoolYearApis
+            .getSchoolYearList({ page: 1, limit: 100 })
+            .then((res) => {
+                const sorted = [...res.data].sort((a, b) => {
+                    const endYearA = parseInt(a.schoolYear.split('-')[1]);
+                    const endYearB = parseInt(b.schoolYear.split('-')[1]);
+                    return endYearB - endYearA;
+                });
+                setSchoolYears(sorted);
+                if (sorted.length > 0) {
+                    setSelectedYear(sorted[0]._id);
+                }
+            })
+            .catch(() => {
+                toast.error('Không thể tải danh sách năm học.');
+            });
+    }, []);
+
+    useEffect(() => {
+        if (!teacherId || !selectedYear) return;
 
         setIsLoadingData(true);
 
         teacherApis
-            .getClassAndStudentByTeacher(teacherId)
-            .then((response) => {
-                setClassData(response);
-                setHasFetched(true);
-            })
-            .catch(() => {
-                toast.error('Không thể tải thông tin lớp học. Vui lòng thử lại.');
-            })
-            .finally(() => {
-                setIsLoadingData(false);
-            });
-    }, [teacherId, hasFetched, user]);
+            .getClassAndStudentByTeacher(teacherId, selectedYear)
+            .then((response) => setClassData(response))
+            .catch(() => toast.error('Không thể tải thông tin lớp học.'))
+            .finally(() => setIsLoadingData(false));
+    }, [teacherId, selectedYear]);
 
     const renderContent = () => {
         if (isLoadingData || user === undefined) {
@@ -136,7 +158,10 @@ function ClassInfor() {
         if (!classData || classData.classes.length === 0) {
             return (
                 <Card bordered={false} style={{ textAlign: 'center', padding: '40px 0' }}>
-                    <Empty description={<Text strong>Giáo viên hiện chưa được phân công lớp học nào.</Text>} />
+                    <Empty
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        description={<Text strong>Giáo viên hiện chưa được phân công lớp học nào trong năm học này.</Text>}
+                    />
                 </Card>
             );
         }
@@ -145,7 +170,7 @@ function ClassInfor() {
 
         return (
             <Space direction="vertical" size="large" style={{ display: 'flex' }}>
-                <Card bordered={false} style={{ background: `linear-gradient(135deg, ${token.colorPrimaryBg}, ${token.colorInfoBg})` }}>
+                <Card bordered={false} style={{ background: `linear-gradient(135deg, ${token.colorBgLayout}, ${token.colorInfoBg})` }}>
                     <Row gutter={[16, 16]} align="middle">
                         <Col>
                             <Avatar size={64} icon={<UserOutlined />} style={{ backgroundColor: token.colorPrimary }} />
@@ -155,7 +180,9 @@ function ClassInfor() {
                             <Text type="secondary">{teacher?.email || user?.email}</Text>
                         </Col>
                         <Col>
-                            <Tag color="cyan" style={{ padding: '5px 10px', fontSize: '14px' }}>Năm học: {schoolYear.schoolYear}</Tag>
+                            <Tag color="cyan" style={{ padding: '5px 10px', fontSize: '14px' }}>
+                                Năm học: {schoolYear.schoolYear}
+                            </Tag>
                         </Col>
                     </Row>
                 </Card>
@@ -166,8 +193,12 @@ function ClassInfor() {
                         tabPosition="top"
                         size="large"
                         type="line"
-                        style={{ background: token.colorBgContainer, borderRadius: token.borderRadiusLG, overflow: 'hidden' }}
-                        tabBarStyle={{ padding: `0 ${token.paddingLG}px`, marginBottom: 0, borderBottom: `1px solid ${token.colorBorderSecondary}` }}
+                        style={{ background: token.colorBgContainer, borderRadius: token.borderRadiusLG }}
+                        tabBarStyle={{
+                            padding: `0 ${token.paddingLG}px`,
+                            marginBottom: 0,
+                            borderBottom: `1px solid ${token.colorBorderSecondary}`,
+                        }}
                     >
                         {classes.map((classInfo: IClassInfo) => (
                             <TabPane
@@ -180,18 +211,35 @@ function ClassInfor() {
                                 key={classInfo._id}
                                 style={{ padding: token.paddingLG }}
                             >
-                                <Row gutter={[24, 16]} align="middle" style={{ marginBottom: token.marginLG }}>
+                                <Row gutter={[24, 24]} style={{ marginBottom: token.marginLG }}>
                                     <Col xs={24} sm={12} md={6}>
-                                        <Statistic title="Mã lớp" value={classInfo.classCode} />
+                                        <Statistic
+                                            title="Mã lớp"
+                                            value={classInfo.classCode}
+                                            prefix={<BarcodeOutlined style={{ color: token.colorTextSecondary }} />}
+                                        />
                                     </Col>
                                     <Col xs={24} sm={12} md={6}>
-                                        <Statistic title="Phòng học" value={classInfo.room?.roomName || '--'} />
+                                        <Statistic
+                                            title="Phòng học"
+                                            value={classInfo.room?.roomName || '--'}
+                                            prefix={<HomeOutlined style={{ color: token.colorSuccess }} />}
+                                        />
                                     </Col>
                                     <Col xs={24} sm={12} md={6}>
-                                        <Statistic title="Độ tuổi" value={`${classInfo.age || '--'} tuổi`} />
+                                        <Statistic
+                                            title="Độ tuổi"
+                                            value={`${classInfo.age || '--'} tuổi`}
+                                            prefix={<SmileOutlined style={{ color: token.colorWarning }} />}
+                                        />
                                     </Col>
                                     <Col xs={24} sm={12} md={6}>
-                                        <Statistic title="Sĩ số" value={classInfo.students?.length || 0} suffix="học sinh" />
+                                        <Statistic
+                                            title="Sĩ số"
+                                            value={classInfo.students?.length || 0}
+                                            suffix="học sinh"
+                                            prefix={<UsergroupAddOutlined style={{ color: token.colorPrimary }} />}
+                                        />
                                     </Col>
                                 </Row>
 
@@ -205,7 +253,7 @@ function ClassInfor() {
                                     pagination={{ pageSize: 10, showSizeChanger: true, size: 'small' }}
                                     bordered
                                     size="middle"
-                                    scroll={{ x: 800 }}
+                                    scroll={{ x: 1000 }}
                                     rowClassName={() => 'table-row-hover'}
                                 />
                             </TabPane>
@@ -218,11 +266,39 @@ function ClassInfor() {
 
     return (
         <>
-            <div style={{ maxWidth: 1200, margin: 'auto' }}>
-                <Title level={2} style={{ marginBottom: 24, color: token.colorPrimary }}>
-                    Thông tin Lớp học phụ trách
-                </Title>
+            <div>
+                <Flex justify="space-between" align="center" style={{ marginBottom: 24 }} wrap="wrap" gap="middle">
+                    <Space>
+                        <Title level={2} style={{ margin: 0, color: token.colorPrimary }}>
+                            <ReadOutlined style={{ marginRight: 12 }} />
+                            Thông tin Lớp học phụ trách
+                        </Title>
+                    </Space>
+                    <Select
+                        value={selectedYear}
+                        onChange={(val) => setSelectedYear(val)}
+                        style={{ width: 250 }}
+                        placeholder="Chọn năm học"
+                        size="large"
+                    >
+                        {schoolYears.map((item) => (
+                            <Option key={item._id} value={item._id}>
+                                <CalendarOutlined style={{ marginRight: 8, color: token.colorTextSecondary }} />
+                                {item.schoolYear}
+                            </Option>
+                        ))}
+                    </Select>
+                </Flex>
+
                 {renderContent()}
+
+                {selectedStudentId && (
+                    <StudentDetailModal
+                        studentId={selectedStudentId}
+                        open={isDetailModalOpen}
+                        onClose={() => setIsDetailModalOpen(false)}
+                    />
+                )}
             </div>
         </>
     );
@@ -233,7 +309,7 @@ export default ClassInfor;
 const styleSheet = document.createElement("style");
 styleSheet.innerText = `
  .table-row-hover:hover > td {
-    background-color: #f5f5f5 !important;
+   background-color: #f5f5ff !important;
  }
 `;
 document.head.appendChild(styleSheet);

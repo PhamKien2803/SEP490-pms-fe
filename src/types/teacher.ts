@@ -203,7 +203,42 @@ export interface IAttendanceDetailResponse {
 export type IAttendanceListResponse = IAttendanceDetailResponse[];
 
 export interface IPaginatedResponse<T> {
-  data: T;
-  total: number;
-  // Add other potential fields like page, limit if your API returns them
+    data: T;
+    total: number;
+    // Add other potential fields like page, limit if your API returns them
+}
+
+
+export interface StudentDetailResponse {
+    _id: string;
+    studentCode: string;
+    fullName: string;
+    dob: string;
+    idCard: string;
+    gender: string;
+    address: string;
+    nation: string;
+    religion: string;
+    birthCertId: string;
+    healthCertId: string;
+    classGroup: string;
+    active: boolean;
+    createdBy: string;
+    updatedBy: string;
+    createdAt: string;
+    updatedAt: string;
+    healthCertFile: {
+        _id: string;
+        length: number;
+        chunkSize: number;
+        uploadDate: string;
+        filename: string;
+    };
+    birthCertFile: {
+        _id: string;
+        length: number;
+        chunkSize: number;
+        uploadDate: string;
+        filename: string;
+    };
 }
