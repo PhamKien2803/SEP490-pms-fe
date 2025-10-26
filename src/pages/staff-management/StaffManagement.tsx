@@ -15,6 +15,7 @@ import {
   DeleteOutlined,
   PlusOutlined,
   EyeOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { staffApis } from "../../services/apiServices";
@@ -323,6 +324,20 @@ const StaffManagement: React.FC = () => {
               onChange={(e) => setSearchKeyword(e.target.value)}
               allowClear
             />
+            <Tooltip title="Làm mới danh sách">
+              <Button
+                style={{ marginRight: 5 }}
+                icon={<ReloadOutlined />}
+                onClick={() =>
+                  fetchListStaff({
+                    page: pagination.current!,
+                    limit: pagination.pageSize!,
+                  })
+                }
+                loading={loading}
+              >
+              </Button>
+            </Tooltip>
             {canCreate && (
               <Button
                 type="primary"

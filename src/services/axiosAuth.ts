@@ -35,9 +35,9 @@ axiosAuth.interceptors.response.use(
         if (status === 401) {
             if (
                 error instanceof AxiosError &&
-                window.location.pathname !== '/auth/login'
+                window.location.pathname !== '/login'
             ) {
-                window.location.pathname = '/auth/login';
+                window.location.pathname = '/login';
             }
         }
 

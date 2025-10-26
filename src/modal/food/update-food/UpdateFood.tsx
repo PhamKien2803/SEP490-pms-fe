@@ -39,7 +39,6 @@ const { Title, Text } = Typography;
 const { Option } = Select;
 
 const AGE_GROUPS = [
-  { value: "Dưới 1 tuổi", label: "Dưới 1 tuổi" },
   { value: "1-3 tuổi", label: "1-3 tuổi" },
   { value: "4-5 tuổi", label: "4-5 tuổi" },
 ];

@@ -1,105 +1,184 @@
-import { Table, Input, Button, Space, Typography, Tag, Card } from 'antd';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Table, Input, Button, Space, Typography, Tag, Card, Popconfirm, Flex, Spin, Tooltip } from 'antd';
 import {
-    SearchOutlined,
     EditOutlined,
     DeleteOutlined,
     PlusOutlined,
+    ReloadOutlined,
 } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
+import { constants } from '../../constants';
+import { toast } from 'react-toastify';
+import { curriculumsApis } from '../../services/apiServices';
+import { CurriculumItem } from '../../types/curriculums';
+import { usePagePermission } from '../../hooks/usePagePermission';
 
 const { Title } = Typography;
 const { Search } = Input;
 
-const mockData = [
-    {
-        key: '1',
-        curriculumCode: 'KID-001',
-        curriculumName: 'Early Math Adventures',
-        age: 4,
-        activityNumber: 15,
-        active: true,
-        startTime: '2025-09-01T09:00:00Z',
-        endTime: '2025-12-20T17:00:00Z',
-    },
-    {
-        key: '2',
-        curriculumCode: 'ART-002',
-        curriculumName: 'Creative Canvas',
-        age: 5,
-        activityNumber: 12,
-        active: true,
-        startTime: '2025-09-01T09:00:00Z',
-        endTime: '2026-01-15T17:00:00Z',
-    },
-    {
-        key: '3',
-        curriculumCode: 'SCI-003',
-        curriculumName: 'Little Scientists',
-        age: 6,
-        activityNumber: 20,
-        active: false,
-        startTime: '2024-01-10T09:00:00Z',
-        endTime: '2024-05-30T17:00:00Z',
-    },
-    {
-        key: '4',
-        curriculumCode: 'ENG-004',
-        curriculumName: 'Storytelling & Phonics',
-        age: 4,
-        activityNumber: 18,
-        active: true,
-        startTime: '2025-10-01T09:00:00Z',
-        endTime: '2026-02-28T17:00:00Z',
-    },
-];
-
-const formatDate = (dateString: any) => {
-    const options = { year: "numeric" as const, month: "2-digit" as const, day: "2-digit" as const };
-    return new Date(dateString).toLocaleDateString('vi-VN', options);
+const formatMinutesToTime = (minutes: number) => {
+    if (isNaN(minutes)) return 'N/A';
+    const hours = Math.floor(minutes / 60).toString().padStart(2, '0');
+    const mins = (minutes % 60).toString().padStart(2, '0');
+    return `${hours}:${mins}`;
 };
 
+
 function CurriculumManagement() {
-    const columns = [
+    const navigate = useNavigate();
+    const { canCreate, canUpdate, canDelete } = usePagePermission();
+    const [originalCurriculums, setOriginalCurriculums] = useState<CurriculumItem[]>([]);
+    const [filteredCurriculums, setFilteredCurriculums] = useState<CurriculumItem[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [pagination, setPagination] = useState({
+        current: 1,
+        pageSize: 10,
+        total: 0,
+    });
+
+    const fetchCurriculums = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await curriculumsApis.getCurriculumsList({
+                page: 1,
+                limit: 1000,
+            });
+            setOriginalCurriculums(response.data);
+            setFilteredCurriculums(response.data);
+            setPagination(prev => ({
+                ...prev,
+                total: response.data.length,
+                current: 1
+            }));
+        } catch (error) {
+            typeof error === "string" ? toast.warn(error) : toast.error('Lấy danh sách chương trình học thất bại!');
+            setOriginalCurriculums([]);
+            setFilteredCurriculums([]);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchCurriculums();
+    }, [fetchCurriculums]);
+
+    useEffect(() => {
+        const lowercasedFilter = searchTerm.toLowerCase();
+        const filteredData = originalCurriculums.filter(item =>
+            item.activityName.toLowerCase().includes(lowercasedFilter) ||
+            item.activityCode.toLowerCase().includes(lowercasedFilter)
+        );
+        setFilteredCurriculums(filteredData);
+
+        setPagination(prev => ({
+            ...prev,
+            total: filteredData.length,
+            current: 1,
+        }));
+    }, [searchTerm, originalCurriculums]);
+
+
+    const handleDelete = async (id: string) => {
+        try {
+            await curriculumsApis.deleteCurriculum(id);
+            toast.success('Xóa chương trình học thành công!');
+            fetchCurriculums();
+        } catch (error) {
+            typeof error === "string" ? toast.warn(error) : toast.error('Xóa chương trình học thất bại. Vui lòng thử lại.');
+        }
+    };
+
+    const columns = useMemo((): any[] => [
         {
-            title: 'Mã chương trình',
-            dataIndex: 'curriculumCode',
-            key: 'curriculumCode',
-            sorter: (a: { curriculumCode: string; }, b: { curriculumCode: any; }) => a.curriculumCode.localeCompare(b.curriculumCode),
+            title: 'Mã Hoạt động',
+            dataIndex: 'activityCode',
+            key: 'activityCode',
+            sorter: (a: CurriculumItem, b: CurriculumItem) => a.activityCode.localeCompare(b.activityCode),
         },
         {
-            title: 'Tên chương trình',
-            dataIndex: 'curriculumName',
-            key: 'curriculumName',
-            sorter: (a: { curriculumName: string; }, b: { curriculumName: any; }) => a.curriculumName.localeCompare(b.curriculumName),
+            title: 'Tên Hoạt động',
+            dataIndex: 'activityName',
+            key: 'activityName',
+            sorter: (a: CurriculumItem, b: CurriculumItem) => a.activityName.localeCompare(b.activityName),
         },
         {
-            title: 'Độ tuổi',
-            dataIndex: 'age',
-            key: 'age',
-            sorter: (a: { age: number; }, b: { age: number; }) => a.age - b.age,
+            title: 'Loại',
+            dataIndex: 'type',
+            key: 'type',
+            filters: [
+                { text: 'Cố định', value: 'Cố định' },
+                { text: 'Bình thường', value: 'Bình thường' },
+                { text: 'Sự kiện', value: 'Sự kiện' },
+            ],
+            onFilter: (value: any, record: CurriculumItem) => record.type === value,
+            render: (type: string) => {
+                let color = 'default';
+                switch (type) {
+                    case 'Cố định':
+                        color = 'blue';
+                        break;
+                    case 'Bình thường':
+                        color = 'purple';
+                        break;
+                    case 'Sự kiện':
+                        color = 'geekblue';
+                        break;
+                }
+                return <Tag color={color}>{type ? type.toUpperCase() : 'N/A'}</Tag>;
+            }
         },
         {
-            title: 'Số hoạt động',
-            dataIndex: 'activityNumber',
-            key: 'activityNumber',
-            sorter: (a: { activityNumber: number; }, b: { activityNumber: number; }) => a.activityNumber - b.activityNumber,
-        },
-        {
-            title: 'Ngày bắt đầu',
-            dataIndex: 'startTime',
-            key: 'startTime',
-            render: (text: any) => formatDate(text),
-        },
-        {
-            title: 'Ngày kết thúc',
-            dataIndex: 'endTime',
-            key: 'endTime',
-            render: (text: any) => formatDate(text),
+            title: 'Chi tiết',
+            key: 'details',
+            sorter: (a: CurriculumItem, b: CurriculumItem) => {
+                const typePriority = {
+                    'Cố định': 1,
+                    'Bình thường': 2,
+                    'Sự kiện': 3,
+                };
+
+                const priorityA = typePriority[a.type as keyof typeof typePriority] || 99;
+                const priorityB = typePriority[b.type as keyof typeof typePriority] || 99;
+
+                if (priorityA !== priorityB) {
+                    return priorityA - priorityB;
+                }
+
+                if (a.type === 'Cố định') {
+                    return (a.startTime ?? 0) - (b.startTime ?? 0);
+                }
+                if (a.type === 'Bình thường') {
+                    const categoryCompare = (a.category ?? '').localeCompare(b.category ?? '');
+                    if (categoryCompare !== 0) return categoryCompare;
+                    return (a.age ?? 0) - (b.age ?? 0);
+                }
+                if (a.type === 'Sự kiện') {
+                    return (a.eventName ?? '').localeCompare(b.eventName ?? '');
+                }
+                return 0;
+            },
+            defaultSortOrder: 'ascend',
+            render: (_: any, record: CurriculumItem) => {
+                if (record.type === 'Cố định') {
+                    return `Thời gian: ${formatMinutesToTime(record.startTime as number)} - ${formatMinutesToTime(record.endTime as number)}`;
+                }
+                if (record.type === 'Bình thường') {
+                    const ageText = record.age === 0 ? "Dưới 1 tuổi" : (record.age || 'N/A');
+                    return `Độ tuổi: ${ageText}, Danh mục: ${record.category || 'N/A'}`;
+                }
+                if (record.type === 'Sự kiện') {
+                    return `Sự kiện: ${record.eventName || 'N/A'}`;
+                }
+                return 'N/A';
+            },
         },
         {
             title: 'Trạng thái',
             key: 'active',
             dataIndex: 'active',
-            render: (active: any) => (
+            render: (active: boolean) => (
                 <Tag color={active ? 'green' : 'volcano'}>
                     {active ? 'ĐANG HOẠT ĐỘNG' : 'KHÔNG HOẠT ĐỘNG'}
                 </Tag>
@@ -108,40 +187,79 @@ function CurriculumManagement() {
                 { text: 'Đang hoạt động', value: true },
                 { text: 'Không hoạt động', value: false },
             ],
-            onFilter: (value: any, record: { active: any; }) => record.active === value,
+            onFilter: (value: any, record: CurriculumItem) => record.active === value,
         },
         {
             title: 'Hành động',
             key: 'action',
-            render: (_: any) => (
+            align: 'center' as const,
+            render: (_: any, record: CurriculumItem) => (
                 <Space size="middle">
-                    <Button type="text" icon={<EditOutlined style={{ color: '#1890ff' }} />} />
-                    <Button type="text" danger icon={<DeleteOutlined />} />
+                    {canUpdate && (<Button type="text" icon={<EditOutlined style={{ color: '#1890ff' }} />} onClick={() => navigate(`${constants.APP_PREFIX}/curriculums/update/${record._id}`)} />)}
+
+                    <Popconfirm
+                        title="Xóa chương trình học"
+                        description="Bạn có chắc chắn muốn xóa chương trình này?"
+                        onConfirm={() => handleDelete(record._id)}
+                        okText="Đồng ý"
+                        cancelText="Hủy"
+                    >
+                        {canDelete && (<Button type="text" danger icon={<DeleteOutlined />} />)}
+
+                    </Popconfirm>
                 </Space>
             ),
         },
-    ];
+    ], [handleDelete, canUpdate, canDelete, navigate]);
 
-    const onSearch = (value: any) => {
-        console.log(value);
-    };
 
     return (
         <Card>
             <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
-                <Title level={2}>Quản lý Chương trình học</Title>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Search
-                        placeholder="Tìm kiếm chương trình..."
-                        onSearch={onSearch}
-                        enterButton={<SearchOutlined />}
-                        style={{ width: 400 }}
-                    />
-                    <Button type="primary" icon={<PlusOutlined />}>
-                        Thêm mới
-                    </Button>
+                <Title level={2}>Quản lý hoạt động</Title>
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Space>
+                        <Search
+                            placeholder="Tìm kiếm theo tên, mã hoạt động..."
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            style={{ width: 400 }}
+                            allowClear
+                        />
+                        <Tooltip title="Làm mới danh sách">
+                            <Button
+                                icon={<ReloadOutlined />}
+                                onClick={fetchCurriculums}
+                                loading={loading}
+                            />
+                        </Tooltip>
+                        {canCreate && (<Button type="primary" icon={<PlusOutlined />} onClick={() => navigate(`${constants.APP_PREFIX}/curriculums/create`)}>
+                            Thêm mới
+                        </Button>)}
+
+                    </Space>
+
                 </div>
-                <Table columns={columns} dataSource={mockData} rowKey="key" />
+                {loading ? (
+                    <Flex align="center" justify="center" style={{ minHeight: '400px' }}>
+                        <Spin size="large" />
+                    </Flex>
+                ) : (
+                    <Table
+                        columns={columns}
+                        dataSource={filteredCurriculums}
+                        rowKey="_id"
+                        bordered
+                        pagination={{
+                            current: pagination.current,
+                            pageSize: pagination.pageSize,
+                            total: pagination.total,
+                            onChange: (page, pageSize) => setPagination({ ...pagination, current: page, pageSize: pageSize }),
+                            showSizeChanger: true,
+                            pageSizeOptions: ['10', '20', '50'],
+                            showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} mục`,
+                        }}
+                    />
+                )}
             </Space>
         </Card>
     );

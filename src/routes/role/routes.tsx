@@ -32,6 +32,32 @@ import FoodDetailPage from "../../modal/food/view-food/FoodDetails";
 import UpdateFoodPage from "../../modal/food/update-food/UpdateFood";
 import CreateFoodPage from "../../modal/food/create-food/CreateFoodPage";
 import CurriculumManagement from "../../pages/curriculum-management/CurriculumManagement";
+import CurriculumsCreate from "../../pages/curriculum-management/curriculums-create/CurriculumsCreate";
+import CurriculumsUpdate from "../../pages/curriculum-management/curriculums-update/CurriculumsUpdate";
+import EventManagement from "../../pages/event-management/EventManagement";
+import EventCreate from "../../pages/event-management/event-create/EventCreate";
+import EventUpdate from "../../pages/event-management/event-update/EventUpdate";
+import RoomManagement from "../../pages/room-management/RoomManagement";
+import RoomDetails from "../../pages/room-management/room-details/RoomDetails";
+import CreateRoom from "../../pages/room-management/create-room/CreateRoom";
+import UpdateRoom from "../../pages/room-management/edit-room/UpdateRoom";
+import RoomReport from "../../pages/room-report/RoomReport";
+import TopicManagement from "../../pages/topic-management/TopicManagement";
+import TopicCreate from "../../pages/topic-management/topic-create/TopicCreate";
+import TopicUpdate from "../../pages/topic-management/topic-update/TopicUpdate";
+import SchedulesManagement from "../../pages/schedules-management/SchedulesManagement";
+import ClassInfor from "../../pages/teacher/class-information/ClassInfor";
+import Attendance from "../../pages/teacher/attendance-student/Attendance";
+import TakeAttendance from "../../pages/teacher/attendance-student/take-attendance/TakeAttendance";
+import EditAttendance from "../../pages/teacher/attendance-student/edit-attendance/EditAttendance";
+import AttendanceDetails from "../../pages/teacher/attendance-student/attendance-details/AttendanceDetails";
+import StudentDetails from "../../pages/teacher/class-information/student-details/StudentDetails";
+import ScheduleCreate from "../../pages/schedules-management/schedule-create/ScheduleCreate";
+import MedicalManagement from "../../pages/medical-management/MedicalManagement";
+import MedicalDetail from "../../pages/medical-management/medical-details/MedicalDetails";
+import CreateMedical from "../../pages/medical-management/create-medical/CreateMedical";
+import UpdateMedical from "../../pages/medical-management/edit-medical/EditMedical";
+import TimeTable from "../../pages/teacher/time-table/TimeTable";
 
 export const routes: RouteObject[] = [
   {
@@ -270,6 +296,141 @@ export const routes: RouteObject[] = [
                 index: true,
                 element: <CurriculumManagement />,
               },
+              {
+                path: "create",
+                element: <CurriculumsCreate />
+              },
+              {
+                path: "update/:id",
+                element: <CurriculumsUpdate />
+              }
+            ],
+          },
+          {
+            path: "events",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/events`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <EventManagement />,
+              },
+              {
+                path: "create",
+                element: <EventCreate />
+              },
+              {
+                path: "update/:id",
+                element: <EventUpdate />
+              }
+            ],
+          },
+          {
+            path: "topics",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/topics`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <TopicManagement />,
+              },
+              {
+                path: "create",
+                element: <TopicCreate />,
+              },
+              {
+                path: "update/:id",
+                element: <TopicUpdate />
+              }
+
+            ],
+          },
+          {
+            path: "schedules",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/schedules`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <SchedulesManagement />,
+              },
+              {
+                path: "create",
+                element: <ScheduleCreate />
+              }
+            ],
+          },
+          {
+            path: "teachers",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/teachers`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <ClassInfor />,
+              },
+              {
+                path: "students/detail/:id",
+                element: <StudentDetails />,
+              }
+            ],
+          },
+          {
+            path: "time-table",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/time-table`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <TimeTable />,
+              }
+            ],
+          },
+          {
+            path: "attendances",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/attendances`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <Attendance />,
+              },
+              {
+                path: "take-attendance",
+                element: <TakeAttendance />
+              },
+              {
+                path: "update/:id",
+                element: <EditAttendance />
+              },
+              {
+                path: "detail/:id",
+                element: <AttendanceDetails />
+              }
             ],
           },
           {
@@ -287,16 +448,16 @@ export const routes: RouteObject[] = [
               },
               {
                 path: "view/:id",
-                element: <ClassDetails />
+                element: <ClassDetails />,
               },
               {
                 path: "update/:id",
-                element: <UpdateClass />
+                element: <UpdateClass />,
               },
               {
                 path: "create",
-                element: <CreateClass />
-              }
+                element: <CreateClass />,
+              },
             ],
           },
           {
@@ -323,6 +484,75 @@ export const routes: RouteObject[] = [
               {
                 path: "create",
                 element: <CreateFoodPage />,
+              },
+            ],
+          },
+          {
+            path: "rooms",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/rooms`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <RoomManagement />,
+              },
+              {
+                path: "view/:id",
+                element: <RoomDetails />,
+              },
+              {
+                path: "edit/:id",
+                element: <UpdateRoom />,
+              },
+              {
+                path: "create",
+                element: <CreateRoom />,
+              },
+            ],
+          },
+          {
+            path: "rooms-report",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/rooms-report`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <RoomReport />,
+              },
+            ],
+          },
+          {
+            path: "medicals",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/medicals`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <MedicalManagement />,
+              },
+              {
+                path: "view/:id",
+                element: <MedicalDetail />,
+              },
+              {
+                path: "edit/:id",
+                element: <UpdateMedical />,
+              },
+              {
+                path: "create",
+                element: <CreateMedical />,
               },
             ],
           },

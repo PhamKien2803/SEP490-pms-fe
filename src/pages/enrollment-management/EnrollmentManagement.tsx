@@ -168,14 +168,6 @@ const EnrollmentManagement: React.FC = () => {
                     </Col>
                     <Col>
                         <Space>
-                            <Tooltip title="Làm mới danh sách">
-                                <Button icon={<ReloadOutlined />}
-                                    onClick={fetchAllEnrollments}
-                                    loading={loading}>Làm mới danh sách</Button>
-                            </Tooltip>
-                            {canApproveAll && (
-                                <Button type="primary" onClick={handleOpenApproveAllModal}>Duyệt tất cả</Button>
-                            )}
                             <Input
                                 placeholder="Tìm theo tên, mã đơn..."
                                 prefix={<SearchOutlined />}
@@ -201,6 +193,15 @@ const EnrollmentManagement: React.FC = () => {
                                 <Select.Option value="Xử lý lỗi">Xử lý lỗi</Select.Option>
                                 <Select.Option value="Chờ xử lý tự động">Chờ xử lý tự động</Select.Option>
                             </Select>
+                            <Tooltip title="Làm mới danh sách">
+                                <Button icon={<ReloadOutlined />}
+                                    onClick={fetchAllEnrollments}
+                                    loading={loading}></Button>
+                            </Tooltip>
+                            {canApproveAll && (
+                                <Button type="primary" onClick={handleOpenApproveAllModal}>Duyệt tất cả</Button>
+                            )}
+
                         </Space>
                     </Col>
                 </Row>

@@ -25,6 +25,7 @@ import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { LocalStorageKey } from "../../types/local-storage";
 import ErrorBoundary from "../../components/error-boundary/Error";
 import './Dashboard.css';
+import { toast } from "react-toastify";
 
 const { Header, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -75,6 +76,7 @@ const Dashboard: React.FC = () => {
           ),
           onClick: () => {
             dispatch(logout());
+            toast.info("Đăng xuất thành công");
             navigate("/login");
           },
         },

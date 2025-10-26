@@ -72,7 +72,31 @@ import {
   FoodRecord,
   UpdateFoodParams,
 } from "../types/food-management";
-import { AvailableClassForStudent, AvailableClassForTeacher, AvailableRoom, ClassDetail, ClassListResponse, CreateClassDto, StudentChangeClassDto, StudentInClass, TeacherChangeClassDto, TeacherInClass, UpdateClassDto } from "../types/class";
+import { CreateCurriculumDto, CurriculumItem, CurriculumsListResponse, GetCurriculumsParams, UpdateCurriculumDto } from "../types/curriculums";
+import { CreateEventDto, EventItem, EventsListResponse, GetEventsParams, UpdateEventDto } from "../types/event";
+import {
+  AvailableClassForStudent,
+  AvailableClassForTeacher,
+  AvailableRoom,
+  ClassDetail,
+  ClassListResponse,
+  CreateClassDto,
+  StudentChangeClassDto,
+  StudentInClass,
+  TeacherChangeClassDto,
+  TeacherInClass,
+  UpdateClassDto,
+} from "../types/class";
+import {
+  CreateRoomData,
+  RoomListResponse,
+  RoomRecord,
+  UpdateRoomData,
+} from "../types/room-management";
+import { AvailableTopicActivitiesResponse, CreateTopicDto, GetAvailableTopicActivitiesParams, GetTopicsParams, TopicDetails, TopicsListResponse, UpdateTopicDto } from "../types/topic";
+import { IAttendanceCreatePayload, IAttendanceDetailResponse, IAttendanceListResponse, IAttendanceUpdatePayload, IPaginatedResponse, ITeacherClassStudentResponse, StudentDetailResponse } from "../types/teacher";
+import { AvailableActivityItem, FixActivityResponseItem, IClassBySchoolYearItem, ICreateSchedulePayload, IDailySchedule, TCreateScheduleResponse, TScheduleByIdResponse, TScheduleParamsResponse } from "../types/timetable";
+import { HealthCertCreateData, HealthCertListResponse, HealthCertRecord, HealthCertUpdateData } from "../types/medical-management";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -504,7 +528,7 @@ export const schoolYearApis = {
     );
     return response.data;
   },
-}
+};
 
 export const classApis = {
   getClassList: async (params: {
@@ -512,14 +536,19 @@ export const classApis = {
     page?: number;
     limit?: number;
   }): Promise<ClassListResponse> => {
-    const response = await axiosAuth.get<ClassListResponse>(apiEndPoint.GET_CLASS_LIST, {
-      params,
-    });
+    const response = await axiosAuth.get<ClassListResponse>(
+      apiEndPoint.GET_CLASS_LIST,
+      {
+        params,
+      }
+    );
     return response.data;
   },
 
   getClassById: async (id: string): Promise<ClassDetail> => {
-    const response = await axiosAuth.get<ClassDetail>(apiEndPoint.GET_CLASS_BY_ID(id));
+    const response = await axiosAuth.get<ClassDetail>(
+      apiEndPoint.GET_CLASS_BY_ID(id)
+    );
     return response.data;
   },
 
@@ -550,18 +579,27 @@ export const classApis = {
     await axiosAuth.post(apiEndPoint.ASYNC_CLASS);
   },
 
-  getAvailableClassForStudent: async (params: { classAge: number }): Promise<AvailableClassForStudent[]> => {
-    const response = await axiosAuth.get<AvailableClassForStudent[]>(apiEndPoint.GET_AVAILABEL_CLASS_STUDENT, {
-      params,
-    });
+  getAvailableClassForStudent: async (params: {
+    classAge: number;
+  }): Promise<AvailableClassForStudent[]> => {
+    const response = await axiosAuth.get<AvailableClassForStudent[]>(
+      apiEndPoint.GET_AVAILABEL_CLASS_STUDENT,
+      {
+        params,
+      }
+    );
     return response.data;
   },
 
-
-  getAvailableClassForTeacher: async (params: { classAge: number }): Promise<AvailableClassForTeacher[]> => {
-    const response = await axiosAuth.get<AvailableClassForTeacher[]>(apiEndPoint.GET_AVAILABEL_CLASS_TEACHER, {
-      params,
-    });
+  getAvailableClassForTeacher: async (params: {
+    classAge: number;
+  }): Promise<AvailableClassForTeacher[]> => {
+    const response = await axiosAuth.get<AvailableClassForTeacher[]>(
+      apiEndPoint.GET_AVAILABEL_CLASS_TEACHER,
+      {
+        params,
+      }
+    );
     return response.data;
   },
 
@@ -569,13 +607,10 @@ export const classApis = {
     await axiosAuth.post(apiEndPoint.STUDENT_CHANGE_CLASS, body);
   },
 
-
   teacherChangeClass: async (body: TeacherChangeClassDto): Promise<void> => {
     await axiosAuth.post(apiEndPoint.TEACHER_CHANGE_CLASS, body);
-  }
-
-}
-
+  },
+};
 
 export const foodApis = {
   getListFood: async (params: FoodListParams): Promise<FoodListResponse> => {
@@ -594,9 +629,11 @@ export const foodApis = {
     return response.data;
   },
 
-  calculateFoodNutrients: async (foodId: string): Promise<AICalculateResponse> => {
+  calculateFoodNutrients: async (
+    foodId: string
+  ): Promise<AICalculateResponse> => {
     const response = await axiosAuth.get<AICalculateResponse>(
-      apiEndPoint.CALCULATE_FOOD_AI(foodId),
+      apiEndPoint.CALCULATE_FOOD_AI(foodId)
     );
     return response.data;
   },
@@ -622,4 +659,450 @@ export const foodApis = {
     );
     return response.data;
   },
+};
+
+export const curriculumsApis = {
+
+  getCurriculumsList: async (
+    params: GetCurriculumsParams
+  ): Promise<CurriculumsListResponse> => {
+    const response = await axiosAuth.get<CurriculumsListResponse>(
+      apiEndPoint.GET_CURRICULUMS_LIST,
+      { params }
+    );
+    return response.data;
+  },
+
+  getCurriculumById: async (id: string): Promise<CurriculumItem> => {
+    const response = await axiosAuth.get<CurriculumItem>(
+      apiEndPoint.GET_CURRICULUMS_BY_ID(id)
+    );
+    return response.data;
+  },
+
+  createCurriculum: async (
+    body: CreateCurriculumDto
+  ): Promise<CurriculumItem> => {
+    const response = await axiosAuth.post<CurriculumItem>(
+      apiEndPoint.CREATE_CURRICULUMS,
+      body
+    );
+    return response.data;
+  },
+
+  updateCurriculum: async (
+    id: string,
+    body: UpdateCurriculumDto
+  ): Promise<CurriculumItem> => {
+    const response = await axiosAuth.put<CurriculumItem>(
+      apiEndPoint.UPDATE_CURRICULUMS(id),
+      body
+    );
+    return response.data;
+  },
+
+  deleteCurriculum: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_CURRICULUMS(id));
+  },
+
+}
+
+export const eventApis = {
+  getEventList: async (
+    params: GetEventsParams
+  ): Promise<EventsListResponse> => {
+    const response = await axiosAuth.get<EventsListResponse>(
+      apiEndPoint.GET_EVENT_LIST,
+      { params }
+    );
+    return response.data;
+  },
+
+
+  getEventById: async (id: string): Promise<EventItem> => {
+    const response = await axiosAuth.get<EventItem>(
+      apiEndPoint.GET_EVENT_BY_ID(id)
+    );
+    return response.data;
+  },
+
+
+  createEvent: async (body: CreateEventDto): Promise<EventItem> => {
+    const response = await axiosAuth.post<EventItem>(
+      apiEndPoint.CREATE_EVENT,
+      body
+    );
+    return response.data;
+  },
+
+  updateEvent: async (
+    id: string,
+    body: UpdateEventDto
+  ): Promise<EventItem> => {
+    const response = await axiosAuth.put<EventItem>(
+      apiEndPoint.UPDATE_EVENT(id),
+      body
+    );
+    return response.data;
+  },
+
+  deleteEvent: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_EVENT(id));
+  },
+
+}
+
+export const topicApis = {
+  getTopicsList: async (
+    params: GetTopicsParams
+  ): Promise<TopicsListResponse> => {
+    const response = await axiosAuth.get<TopicsListResponse>(
+      apiEndPoint.GET_TOPIC_LIST,
+      { params }
+    );
+    return response.data;
+  },
+
+
+  getTopicById: async (
+    id: string
+  ): Promise<TopicDetails> => {
+    const response = await axiosAuth.get<TopicDetails>(
+      apiEndPoint.GET_TOPIC_BY_ID(id)
+    );
+    return response.data;
+  },
+
+
+  createTopic: async (
+    data: CreateTopicDto
+  ): Promise<TopicDetails> => {
+    const response = await axiosAuth.post<TopicDetails>(
+      apiEndPoint.CREATE_TOPIC,
+      data
+    );
+    return response.data;
+  },
+
+
+  updateTopic: async (
+    id: string,
+    data: UpdateTopicDto
+  ): Promise<TopicDetails> => {
+    const response = await axiosAuth.put<TopicDetails>(
+      apiEndPoint.UPDATE_TOPIC(id),
+      data
+    );
+    return response.data;
+  },
+
+  deleteTopic: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_TOPIC(id));
+  },
+
+  getAvailableTopicActivities: async (
+    params: GetAvailableTopicActivitiesParams
+  ): Promise<AvailableTopicActivitiesResponse> => {
+    const response = await axiosAuth.get<AvailableTopicActivitiesResponse>(
+      apiEndPoint.GET_AVAILABEL_TOPIC,
+      { params }
+    );
+    return response.data;
+  },
+
+}
+
+export const teacherApis = {
+  getClassAndStudentByTeacher: async (
+    teacherId: string,
+    schoolYearId: string
+  ): Promise<ITeacherClassStudentResponse> => {
+    const response = await axiosAuth.get<ITeacherClassStudentResponse>(
+      apiEndPoint.GET_CLASS_AND_STUDENT_BY_TEACHER(teacherId),
+      {
+        params: { schoolYearId },
+      }
+    );
+    return response.data;
+  },
+
+
+  getSchoolYearList: async (params: {
+    page: number;
+    limit: number;
+  }): Promise<SchoolYearsListResponse> => {
+    const response = await axiosAuth.get<SchoolYearsListResponse>(
+      apiEndPoint.GET_SCHOOLYEARS_LIST,
+      { params }
+    );
+    return response.data;
+  },
+
+  getAttendanceList: async (
+    params?: { page: number; limit: number;[key: string]: any }
+  ): Promise<IAttendanceListResponse | IPaginatedResponse<IAttendanceListResponse>> => {
+    const response = await axiosAuth.get<IAttendanceListResponse | IPaginatedResponse<IAttendanceListResponse>>(
+      apiEndPoint.GET_ATTENDANCE_LIST,
+      { params }
+    );
+    return response.data;
+  },
+
+
+  getAttendanceById: async (
+    id: string
+  ): Promise<IAttendanceDetailResponse> => {
+    const response = await axiosAuth.get<IAttendanceDetailResponse>(
+      apiEndPoint.GET_ATTENDANCE_BY_ID(id)
+    );
+    return response.data;
+  },
+
+  getAttendanceByClassAndSchoolYear: async (
+    classId: string,
+    schoolYearId: string
+  ): Promise<IAttendanceDetailResponse> => {
+    const response = await axiosAuth.get<IAttendanceDetailResponse>(
+      apiEndPoint.GET_ATTENDANCE_BY_CLASS_AND_SCHOOLYEAR(classId, schoolYearId)
+    );
+    return response.data;
+  },
+
+  getAttendanceByClassAndDate: async (
+    classId: string,
+    date: string
+  ): Promise<IAttendanceDetailResponse> => {
+    const response = await axiosAuth.get<IAttendanceDetailResponse>(
+      apiEndPoint.GET_ATTENDANCE_BY_CLASS_AND_DATE(classId, date)
+    );
+    return response.data;
+  },
+
+
+  createAttendance: async (
+    payload: IAttendanceCreatePayload
+  ): Promise<IAttendanceDetailResponse> => {
+    const response = await axiosAuth.post<IAttendanceDetailResponse>(
+      apiEndPoint.CREATE_ATTENDANCE,
+      payload
+    );
+    return response.data;
+  },
+
+
+  updateAttendance: async (
+    id: string,
+    payload: IAttendanceUpdatePayload
+  ): Promise<IAttendanceDetailResponse> => {
+    const response = await axiosAuth.put<IAttendanceDetailResponse>(
+      apiEndPoint.UPDATE_ATTENDANCE(id),
+      payload
+    );
+    return response.data;
+  },
+
+
+  deleteAttendance: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_ATTENDANCE(id));
+  },
+
+  getStudentDetails: async (id: string): Promise<StudentDetailResponse> => {
+    const response = await axiosAuth.get<StudentDetailResponse>(
+      apiEndPoint.GET_STUDENT_DETAILS(id)
+    );
+    return response.data;
+  }
+
+}
+
+export const scheduleApis = {
+  getScheduleById: async (id: string): Promise<TScheduleByIdResponse> => {
+    const response = await axiosAuth.get<TScheduleByIdResponse>(
+      apiEndPoint.GET_SCHEDULE_BY_ID(id)
+    );
+    return response.data;
+  },
+
+
+  createSchedule: async (payload: ICreateSchedulePayload): Promise<TCreateScheduleResponse> => {
+    const response = await axiosAuth.post<TCreateScheduleResponse>(
+      apiEndPoint.CREATE_SCHEDULE,
+      payload
+    );
+    return response.data;
+  },
+
+  getSchoolYearList: async (params: {
+    page: number;
+    limit: number;
+  }): Promise<SchoolYearsListResponse> => {
+    const response = await axiosAuth.get<SchoolYearsListResponse>(
+      apiEndPoint.GET_SCHOOLYEARS_LIST,
+      { params }
+    );
+    return response.data;
+  },
+
+  getClassList: async (params: {
+    year: string;
+    page?: number;
+    limit?: number;
+  }): Promise<ClassListResponse> => {
+    const response = await axiosAuth.get<ClassListResponse>(
+      apiEndPoint.GET_CLASS_LIST,
+      {
+        params,
+      }
+    );
+    return response.data;
+  },
+
+  getClassListByActiveSchoolYear: async (): Promise<IClassBySchoolYearItem[]> => {
+    const response = await axiosAuth.get<IClassBySchoolYearItem[]>(
+      apiEndPoint.GET_CLASS_BY_SCHOOLYEAR
+    );
+    return response.data;
+  },
+
+
+  getScheduleParams: async (params: {
+    schoolYear: string;
+    class: string;
+    month: number;
+  }): Promise<TScheduleParamsResponse> => {
+    const response = await axiosAuth.get<TScheduleParamsResponse>(
+      apiEndPoint.GET_SCHEDULE_PARAMS,
+      { params }
+    );
+    return response.data;
+  },
+
+
+  getPreviewSchedule: async (params: {
+    year: string;
+    month: string;
+    classId: string;
+  }): Promise<{ message: string; schedule: { scheduleDays: IDailySchedule[] } }> => {
+    const response = await axiosAuth.get(apiEndPoint.PREVIEWS_SCHEDULE, { params });
+    return response.data;
+  },
+
+  updateSchedule: async (
+    id: string,
+    payload: ICreateSchedulePayload
+  ): Promise<TCreateScheduleResponse> => {
+    const response = await axiosAuth.put<TCreateScheduleResponse>(
+      apiEndPoint.UPDATE_SCHEDULE(id),
+      payload
+    );
+    return response.data;
+  },
+
+  confirmSchedule: async (id: string): Promise<{ message: string }> => {
+    const response = await axiosAuth.put(apiEndPoint.CONFIRM_SCHEDULE(id));
+    return response.data;
+  },
+
+  getFixActivity: async (params: {
+    year: string;
+    month: string;
+    classId: string;
+  }): Promise<FixActivityResponseItem[]> => {
+    const response = await axiosAuth.get(apiEndPoint.GET_FIX_ACTIVITY, {
+      params,
+    });
+    return response.data;
+  },
+
+  getAvailableActivities: async (params: {
+    month: string;
+    classId: string;
+  }): Promise<AvailableActivityItem[]> => {
+    const response = await axiosAuth.get(apiEndPoint.GET_AVAILABEL_ACTIVITY, {
+      params,
+    });
+    return response.data;
+  },
+
+}
+
+export const roomApis = {
+  getListRoom: async (params: {
+    page: number;
+    limit: number;
+  }): Promise<RoomListResponse> => {
+    const response = await axiosAuth.get<RoomListResponse>(
+      apiEndPoint.GET_LIST_ROOM,
+      { params }
+    );
+    return response.data;
+  },
+
+  getRoomById: async (id: string): Promise<RoomRecord> => {
+    const response = await axiosAuth.get<RoomRecord>(
+      apiEndPoint.GET_ROOM_BY_ID(id)
+    );
+    return response.data;
+  },
+
+  createRoom: async (body: CreateRoomData): Promise<RoomRecord> => {
+    const response = await axiosAuth.post<RoomRecord>(
+      apiEndPoint.CREATE_ROOM,
+      body
+    );
+    return response.data;
+  },
+
+  updateRoom: async (id: string, body: UpdateRoomData): Promise<RoomRecord> => {
+    const response = await axiosAuth.put<RoomRecord>(
+      apiEndPoint.UPDATE_ROOM(id),
+      body
+    );
+    return response.data;
+  },
+
+  deleteRoom: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_ROOM(id));
+  },
+};
+
+export const medicalApis = {
+  getListMedical: async (params: {
+    page: number;
+    limit: number;
+  }): Promise<HealthCertListResponse> => {
+    const response = await axiosAuth.get<HealthCertListResponse>(
+      apiEndPoint.GET_LIST_MEDICAL,
+      { params }
+    );
+    return response.data;
+  },
+
+  getMedicalById: async (id: string): Promise<HealthCertRecord> => {
+    const response = await axiosAuth.get<HealthCertRecord>(
+      apiEndPoint.GET_MEDICAL_BY_ID(id)
+    );
+    return response.data;
+  },
+
+  createMedical: async (body: HealthCertCreateData): Promise<HealthCertRecord> => {
+    const response = await axiosAuth.post<HealthCertRecord>(
+      apiEndPoint.CREATE_MEDICAL,
+      body
+    );
+    return response.data;
+  },
+
+  updateMedical: async (id: string, body: HealthCertUpdateData): Promise<HealthCertRecord> => {
+    const response = await axiosAuth.put<HealthCertRecord>(
+      apiEndPoint.UPDATE_MEDICAL(id),
+      body
+    );
+    return response.data;
+  },
+
+  deleteMedical: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_MEDICAL(id));
+  },
+
 };

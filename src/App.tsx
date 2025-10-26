@@ -11,6 +11,8 @@ import type { AppDispatch, RootState } from './redux/store';
 import { usePermissionWatcher } from './hooks/usePermissionWatcher';
 import { messages } from './constants/message';
 import BlockingOverlay from './components/block-page/BlockingOverlay';
+import viVN from 'antd/locale/vi_VN';
+import 'dayjs/locale/vi';
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -33,7 +35,7 @@ function App() {
     return <BlockingOverlay />;
   }
   return (
-    <ConfigProvider
+    <ConfigProvider locale={viVN}
       theme={theme}
       form={{
         requiredMark: false,

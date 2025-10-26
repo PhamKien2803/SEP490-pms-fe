@@ -9,7 +9,7 @@ import { useCurrentUser } from '../../../hooks/useCurrentUser';
 import { RoleDetails, RoleFunctionItem, RoleModuleItem, UpdateRoleDto } from '../../../types/role';
 import { constants } from '../../../constants';
 import { rolesApis } from '../../../services/apiServices';
-import hardcodedActions from '../../../components/hard-code-action';
+import { hardcodedActions } from '../../../components/hard-code-action';
 
 
 const EditRole: React.FC = () => {

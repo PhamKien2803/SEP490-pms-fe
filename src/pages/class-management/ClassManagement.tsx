@@ -66,7 +66,6 @@ function ClassManagement() {
             }
         } catch (error) {
             typeof error === "string" ? toast.warn(error) : toast.error('Đồng bộ dữ liệu thất bại. Vui lòng thử lại.');
-            console.error("Sync failed:", error);
         } finally {
             setSyncLoading(false);
         }
