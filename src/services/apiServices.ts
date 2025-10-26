@@ -94,8 +94,7 @@ import {
   UpdateRoomData,
 } from "../types/room-management";
 import { AvailableTopicActivitiesResponse, CreateTopicDto, GetAvailableTopicActivitiesParams, GetTopicsParams, TopicDetails, TopicsListResponse, UpdateTopicDto } from "../types/topic";
-import { IAttendanceCreatePayload, IAttendanceDetailResponse, IAttendanceListResponse, IAttendanceUpdatePayload, IPaginatedResponse, ITeacherClassStudentResponse } from "../types/teacher";
-import { ITeacherClassStudentResponse } from "../types/teacher";
+import { IAttendanceCreatePayload, IAttendanceDetailResponse, IAttendanceListResponse, IAttendanceUpdatePayload, IPaginatedResponse, ITeacherClassStudentResponse, StudentDetailResponse } from "../types/teacher";
 import { AvailableActivityItem, FixActivityResponseItem, IClassBySchoolYearItem, ICreateSchedulePayload, IDailySchedule, TCreateScheduleResponse, TScheduleByIdResponse, TScheduleParamsResponse } from "../types/timetable";
 import { HealthCertCreateData, HealthCertListResponse, HealthCertRecord, HealthCertUpdateData } from "../types/medical-management";
 
@@ -815,10 +814,14 @@ export const topicApis = {
 
 export const teacherApis = {
   getClassAndStudentByTeacher: async (
-    id: string
+    teacherId: string,
+    schoolYearId: string
   ): Promise<ITeacherClassStudentResponse> => {
     const response = await axiosAuth.get<ITeacherClassStudentResponse>(
-      apiEndPoint.GET_CLASS_AND_STUDENT_BY_TEACHER(id)
+      apiEndPoint.GET_CLASS_AND_STUDENT_BY_TEACHER(teacherId),
+      {
+        params: { schoolYearId },
+      }
     );
     return response.data;
   },
@@ -902,6 +905,14 @@ export const teacherApis = {
   deleteAttendance: async (id: string): Promise<void> => {
     await axiosAuth.post(apiEndPoint.DELETE_ATTENDANCE(id));
   },
+
+  getStudentDetails: async (id: string): Promise<StudentDetailResponse> => {
+    const response = await axiosAuth.get<StudentDetailResponse>(
+      apiEndPoint.GET_STUDENT_DETAILS(id)
+    );
+    return response.data;
+  }
+
 }
 
 export const scheduleApis = {
@@ -953,7 +964,7 @@ export const scheduleApis = {
     return response.data;
   },
 
- 
+
   getScheduleParams: async (params: {
     schoolYear: string;
     class: string;
@@ -1093,5 +1104,5 @@ export const medicalApis = {
   deleteMedical: async (id: string): Promise<void> => {
     await axiosAuth.post(apiEndPoint.DELETE_MEDICAL(id));
   },
-  
+
 };

@@ -57,6 +57,7 @@ import MedicalManagement from "../../pages/medical-management/MedicalManagement"
 import MedicalDetail from "../../pages/medical-management/medical-details/MedicalDetails";
 import CreateMedical from "../../pages/medical-management/create-medical/CreateMedical";
 import UpdateMedical from "../../pages/medical-management/edit-medical/EditMedical";
+import TimeTable from "../../pages/teacher/time-table/TimeTable";
 
 export const routes: RouteObject[] = [
   {
@@ -387,6 +388,21 @@ export const routes: RouteObject[] = [
               {
                 path: "students/detail/:id",
                 element: <StudentDetails />,
+              }
+            ],
+          },
+          {
+            path: "time-table",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/time-table`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <TimeTable />,
               }
             ],
           },

@@ -15,6 +15,7 @@ import {
 } from '../../../types/teacher';
 import { schoolYearApis, teacherApis } from '../../../services/apiServices';
 import { constants } from '../../../constants';
+import { usePagePermission } from '../../../hooks/usePagePermission';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -27,7 +28,7 @@ function AttendanceHistory() {
     const navigate = useNavigate();
     const user = useCurrentUser();
     const teacherId = useMemo(() => user?.staff, [user]);
-
+    const { canUpdate, canCreate } = usePagePermission();
     const [loading, setLoading] = useState(false);
     const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
     const [selectedSchoolYearId, setSelectedSchoolYearId] = useState<string | undefined>(undefined);
@@ -88,13 +89,15 @@ function AttendanceHistory() {
                         />
                     </Tooltip>
                     <Tooltip title="Chỉnh sửa">
-                        <Button
-                            shape="circle"
-                            icon={<EditOutlined />}
-                            onClick={() =>
-                                navigate(`${constants.APP_PREFIX}/attendances/update/${record._id}`)
-                            }
-                        />
+                        {canUpdate && (
+                            <Button
+                                shape="circle"
+                                icon={<EditOutlined />}
+                                onClick={() =>
+                                    navigate(`${constants.APP_PREFIX}/attendances/update/${record._id}`)
+                                }
+                            />
+                        )}
                     </Tooltip>
                 </Space>
             ),
@@ -107,26 +110,20 @@ function AttendanceHistory() {
 
             setLoading(true);
             try {
-                // 1. Fetch school years
                 const res = await schoolYearApis.getSchoolYearList({ page: 1, limit: 100 });
                 const sorted = res.data.sort(
                     (a, b) =>
-                        parseInt(b.schoolYear.split('-')[0]) -
-                        parseInt(a.schoolYear.split('-')[0])
+                        parseInt(b.schoolYear.split('-')[0]) - parseInt(a.schoolYear.split('-')[0])
                 );
                 setSchoolYears(sorted);
 
                 const firstYearId = sorted[0]?._id;
                 setSelectedSchoolYearId(firstYearId);
-
                 if (!firstYearId) return;
 
-                // 2. Fetch teacher's class for the selected year
                 const teacherData: ITeacherClassStudentResponse =
-                    await teacherApis.getClassAndStudentByTeacher(teacherId);
-                const currentClass = teacherData.classes?.find(
-                    (c) => c.schoolYear._id === firstYearId
-                );
+                    await teacherApis.getClassAndStudentByTeacher(teacherId, firstYearId);
+                const currentClass = teacherData.classes?.[0];
 
                 if (!currentClass) {
                     setTeacherClassInfo(null);
@@ -136,7 +133,6 @@ function AttendanceHistory() {
 
                 setTeacherClassInfo(currentClass);
 
-                // 3. Fetch attendance
                 const attendanceData = await teacherApis.getAttendanceByClassAndSchoolYear(
                     currentClass._id,
                     firstYearId
@@ -174,10 +170,8 @@ function AttendanceHistory() {
         setLoading(true);
         try {
             const teacherData: ITeacherClassStudentResponse =
-                await teacherApis.getClassAndStudentByTeacher(teacherId);
-            const currentClass = teacherData.classes?.find(
-                (c) => c.schoolYear._id === yearId
-            );
+                await teacherApis.getClassAndStudentByTeacher(teacherId, yearId);
+            const currentClass = teacherData.classes?.[0];
 
             if (!currentClass) {
                 setTeacherClassInfo(null);
@@ -186,7 +180,6 @@ function AttendanceHistory() {
             }
 
             setTeacherClassInfo(currentClass);
-
             const attendanceData = await teacherApis.getAttendanceByClassAndSchoolYear(
                 currentClass._id,
                 yearId
@@ -223,14 +216,17 @@ function AttendanceHistory() {
                         </Space>
                     </Col>
                     <Col>
-                        <Button
-                            type="primary"
-                            icon={<EditOutlined />}
-                            onClick={handleNavigateToTakeAttendance}
-                            disabled={!teacherClassInfo}
-                        >
-                            Điểm danh hôm nay
-                        </Button>
+                        {canCreate && (
+                            <Button
+                                type="primary"
+                                icon={<EditOutlined />}
+                                onClick={handleNavigateToTakeAttendance}
+                                disabled={!teacherClassInfo}
+                            >
+                                Điểm danh hôm nay
+                            </Button>
+                        )}
+
                     </Col>
                 </Row>
 
