@@ -97,7 +97,7 @@ export interface IScheduleActivity {
     activityCode?: string;
     // activity: string;
     activityName: string;
-    type: 'Cố định' | 'Bình thường' | 'Sự kiện';
+    type: 'Cố định' | 'Bình thường' | 'Sự kiện' | null;
     startTime: number;
     category?: string | null;
     eventName?: string | null;
@@ -238,7 +238,7 @@ export interface FixActivityResponseItem {
     activities: {
         activity: string;
         activityName: string;
-        type: 'Cố định' | 'Bình thường' | 'Sự kiện';
+        type: 'Cố định' | 'Bình thường' | 'Sự kiện'| null;
         startTime: number;
         endTime: number;
         _justSwapped?: boolean;

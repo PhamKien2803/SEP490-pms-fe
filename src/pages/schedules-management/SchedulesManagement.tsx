@@ -8,7 +8,7 @@ import {
 } from 'antd';
 import {
     ScheduleOutlined, PlusOutlined, LeftOutlined, RightOutlined, BulbOutlined,
-    EditOutlined, CloseCircleOutlined, SaveOutlined
+    EditOutlined, CloseCircleOutlined, SaveOutlined, CheckCircleOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
@@ -108,6 +108,10 @@ function SchedulesManagement() {
             setSelectedActivity2({ date, index });
         }
     };
+    const handleExitPreview = () => {
+        fetchScheduleData();
+        toast.info("Đã thoát chế độ xem gợi ý.");
+    };
 
     useEffect(() => {
         if (selectedActivity1 && selectedActivity2) {
@@ -171,26 +175,35 @@ function SchedulesManagement() {
 
 
     const handleDeleteActivity = (date: string, index: number) => {
+        const day = scheduleData.find(d => d.date === date);
+        if (!day) return;
+        const target = day.activities[index];
+
+        if (!target.activity && !target.activityName) {
+            toast.info("Bạn chưa thêm hoạt động nào để xóa !!");
+            return;
+        }
+
         setScheduleData((prev) => {
             const updated = [...prev];
-            const day = updated.find(d => d.date === date);
-            if (!day) return prev;
+            const dayToUpdate = updated.find(d => d.date === date);
+            if (!dayToUpdate) return prev;
 
-            const activities = [...day.activities];
-            const target = activities[index];
-
+            const activities = [...dayToUpdate.activities];
             activities[index] = {
-                ...target,
+                ...activities[index],
                 activity: '',
                 activityName: '',
-                type: 'Bình thường',
+                activityCode: undefined,
+                type: null,
                 category: null,
                 eventName: null
             };
 
-            day.activities = activities;
+            dayToUpdate.activities = activities;
             return updated;
         });
+        toast.success("Đã xóa hoạt động thành công!");
     };
 
     const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -561,15 +574,25 @@ function SchedulesManagement() {
 
                             <Row className="schedule-action-buttons">
                                 {isPreview ? (
-                                    <Button
-                                        type="primary"
-                                        icon={<SaveOutlined />}
-                                        onClick={handleCreateSchedule}
-                                        loading={isSaving}
-                                        disabled={!scheduleData.length}
-                                    >
-                                        Tạo lịch học
-                                    </Button>
+                                    <>
+                                        <Button
+                                            icon={<CloseCircleOutlined />}
+                                            onClick={handleExitPreview}
+                                            disabled={isSaving || loading}
+                                        >
+                                            Thoát gợi ý
+                                        </Button>
+                                        <Button
+                                            type="primary"
+                                            icon={<SaveOutlined />}
+                                            onClick={handleCreateSchedule}
+                                            loading={isSaving}
+                                            disabled={!scheduleData.length}
+                                        >
+                                            Tạo lịch học
+                                        </Button>
+                                    </>
+
                                 ) : scheduleStatus === 'Dự thảo' && (
                                     <>
                                         <Button
@@ -591,21 +614,23 @@ function SchedulesManagement() {
                                             </Button>
                                         )}
 
-                                        <Popconfirm
-                                            title="Xác nhận lịch học?"
-                                            description="Sau khi xác nhận, bạn sẽ không thể chỉnh sửa lịch học nữa."
-                                            onConfirm={handleConfirmSchedule}
-                                            okText="Xác nhận"
-                                            cancelText="Hủy"
-                                        >
-                                            <Button
-                                                danger
-                                                type="default"
-                                                disabled={!scheduleData.length}
+                                        {!editMode && (
+                                            <Popconfirm
+                                                title="Xác nhận lịch học?"
+                                                description="Sau khi xác nhận, bạn sẽ không thể chỉnh sửa lịch học nữa."
+                                                onConfirm={handleConfirmSchedule}
+                                                okText="Xác nhận"
+                                                cancelText="Hủy"
                                             >
-                                                Xác nhận lịch học
-                                            </Button>
-                                        </Popconfirm>
+                                                <Button
+                                                    style={{ color: "white", backgroundColor: "#8fd460" }}
+                                                    icon={<CheckCircleOutlined />}
+                                                    disabled={!scheduleData.length || isSaving}
+                                                >
+                                                    Xác nhận lịch học
+                                                </Button>
+                                            </Popconfirm>
+                                        )}
                                     </>
                                 )}
                             </Row>
@@ -632,7 +657,7 @@ function SchedulesManagement() {
                                                             backgroundColor: '#fff1f0',
                                                             color: '#cf1322',
                                                             borderBottomColor: '#ffccc7'
-                                                        } : { background: '#fff' })
+                                                        } : {})
                                                     }}
                                                 >
                                                     <Text strong>{dayjs(day.date).format('dddd, DD/MM')}</Text>
