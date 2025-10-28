@@ -94,7 +94,7 @@ import {
   UpdateRoomData,
 } from "../types/room-management";
 import { AvailableTopicActivitiesResponse, CreateTopicDto, GetAvailableTopicActivitiesParams, GetTopicsParams, TopicDetails, TopicsListResponse, UpdateTopicDto } from "../types/topic";
-import { IAttendanceCreatePayload, IAttendanceDetailResponse, IAttendanceListResponse, IAttendanceUpdatePayload, IPaginatedResponse, ITeacherClassStudentResponse, StudentDetailResponse } from "../types/teacher";
+import { IAttendanceCreatePayload, IAttendanceDetailResponse, IAttendanceListResponse, IAttendanceUpdatePayload, IFeedbackCreatePayload, IFeedbackDetailResponse, IFeedbackListResponse, IFeedbackUpdatePayload, IPaginatedResponse, ITeacherClassStudentResponse, StudentDetailResponse } from "../types/teacher";
 import { AvailableActivityItem, FixActivityResponseItem, IClassBySchoolYearItem, ICreateSchedulePayload, IDailySchedule, TCreateScheduleResponse, TScheduleByIdResponse, TScheduleParamsResponse } from "../types/timetable";
 import { HealthCertCreateData, HealthCertListResponse, HealthCertRecord, HealthCertUpdateData } from "../types/medical-management";
 
@@ -911,7 +911,71 @@ export const teacherApis = {
       apiEndPoint.GET_STUDENT_DETAILS(id)
     );
     return response.data;
-  }
+  },
+
+  getClassList: async (params: {
+    year: string;
+    page?: number;
+    limit?: number;
+  }): Promise<ClassListResponse> => {
+    const response = await axiosAuth.get<ClassListResponse>(
+      apiEndPoint.GET_CLASS_LIST,
+      {
+        params,
+      }
+    );
+    return response.data;
+  },
+
+  getFeedbackByClassAndDate: async (
+    classId: string,
+    date: string
+  ): Promise<IFeedbackListResponse> => {
+    const response = await axiosAuth.get<IFeedbackListResponse>(
+      apiEndPoint.GET_FEEDBACK_BY_CLASS_AND_DATE,
+      {
+        params: { classId, date },
+      }
+    );
+    return response.data;
+  },
+
+
+
+  getFeedbackById: async (id: string): Promise<IFeedbackDetailResponse> => {
+    const response = await axiosAuth.get<IFeedbackDetailResponse>(
+      apiEndPoint.GET_FEEDBACK_BY_ID(id)
+    );
+    return response.data;
+  },
+
+
+  createFeedback: async (
+    payload: IFeedbackCreatePayload
+  ): Promise<IFeedbackDetailResponse[]> => {
+    const response = await axiosAuth.post<IFeedbackDetailResponse[]>(
+      apiEndPoint.CREATE_FEEDBACK,
+      payload
+    );
+    return response.data;
+  },
+
+
+  updateFeedback: async (
+    id: string,
+    payload: IFeedbackUpdatePayload
+  ): Promise<IFeedbackDetailResponse> => {
+    const response = await axiosAuth.put<IFeedbackDetailResponse>(
+      apiEndPoint.UPDATE_FEED_BACK(id),
+      payload
+    );
+    return response.data;
+  },
+
+
+  deleteFeedback: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_FEED_BACK(id));
+  },
 
 }
 

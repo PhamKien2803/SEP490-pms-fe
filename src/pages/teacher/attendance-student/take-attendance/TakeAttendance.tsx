@@ -72,7 +72,6 @@ function TakeAttendance() {
     const [isFetchingAttendance, setIsFetchingAttendance] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
-    // ✅ current class + students
     const currentClass: IClassInfo | undefined = useMemo(
         () => teacherData?.classes?.find((c) => c._id === selectedClassId),
         [teacherData, selectedClassId]

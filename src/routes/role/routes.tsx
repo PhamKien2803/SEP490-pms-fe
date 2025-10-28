@@ -58,6 +58,9 @@ import MedicalDetail from "../../pages/medical-management/medical-details/Medica
 import CreateMedical from "../../pages/medical-management/create-medical/CreateMedical";
 import UpdateMedical from "../../pages/medical-management/edit-medical/EditMedical";
 import TimeTable from "../../pages/teacher/time-table/TimeTable";
+import FeedBack from "../../pages/teacher/feedbacks/FeedBack";
+import TakeFeedback from "../../pages/teacher/feedbacks/take-feedback/TakeFeedback";
+import EditFeedback from "../../pages/teacher/feedbacks/edit-feedback/EditFeedback";
 
 export const routes: RouteObject[] = [
   {
@@ -430,6 +433,29 @@ export const routes: RouteObject[] = [
               {
                 path: "detail/:id",
                 element: <AttendanceDetails />
+              }
+            ],
+          },
+          {
+            path: "feedbacks",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/feedbacks`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <FeedBack />,
+              },
+              {
+                path: "take-feedback",
+                element: <TakeFeedback />
+              },
+              {
+                path: "edit/:id",
+                element: <EditFeedback />
               }
             ],
           },
