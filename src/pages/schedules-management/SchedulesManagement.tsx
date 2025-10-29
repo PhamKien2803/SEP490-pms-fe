@@ -82,6 +82,11 @@ function SchedulesManagement() {
     const [scheduleStatus, setScheduleStatus] = useState<'Dự thảo' | 'Xác nhận' | null>(null);
     const [scheduleId, setScheduleId] = useState<string | null>(null)
     const [editMode, setEditMode] = useState(false);
+    const [hasEditedAfterPreview, setHasEditedAfterPreview] = useState(false);
+    const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [lastSavedSnapshot, setLastSavedSnapshot] = useState<string>('');
+    const [isAutoSaving, setIsAutoSaving] = useState(false);
+    const [justSaved, setJustSaved] = useState(false);
     const [isConfirmVisible, setIsConfirmVisible] = useState(false);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [originalScheduleData, setOriginalScheduleData] = useState<TScheduleDetailResponse>([]);
@@ -382,6 +387,7 @@ function SchedulesManagement() {
             if (res && Array.isArray(res.schedule?.scheduleDays) && res.schedule.scheduleDays.length > 0) {
                 setScheduleData(res.schedule.scheduleDays);
                 setIsPreview(true);
+                // setEditMode(true);
                 setScheduleStatus('Dự thảo');
                 toast.success('Đã tải gợi ý lịch học thành công!');
             } else {
@@ -480,6 +486,44 @@ function SchedulesManagement() {
             setIsPreview(false);
         }
     };
+
+    const handleSaveTemporarySchedule = () => {
+        const snapshot = JSON.stringify(scheduleData);
+        setIsAutoSaving(true);
+
+        setTimeout(() => {
+            setOriginalScheduleData(JSON.parse(snapshot));
+            setLastSavedSnapshot(snapshot);
+            setHasUnsavedChanges(false);
+            setIsAutoSaving(false);
+            setJustSaved(true);
+
+            setTimeout(() => setJustSaved(false), 1500);
+        }, 300);
+    };
+
+
+    useEffect(() => {
+        if (!isPreview || !editMode) return;
+
+        const currentSnapshot = JSON.stringify(scheduleData);
+        if (currentSnapshot === lastSavedSnapshot) return;
+
+        setHasUnsavedChanges(true);
+
+        // Clear previous timer
+        if (autoSaveTimerRef.current) {
+            clearTimeout(autoSaveTimerRef.current);
+        }
+
+        // Set new auto-save timer
+        autoSaveTimerRef.current = setTimeout(() => {
+            handleSaveTemporarySchedule();
+        }, 3000); // ⏱️ Auto-save sau 3 giây không thay đổi
+    }, [scheduleData, isPreview, editMode]);
+
+
+
 
     const weeklyGroupedDays = useMemo(() => {
         if (!scheduleData.length) return [];
@@ -582,35 +626,63 @@ function SchedulesManagement() {
                             </Row>
 
                             <Row className="schedule-action-buttons">
-                                {isPreview ? (
+                                {isPreview && (
                                     <>
-                                        <Button
-                                            icon={<CloseCircleOutlined />}
-                                            onClick={handleExitPreview}
-                                            disabled={isSaving || loading}
-                                        >
-                                            Thoát gợi ý
-                                        </Button>
-                                        <Button
-                                            type="primary"
-                                            icon={<SaveOutlined />}
-                                            onClick={handleCreateSchedule}
-                                            loading={isSaving}
-                                            disabled={!scheduleData.length}
-                                        >
-                                            Tạo lịch học
-                                        </Button>
-                                    </>
+                                        {!hasEditedAfterPreview ? (
+                                            // Gợi ý xong, chưa bấm chỉnh sửa → hiện đủ 3 nút
+                                            <>
+                                                <Button
+                                                    icon={<CloseCircleOutlined />}
+                                                    onClick={handleExitPreview}
+                                                    disabled={isSaving || loading}
+                                                >
+                                                    Thoát gợi ý
+                                                </Button>
 
-                                ) : scheduleStatus === 'Dự thảo' && (
+                                                <Button
+                                                    icon={<EditOutlined />}
+                                                    onClick={() => {
+                                                        setOriginalScheduleData(JSON.parse(JSON.stringify(scheduleData)));
+                                                        setEditMode(true);
+                                                        setHasEditedAfterPreview(true); // ✅ Bấm chỉnh sửa
+                                                        setHasUnsavedChanges(false);
+                                                    }}
+                                                    type="primary"
+                                                >
+                                                    Chỉnh sửa lịch
+                                                </Button>
+
+                                                <Button
+                                                    type="primary"
+                                                    icon={<SaveOutlined />}
+                                                    onClick={handleCreateSchedule}
+                                                    loading={isSaving}
+                                                    disabled={!scheduleData.length}
+                                                >
+                                                    Tạo lịch học
+                                                </Button>
+                                            </>
+                                        ) : (
+                                            <> <Button
+                                                icon={<CloseCircleOutlined />}
+                                                onClick={() => {
+                                                    if (hasUnsavedChanges) {
+                                                        setIsConfirmVisible(true);
+                                                    } else {
+                                                        setEditMode(false);
+                                                        setHasEditedAfterPreview(false);
+                                                    }
+                                                }}
+                                            >
+                                                Thoát chỉnh sửa
+                                            </Button>
+                                            </>
+                                        )}
+                                    </>
+                                )}
+
+                                {!isPreview && scheduleStatus === 'Dự thảo' && (
                                     <>
-                                        {/* <Button
-                                            icon={editMode ? <CloseCircleOutlined /> : <EditOutlined />}
-                                            onClick={() => setEditMode(prev => !prev)}
-                                            type={editMode ? 'default' : 'primary'}
-                                        >
-                                            {editMode ? 'Thoát chỉnh sửa' : 'Chỉnh sửa lịch'}
-                                        </Button> */}
                                         <Button
                                             icon={editMode ? <CloseCircleOutlined /> : <EditOutlined />}
                                             onClick={() => {
@@ -628,8 +700,6 @@ function SchedulesManagement() {
                                         >
                                             {editMode ? 'Thoát chỉnh sửa' : 'Chỉnh sửa lịch'}
                                         </Button>
-
-
 
                                         {editMode && (
                                             <Button
@@ -876,6 +946,37 @@ function SchedulesManagement() {
                 cancelText="Không">
                 <p>Các thay đổi sẽ không được lưu lại.</p>
             </Modal>
+
+            {(isAutoSaving || justSaved) && (
+                <div style={{
+                    position: 'fixed',
+                    bottom: 20,
+                    left: 24,
+                    backgroundColor: 'white',
+                    border: '1px solid #ccc',
+                    borderRadius: 8,
+                    padding: '8px 12px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    zIndex: 9999,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                }}>
+                    {isAutoSaving && (
+                        <>
+                            <Spin size="small" />
+                            <span>Tự động lưu thay đổi...</span>
+                        </>
+                    )}
+                    {justSaved && (
+                        <>
+                            <CheckCircleOutlined style={{ color: 'green' }} />
+                            <span>Đã lưu thành công</span>
+                        </>
+                    )}
+                </div>
+            )}
+
         </div>
     );
 }
