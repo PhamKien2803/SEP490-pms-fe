@@ -24,6 +24,7 @@ export interface StudentInClass {
     fullName: string;
     dob: string;
     gender: string;
+    healthCertId?: string;
 }
 
 export interface TeacherInClass {

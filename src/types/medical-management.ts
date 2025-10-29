@@ -38,6 +38,8 @@ export interface Conclusion {
 }
 
 export interface HealthCertCreateData {
+    class: string;
+    schoolYear: string;
     student: string; 
     physicalDevelopment: PhysicalDevelopment;
     comprehensiveExamination: ComprehensiveExamination;
