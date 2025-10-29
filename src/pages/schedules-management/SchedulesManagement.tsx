@@ -4,7 +4,8 @@ import {
     Tooltip,
     Popconfirm,
     List,
-    Popover
+    Popover,
+    Modal
 } from 'antd';
 import {
     ScheduleOutlined, PlusOutlined, LeftOutlined, RightOutlined, BulbOutlined,
@@ -81,6 +82,9 @@ function SchedulesManagement() {
     const [scheduleStatus, setScheduleStatus] = useState<'Dự thảo' | 'Xác nhận' | null>(null);
     const [scheduleId, setScheduleId] = useState<string | null>(null)
     const [editMode, setEditMode] = useState(false);
+    const [isConfirmVisible, setIsConfirmVisible] = useState(false);
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+    const [originalScheduleData, setOriginalScheduleData] = useState<TScheduleDetailResponse>([]);
     const currentYear = dayjs().year();
     const scrollRef = useRef<HTMLDivElement>(null);
     const dragStateRef = useRef({ isDragging: false, startX: 0, scrollLeftStart: 0 });
@@ -192,7 +196,7 @@ function SchedulesManagement() {
             const activities = [...dayToUpdate.activities];
             activities[index] = {
                 ...activities[index],
-                activity: '',
+                activity: null,
                 activityName: '',
                 activityCode: undefined,
                 type: null,
@@ -253,6 +257,11 @@ function SchedulesManagement() {
         fetchClassList();
     }, [fetchClassList]);
 
+    useEffect(() => {
+        if (editMode) {
+            setHasUnsavedChanges(true);
+        }
+    }, [scheduleData]);
 
 
     const fetchScheduleData = useCallback(async () => {
@@ -595,13 +604,32 @@ function SchedulesManagement() {
 
                                 ) : scheduleStatus === 'Dự thảo' && (
                                     <>
-                                        <Button
+                                        {/* <Button
                                             icon={editMode ? <CloseCircleOutlined /> : <EditOutlined />}
                                             onClick={() => setEditMode(prev => !prev)}
                                             type={editMode ? 'default' : 'primary'}
                                         >
                                             {editMode ? 'Thoát chỉnh sửa' : 'Chỉnh sửa lịch'}
+                                        </Button> */}
+                                        <Button
+                                            icon={editMode ? <CloseCircleOutlined /> : <EditOutlined />}
+                                            onClick={() => {
+                                                if (editMode && hasUnsavedChanges) {
+                                                    setIsConfirmVisible(true);
+                                                } else {
+                                                    if (!editMode) {
+                                                        setOriginalScheduleData(JSON.parse(JSON.stringify(scheduleData)));
+                                                    }
+                                                    setEditMode(prev => !prev);
+                                                    setHasUnsavedChanges(false);
+                                                }
+                                            }}
+                                            type={editMode ? 'default' : 'primary'}
+                                        >
+                                            {editMode ? 'Thoát chỉnh sửa' : 'Chỉnh sửa lịch'}
                                         </Button>
+
+
 
                                         {editMode && (
                                             <Button
@@ -831,6 +859,23 @@ function SchedulesManagement() {
                 </Spin>
 
             </Card>
+            <Modal title="Bạn có chắc muốn hủy?"
+                open={isConfirmVisible}
+                onOk={() => {
+                    setIsConfirmVisible(false);
+                    setEditMode(false);
+                    setHasUnsavedChanges(false);
+                    if (originalScheduleData.length > 0) {
+                        setScheduleData(JSON.parse(JSON.stringify(originalScheduleData)));
+                    }
+
+                    toast.info("Đã hủy chỉnh sửa, các thay đổi chưa lưu sẽ bị mất.");
+                }}
+                onCancel={() => setIsConfirmVisible(false)}
+                okText="Đồng ý"
+                cancelText="Không">
+                <p>Các thay đổi sẽ không được lưu lại.</p>
+            </Modal>
         </div>
     );
 }
