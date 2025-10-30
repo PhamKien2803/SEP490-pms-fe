@@ -1,325 +1,269 @@
-import React, { useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
-    Card, Calendar, Button, Flex, Typography, Tag, Radio,
-    ConfigProvider, theme, Space, Table, List
+    Card,
+    Typography,
+    List,
+    Flex,
+    Table,
+    Tag,
+    Button,
+    Segmented,
+    Spin,
+    Empty,
+    Select,
 } from 'antd';
 import {
-    PlusOutlined, LeftOutlined, RightOutlined, CalendarOutlined,
-    ClockCircleOutlined
+    ClockCircleOutlined,
+    LeftOutlined,
+    RightOutlined,
 } from '@ant-design/icons';
-import type { TableProps } from 'antd';
+import { useToken } from 'antd/es/theme/internal';
 import dayjs from 'dayjs';
-import 'dayjs/locale/vi';
-import type { Dayjs } from 'dayjs';
-import viVN from 'antd/locale/vi_VN';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
-import './TimeTable.module.scss';
+import { useCurrentUser } from '../../../hooks/useCurrentUser';
+import { IDailySchedule } from '../../../types/timetable';
+import { teacherApis } from '../../../services/apiServices';
+import { ILessonListItem, IScheduleDay } from '../../../types/teacher';
 
-dayjs.locale('vi');
 dayjs.extend(weekOfYear);
-
 const { Title, Text } = Typography;
-const { useToken } = theme;
-type Token = ReturnType<typeof useToken>['token'];
-type ViewMode = 'month' | 'week' | 'day';
 
+const TimeTable = () => {
+    const [token] = useToken();
+    const user = useCurrentUser();
+    const teacherId = user?.staff;
 
-const getMonthMockData = (value: Dayjs) => {
-    if (value.month() !== 9 || value.year() !== 2025) {
-        return null;
-    }
+    const [currentDate, setCurrentDate] = useState(dayjs());
+    const [viewMode, setViewMode] = useState<'week' | 'day'>('week');
+    const [scheduleData, setScheduleData] = useState<IDailySchedule[]>([]);
+    const [lessonData, setLessonData] = useState<ILessonListItem[]>([]);
+    const [loading, setLoading] = useState(false);
 
-    const day = value.date();
-    switch (day) {
-        case 8:
-        case 22:
-        case 23:
-            return { type: 'holiday', title: 'Nghỉ' };
-        case 19:
-        case 26:
-            return null;
-        default:
-            if (day > 0 && day < 32) {
-                return { type: 'event', title: '12 hoạt động' };
-            }
-            return null;
-    }
-};
+    const [schoolYears, setSchoolYears] = useState<{ schoolYear: string }[]>([]);
+    const [selectedYear, setSelectedYear] = useState<string>();
 
-const ActivityCell: React.FC<{ title: string; color: string; token: Token }> = ({ title, color, token }) => {
-    const colorMap: { [key: string]: { bg: string; border: string; text: string } } = {
-        blue: { bg: token.colorPrimaryBg, border: token.colorPrimaryBorder, text: token.colorPrimary },
-        green: { bg: token.colorSuccessBg, border: token.colorSuccessBorder, text: token.colorSuccess },
-        purple: { bg: token.colorInfoBg, border: token.colorInfoBorder, text: token.colorInfo },
-        yellow: { bg: token.colorWarningBg, border: token.colorWarningBorder, text: token.colorWarning },
-    };
-
-    const style: React.CSSProperties = {
-        backgroundColor: colorMap[color]?.bg || token.colorBgContainer,
-        borderColor: colorMap[color]?.border || token.colorBorder,
-        borderWidth: 1,
-        borderStyle: 'solid',
-        borderRadius: token.borderRadius,
-        padding: '8px 12px',
-        width: '100%',
-        cursor: 'pointer',
-    };
-
-    return <div style={style}><Text style={{ color: colorMap[color]?.text }}>{title}</Text></div>;
-};
-
-const getWeekColumns = (token: Token, currentDate: Dayjs): TableProps<any>['columns'] => {
-    const startOfWeek = currentDate.startOf('week');
-
-    const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'];
-    const dataIndex = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-
-    const columns: TableProps<any>['columns'] = [
-        {
-            title: 'Thời gian',
-            dataIndex: 'time',
-            key: 'time',
-            width: 100,
-            align: 'center',
-            fixed: 'left',
-            className: 'time-cell'
-        },
-    ];
-
-    days.forEach((day, index) => {
-        const date = startOfWeek.add(index, 'day');
-        columns.push({
-            title: <div style={{ lineHeight: 1.2 }}><Text strong>{day}</Text><br /><Text type="secondary">{date.format('D/M')}</Text></div>,
-            dataIndex: dataIndex[index],
-            key: dataIndex[index],
-            align: 'center',
-            render: (activity) => activity ? <ActivityCell {...activity} token={token} /> : null,
+    // 1. Lấy danh sách năm học
+    useEffect(() => {
+        teacherApis.getSchoolYearList({ page: 0, limit: 10 }).then((res) => {
+            const sorted = res.data.sort(
+                (a, b) => dayjs(b.startDate).unix() - dayjs(a.startDate).unix()
+            );
+            setSchoolYears(sorted);
+            if (sorted.length > 0) setSelectedYear(sorted[0].schoolYear);
         });
-    });
+    }, []);
 
-    return columns;
-};
+    // 2. Lấy danh sách bài học theo năm học (luôn truyền teacherId)
+    const fetchLessonList = useCallback(() => {
+        if (!selectedYear || !teacherId) return;
 
-const weekData = [
-    { key: '1', time: '07:00', mon: { title: 'Hoạt động 1', color: 'blue' }, tue: { title: 'Hoạt động 1', color: 'blue' }, wed: { title: 'Hoạt động 1', color: 'blue' }, thu: { title: 'Hoạt động 1', color: 'blue' }, fri: { title: 'Hoạt động 1', color: 'blue' }, sat: { title: 'Hoạt động 1', color: 'blue' }, sun: null, },
-    { key: '2', time: '09:00', mon: { title: 'Hoạt động 2', color: 'green' }, tue: { title: 'Hoạt động 2', color: 'green' }, wed: { title: 'Hoạt động 2', color: 'green' }, thu: { title: 'Hoạt động 2', color: 'green' }, fri: { title: 'Hoạt động 2', color: 'green' }, sat: null, sun: null, },
-    { key: '3', time: '11:00', mon: { title: 'Hoạt động 3', color: 'purple' }, tue: { title: 'Hoạt động 3', color: 'purple' }, wed: { title: 'Hoạt động 3', color: 'purple' }, thu: { title: 'Hoạt động 3', color: 'purple' }, fri: { title: 'Hoạt động 3', color: 'purple' }, sat: null, sun: null, },
-    { key: '4', time: '13:00', mon: { title: 'Hoạt động 4', color: 'yellow' }, tue: { title: 'Hoạt động 4', color: 'yellow' }, wed: { title: 'Hoạt động 4', color: 'yellow' }, thu: { title: 'Hoạt động 4', color: 'yellow' }, fri: null, sat: null, sun: null, },
-];
+        const params = {
+            schoolYear: selectedYear,
+            teacherId,
+            limit: '30',
+            page: '0',
+        };
 
-const WeekView: React.FC<{ token: Token; currentDate: Dayjs }> = ({ token, currentDate }) => {
-    return (
-        <div style={{ padding: '0 12px 12px' }}>
+        setLoading(true);
+        teacherApis
+            .getListLesson(params)
+            .then((res) => setLessonData(res.data))
+            .finally(() => setLoading(false));
+    }, [teacherId, selectedYear]);
+
+    useEffect(() => {
+        fetchLessonList();
+    }, [fetchLessonList]);
+
+    // 3. Lấy TKB tuần
+    useEffect(() => {
+        const fetchSchedule = async () => {
+            if (!teacherId) return;
+            try {
+                setLoading(true);
+                const params = {
+                    teacherId,
+                    month: String(currentDate.month() + 1),
+                    week: String(currentDate.week()),
+                };
+                const res = await teacherApis.getScheduleWeek(params);
+                if (res.status === 'Hoàn thành') {
+                    setScheduleData(
+                        res.scheduleDays.map((day: IScheduleDay) => ({
+                            ...day,
+                            activities: day.activities.map((activity: IActivity) => ({
+                                ...activity,
+                                activityName: activity.activityName || 'Unknown Activity',
+                            })),
+                        }))
+                    );
+                } else {
+                    setScheduleData([]);
+                }
+            } catch (err) {
+                console.error(err);
+                setScheduleData([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchSchedule();
+    }, [currentDate, teacherId]);
+
+    const getWeekColumns = () => {
+        const days = [];
+        for (let i = 1; i <= 5; i++) {
+            const date = currentDate.startOf('week').add(i, 'day');
+            days.push({
+                title: `${date.format('dddd')} (${date.format('DD/MM')})`,
+                dataIndex: date.format('YYYY-MM-DD'),
+                key: date.format('YYYY-MM-DD'),
+                align: 'center' as const,
+                render: (val: any) =>
+                    val ? <Tag color={val.color}>{val.title}</Tag> : null,
+            });
+        }
+
+        return [
+            {
+                title: 'Giờ học',
+                dataIndex: 'time',
+                key: 'time',
+                fixed: 'left' as const,
+                render: (val: string) => <b>{val}</b>,
+            },
+            ...days,
+        ];
+    };
+
+    const WeekView = () => {
+        if (!scheduleData.length) {
+            return <Empty description="Không có thời khóa biểu tuần này." />;
+        }
+
+        const timeSlots = Array.from(
+            new Set(scheduleData.flatMap((day) => day.activities.map((act) => act.startTime)))
+        ).sort((a, b) => a - b);
+
+        const dataSource = timeSlots.map((startTime, idx) => {
+            const row: any = {
+                key: idx,
+                time: `${Math.floor(startTime / 60)
+                    .toString()
+                    .padStart(2, '0')}:${(startTime % 60).toString().padStart(2, '0')}`,
+            };
+            scheduleData.forEach((day) => {
+                const act = day.activities.find((a) => a.startTime === startTime);
+                const colKey = dayjs(day.date).format('YYYY-MM-DD');
+                if (act) {
+                    row[colKey] = {
+                        title: act.activityName,
+                        color: act.type === 'Cố định' ? 'purple' : 'blue',
+                    };
+                }
+            });
+            return row;
+        });
+
+        return (
             <Table
-                columns={getWeekColumns(token, currentDate)}
-                dataSource={weekData}
+                columns={getWeekColumns()}
+                dataSource={dataSource}
                 bordered
                 pagination={false}
-                scroll={{ x: 1200 }}
-                className="week-timetable"
+                scroll={{ x: 1000 }}
             />
-        </div>
-    );
-};
+        );
+    };
 
-const dayMockData = (token: Token) => [
-    { key: '1', time: '07:15 - 07:30', title: 'Đón trẻ', duration: '30 phút', color: token.colorPrimary, tagColor: 'blue' },
-    { key: '2', time: '07:30 - 08:30', title: 'Ăn sáng', duration: '30 phút', color: token.colorSuccess, tagColor: 'green' },
-    { key: '3', time: '08:30 - 09:00', title: 'Vệ sinh cá nhân', duration: '30 phút', color: token.colorInfo, tagColor: 'purple' },
-    { key: '4', time: '09:00 - 09:30', title: 'Hoạt động ngoài trời', duration: '30 phút', color: token.colorWarning, tagColor: 'orange' },
-];
+    const DayView = () => {
+        const todayData = scheduleData.find((day) =>
+            dayjs(day.date).isSame(currentDate, 'day')
+        );
+        if (!todayData) {
+            return <Empty description="Không có thời khóa biểu ngày này." />;
+        }
 
-const DayView: React.FC<{ token: Token; currentDate: Dayjs }> = ({ token, currentDate }) => {
-    const data = dayMockData(token);
-    return (
-        <div style={{ padding: '16px 8px' }}>
-            <Title level={5} style={{ marginBottom: 16, paddingLeft: 16, textTransform: 'capitalize' }}>
-                {currentDate.format('dddd, DD/MM/YYYY')}
-            </Title>
+        const data = todayData.activities.map((a, idx) => ({
+            key: idx,
+            time: `${Math.floor(a.startTime / 60)
+                .toString()
+                .padStart(2, '0')}:${(a.startTime % 60).toString().padStart(2, '0')}`,
+            title: a.activityName,
+            duration: `${a.endTime - a.startTime} phút`,
+            color: a.type === 'Cố định' ? token.colorPurple : token.colorPrimary,
+            tagColor: a.type === 'Cố định' ? 'purple' : 'blue',
+        }));
+
+        return (
             <List
-                itemLayout="horizontal"
                 dataSource={data}
-                className="day-timetable-list"
                 renderItem={(item) => (
-                    <List.Item style={{ padding: '16px' }}>
-                        <Flex align="center" gap="middle" style={{ width: '100%' }}>
-                            <Flex align="center" justify="center" style={{ width: 24, height: 60, position: 'relative' }}>
-                                <div style={{
-                                    width: 2,
-                                    height: '100%',
-                                    backgroundColor: item.color,
-                                    position: 'absolute',
-                                    opacity: 0.3
-                                }} />
-                                <ClockCircleOutlined style={{
-                                    fontSize: 20,
-                                    color: item.color,
-                                    backgroundColor: token.colorBgContainer,
-                                    borderRadius: '50%',
-                                    padding: 2,
-                                    zIndex: 1
-                                }} />
-                            </Flex>
-
-                            <Flex justify="space-between" align="center" style={{ flex: 1 }}>
-                                <div>
-                                    <Text type="secondary">{item.time}</Text>
-                                    <br />
-                                    <Text strong style={{ fontSize: 16 }}>{item.title}</Text>
-                                </div>
-                                <Tag color={item.tagColor} style={{ fontSize: 13, padding: '4px 8px' }}>
-                                    {item.duration}
-                                </Tag>
-                            </Flex>
+                    <List.Item>
+                        <Flex align="center" gap={16} style={{ width: '100%' }}>
+                            <ClockCircleOutlined style={{ color: item.color }} />
+                            <div style={{ flex: 1 }}>
+                                <Text type="secondary">{item.time}</Text>
+                                <br />
+                                <Text strong>{item.title}</Text>
+                            </div>
+                            <Tag color={item.tagColor}>{item.duration}</Tag>
                         </Flex>
                     </List.Item>
                 )}
             />
-        </div>
-    );
-};
-
-
-interface TimeTableHeaderProps {
-    viewMode: ViewMode;
-    setViewMode: (mode: ViewMode) => void;
-    currentDate: Dayjs;
-    setCurrentDate: (date: Dayjs) => void;
-}
-
-const TimeTableHeader: React.FC<TimeTableHeaderProps> = ({
-    viewMode,
-    setViewMode,
-    currentDate,
-    setCurrentDate
-}) => {
-    const handleNav = (direction: 'prev' | 'next') => {
-        const unit = viewMode === 'month' ? 'month' : viewMode;
-        const newDate = direction === 'prev' ? currentDate.subtract(1, unit) : currentDate.add(1, unit);
-        setCurrentDate(newDate);
-    };
-
-    const getTitle = () => {
-        if (viewMode === 'month') {
-            return currentDate.format('MMMM, YYYY');
-        }
-        if (viewMode === 'week') {
-            const startOfWeek = currentDate.startOf('week').format('DD/MM');
-            const endOfWeek = currentDate.endOf('week').format('DD/MM/YYYY');
-            return `Tuần ${currentDate.week()}, ${startOfWeek} - ${endOfWeek}`;
-        }
-        if (viewMode === 'day') {
-            return currentDate.format('dddd, DD/MM/YYYY');
-        }
+        );
     };
 
     return (
-        <Flex justify="space-between" align="center" style={{ padding: '8px 12px', borderBottom: '1px solid #f0f0f0' }}>
-            <Radio.Group
-                value={viewMode}
-                onChange={(e) => setViewMode(e.target.value)}
-            >
-                <Radio.Button value="month">Lịch tháng</Radio.Button>
-                <Radio.Button value="week">Lịch tuần</Radio.Button>
-                <Radio.Button value="day">Lịch ngày</Radio.Button>
-            </Radio.Group>
-
-            <Flex align="center" gap="middle">
-                <Button icon={<LeftOutlined />} shape="circle" onClick={() => handleNav('prev')} />
-                <Title level={4} style={{ margin: 0, textTransform: 'capitalize', minWidth: 250, textAlign: 'center' }}>
-                    {getTitle()}
-                </Title>
-                <Button icon={<RightOutlined />} shape="circle" onClick={() => handleNav('next')} />
-                <Tag color="success" style={{ marginLeft: 16, fontSize: 14, padding: '4px 8px' }}>Xác nhận</Tag>
-            </Flex>
-        </Flex>
-    );
-};
-
-
-const TimeTable: React.FC = () => {
-    const { token } = useToken();
-    const [viewMode, setViewMode] = useState<ViewMode>('month');
-    const [currentDate, setCurrentDate] = useState(dayjs());
-
-    const dateCellRender = (value: Dayjs) => {
-        const data = getMonthMockData(value);
-        if (!data) return <div style={{ minHeight: 70 }} />;
-
-        if (data.type === 'holiday') {
-            return (
-                <div style={{
-                    backgroundColor: token.colorErrorBg,
-                    borderRadius: token.borderRadius,
-                    padding: '4px 8px',
-                    height: '100%',
-                    minHeight: 70,
-                    borderTop: `2px solid ${token.colorError}`,
-                }}>
-                    <Tag color="error">{data.title}</Tag>
-                </div>
-            );
-        }
-
-        if (data.type === 'event') {
-            return (
-                <div style={{
-                    backgroundColor: token.colorPrimaryBg,
-                    borderRadius: token.borderRadius,
-                    padding: '4px 8px',
-                    cursor: 'pointer',
-                    height: '100%',
-                    minHeight: 70,
-                    borderTop: `2px solid ${token.colorPrimary}`,
-                }}>
-                    <Text style={{ color: token.colorPrimary, fontSize: 12, fontWeight: 500 }}>{data.title}</Text>
-                </div>
-            );
-        }
-        return <div style={{ minHeight: 70 }} />;
-    };
-
-    return (
-        <ConfigProvider locale={viVN}>
-            <div style={{ padding: 24 }}>
-                <Flex justify="space-between" align="center" style={{ marginBottom: 24 }}>
-                    <Title level={3} style={{ margin: 0 }}>
-                        <Space><CalendarOutlined /> Thời khóa biểu</Space>
-                    </Title>
-                    <Button type="primary" icon={<PlusOutlined />} size="large">
-                        Thêm hoạt động
-                    </Button>
-                </Flex>
-
-                <Card bordered={false} style={{ boxShadow: token.boxShadowSecondary }} bodyStyle={{ padding: 0 }}>
-                    <TimeTableHeader
-                        viewMode={viewMode}
-                        setViewMode={setViewMode}
-                        currentDate={currentDate}
-                        setCurrentDate={setCurrentDate}
+        <Card
+            title={
+                <Flex justify="space-between">
+                    <Title level={4}>Thời khóa biểu</Title>
+                    <Select
+                        value={selectedYear}
+                        onChange={(val) => setSelectedYear(val)}
+                        options={schoolYears.map((y) => ({
+                            label: y.schoolYear,
+                            value: y.schoolYear,
+                        }))}
+                        style={{ minWidth: 160 }}
                     />
+                </Flex>
+            }
+            extra={
+                <Segmented
+                    value={viewMode}
+                    onChange={(val) => setViewMode(val as 'week' | 'day')}
+                    options={[
+                        { label: 'Tuần', value: 'week' },
+                        { label: 'Ngày', value: 'day' },
+                    ]}
+                />
+            }
+        >
+            <Flex justify="space-between" style={{ marginBottom: 16 }}>
+                <Button
+                    icon={<LeftOutlined />}
+                    onClick={() => setCurrentDate((prev) => prev.subtract(1, 'week'))}
+                >
+                    Tuần trước
+                </Button>
+                <Text strong>
+                    Tuần {currentDate.week()} - Tháng {currentDate.month() + 1}
+                </Text>
+                <Button
+                    icon={<RightOutlined />}
+                    onClick={() => setCurrentDate((prev) => prev.add(1, 'week'))}
+                >
+                    Tuần sau
+                </Button>
+            </Flex>
 
-                    {viewMode === 'month' && (
-                        <Calendar
-                            value={currentDate}
-                            onChange={setCurrentDate}
-                            dateCellRender={dateCellRender}
-                            headerRender={() => null}
-                            fullscreen
-                            className="teacher-timetable-calendar"
-                        />
-                    )}
-
-                    {viewMode === 'week' && (
-                        <WeekView token={token} currentDate={currentDate} />
-                    )}
-
-                    {viewMode === 'day' && (
-                        <DayView token={token} currentDate={currentDate} />
-                    )}
-                </Card>
-            </div>
-        </ConfigProvider>
+            <Spin spinning={loading}>
+                {viewMode === 'week' ? <WeekView /> : <DayView />}
+            </Spin>
+        </Card>
     );
 };
 

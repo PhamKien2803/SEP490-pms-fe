@@ -110,40 +110,41 @@ function ReportDetails() {
                     </Button>
 
                     {isAdmin && normalizedStatus === 'chờ duyệt' && (
-                        <Popconfirm
-                            title="Xác nhận duyệt báo giảng?"
-                            onConfirm={handleApprove}
-                            okText="Duyệt"
-                            cancelText="Hủy"
-                        >
-                            <Button
-                                type="primary"
-                                icon={<CheckOutlined />}
-                                loading={actionLoading}
+                        <>
+                            <Popconfirm
+                                title="Xác nhận duyệt báo giảng?"
+                                onConfirm={handleApprove}
+                                okText="Duyệt"
+                                cancelText="Hủy"
                             >
-                                Duyệt
-                            </Button>
-                        </Popconfirm>
-                    )}
+                                <Button
+                                    type="primary"
+                                    icon={<CheckOutlined />}
+                                    loading={actionLoading}
+                                >
+                                    Duyệt
+                                </Button>
+                            </Popconfirm>
 
-                    {isAdmin && normalizedStatus === 'hoàn thành' && (
-                        <Popconfirm
-                            title="Xác nhận từ chối báo giảng?"
-                            onConfirm={handleReject}
-                            okText="Từ chối"
-                            cancelText="Hủy"
-                        >
-                            <Button
-                                danger
-                                icon={<CloseOutlined />}
-                                loading={actionLoading}
+                            <Popconfirm
+                                title="Xác nhận từ chối báo giảng?"
+                                onConfirm={handleReject}
+                                okText="Từ chối"
+                                cancelText="Hủy"
                             >
-                                Từ chối
-                            </Button>
-                        </Popconfirm>
+                                <Button
+                                    danger
+                                    icon={<CloseOutlined />}
+                                    loading={actionLoading}
+                                >
+                                    Từ chối
+                                </Button>
+                            </Popconfirm>
+                        </>
                     )}
                 </Space>
             }
+
         >
             <Descriptions bordered column={2} size="middle">
                 <Descriptions.Item label="Lớp">{lesson.className}</Descriptions.Item>
