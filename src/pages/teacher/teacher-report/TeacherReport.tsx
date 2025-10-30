@@ -23,6 +23,7 @@ import { useCurrentUser } from '../../../hooks/useCurrentUser';
 import { teacherApis } from '../../../services/apiServices';
 import { constants } from '../../../constants';
 import { useNavigate } from 'react-router-dom';
+import { usePagePermission } from '../../../hooks/usePagePermission';
 
 const { Title } = Typography;
 
@@ -43,6 +44,7 @@ function TeacherReport() {
     const user = useCurrentUser();
     const teacherId = useMemo(() => user?.staff, [user]);
     const navigate = useNavigate();
+    const { canUpdate, canCreate } = usePagePermission();
     const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
     const [selectedYear, setSelectedYear] = useState('');
     const [lessonData, setLessonData] = useState<ILessonListItem[]>([]);
@@ -118,12 +120,15 @@ function TeacherReport() {
                     </Tooltip>
                     {(record.status === 'Dự thảo' || record.status === 'Chờ duyệt' || record.status === 'Hoàn thành') && (
                         <Tooltip title="Cập nhật">
-                            <Button
-                                type="text"
-                                shape="circle"
-                                icon={<EditOutlined />}
-                                onClick={() => navigate(`${constants.APP_PREFIX}/lessons/edit/${record._id}`)}
-                            />
+                            {canUpdate && (
+                                <Button
+                                    type="text"
+                                    shape="circle"
+                                    icon={<EditOutlined />}
+                                    onClick={() => navigate(`${constants.APP_PREFIX}/lessons/edit/${record._id}`)}
+                                />
+                            )}
+
                         </Tooltip>
                     )}
                 </Space>
@@ -139,13 +144,15 @@ function TeacherReport() {
                 </Title>
             }
             extra={
-                <Button
-                    onClick={() => navigate(`${constants.APP_PREFIX}/lessons/create`)}
-                    type="primary"
-                    icon={<PlusOutlined />}
-                >
-                    Tạo mới báo giảng
-                </Button>
+                canCreate && (
+                    <Button
+                        onClick={() => navigate(`${constants.APP_PREFIX}/lessons/create`)}
+                        type="primary"
+                        icon={<PlusOutlined />}
+                    >
+                        Tạo mới báo giảng
+                    </Button>
+                )
             }
             style={{ margin: 24 }}
         >
