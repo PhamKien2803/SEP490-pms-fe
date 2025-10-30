@@ -61,6 +61,10 @@ import TimeTable from "../../pages/teacher/time-table/TimeTable";
 import FeedBack from "../../pages/teacher/feedbacks/FeedBack";
 import TakeFeedback from "../../pages/teacher/feedbacks/take-feedback/TakeFeedback";
 import EditFeedback from "../../pages/teacher/feedbacks/edit-feedback/EditFeedback";
+import TeacherReport from "../../pages/teacher/teacher-report/TeacherReport";
+import CreateReport from "../../pages/teacher/teacher-report/create-teacher-report/CreateReport";
+import UpdateReport from "../../pages/teacher/teacher-report/update-teacher-report/UpdateReport";
+import ReportDetails from "../../pages/teacher/teacher-report/teacher-report-details/ReportDetails";
 
 export const routes: RouteObject[] = [
   {
@@ -456,6 +460,33 @@ export const routes: RouteObject[] = [
               {
                 path: "edit/:id",
                 element: <EditFeedback />
+              }
+            ],
+          },
+          {
+            path: "lessons",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/lessons`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <TeacherReport />,
+              },
+              {
+                path: "create",
+                element: <CreateReport />
+              },
+              {
+                path: "edit/:id",
+                element: <UpdateReport />
+              },
+              {
+                path: "detail/:id",
+                element: <ReportDetails />
               }
             ],
           },
