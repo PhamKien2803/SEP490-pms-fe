@@ -12,15 +12,20 @@ import {
     Col,
     Button,
     Space,
+    message,
+    Popconfirm,
 } from 'antd';
 import {
     LeftOutlined,
     RightOutlined,
     RollbackOutlined,
+    CheckOutlined,
+    CloseOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { ILessonDetailResponse } from '../../../../types/teacher';
 import { teacherApis } from '../../../../services/apiServices';
+import { useCurrentUser } from '../../../../hooks/useCurrentUser';
 
 const { Title, Text } = Typography;
 
@@ -38,9 +43,13 @@ function ReportDetails() {
     const navigate = useNavigate();
     const [lesson, setLesson] = useState<ILessonDetailResponse | null>(null);
     const [loading, setLoading] = useState(false);
+    const [actionLoading, setActionLoading] = useState(false);
     const [currentDayIndex, setCurrentDayIndex] = useState(0);
 
-    useEffect(() => {
+    const user = useCurrentUser();
+    const isAdmin = user?.isAdmin;
+
+    const fetchLesson = () => {
         if (!id) return;
         setLoading(true);
         teacherApis
@@ -50,21 +59,92 @@ function ReportDetails() {
                 setCurrentDayIndex(0);
             })
             .finally(() => setLoading(false));
+    };
+
+    useEffect(() => {
+        fetchLesson();
     }, [id]);
+
+    const handleApprove = async () => {
+        if (!id) return;
+        setActionLoading(true);
+        try {
+            await teacherApis.approveLesson(id);
+            message.success('Đã duyệt báo giảng');
+            fetchLesson();
+        } catch {
+            message.error('Lỗi khi duyệt báo giảng');
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleReject = async () => {
+        if (!id) return;
+        setActionLoading(true);
+        try {
+            await teacherApis.rejectLesson(id);
+            message.success('Đã từ chối báo giảng');
+            fetchLesson();
+        } catch {
+            message.error('Lỗi khi từ chối báo giảng');
+        } finally {
+            setActionLoading(false);
+        }
+    };
 
     if (loading) return <Spin fullscreen />;
     if (!lesson) return <Empty description="Không tìm thấy báo giảng" />;
 
     const day = lesson.scheduleDays[currentDayIndex];
+    const normalizedStatus = lesson.status?.trim().toLowerCase();
 
     return (
-        <Card title={<Title level={4}>Chi tiết báo giảng</Title>} style={{ margin: 16 }}>
-            <Space style={{ marginBottom: 10 }}>
-                <Button icon={<RollbackOutlined />} onClick={() => navigate(-1)}>
-                    Trở về
-                </Button>
-            </Space>
+        <Card
+            title={<Title level={4}>Chi tiết báo giảng</Title>}
+            style={{ margin: 16 }}
+            extra={
+                <Space>
+                    <Button icon={<RollbackOutlined />} onClick={() => navigate(-1)}>
+                        Trở về
+                    </Button>
 
+                    {isAdmin && normalizedStatus === 'chờ duyệt' && (
+                        <Popconfirm
+                            title="Xác nhận duyệt báo giảng?"
+                            onConfirm={handleApprove}
+                            okText="Duyệt"
+                            cancelText="Hủy"
+                        >
+                            <Button
+                                type="primary"
+                                icon={<CheckOutlined />}
+                                loading={actionLoading}
+                            >
+                                Duyệt
+                            </Button>
+                        </Popconfirm>
+                    )}
+
+                    {isAdmin && normalizedStatus === 'hoàn thành' && (
+                        <Popconfirm
+                            title="Xác nhận từ chối báo giảng?"
+                            onConfirm={handleReject}
+                            okText="Từ chối"
+                            cancelText="Hủy"
+                        >
+                            <Button
+                                danger
+                                icon={<CloseOutlined />}
+                                loading={actionLoading}
+                            >
+                                Từ chối
+                            </Button>
+                        </Popconfirm>
+                    )}
+                </Space>
+            }
+        >
             <Descriptions bordered column={2} size="middle">
                 <Descriptions.Item label="Lớp">{lesson.className}</Descriptions.Item>
                 <Descriptions.Item label="Năm học">{lesson.schoolYear}</Descriptions.Item>
@@ -74,7 +154,15 @@ function ReportDetails() {
                     {lesson.topicName || '—'}
                 </Descriptions.Item>
                 <Descriptions.Item label="Trạng thái">
-                    <Tag color={lesson.status === 'Dự Thảo' ? 'orange' : 'green'}>
+                    <Tag
+                        color={
+                            normalizedStatus === 'dự thảo'
+                                ? 'orange'
+                                : normalizedStatus === 'chờ duyệt'
+                                    ? 'gold'
+                                    : 'green'
+                        }
+                    >
                         {lesson.status}
                     </Tag>
                 </Descriptions.Item>
@@ -168,7 +256,6 @@ function ReportDetails() {
                                         <Text type="secondary">—</Text>
                                     ),
                             },
-
                         ]}
                     />
                 )}
