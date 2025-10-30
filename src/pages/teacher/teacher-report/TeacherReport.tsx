@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import {
     Select,
     Table,
@@ -14,6 +14,7 @@ import {
     PlusOutlined,
     EyeOutlined,
     EditOutlined,
+    ReloadOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { ColumnsType } from 'antd/es/table';
@@ -28,28 +29,22 @@ import { usePagePermission } from '../../../hooks/usePagePermission';
 const { Title } = Typography;
 
 const getStatusTag = (status: string) => {
-    if (status === 'Dự thảo') {
-        return <Tag color="blue">Dự thảo</Tag>;
-    }
-    if (status === 'Chờ duyệt') {
-        return <Tag color="orange">Chờ duyệt</Tag>;
-    }
-    if (status === 'Hoàn thành') {
-        return <Tag color="green">Hoàn thành</Tag>;
-    }
+    if (status === 'Dự thảo') return <Tag color="blue">Dự thảo</Tag>;
+    if (status === 'Chờ duyệt') return <Tag color="orange">Chờ duyệt</Tag>;
+    if (status === 'Hoàn thành') return <Tag color="green">Hoàn thành</Tag>;
     return <Tag>{status}</Tag>;
 };
 
 function TeacherReport() {
     const user = useCurrentUser();
+    const isAdmin = user?.isAdmin;
     const teacherId = useMemo(() => user?.staff, [user]);
     const navigate = useNavigate();
     const { canUpdate, canCreate } = usePagePermission();
+
     const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
     const [selectedYear, setSelectedYear] = useState('');
     const [lessonData, setLessonData] = useState<ILessonListItem[]>([]);
-    console.log(lessonData);
-
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -62,19 +57,30 @@ function TeacherReport() {
         });
     }, []);
 
-    useEffect(() => {
-        if (!teacherId || !selectedYear) return;
+    const fetchLessonList = useCallback(() => {
+        if (!selectedYear) return;
+
+        const params: any = {
+            schoolYear: selectedYear,
+            limit: '30',
+            page: '0',
+        };
+
+        if (!isAdmin) {
+            if (!teacherId) return;
+            params.teacherId = teacherId;
+        }
+
         setLoading(true);
         teacherApis
-            .getListLesson({
-                teacherId,
-                schoolYear: selectedYear,
-                limit: '30',
-                page: '0',
-            })
+            .getListLesson(params)
             .then((res) => setLessonData(res.data))
             .finally(() => setLoading(false));
-    }, [teacherId, selectedYear]);
+    }, [teacherId, selectedYear, isAdmin]);
+
+    useEffect(() => {
+        fetchLessonList();
+    }, [fetchLessonList]);
 
     const columns: ColumnsType<ILessonListItem> = [
         {
@@ -107,7 +113,7 @@ function TeacherReport() {
             title: 'Hành động',
             key: 'action',
             align: 'center',
-            width: 120,
+            width: 150,
             render: (_, record) => (
                 <Space size="middle">
                     <Tooltip title="Xem chi tiết">
@@ -115,22 +121,27 @@ function TeacherReport() {
                             type="text"
                             shape="circle"
                             icon={<EyeOutlined />}
-                            onClick={() => navigate(`${constants.APP_PREFIX}/lessons/detail/${record._id}`)}
+                            onClick={() =>
+                                navigate(`${constants.APP_PREFIX}/lessons/detail/${record._id}`)
+                            }
                         />
                     </Tooltip>
-                    {(record.status === 'Dự thảo' || record.status === 'Chờ duyệt' || record.status === 'Hoàn thành') && (
-                        <Tooltip title="Cập nhật">
-                            {canUpdate && (
+
+                    {!isAdmin &&
+                        (record.status === 'Dự thảo' ||
+                            record.status === 'Chờ duyệt') &&
+                        canUpdate && (
+                            <Tooltip title="Cập nhật">
                                 <Button
                                     type="text"
                                     shape="circle"
                                     icon={<EditOutlined />}
-                                    onClick={() => navigate(`${constants.APP_PREFIX}/lessons/edit/${record._id}`)}
+                                    onClick={() =>
+                                        navigate(`${constants.APP_PREFIX}/lessons/edit/${record._id}`)
+                                    }
                                 />
-                            )}
-
-                        </Tooltip>
-                    )}
+                            </Tooltip>
+                        )}
                 </Space>
             ),
         },
@@ -140,11 +151,11 @@ function TeacherReport() {
         <Card
             title={
                 <Title level={3} style={{ margin: 0 }}>
-                    Báo cáo thời khóa biểu theo tuần
+                    {isAdmin ? 'Danh sách báo giảng giáo viên' : 'Báo cáo thời khóa biểu theo tuần'}
                 </Title>
             }
             extra={
-                canCreate && (
+                !isAdmin && canCreate && (
                     <Button
                         onClick={() => navigate(`${constants.APP_PREFIX}/lessons/create`)}
                         type="primary"
@@ -156,7 +167,7 @@ function TeacherReport() {
             }
             style={{ margin: 24 }}
         >
-            <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 16, display: 'flex', gap: 12 }}>
                 <Select
                     value={selectedYear}
                     onChange={setSelectedYear}
@@ -166,6 +177,15 @@ function TeacherReport() {
                     }))}
                     style={{ minWidth: 220 }}
                 />
+                <Tooltip title="Làm mới danh sách">
+                    <Button
+                        icon={<ReloadOutlined />}
+                        onClick={fetchLessonList}
+                        loading={loading}
+                    >
+                        Làm mới danh sách
+                    </Button>
+                </Tooltip>
             </div>
             <Spin spinning={loading}>
                 <Table
