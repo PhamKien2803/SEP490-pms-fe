@@ -381,3 +381,108 @@ export interface IFeedbackDetailResponse extends IFeedbackBaseRecord {
     studentId: string;
     classId: string;
 }
+
+
+
+// Kiểu dữ liệu cho response của GET_LIST_LESSON
+export interface ILessonListItem {
+    _id: string;
+    className: string;
+    schoolYear: string;
+    month: number;
+    weekNumber: number;
+    status: string;
+}
+
+export interface IPagination {
+    totalCount: number;
+    limit: number;
+    page: number;
+}
+
+export interface ILessonListResponse {
+    data: ILessonListItem[];
+    page: IPagination;
+}
+
+// Kiểu dữ liệu cho response của GET_SCHEDULE_WEEK
+export interface IActivity {
+    activity: string;
+    activityCode?: string;
+    activityName?: string;
+    type?: string;
+    category?: string;
+    startTime: number;
+    endTime: number;
+    tittle: string;
+}
+
+export interface IScheduleDay {
+    date: string; // ISO date string
+    dayName: string;
+    activities: IActivity[];
+    isHoliday: boolean;
+    notes: string;
+    _id: string;
+}
+
+export interface IScheduleWeekResponse {
+    classId: string;
+    schoolYearId: string;
+    month: number;
+    week: number;
+    topic: string;
+    scheduleDays: IScheduleDay[];
+}
+
+export interface IActivityPayload {
+    activity: string;
+    activityCode: string;
+    activityName: string;
+    type: string;
+    startTime: number;
+    endTime: number;
+    tittle: string;
+}
+
+export interface IScheduleDayPayload {
+    date: string; // ISO Date String
+    dayName: string;
+    isHoliday: boolean;
+    notes: string;
+    activities: IActivityPayload[];
+}
+
+
+export interface ILessonPayload {
+    // activity: string;
+    classId: string;
+    schoolYearId: string;
+    class: string;
+    schoolYear: string;
+    month: number;
+    weekNumber: number;
+    topicName?: string;
+    scheduleDays: IScheduleDayPayload[];
+}
+
+export interface IScheduleDay {
+    date: string;
+    dayName: string;
+    isHoliday: boolean;
+    notes: string;
+    activities: IActivity[];
+}
+
+export interface ILessonDetailResponse {
+    _id: string;
+    schoolYearId: string;
+    classId: string;
+    className: string;
+    schoolYear: string;
+    status: string;
+    topicName: string;
+    month: number;
+    weekNumber: number;
+    scheduleDays: IScheduleDay[];
+}

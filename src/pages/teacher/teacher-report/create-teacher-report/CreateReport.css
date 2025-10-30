@@ -1,0 +1,127 @@
+/* Container cuộn ngang */
+.schedule-table-container {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 24px;
+  border-radius: 12px;
+  background: #fffdf8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 12px;
+}
+
+/* Bảng chính */
+.schedule-table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  font-family: "Segoe UI", sans-serif;
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Ô tiêu đề và dữ liệu */
+.schedule-table th,
+.schedule-table td {
+  border: 1px solid #e0e0e0;
+  padding: 10px;
+  text-align: center;
+  vertical-align: top;
+  height: 64px;
+}
+
+/* Ô tiêu đề ngày */
+.schedule-table th {
+  background: linear-gradient(180deg, #ffeecf 0%, #fff5e5 100%);
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 14px 8px;
+  border-bottom: 2px solid #f6c35e;
+}
+
+.header-date {
+  font-size: 12px;
+  font-weight: 500;
+  color: #8c8c8c;
+  margin-top: 4px;
+}
+
+/* Ô cột giờ */
+.time-cell {
+  width: 100px;
+  background: #fef6e5;
+  font-weight: bold;
+  font-size: 14px;
+  color: #333;
+  vertical-align: middle;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+/* Box hoạt động */
+.activity-box {
+  border: 1px solid;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  white-space: normal;
+  word-break: break-word;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+/* Hiệu ứng hover nhẹ */
+.activity-box:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .schedule-table {
+    font-size: 12px;
+  }
+  .time-cell {
+    width: 80px;
+  }
+}
+/* Hiệu ứng thả xuống bài học (slide & fade) */
+.lesson-textarea-wrapper {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-6px);
+  transition: max-height 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+    opacity 0.25s ease, transform 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+    margin-top 0.3s ease;
+}
+
+.lesson-textarea-wrapper.open {
+  max-height: 250px; /* cho phép vùng rộng hơn */
+  opacity: 1;
+  transform: translateY(0);
+  margin-top: 8px;
+}
+
+.lesson-textarea {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  padding: 8px;
+  background: #fffaf2;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease,
+    background-color 0.3s ease;
+}
+
+.lesson-textarea:focus {
+  border-color: #f6c35e;
+  background-color: #fff7e6;
+  box-shadow: 0 0 0 3px rgba(246, 195, 94, 0.2);
+}

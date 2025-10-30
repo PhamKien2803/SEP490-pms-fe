@@ -63,6 +63,10 @@ import TakeFeedback from "../../pages/teacher/feedbacks/take-feedback/TakeFeedba
 import EditFeedback from "../../pages/teacher/feedbacks/edit-feedback/EditFeedback";
 import StudentInfo from "../../pages/parent-dashboard/dashboard-parents/StudentInfo";
 import DashboardMenu from "../../pages/parent-dashboard/dashboard-menu/DashboardMenu";
+import TeacherReport from "../../pages/teacher/teacher-report/TeacherReport";
+import CreateReport from "../../pages/teacher/teacher-report/create-teacher-report/CreateReport";
+import UpdateReport from "../../pages/teacher/teacher-report/update-teacher-report/UpdateReport";
+import ReportDetails from "../../pages/teacher/teacher-report/teacher-report-details/ReportDetails";
 
 export const routes: RouteObject[] = [
   {
@@ -303,12 +307,12 @@ export const routes: RouteObject[] = [
               },
               {
                 path: "create",
-                element: <CurriculumsCreate />
+                element: <CurriculumsCreate />,
               },
               {
                 path: "update/:id",
-                element: <CurriculumsUpdate />
-              }
+                element: <CurriculumsUpdate />,
+              },
             ],
           },
           {
@@ -326,12 +330,12 @@ export const routes: RouteObject[] = [
               },
               {
                 path: "create",
-                element: <EventCreate />
+                element: <EventCreate />,
               },
               {
                 path: "update/:id",
-                element: <EventUpdate />
-              }
+                element: <EventUpdate />,
+              },
             ],
           },
           {
@@ -353,9 +357,8 @@ export const routes: RouteObject[] = [
               },
               {
                 path: "update/:id",
-                element: <TopicUpdate />
-              }
-
+                element: <TopicUpdate />,
+              },
             ],
           },
           {
@@ -373,8 +376,8 @@ export const routes: RouteObject[] = [
               },
               {
                 path: "create",
-                element: <ScheduleCreate />
-              }
+                element: <ScheduleCreate />,
+              },
             ],
           },
           {
@@ -393,7 +396,7 @@ export const routes: RouteObject[] = [
               {
                 path: "students/detail/:id",
                 element: <StudentDetails />,
-              }
+              },
             ],
           },
           {
@@ -408,7 +411,7 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <TimeTable />,
-              }
+              },
             ],
           },
           {
@@ -426,16 +429,16 @@ export const routes: RouteObject[] = [
               },
               {
                 path: "take-attendance",
-                element: <TakeAttendance />
+                element: <TakeAttendance />,
               },
               {
                 path: "update/:id",
-                element: <EditAttendance />
+                element: <EditAttendance />,
               },
               {
                 path: "detail/:id",
-                element: <AttendanceDetails />
-              }
+                element: <AttendanceDetails />,
+              },
             ],
           },
           {
@@ -453,12 +456,39 @@ export const routes: RouteObject[] = [
               },
               {
                 path: "take-feedback",
-                element: <TakeFeedback />
+                element: <TakeFeedback />,
               },
               {
                 path: "edit/:id",
-                element: <EditFeedback />
-              }
+                element: <EditFeedback />,
+              },
+            ],
+          },
+          {
+            path: "lessons",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/lessons`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <TeacherReport />,
+              },
+              {
+                path: "create",
+                element: <CreateReport />,
+              },
+              {
+                path: "edit/:id",
+                element: <UpdateReport />,
+              },
+              {
+                path: "detail/:id",
+                element: <ReportDetails />,
+              },
             ],
           },
           {
@@ -596,7 +626,7 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <StudentInfo />,
-              }
+              },
             ],
           },
           {
@@ -611,7 +641,7 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <DashboardMenu />,
-              }
+              },
             ],
           },
         ],

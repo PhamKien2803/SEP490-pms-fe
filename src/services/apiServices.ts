@@ -94,7 +94,7 @@ import {
   UpdateRoomData,
 } from "../types/room-management";
 import { AvailableTopicActivitiesResponse, CreateTopicDto, GetAvailableTopicActivitiesParams, GetTopicsParams, TopicDetails, TopicsListResponse, UpdateTopicDto } from "../types/topic";
-import { IAttendanceCreatePayload, IAttendanceDetailResponse, IAttendanceListResponse, IAttendanceUpdatePayload, IFeedbackCreatePayload, IFeedbackDetailResponse, IFeedbackListResponse, IFeedbackUpdatePayload, IPaginatedResponse, ITeacherClassStudentResponse, StudentDetailResponse } from "../types/teacher";
+import { IAttendanceCreatePayload, IAttendanceDetailResponse, IAttendanceListResponse, IAttendanceUpdatePayload, IFeedbackCreatePayload, IFeedbackDetailResponse, IFeedbackListResponse, IFeedbackUpdatePayload, ILessonDetailResponse, ILessonListResponse, ILessonPayload, IPaginatedResponse, IScheduleWeekResponse, ITeacherClassStudentResponse, StudentDetailResponse } from "../types/teacher";
 import { AvailableActivityItem, FixActivityResponseItem, IClassBySchoolYearItem, ICreateSchedulePayload, IDailySchedule, TCreateScheduleResponse, TScheduleByIdResponse, TScheduleParamsResponse } from "../types/timetable";
 import { HealthCertCreateData, HealthCertListResponse, HealthCertRecord, HealthCertUpdateData } from "../types/medical-management";
 import { ParentStudentsListResponse } from "../types/parent";
@@ -976,6 +976,71 @@ export const teacherApis = {
 
   deleteFeedback: async (id: string): Promise<void> => {
     await axiosAuth.post(apiEndPoint.DELETE_FEED_BACK(id));
+  },
+
+  getListLesson: async (params: {
+    teacherId: string;
+    schoolYear: string;
+    limit: string;
+    page: string;
+  }): Promise<ILessonListResponse> => {
+    const response = await axiosAuth.get<ILessonListResponse>(
+      apiEndPoint.GET_LIST_LESSON,
+      { params }
+    );
+    return response.data;
+  },
+
+  getScheduleWeek: async (params: {
+    teacherId: string;
+    month: string;
+    week: string;
+  }): Promise<IScheduleWeekResponse> => {
+    const response = await axiosAuth.get<IScheduleWeekResponse>(
+      apiEndPoint.GET_SCHEDULE_WEEK,
+      { params }
+    );
+    return response.data;
+  },
+
+  getLessonById: async (id: string): Promise<ILessonDetailResponse> => {
+    const response = await axiosAuth.get<ILessonDetailResponse>(
+      apiEndPoint.GET_LESSON_BY_ID(id)
+    );
+    return response.data;
+  },
+
+  createLesson: async (
+    payload: ILessonPayload
+  ): Promise<ILessonDetailResponse> => {
+    const response = await axiosAuth.post<ILessonDetailResponse>(
+      apiEndPoint.CREATE_LESSON,
+      payload
+    );
+    return response.data;
+  },
+
+  updateLesson: async (
+    id: string,
+    payload: ILessonPayload
+  ): Promise<ILessonDetailResponse> => {
+    const response = await axiosAuth.put<ILessonDetailResponse>(
+      apiEndPoint.UPDATE_LESSON(id),
+      payload
+    );
+    return response.data;
+  },
+
+  sendLesson: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.SEND_LESSON(id));
+  },
+
+  approveLesson: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.APPROVE_LESSON(id));
+  },
+
+  rejectLesson: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.REJECT_LESSON(id));
   },
 
 }
