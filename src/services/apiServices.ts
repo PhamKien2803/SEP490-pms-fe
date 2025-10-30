@@ -1248,3 +1248,7 @@ export const medicalApis = {
   },
 
 };
+
+export const parentDashboardApis = {
+  
+}

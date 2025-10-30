@@ -306,12 +306,12 @@ export const routes: RouteObject[] = [
               },
               {
                 path: "create",
-                element: <CurriculumsCreate />
+                element: <CurriculumsCreate />,
               },
               {
                 path: "update/:id",
-                element: <CurriculumsUpdate />
-              }
+                element: <CurriculumsUpdate />,
+              },
             ],
           },
           {
@@ -329,12 +329,12 @@ export const routes: RouteObject[] = [
               },
               {
                 path: "create",
-                element: <EventCreate />
+                element: <EventCreate />,
               },
               {
                 path: "update/:id",
-                element: <EventUpdate />
-              }
+                element: <EventUpdate />,
+              },
             ],
           },
           {
@@ -356,9 +356,8 @@ export const routes: RouteObject[] = [
               },
               {
                 path: "update/:id",
-                element: <TopicUpdate />
-              }
-
+                element: <TopicUpdate />,
+              },
             ],
           },
           {
@@ -376,8 +375,8 @@ export const routes: RouteObject[] = [
               },
               {
                 path: "create",
-                element: <ScheduleCreate />
-              }
+                element: <ScheduleCreate />,
+              },
             ],
           },
           {
@@ -396,7 +395,7 @@ export const routes: RouteObject[] = [
               {
                 path: "students/detail/:id",
                 element: <StudentDetails />,
-              }
+              },
             ],
           },
           {
@@ -411,7 +410,7 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <TimeTable />,
-              }
+              },
             ],
           },
           {
@@ -429,16 +428,16 @@ export const routes: RouteObject[] = [
               },
               {
                 path: "take-attendance",
-                element: <TakeAttendance />
+                element: <TakeAttendance />,
               },
               {
                 path: "update/:id",
-                element: <EditAttendance />
+                element: <EditAttendance />,
               },
               {
                 path: "detail/:id",
-                element: <AttendanceDetails />
-              }
+                element: <AttendanceDetails />,
+              },
             ],
           },
           {
@@ -456,12 +455,12 @@ export const routes: RouteObject[] = [
               },
               {
                 path: "take-feedback",
-                element: <TakeFeedback />
+                element: <TakeFeedback />,
               },
               {
                 path: "edit/:id",
-                element: <EditFeedback />
-              }
+                element: <EditFeedback />,
+              },
             ],
           },
           {
@@ -479,16 +478,16 @@ export const routes: RouteObject[] = [
               },
               {
                 path: "create",
-                element: <CreateReport />
+                element: <CreateReport />,
               },
               {
                 path: "edit/:id",
-                element: <UpdateReport />
+                element: <UpdateReport />,
               },
               {
                 path: "detail/:id",
-                element: <ReportDetails />
-              }
+                element: <ReportDetails />,
+              },
             ],
           },
           {
@@ -614,7 +613,7 @@ export const routes: RouteObject[] = [
               },
             ],
           },
-           {
+          {
             path: "parents/student-info",
             element: (
               <PrivateRoute
@@ -626,7 +625,7 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <ParentDashboard />,
-              }
+              },
             ],
           },
         ],
