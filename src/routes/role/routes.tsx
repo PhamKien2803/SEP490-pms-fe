@@ -67,6 +67,10 @@ import UpdateReport from "../../pages/teacher/teacher-report/update-teacher-repo
 import ReportDetails from "../../pages/teacher/teacher-report/teacher-report-details/ReportDetails";
 import StudentInfo from "../../pages/parent-dashboard/dashboard-parents/StudentInfo";
 import DashboardMenu from "../../pages/parent-dashboard/dashboard-menu/DashboardMenu";
+import TeacherReport from "../../pages/teacher/teacher-report/TeacherReport";
+import CreateReport from "../../pages/teacher/teacher-report/create-teacher-report/CreateReport";
+import UpdateReport from "../../pages/teacher/teacher-report/update-teacher-report/UpdateReport";
+import ReportDetails from "../../pages/teacher/teacher-report/teacher-report-details/ReportDetails";
 
 export const routes: RouteObject[] = [
   {
