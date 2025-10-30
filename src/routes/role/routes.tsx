@@ -61,6 +61,7 @@ import TimeTable from "../../pages/teacher/time-table/TimeTable";
 import FeedBack from "../../pages/teacher/feedbacks/FeedBack";
 import TakeFeedback from "../../pages/teacher/feedbacks/take-feedback/TakeFeedback";
 import EditFeedback from "../../pages/teacher/feedbacks/edit-feedback/EditFeedback";
+import ParentDashboard from "../../pages/parent-dashboard/ParentDashboard";
 
 export const routes: RouteObject[] = [
   {
@@ -580,6 +581,21 @@ export const routes: RouteObject[] = [
                 path: "create",
                 element: <CreateMedical />,
               },
+            ],
+          },
+           {
+            path: "parents/student-info",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/parents/student-info`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <ParentDashboard />,
+              }
             ],
           },
         ],
