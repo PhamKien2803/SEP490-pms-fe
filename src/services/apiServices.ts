@@ -94,7 +94,7 @@ import {
   UpdateRoomData,
 } from "../types/room-management";
 import { AvailableTopicActivitiesResponse, CreateTopicDto, GetAvailableTopicActivitiesParams, GetTopicsParams, TopicDetails, TopicsListResponse, UpdateTopicDto } from "../types/topic";
-import { IAttendanceCreatePayload, IAttendanceDetailResponse, IAttendanceListResponse, IAttendanceUpdatePayload, IFeedbackCreatePayload, IFeedbackDetailResponse, IFeedbackListResponse, IFeedbackUpdatePayload, ILessonDetailResponse, ILessonListResponse, ILessonPayload, IPaginatedResponse, IScheduleWeekResponse, ITeacherClassStudentResponse, StudentDetailResponse } from "../types/teacher";
+import { IAttendanceCreatePayload, IAttendanceDetailResponse, IAttendanceListResponse, IAttendanceUpdatePayload, IFeedbackCreatePayload, IFeedbackDetailResponse, IFeedbackListResponse, IFeedbackUpdatePayload, IGetTimetableTeacherResponse, ILessonDetailResponse, ILessonListResponse, ILessonPayload, IPaginatedResponse, IScheduleWeekResponse, ITeacherClassStudentResponse, StudentDetailResponse } from "../types/teacher";
 import { AvailableActivityItem, FixActivityResponseItem, IClassBySchoolYearItem, ICreateSchedulePayload, IDailySchedule, TCreateScheduleResponse, TScheduleByIdResponse, TScheduleParamsResponse } from "../types/timetable";
 import { HealthCertCreateData, HealthCertListResponse, HealthCertRecord, HealthCertUpdateData } from "../types/medical-management";
 
@@ -1041,6 +1041,19 @@ export const teacherApis = {
   rejectLesson: async (id: string): Promise<void> => {
     await axiosAuth.post(apiEndPoint.REJECT_LESSON(id));
   },
+
+  getTimetableTeacher: async (params: {
+    teacherId: string;
+    schoolYear: string;
+    month: string;
+  }): Promise<IGetTimetableTeacherResponse> => {
+    const response = await axiosAuth.get<IGetTimetableTeacherResponse>(
+      apiEndPoint.GET_TIMETABLE_TEACHER,
+      { params }
+    );
+    return response.data;
+  },
+
 
 }
 
