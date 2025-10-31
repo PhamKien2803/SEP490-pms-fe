@@ -115,7 +115,7 @@ function EventUpdate() {
             await eventApis.updateEvent(id, payload);
             toast.success('Cập nhật sự kiện thành công!');
             setIsDirty(false);
-            navigate(-1);
+            // navigate(-1);
         } catch (error) {
             toast.error('Cập nhật sự kiện thất bại.');
             console.error("Event update failed:", error);

@@ -132,7 +132,7 @@ function EditAttendance() {
         try {
             await teacherApis.updateAttendance(attendanceId!, payload);
             toast.success('Cập nhật điểm danh thành công!');
-            navigate(-1);
+            // navigate(-1);
         } catch (error) {
             console.error(error);
             toast.error('Cập nhật thất bại.');

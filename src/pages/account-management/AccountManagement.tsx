@@ -138,11 +138,6 @@ const AccountManagement: React.FC = () => {
             ),
         },
         {
-            title: 'Người tạo',
-            dataIndex: 'createdBy',
-            key: 'createdBy',
-        },
-        {
             title: 'Người cập nhật',
             dataIndex: 'updatedBy',
             key: 'updatedBy',

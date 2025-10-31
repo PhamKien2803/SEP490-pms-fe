@@ -181,7 +181,11 @@ function UpdateClass() {
             toast.success(`Chuyển ${itemType} thành công!`);
             await fetchData();
         } catch (error) {
-            toast.error(`Chuyển ${itemType} thất bại.`);
+            if (error) {
+                toast.info("Bạn cần lưu giáo viên vào lớp rồi mới được chuyển")
+            } else {
+                toast.error(`Chuyển ${itemType} thất bại.`);
+            }
         } finally {
             setIsTransferLoading(false);
             setIsTransferModalVisible(false);
@@ -204,7 +208,7 @@ function UpdateClass() {
             await classApis.updateClass(id, payload);
             toast.success('Cập nhật lớp học thành công!');
             setIsDirty(false);
-            navigate(-1);
+            // navigate(-1);
         } catch (err) {
             toast.error('Cập nhật lớp học thất bại.');
         } finally {

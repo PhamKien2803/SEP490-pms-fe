@@ -111,7 +111,7 @@ function EditFeedback() {
         try {
             await teacherApis.updateFeedback(feedbackDetail._id, payload);
             toast.success('Cập nhật phản hồi thành công!');
-            navigate(-1);
+            // navigate(-1);
         } catch {
             toast.error('Lỗi khi cập nhật phản hồi.');
         } finally {

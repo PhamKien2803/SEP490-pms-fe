@@ -223,7 +223,7 @@ function CurriculumsUpdate() {
             await curriculumsApis.updateCurriculum(id, payload);
             toast.success('Cập nhật chương trình học thành công!');
             setIsDirty(false);
-            navigate(-1);
+            // navigate(-1);
         } catch (error) {
             typeof error === "string" ? toast.warn(error) : toast.error('Cập nhật chương trình học thất bại.');
         } finally {

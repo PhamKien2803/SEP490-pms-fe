@@ -82,7 +82,7 @@ function EditSchoolyear() {
             await schoolYearApis.updateSchoolYear(id, payload);
             toast.success('Cập nhật năm học thành công!');
             // fetchData();
-            navigate(-1);
+            // navigate(-1);
         } catch (error) {
             typeof error === "string" ? toast.warn(error) : toast.error('Đã có lỗi xảy ra. Vui lòng thử lại!');
         } finally {

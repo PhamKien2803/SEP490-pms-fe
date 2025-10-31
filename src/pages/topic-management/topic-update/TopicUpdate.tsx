@@ -190,7 +190,7 @@ function TopicUpdate() {
         try {
             await topicApis.updateTopic(id, payload);
             toast.success('Cập nhật chủ đề thành công!');
-            navigate(-1);
+            // navigate(-1);
         } catch (error) {
             toast.error('Cập nhật chủ đề thất bại!');
         } finally {
