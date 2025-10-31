@@ -198,7 +198,7 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
   }, []);
 
   return (
-    <div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
+    <div style={{ padding: "24px", margin: "0 auto" }}>
       <Button
         type="primary"
         onClick={onBack}
@@ -498,10 +498,10 @@ const Medical: React.FC = () => {
   const selectedStudent = listChild.find((s) => s._id === selectedStudentId);
 
   return (
-    <div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
+    <div style={{ padding: "24px", margin: "0 auto" }}>
       <Title
         level={2}
-        style={{ color: "#0050b3", display: "flex", alignItems: "center" }}
+        style={{ color: "#1890ff", display: "flex", alignItems: "center" }}
       >
         <HeartOutlined style={{ marginRight: 10 }} /> Hồ Sơ Khám Sức Khỏe Định
         Kỳ
@@ -554,15 +554,13 @@ const Medical: React.FC = () => {
       <Title
         level={3}
         style={{
-          color: "#0050b3",
+          color: "#1890ff",
           borderBottom: "1px solid #e8e8e8",
           paddingBottom: 8,
         }}
       >
         <ContainerOutlined style={{ marginRight: 8 }} />
-        Danh Sách Hồ Sơ Khám (
-          {selectedStudent?.fullName || "..."}
-        )
+        Danh Sách Hồ Sơ Khám ({selectedStudent?.fullName || "..."})
       </Title>
       <Divider style={{ margin: "10px 0 20px 0" }} />
 

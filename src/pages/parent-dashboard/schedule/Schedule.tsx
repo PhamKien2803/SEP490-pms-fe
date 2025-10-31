@@ -69,15 +69,6 @@ const FAKE_MONTHS = Array.from({ length: 12 }, (_, i) => ({
   label: `Tháng ${i + 1}`,
 }));
 
-const formatTime = (time: number) => {
-  const hours = Math.floor(time / 100);
-  const minutes = time % 100;
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
-    2,
-    "0"
-  )}`;
-};
-
 const groupDaysIntoWeeks = (
   days: ScheduleDay[]
 ): { label: string; key: string; days: ScheduleDay[] }[] => {
@@ -294,23 +285,26 @@ const Schedule: React.FC = () => {
     return groupDaysIntoWeeks(currentSchedule.scheduleDays);
   }, [currentSchedule]);
 
+  const formatMinutesToTime = (minutes: number) => {
+    if (isNaN(minutes) || minutes === null) return "N/A";
+    const hours = Math.floor(minutes / 60)
+      .toString()
+      .padStart(2, "0");
+    const mins = (minutes % 60).toString().padStart(2, "0");
+    return `${hours}:${mins}`;
+  };
+
   const renderActivityBlock = (activity: ScheduleActivity, index: number) => {
     const timeDisplay =
       activity.startTime && activity.endTime
-        ? `${formatTime(activity.startTime)} - ${formatTime(activity.endTime)}`
+        ? `${formatMinutesToTime(activity.startTime)} - ${formatMinutesToTime(
+            activity.endTime
+          )}`
         : "N/A";
 
-    const categoryColorMap: { [key: string]: string } = {
-      "Thể chất": "green",
-      "Nhận thức": "blue",
-      "Ngôn ngữ": "purple",
-      "Thẩm mỹ": "volcano",
-      "Chăm sóc": "cyan",
-      "Kĩ năng": "orange",
-      Chung: "geekblue",
-    };
-    const category = activity.activity?.category || "Chung";
-    const tagColor = categoryColorMap[category] || "geekblue";
+    console.log("activity", activity);
+    const category = activity.activity?.category || "";
+    const type = activity.activity?.type || "";
 
     return (
       <div
@@ -318,7 +312,7 @@ const Schedule: React.FC = () => {
         style={{
           padding: "10px 12px",
           marginBottom: 10,
-          borderLeft: `5px solid ${tagColor}`,
+          borderLeft: `5px solid geekblue`,
           backgroundColor: "#ffffff",
           borderRadius: 6,
           boxShadow: "0 2px 5px rgba(0,0,0,0.08)",
@@ -349,15 +343,18 @@ const Schedule: React.FC = () => {
         </Text>
 
         <Row gutter={8}>
-          <Col>
-            <Tag color={tagColor} icon={<TagOutlined />}>
-              {category}
-            </Tag>
-          </Col>
-          {activity.activity?.activityCode && (
+          {!!category && (
+            <Col>
+              <Tag color={"geekblue"} icon={<TagOutlined />}>
+                {category}
+              </Tag>
+            </Col>
+          )}
+
+          {!!type && (
             <Col>
               <Tag color="default" style={{ color: "#8c8c8c" }}>
-                Mã: {activity.activity.activityCode}
+                {type}
               </Tag>
             </Col>
           )}
@@ -601,7 +598,7 @@ const Schedule: React.FC = () => {
           <Alert
             message={
               <Text strong style={{ color: "#135200" }}>
-                <HomeOutlined style={{ marginRight: 5 }} /> Lớp Học: 
+                <HomeOutlined style={{ marginRight: 5 }} /> Lớp Học:
                 {classData.className} ({classData.classCode})
               </Text>
             }
@@ -635,9 +632,8 @@ const Schedule: React.FC = () => {
             <Empty
               description={
                 <Title level={4}>
-                  Không tìm thấy thông tin lớp học của bé 
-                  {selectedStudent?.fullName} trong năm {selectedSchoolYear}
-                  .
+                  Không tìm thấy thông tin lớp học của bé
+                  {selectedStudent?.fullName} trong năm {selectedSchoolYear}.
                 </Title>
               }
             />
@@ -658,7 +654,7 @@ const Schedule: React.FC = () => {
             <Empty
               description={
                 <Title level={4}>
-                  Chưa có Thời khóa biểu chính thức cho lớp 
+                  Chưa có Thời khóa biểu chính thức cho lớp
                   {classData.className} trong {selectedMonthName}.
                 </Title>
               }
@@ -669,7 +665,8 @@ const Schedule: React.FC = () => {
           <Card
             title={
               <Title level={4} style={{ margin: 0, color: "#08979c" }}>
-                <CalendarOutlined />Lịch Học Chi Tiết theo Tuần
+                <CalendarOutlined />
+                Lịch Học Chi Tiết theo Tuần
               </Title>
             }
             bordered={false}

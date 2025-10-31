@@ -40,25 +40,25 @@ const StatusTag: React.FC<{ status: string }> = ({ status }) => {
   let text = status;
 
   switch (status.toLowerCase()) {
-    case "có mặt":
+    case "Có mặt":
       color = "success";
       icon = <CheckCircleOutlined />;
       text = "Có Mặt";
       break;
-    case "vắng có phép":
+    case "Vắng mặt có phép":
       color = "warning";
       icon = <AlertOutlined />;
       text = "Vắng (Có phép)";
       break;
     case "vắng không phép":
-      color = "error";
+      color = "Vắng mặt không phép";
       icon = <AlertOutlined />;
       text = "Vắng (Không phép)";
       break;
-    case "chưa điểm danh":
+    case "Đi muộn":
       color = "processing";
       icon = <ClockCircleOutlined />;
-      text = "Chưa điểm danh";
+      text = "Đi muộn";
       break;
     default:
       color = "default";
@@ -177,12 +177,12 @@ const CheckIn: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
+    <div style={{ padding: "24px", margin: "0 auto" }}>
       <Title
         level={2}
         style={{
-          color: "#722ed1",
-          borderBottom: "2px solid #722ed1",
+          color: "#08979c",
+          borderBottom: "2px solid #08979c",
           paddingBottom: 8,
         }}
       >
@@ -196,7 +196,7 @@ const CheckIn: React.FC = () => {
         style={{
           marginBottom: 24,
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-          backgroundColor: "#f9f0ff",
+          backgroundColor: "#e6fffb",
         }}
       >
         <Row gutter={24} align="middle">
@@ -284,7 +284,6 @@ const CheckIn: React.FC = () => {
               bordered={false}
               style={{
                 marginBottom: 24,
-                backgroundColor: "#fff7e6",
                 boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
               }}
             >
