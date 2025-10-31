@@ -92,14 +92,19 @@ export const apiEndPoint = {
   CREATE_TOPIC: "/topics/create",
   UPDATE_TOPIC: (id: string) => `/topics/update/${id}`,
   DELETE_TOPIC: (id: string) => `/topics/delete/${id}`,
-  GET_CLASS_AND_STUDENT_BY_TEACHER: (id: string) => `/teachers/getClassByTeacher/${id}`,
+  GET_CLASS_AND_STUDENT_BY_TEACHER: (id: string) =>
+    `/teachers/getClassByTeacher/${id}`,
   GET_ATTENDANCE_LIST: "/attendances/list",
   CREATE_ATTENDANCE: "/attendances/create",
   UPDATE_ATTENDANCE: (id: string) => `/attendances/update/${id}`,
   DELETE_ATTENDANCE: (id: string) => `/attendances/delete/${id}`,
   GET_ATTENDANCE_BY_ID: (id: string) => `/attendances/getById/${id}`,
-  GET_ATTENDANCE_BY_CLASS_AND_SCHOOLYEAR: (classId: string, schoolYearId: string) => `/attendances/getByClassAndSchoolYear/${classId}/${schoolYearId}`,
-  GET_ATTENDANCE_BY_CLASS_AND_DATE: (id: string, date: string) => `/attendances/getByClassAndDate/${id}/${date}`,
+  GET_ATTENDANCE_BY_CLASS_AND_SCHOOLYEAR: (
+    classId: string,
+    schoolYearId: string
+  ) => `/attendances/getByClassAndSchoolYear/${classId}/${schoolYearId}`,
+  GET_ATTENDANCE_BY_CLASS_AND_DATE: (id: string, date: string) =>
+    `/attendances/getByClassAndDate/${id}/${date}`,
   GET_STUDENT_DETAILS: (id: string) => `/teachers/getByIdStudent/${id}`,
   GET_FEEDBACK_BY_CLASS_AND_DATE: `/feedbacks/getByClassAndDate`,
   GET_FEEDBACK_BY_ID: (id: string) => `/feedbacks/getByIdFeedback/${id}`,
@@ -129,6 +134,22 @@ export const apiEndPoint = {
   CREATE_MEDICAL: "/medicals/create",
   UPDATE_MEDICAL: (id: string) => `/medicals/update/${id}`,
   DELETE_MEDICAL: (id: string) => `/medicals/delete/${id}`,
+  GET_LIST_PARENT_STUDENT: (id: string) =>
+    `/dashboard-parent/getStudentByParent/${id}`,
+  GET_DASHBOARD_SCHEDULE: "/dashboard-schedules/getSchedulesByClassAndMonth",
+  GET_DASHBOARD_CLASS: "/dashboard-class/getClassByStuAndSY",
+
+  GET_LIST_FEEDBACK: "/dashboard-feedbacks/getFbByStuAndDate",
+  GET_LIST_MEDICAL_CHILD: (id: string) =>
+    `/dashboard-medicals/getMedicalByStudent/${id}`,
+  GET_LIST_CHILD: (parentId: string) =>
+    `/dashboard-parent/getStudentByParent/${parentId}`,
+  GET_DATA_CHECK_IN: "/dashboard-attendances/getAttByStuAndDate",
+  GET_DATA_CLASS: "/dashboard-class/getClassByStuAndSY",
+  GET_DATA_SCHEDULE: "/dashboard-schedules/getSchedulesByClassAndMonth",
+  GET_DATA_MENU_CHILD: "/dashboard-menus/getMenuByAgeAndDate",
+  GET_SCHOOL_YEAR_PARENT: "/dashboard-class/shoolYear/list",
+  GET_PDF_BY_PARENTS: (id: string) => `/dashboard-medicals/pdf/${id}`,
 };
 
 export const apiConfig = {
