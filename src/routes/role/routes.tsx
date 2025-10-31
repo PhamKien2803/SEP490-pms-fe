@@ -61,7 +61,8 @@ import TimeTable from "../../pages/teacher/time-table/TimeTable";
 import FeedBack from "../../pages/teacher/feedbacks/FeedBack";
 import TakeFeedback from "../../pages/teacher/feedbacks/take-feedback/TakeFeedback";
 import EditFeedback from "../../pages/teacher/feedbacks/edit-feedback/EditFeedback";
-import ParentDashboard from "../../pages/parent-dashboard/ParentDashboard";
+import StudentInfo from "../../pages/parent-dashboard/dashboard-parents/StudentInfo";
+import DashboardMenu from "../../pages/parent-dashboard/dashboard-menu/DashboardMenu";
 
 export const routes: RouteObject[] = [
   {
@@ -583,18 +584,33 @@ export const routes: RouteObject[] = [
               },
             ],
           },
-           {
-            path: "parents/student-info",
+          {
+            path: "dashboard-parent",
             element: (
               <PrivateRoute
-                requireFunction={`${constants.APP_PREFIX}/parents/student-info`}
+                requireFunction={`${constants.APP_PREFIX}/dashboard-parent`}
                 requireAction="view"
               />
             ),
             children: [
               {
                 index: true,
-                element: <ParentDashboard />,
+                element: <StudentInfo />,
+              }
+            ],
+          },
+          {
+            path: "dashboard-menus",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/dashboard-menus`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <DashboardMenu />,
               }
             ],
           },

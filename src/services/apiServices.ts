@@ -97,6 +97,7 @@ import { AvailableTopicActivitiesResponse, CreateTopicDto, GetAvailableTopicActi
 import { IAttendanceCreatePayload, IAttendanceDetailResponse, IAttendanceListResponse, IAttendanceUpdatePayload, IFeedbackCreatePayload, IFeedbackDetailResponse, IFeedbackListResponse, IFeedbackUpdatePayload, IPaginatedResponse, ITeacherClassStudentResponse, StudentDetailResponse } from "../types/teacher";
 import { AvailableActivityItem, FixActivityResponseItem, IClassBySchoolYearItem, ICreateSchedulePayload, IDailySchedule, TCreateScheduleResponse, TScheduleByIdResponse, TScheduleParamsResponse } from "../types/timetable";
 import { HealthCertCreateData, HealthCertListResponse, HealthCertRecord, HealthCertUpdateData } from "../types/medical-management";
+import { ParentStudentsListResponse } from "../types/parent";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -1172,5 +1173,11 @@ export const medicalApis = {
 };
 
 export const parentDashboardApis = {
+  getParentStudent: async (id: string): Promise<ParentStudentsListResponse> => {
+    const response = await axiosAuth.get<ParentStudentsListResponse>(
+      apiEndPoint.GET_LIST_PARENT_STUDENT(id)
+    );
+    return response.data;
+  },
   
 }
