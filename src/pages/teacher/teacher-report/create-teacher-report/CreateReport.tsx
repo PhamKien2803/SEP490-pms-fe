@@ -155,24 +155,22 @@ function CreateReport() {
     const handleMonthChange = (value: number) => {
         setCurrentMonth(value);
         setCurrentWeek(1);
+        setScheduleData(null);
     };
 
     const handleWeekChange = (direction: 'prev' | 'next') => {
         if (direction === 'prev' && currentWeek > 1) {
             setCurrentWeek(currentWeek - 1);
         } else if (direction === 'next') {
-            const nextWeek = currentWeek + 1;
-            const nextWeekDate = dayjs()
-                .month(currentMonth - 1)
-                .startOf('month')
-                .add((nextWeek - 1) * 7, 'day');
-            if (nextWeekDate.month() + 1 === currentMonth) {
-                setCurrentWeek(nextWeek);
+            const maxWeek = 5; // hoặc fetch trước số tuần tối đa trong tháng từ backend
+            if (currentWeek < maxWeek) {
+                setCurrentWeek(currentWeek + 1);
             } else {
                 toast.info('Đã hết các tuần trong tháng này. Vui lòng chọn tháng khác.');
             }
         }
     };
+
 
 
     const uniqueStartTimes = useMemo(() => {

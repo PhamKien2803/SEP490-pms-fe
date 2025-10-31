@@ -1,267 +1,363 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-    Card,
-    Typography,
-    List,
-    Flex,
-    Table,
-    Tag,
-    Button,
-    Segmented,
-    Spin,
-    Empty,
-    Select,
+    Button, Typography, Select, Table, Card, Row, Col, Space, Tag,
+    Spin, Empty, Segmented
 } from 'antd';
 import {
-    ClockCircleOutlined,
-    LeftOutlined,
-    RightOutlined,
+    LeftOutlined, RightOutlined, LockOutlined,
+    EditOutlined, BulbOutlined
 } from '@ant-design/icons';
-import { useToken } from 'antd/es/theme/internal';
 import dayjs from 'dayjs';
-import weekOfYear from 'dayjs/plugin/weekOfYear';
+import isBetween from 'dayjs/plugin/isBetween';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { useCurrentUser } from '../../../hooks/useCurrentUser';
-import { IDailySchedule } from '../../../types/timetable';
 import { teacherApis } from '../../../services/apiServices';
-import { ILessonListItem, IScheduleDay } from '../../../types/teacher';
+import { IActivity, IGetTimetableTeacherResponse } from '../../../types/teacher';
+import type { ColumnsType } from 'antd/es/table';
+import { toast } from 'react-toastify';
+import TimetableDayView from './TimetableDayView';
 
-dayjs.extend(weekOfYear);
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isBetween);
+
 const { Title, Text } = Typography;
 
+const formatMinutesToTime = (minutes?: number | null): string => {
+    if (minutes == null || isNaN(minutes)) return '--:--';
+    const h = Math.floor(minutes / 60).toString().padStart(2, '0');
+    const m = (minutes % 60).toString().padStart(2, '0');
+    return `${h}:${m}`;
+};
+
+const getActivityProps = (activity: IActivity) => {
+    const style = {
+        width: '100%',
+        minHeight: '50px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        whiteSpace: 'normal' as const,
+        padding: '6px',
+        fontSize: '13px',
+        margin: 0,
+    };
+    if (activity.type === 'Cố định') return { color: 'blue', icon: <LockOutlined />, style };
+    if (activity.type === 'Bình thường') return { color: 'green', icon: <EditOutlined />, style };
+    if (activity.type === 'Sự kiện') return { color: 'gold', icon: <BulbOutlined />, style };
+    return { color: 'default', style };
+};
+
+interface IScheduleRow {
+    key: string;
+    time: string;
+    [dataIndex: string]: any;
+}
+
 const TimeTable = () => {
-    const [token] = useToken();
     const user = useCurrentUser();
     const teacherId = user?.staff;
 
-    const [currentDate, setCurrentDate] = useState(dayjs());
-    const [viewMode, setViewMode] = useState<'week' | 'day'>('week');
-    const [scheduleData, setScheduleData] = useState<IDailySchedule[]>([]);
-    const [lessonData, setLessonData] = useState<ILessonListItem[]>([]);
+    const [currentMonth, setCurrentMonth] = useState(dayjs().month() + 1);
+    const [currentWeek, setCurrentWeek] = useState(1);
     const [loading, setLoading] = useState(false);
-
-    const [schoolYears, setSchoolYears] = useState<{ schoolYear: string }[]>([]);
     const [selectedYear, setSelectedYear] = useState<string>();
+    const [schoolYears, setSchoolYears] = useState<{ schoolYear: string }[]>([]);
+    const [timetableData, setTimetableData] = useState<IGetTimetableTeacherResponse | null>(null);
+    const [viewMode, setViewMode] = useState<'week' | 'day'>('week');
 
-    // 1. Lấy danh sách năm học
+
     useEffect(() => {
         teacherApis.getSchoolYearList({ page: 0, limit: 10 }).then((res) => {
-            const sorted = res.data.sort(
-                (a, b) => dayjs(b.startDate).unix() - dayjs(a.startDate).unix()
-            );
+            const sorted = res.data.sort((a, b) => dayjs(b.startDate).unix() - dayjs(a.startDate).unix());
             setSchoolYears(sorted);
             if (sorted.length > 0) setSelectedYear(sorted[0].schoolYear);
         });
     }, []);
 
-    // 2. Lấy danh sách bài học theo năm học (luôn truyền teacherId)
-    const fetchLessonList = useCallback(() => {
-        if (!selectedYear || !teacherId) return;
-
-        const params = {
-            schoolYear: selectedYear,
-            teacherId,
-            limit: '30',
-            page: '0',
-        };
-
-        setLoading(true);
-        teacherApis
-            .getListLesson(params)
-            .then((res) => setLessonData(res.data))
-            .finally(() => setLoading(false));
-    }, [teacherId, selectedYear]);
-
     useEffect(() => {
-        fetchLessonList();
-    }, [fetchLessonList]);
-
-    // 3. Lấy TKB tuần
-    useEffect(() => {
-        const fetchSchedule = async () => {
-            if (!teacherId) return;
+        if (!teacherId || !selectedYear) return;
+        const fetch = async () => {
+            setLoading(true);
             try {
-                setLoading(true);
-                const params = {
+                const res = await teacherApis.getTimetableTeacher({
                     teacherId,
-                    month: String(currentDate.month() + 1),
-                    week: String(currentDate.week()),
-                };
-                const res = await teacherApis.getScheduleWeek(params);
-                if (res.status === 'Hoàn thành') {
-                    setScheduleData(
-                        res.scheduleDays.map((day: IScheduleDay) => ({
-                            ...day,
-                            activities: day.activities.map((activity: IActivity) => ({
-                                ...activity,
-                                activityName: activity.activityName || 'Unknown Activity',
-                            })),
-                        }))
-                    );
-                } else {
-                    setScheduleData([]);
-                }
+                    schoolYear: selectedYear,
+                    month: String(currentMonth),
+                });
+                setTimetableData(res);
+                const today = dayjs();
+                const index = totalWeeksInMonth.findIndex(
+                    (week) => today.isBetween(week.start, week.end, 'day', '[]')
+                );
+                setCurrentWeek(index >= 0 ? index + 1 : 1);
             } catch (err) {
                 console.error(err);
-                setScheduleData([]);
+                setTimetableData(null);
             } finally {
                 setLoading(false);
             }
         };
-        fetchSchedule();
-    }, [currentDate, teacherId]);
+        fetch();
+    }, [teacherId, selectedYear, currentMonth]);
 
-    const getWeekColumns = () => {
-        const days = [];
-        for (let i = 1; i <= 5; i++) {
-            const date = currentDate.startOf('week').add(i, 'day');
-            days.push({
-                title: `${date.format('dddd')} (${date.format('DD/MM')})`,
-                dataIndex: date.format('YYYY-MM-DD'),
-                key: date.format('YYYY-MM-DD'),
-                align: 'center' as const,
-                render: (val: any) =>
-                    val ? <Tag color={val.color}>{val.title}</Tag> : null,
-            });
+    const totalWeeksInMonth = useMemo(() => {
+        const year = dayjs().year();
+        const firstDayOfMonth = dayjs(`${year}-${currentMonth}-01`);
+        const lastDayOfMonth = firstDayOfMonth.endOf('month');
+        const weeks: { start: dayjs.Dayjs; end: dayjs.Dayjs }[] = [];
+
+        let cursor = firstDayOfMonth.startOf('week').add(1, 'day'); // bắt đầu từ thứ 2
+
+        while (cursor.isBefore(lastDayOfMonth) || cursor.isSame(lastDayOfMonth, 'day')) {
+            const weekStart = cursor;
+            let weekEnd = weekStart.add(6, 'day');
+            if (weekEnd.isAfter(lastDayOfMonth, 'day')) weekEnd = lastDayOfMonth;
+            weeks.push({ start: weekStart, end: weekEnd });
+            cursor = weekStart.add(7, 'day');
         }
+        return weeks;
+    }, [currentMonth]);
 
-        return [
-            {
-                title: 'Giờ học',
-                dataIndex: 'time',
-                key: 'time',
-                fixed: 'left' as const,
-                render: (val: string) => <b>{val}</b>,
-            },
-            ...days,
-        ];
+    const handleWeekChange = (direction: 'prev' | 'next') => {
+        if (direction === 'prev' && currentWeek > 1) {
+            setCurrentWeek(currentWeek - 1);
+        } else if (direction === 'next') {
+            const nextWeek = currentWeek + 1;
+            if (nextWeek <= totalWeeksInMonth.length) {
+                setCurrentWeek(nextWeek);
+            } else {
+                toast.info('Đã hết các tuần trong tháng này. Vui lòng chọn tháng khác.');
+            }
+        }
     };
 
-    const WeekView = () => {
-        if (!scheduleData.length) {
-            return <Empty description="Không có thời khóa biểu tuần này." />;
-        }
+    const getDaysOfWeek = useMemo(() => {
+        if (!timetableData) return [];
+        const { start, end } = totalWeeksInMonth[currentWeek - 1] || {};
+        if (!start || !end) return [];
+        return timetableData.scheduleDays.filter((day) =>
+            dayjs(day.date).isBetween(start, end, 'day', '[]')
+        );
+    }, [timetableData, currentWeek, totalWeeksInMonth]);
 
-        const timeSlots = Array.from(
-            new Set(scheduleData.flatMap((day) => day.activities.map((act) => act.startTime)))
-        ).sort((a, b) => a - b);
+    const uniqueStartTimes = useMemo(() => {
+        if (!getDaysOfWeek.length) return [];
+        const all = getDaysOfWeek.flatMap((d) => d.activities);
+        const times = [...new Set(all.map((a) => a.startTime))];
+        times.sort((a, b) => (a || 0) - (b || 0));
+        return times;
+    }, [getDaysOfWeek]);
 
-        const dataSource = timeSlots.map((startTime, idx) => {
-            const row: any = {
-                key: idx,
-                time: `${Math.floor(startTime / 60)
-                    .toString()
-                    .padStart(2, '0')}:${(startTime % 60).toString().padStart(2, '0')}`,
-            };
-            scheduleData.forEach((day) => {
-                const act = day.activities.find((a) => a.startTime === startTime);
-                const colKey = dayjs(day.date).format('YYYY-MM-DD');
-                if (act) {
-                    row[colKey] = {
-                        title: act.activityName,
-                        color: act.type === 'Cố định' ? 'purple' : 'blue',
+    const columns = useMemo<ColumnsType<IScheduleRow>>(() => {
+        if (!getDaysOfWeek.length) return [];
+
+        const base: ColumnsType<IScheduleRow> = [
+            {
+                title: 'Thời gian',
+                dataIndex: 'time',
+                fixed: 'left',
+                width: 100,
+                align: 'center',
+            },
+        ];
+
+        const dayColumns = getDaysOfWeek.map((day, dayIndex) => ({
+            title: (
+                <div style={{ textAlign: 'center' }}>
+                    <Text strong>{day.dayName}</Text>
+                    <br />
+                    <Text type="secondary">{dayjs(day.date).format('DD/MM')}</Text>
+                </div>
+            ),
+            dataIndex: `day_${dayIndex}`,
+            key: day._id,
+            width: 250,
+            render: (activity: IActivity | null, _record: any, _: any) => {
+                if (!activity) return { children: null, props: { style: { padding: 8 } } };
+
+                const props = getActivityProps(activity);
+
+                if (activity.type === 'Cố định') {
+                    const isFirstFixed =
+                        dayIndex === 0 ||
+                        (() => {
+                            for (let i = dayIndex - 1; i >= 0; i--) {
+                                const prevDay = getDaysOfWeek[i];
+                                if (prevDay.activities.length === 0) return true;
+                                const prevAct = prevDay.activities.find(
+                                    (a) => a.startTime === activity.startTime
+                                );
+                                if (
+                                    !prevAct ||
+                                    prevAct.activityCode !== activity.activityCode ||
+                                    prevAct.type !== 'Cố định'
+                                ) {
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        })();
+
+                    if (!isFirstFixed) {
+                        return { children: null, props: { colSpan: 0 } };
+                    }
+
+                    let colSpan = 1;
+                    for (let j = dayIndex + 1; j < getDaysOfWeek.length; j++) {
+                        const nextDay = getDaysOfWeek[j];
+                        const isHoliday = nextDay.activities.length === 0;
+
+                        if (isHoliday) break; // nếu là ngày nghỉ, ngắt gộp
+
+                        const nextActivity = nextDay.activities.find(
+                            (a) => a.startTime === activity.startTime
+                        );
+                        if (
+                            nextActivity &&
+                            nextActivity.type === 'Cố định' &&
+                            nextActivity.activityCode === activity.activityCode
+                        ) {
+                            colSpan++;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    // nếu không phải ô đầu tiên trong nhóm thì ẩn
+                    if (!isFirstFixed) {
+                        return { children: null, props: { colSpan: 0 } };
+                    }
+
+                    return {
+                        children: (
+                            <div style={{ textAlign: 'center' }}>
+                                <Tag {...props}>{activity.activityName}</Tag>
+                            </div>
+                        ),
+                        props: { colSpan, style: { padding: 8 } },
                     };
                 }
+
+                //Hoạt động bình thường hoặc sự kiện thì hiển thị như cũ
+                return {
+                    children: (
+                        <div style={{ textAlign: 'center' }}>
+                            <Tag {...props}>{activity.activityName || 'Trống'}</Tag>
+                            {activity.type === 'Bình thường' && activity.tittle && (
+                                <ul
+                                    style={{
+                                        fontSize: 12,
+                                        marginTop: 4,
+                                        paddingLeft: 20,
+                                        textAlign: 'left',
+                                    }}
+                                >
+                                    {activity.tittle.split('\n').map((line, i) => (
+                                        <li key={i} style={{ lineHeight: 1.4 }}>
+                                            {line.trim()}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    ),
+                    props: { style: { padding: 8 } },
+                };
+            },
+        }));
+
+        return [...base, ...dayColumns];
+    }, [getDaysOfWeek, uniqueStartTimes]);
+
+
+    const dataSource = useMemo<IScheduleRow[]>(() => {
+        if (!getDaysOfWeek.length || uniqueStartTimes.length === 0) return [];
+        return uniqueStartTimes.map((startTime) => {
+            const time = formatMinutesToTime(startTime);
+            const row: IScheduleRow = { key: time, time };
+            getDaysOfWeek.forEach((day, index) => {
+                const activity = day.activities.find((a) => a.startTime === startTime);
+                row[`day_${index}`] = activity || null;
             });
             return row;
         });
+    }, [getDaysOfWeek, uniqueStartTimes]);
 
-        return (
-            <Table
-                columns={getWeekColumns()}
-                dataSource={dataSource}
-                bordered
-                pagination={false}
-                scroll={{ x: 1000 }}
-            />
-        );
-    };
-
-    const DayView = () => {
-        const todayData = scheduleData.find((day) =>
-            dayjs(day.date).isSame(currentDate, 'day')
-        );
-        if (!todayData) {
-            return <Empty description="Không có thời khóa biểu ngày này." />;
-        }
-
-        const data = todayData.activities.map((a, idx) => ({
-            key: idx,
-            time: `${Math.floor(a.startTime / 60)
-                .toString()
-                .padStart(2, '0')}:${(a.startTime % 60).toString().padStart(2, '0')}`,
-            title: a.activityName,
-            duration: `${a.endTime - a.startTime} phút`,
-            color: a.type === 'Cố định' ? token.colorPurple : token.colorPrimary,
-            tagColor: a.type === 'Cố định' ? 'purple' : 'blue',
-        }));
-
-        return (
-            <List
-                dataSource={data}
-                renderItem={(item) => (
-                    <List.Item>
-                        <Flex align="center" gap={16} style={{ width: '100%' }}>
-                            <ClockCircleOutlined style={{ color: item.color }} />
-                            <div style={{ flex: 1 }}>
-                                <Text type="secondary">{item.time}</Text>
-                                <br />
-                                <Text strong>{item.title}</Text>
-                            </div>
-                            <Tag color={item.tagColor}>{item.duration}</Tag>
-                        </Flex>
-                    </List.Item>
-                )}
-            />
-        );
-    };
+    const classInfo = timetableData ? `${timetableData.className || ''} (${timetableData.schoolYear || ''})` : '';
 
     return (
         <Card
             title={
-                <Flex justify="space-between">
-                    <Title level={4}>Thời khóa biểu</Title>
-                    <Select
-                        value={selectedYear}
-                        onChange={(val) => setSelectedYear(val)}
-                        options={schoolYears.map((y) => ({
-                            label: y.schoolYear,
-                            value: y.schoolYear,
-                        }))}
-                        style={{ minWidth: 160 }}
-                    />
-                </Flex>
+                <Row justify="space-between" align="middle">
+                    <Col>
+                        <Space direction="vertical" size={0}>
+                            <Title level={4} style={{ margin: 0 }}>Thời khóa biểu giáo viên</Title>
+                            {classInfo && <Text type="secondary">{classInfo}</Text>}
+                        </Space>
+                    </Col>
+                    <Col>
+                        <Space>
+                            <Segmented
+                                value={viewMode}
+                                onChange={(val) => setViewMode(val as 'week' | 'day')}
+                                options={[
+                                    { label: 'Tuần', value: 'week' },
+                                    { label: 'Ngày', value: 'day' },
+                                ]}
+                            />
+                            <Select
+                                value={selectedYear}
+                                onChange={setSelectedYear}
+                                options={schoolYears.map((y) => ({ label: y.schoolYear, value: y.schoolYear }))}
+                                style={{ width: 150 }}
+                            />
+                            <Select
+                                value={currentMonth}
+                                onChange={(val) => {
+                                    setCurrentMonth(val);
+                                    setCurrentWeek(1);
+                                }}
+                                options={Array.from({ length: 12 }, (_, i) => ({
+                                    label: `Tháng ${i + 1}`,
+                                    value: i + 1,
+                                }))}
+                                style={{ width: 120 }}
+                            />
+                            <Space.Compact>
+                                <Button icon={<LeftOutlined />} onClick={() => handleWeekChange('prev')} disabled={currentWeek === 1} />
+                                <Button style={{ minWidth: 180, cursor: 'default' }}>
+                                    {totalWeeksInMonth[currentWeek - 1]
+                                        ? `${totalWeeksInMonth[currentWeek - 1].start.format('DD/MM')} - ${totalWeeksInMonth[currentWeek - 1].end.format('DD/MM')} (Tuần ${currentWeek})`
+                                        : `Tuần ${currentWeek}`}
+                                </Button>
+                                <Button icon={<RightOutlined />} onClick={() => handleWeekChange('next')} />
+                            </Space.Compact>
+                        </Space>
+                    </Col>
+                </Row>
             }
-            extra={
-                <Segmented
-                    value={viewMode}
-                    onChange={(val) => setViewMode(val as 'week' | 'day')}
-                    options={[
-                        { label: 'Tuần', value: 'week' },
-                        { label: 'Ngày', value: 'day' },
-                    ]}
-                />
-            }
+            style={{ margin: 16 }}
         >
-            <Flex justify="space-between" style={{ marginBottom: 16 }}>
-                <Button
-                    icon={<LeftOutlined />}
-                    onClick={() => setCurrentDate((prev) => prev.subtract(1, 'week'))}
-                >
-                    Tuần trước
-                </Button>
-                <Text strong>
-                    Tuần {currentDate.week()} - Tháng {currentDate.month() + 1}
-                </Text>
-                <Button
-                    icon={<RightOutlined />}
-                    onClick={() => setCurrentDate((prev) => prev.add(1, 'week'))}
-                >
-                    Tuần sau
-                </Button>
-            </Flex>
-
             <Spin spinning={loading}>
-                {viewMode === 'week' ? <WeekView /> : <DayView />}
+                {!getDaysOfWeek.length ? (
+                    <Empty description="Không có dữ liệu thời khóa biểu" />
+                ) : viewMode === 'week' ? (
+                    <div
+                        style={{ overflowX: 'auto', paddingBottom: 8 }}
+                    >
+                        <Table
+                            columns={columns}
+                            dataSource={dataSource}
+                            bordered
+                            pagination={false}
+                            style={{ width: '100%' }}
+                        />
+                    </div>
+                ) : (
+                    <TimetableDayView getDaysOfWeek={getDaysOfWeek} />
+                )}
             </Spin>
         </Card>
     );

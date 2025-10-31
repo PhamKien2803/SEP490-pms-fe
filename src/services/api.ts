@@ -122,6 +122,7 @@ export const apiEndPoint = {
   REJECT_LESSON: (id: string) => `/lessons/reject-request/${id}`,
   SEND_LESSON: (id: string) => `/lessons/send-request/${id}`,
   CONFIRM_SCHEDULE: (id: string) => `/schedules/confirm/${id}`,
+  GET_TIMETABLE_TEACHER: "/time-table/get-timetable-teacher",
   GET_CLASS_BY_SCHOOLYEAR: "/schedules/getClassBySchoolYear",
   GET_LIST_MEDICAL: "/medicals/list",
   GET_MEDICAL_BY_ID: (id: string) => `/medicals/getById/${id}`,

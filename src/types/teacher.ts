@@ -486,3 +486,28 @@ export interface ILessonDetailResponse {
     weekNumber: number;
     scheduleDays: IScheduleDay[];
 }
+
+
+export interface IGetTimetableTeacherResponse {
+    _id: string;
+    classId: string;
+    classCode: string;
+    className: string;
+    schoolYearId: string;
+    schoolYear: string;
+    month: number;
+    scheduleDays: {
+        _id: string;
+        date: string;
+        dayName: string;
+        activities: {
+            activity: string;
+            activityCode: string;
+            activityName: string;
+            type: string;
+            startTime: number;
+            endTime: number;
+            tittle: string;
+        }[];
+    }[];
+}
