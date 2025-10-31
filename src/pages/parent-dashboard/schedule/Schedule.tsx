@@ -504,7 +504,7 @@ const Schedule: React.FC = () => {
         }}
       >
         <ScheduleOutlined style={{ marginRight: 10 }} />
-        **Thời Khóa Biểu Học Tập**
+        Thời Khóa Biểu Học Tập
       </Title>
       <Divider style={{ margin: "0 0 24px 0" }} />
 
@@ -601,11 +601,11 @@ const Schedule: React.FC = () => {
           <Alert
             message={
               <Text strong style={{ color: "#135200" }}>
-                <HomeOutlined style={{ marginRight: 5 }} /> Lớp Học: **
-                {classData.className}** ({classData.classCode})
+                <HomeOutlined style={{ marginRight: 5 }} /> Lớp Học: 
+                {classData.className} ({classData.classCode})
               </Text>
             }
-            description={`Thời khóa biểu của bé **${selectedStudent?.fullName}** trong **${selectedMonthName}** (${selectedSchoolYear}).`}
+            description={`Thời khóa biểu của bé ${selectedStudent?.fullName} trong ${selectedMonthName} (${selectedSchoolYear}).`}
             type="success"
             showIcon
             style={{
@@ -635,9 +635,9 @@ const Schedule: React.FC = () => {
             <Empty
               description={
                 <Title level={4}>
-                  Không tìm thấy thông tin lớp học của bé **
-                  {selectedStudent?.fullName}** trong năm **{selectedSchoolYear}
-                  **.
+                  Không tìm thấy thông tin lớp học của bé 
+                  {selectedStudent?.fullName} trong năm {selectedSchoolYear}
+                  .
                 </Title>
               }
             />
@@ -658,8 +658,8 @@ const Schedule: React.FC = () => {
             <Empty
               description={
                 <Title level={4}>
-                  Chưa có **Thời khóa biểu chính thức** cho lớp **
-                  {classData.className}** trong **{selectedMonthName}**.
+                  Chưa có Thời khóa biểu chính thức cho lớp 
+                  {classData.className} trong {selectedMonthName}.
                 </Title>
               }
             />
@@ -669,7 +669,7 @@ const Schedule: React.FC = () => {
           <Card
             title={
               <Title level={4} style={{ margin: 0, color: "#08979c" }}>
-                <CalendarOutlined /> **Lịch Học Chi Tiết theo Tuần**
+                <CalendarOutlined />Lịch Học Chi Tiết theo Tuần
               </Title>
             }
             bordered={false}

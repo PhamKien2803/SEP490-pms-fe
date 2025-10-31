@@ -170,8 +170,8 @@ const StudentInfoSection: React.FC<{ student: StudentListItem, parent: ParentInf
             contentStyle={{ color: TEXT_COLOR }}
             style={{ marginBottom: 30 }}
           >
-            <Descriptions.Item label="Dân tộc"><FlagOutlined style={{ color: ACCENT_COLOR, marginRight: 5 }}/>{student.nation}</Descriptions.Item>
-            <Descriptions.Item label="Tôn giáo"><SafetyOutlined style={{ color: ACCENT_COLOR, marginRight: 5 }}/>{student.religion}</Descriptions.Item>
+            <Descriptions.Item label="Dân tộc"><FlagOutlined style={{ color: ACCENT_COLOR, marginRight: 5 }}/>{student?.nation}</Descriptions.Item>
+            <Descriptions.Item label="Tôn giáo"><SafetyOutlined style={{ color: ACCENT_COLOR, marginRight: 5 }}/>{student?.religion}</Descriptions.Item>
           </Descriptions>
 
           <Divider orientation="left" style={{ margin: '30px 0' }}>

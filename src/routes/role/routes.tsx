@@ -62,15 +62,16 @@ import FeedBack from "../../pages/teacher/feedbacks/FeedBack";
 import TakeFeedback from "../../pages/teacher/feedbacks/take-feedback/TakeFeedback";
 import EditFeedback from "../../pages/teacher/feedbacks/edit-feedback/EditFeedback";
 import TeacherReport from "../../pages/teacher/teacher-report/TeacherReport";
-import CreateReport from "../../pages/teacher/teacher-report/create-teacher-report/CreateReport";
-import UpdateReport from "../../pages/teacher/teacher-report/update-teacher-report/UpdateReport";
-import ReportDetails from "../../pages/teacher/teacher-report/teacher-report-details/ReportDetails";
 import StudentInfo from "../../pages/parent-dashboard/dashboard-parents/StudentInfo";
-import DashboardMenu from "../../pages/parent-dashboard/dashboard-menu/DashboardMenu";
-import TeacherReport from "../../pages/teacher/teacher-report/TeacherReport";
 import CreateReport from "../../pages/teacher/teacher-report/create-teacher-report/CreateReport";
 import UpdateReport from "../../pages/teacher/teacher-report/update-teacher-report/UpdateReport";
 import ReportDetails from "../../pages/teacher/teacher-report/teacher-report-details/ReportDetails";
+import Feedback from "../../pages/parent-dashboard/feedback/Feedback";
+import CheckIn from "../../pages/parent-dashboard/check-in/CheckIn";
+import ClassChild from "../../pages/parent-dashboard/class-child/ClassChild";
+import Schedule from "../../pages/parent-dashboard/schedule/Schedule";
+import Menu from "../../pages/parent-dashboard/menu/Menu";
+import Medical from "../../pages/parent-dashboard/medical/Medical";
 
 export const routes: RouteObject[] = [
   {
@@ -619,7 +620,7 @@ export const routes: RouteObject[] = [
             ],
           },
           {
-            path: "parents/student-info",
+            path: "dashboard-parent",
             element: (
               <PrivateRoute
                 requireFunction={`${constants.APP_PREFIX}/dashboard-parent`}
@@ -634,6 +635,81 @@ export const routes: RouteObject[] = [
             ],
           },
           {
+            path: "dashboard-feedbacks",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/dashboard-feedbacks`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <Feedback />,
+              },
+            ],
+          },
+          {
+            path: "dashboard-medicals",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/dashboard-medicals`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <Medical />,
+              },
+            ],
+          },
+          {
+            path: "dashboard-attendances",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/dashboard-attendances`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <CheckIn />,
+              },
+            ],
+          },
+          {
+            path: "dashboard-class",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/dashboard-class`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <ClassChild />,
+              },
+            ],
+          },
+          {
+            path: "dashboard-schedules",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/dashboard-schedules`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <Schedule />,
+              },
+            ],
+          },
+          {
             path: "dashboard-menus",
             element: (
               <PrivateRoute
@@ -644,7 +720,7 @@ export const routes: RouteObject[] = [
             children: [
               {
                 index: true,
-                element: <DashboardMenu />,
+                element: <Menu />,
               },
             ],
           },

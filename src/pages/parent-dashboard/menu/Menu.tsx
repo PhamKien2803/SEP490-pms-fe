@@ -80,7 +80,7 @@ const NutritionSummary: React.FC<NutritionSummaryProps> = ({
           textAlign: "center",
         }}
       >
-        **Calo**: {calo.toFixed(0)} kcal
+        Calo: {calo.toFixed(0)} kcal
       </Tag>
     </Col>
     <Col xs={12} md={6} style={{ minWidth: 150 }}>
@@ -93,7 +93,7 @@ const NutritionSummary: React.FC<NutritionSummaryProps> = ({
           textAlign: "center",
         }}
       >
-        **Protein**: {protein.toFixed(1)} g
+        Protein: {protein.toFixed(1)} g
       </Tag>
     </Col>
     <Col xs={12} md={6} style={{ minWidth: 150 }}>
@@ -106,7 +106,7 @@ const NutritionSummary: React.FC<NutritionSummaryProps> = ({
           textAlign: "center",
         }}
       >
-        **Lipid**: {lipid.toFixed(1)} g
+        Lipid: {lipid.toFixed(1)} g
       </Tag>
     </Col>
     <Col xs={12} md={6} style={{ minWidth: 150 }}>
@@ -119,7 +119,7 @@ const NutritionSummary: React.FC<NutritionSummaryProps> = ({
           textAlign: "center",
         }}
       >
-        **Carb**: {carb.toFixed(1)} g
+        Carb: {carb.toFixed(1)} g
       </Tag>
     </Col>
   </Row>
@@ -304,8 +304,8 @@ const Menu: React.FC = () => {
               type="inner"
               title={
                 <Text strong style={{ color: "#2f54eb", fontSize: 16 }}>
-                  <ForkOutlined style={{ marginRight: 5 }} /> **
-                  {foodWrapper.food.foodName}**
+                  <ForkOutlined style={{ marginRight: 5 }} /> 
+                  {foodWrapper.food.foodName}
                 </Text>
               }
               style={{ marginBottom: 15, borderLeft: "3px solid #adc6ff" }}
@@ -340,7 +340,7 @@ const Menu: React.FC = () => {
         }}
       >
         <ForkOutlined style={{ marginRight: 10 }} />
-        **Menu Dinh Dưỡng Hàng Ngày**
+        Menu Dinh Dưỡng Hàng Ngày
       </Title>
       <Divider style={{ margin: "20px 0" }} />
 
@@ -368,7 +368,7 @@ const Menu: React.FC = () => {
                 fontSize: 15,
               }}
             >
-              Chọn **Nhóm tuổi/Lớp học**:
+              Chọn Nhóm tuổi/Lớp học:
             </Text>
             <Select
               value={selectedAgeGroup}
@@ -395,7 +395,7 @@ const Menu: React.FC = () => {
                 fontSize: 15,
               }}
             >
-              Chọn **Ngày xem Menu**:
+              Chọn Ngày xem Menu:
             </Text>
             <DatePicker
               value={selectedDateDayjs}
@@ -425,7 +425,7 @@ const Menu: React.FC = () => {
             <Empty
               description={
                 <Title level={4} style={{ fontSize: 22 }}>
-                  Chưa có **Menu chính thức** cho nhóm{" "}
+                  Chưa có Menu chính thức cho nhóm{" "}
                   <Text strong>{selectedAgeGroupLabel}</Text> vào ngày{" "}
                   <Text strong>
                     {selectedDateDayjs
@@ -447,7 +447,7 @@ const Menu: React.FC = () => {
                   level={4}
                   style={{ margin: 0, color: "#08979c", fontSize: 24 }}
                 >
-                  <ForkOutlined /> **Tóm Tắt Dinh Dưỡng Ngày**
+                  <ForkOutlined /> Tóm Tắt Dinh Dưỡng Ngày
                 </Title>
               }
               bordered={false}
@@ -493,7 +493,7 @@ const Menu: React.FC = () => {
                     color="volcano"
                     style={{ fontSize: 15, padding: "4px 8px" }}
                   >
-                    **{currentDayMenu.totalCalo.toFixed(0)} kcal**
+                    {currentDayMenu.totalCalo.toFixed(0)} kcal
                   </Tag>
                 </Descriptions.Item>
                 <Descriptions.Item

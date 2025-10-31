@@ -148,7 +148,22 @@ import {
   HealthCertRecord,
   HealthCertUpdateData,
 } from "../types/medical-management";
-import { ParentStudentsListResponse } from "../types/parent";
+import {
+  CheckInParams,
+  CheckInResponse,
+  ChildResponse,
+  ClassChildParams,
+  ClassDetailResponse,
+  FeedbackParams,
+  FeedbackResponse,
+  HealthCheckResponse,
+  MenuParams,
+  MenuResponse,
+  PageParams,
+  ParentStudentsListResponse,
+  ScheduleList,
+  ScheduleParams,
+} from "../types/parent";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -1287,6 +1302,88 @@ export const parentDashboardApis = {
   getParentStudent: async (id: string): Promise<ParentStudentsListResponse> => {
     const response = await axiosAuth.get<ParentStudentsListResponse>(
       apiEndPoint.GET_LIST_PARENT_STUDENT(id)
+    );
+    return response.data;
+  },
+
+  getListFeedback: async (
+    params: FeedbackParams
+  ): Promise<FeedbackResponse> => {
+    const response = await axiosAuth.get<FeedbackResponse>(
+      apiEndPoint.GET_LIST_FEEDBACK,
+      { params }
+    );
+    return response.data;
+  },
+
+  getListMedical: async (
+    userId: string,
+    params: PageParams
+  ): Promise<HealthCheckResponse> => {
+    const response = await axiosAuth.get<HealthCheckResponse>(
+      apiEndPoint.GET_LIST_MEDICAL_CHILD(userId),
+      { params }
+    );
+    return response.data;
+  },
+
+  getListChild: async (parentId: string): Promise<ChildResponse> => {
+    const response = await axiosAuth.get<ChildResponse>(
+      apiEndPoint.GET_LIST_CHILD(parentId)
+    );
+    return response.data;
+  },
+
+  getDataCheckIn: async (params: CheckInParams): Promise<CheckInResponse> => {
+    const response = await axiosAuth.get<CheckInResponse>(
+      apiEndPoint.GET_DATA_CHECK_IN,
+      { params }
+    );
+    return response.data;
+  },
+
+  getDataClass: async (
+    params: ClassChildParams
+  ): Promise<ClassDetailResponse> => {
+    const response = await axiosAuth.get<ClassDetailResponse>(
+      apiEndPoint.GET_DATA_CLASS,
+      { params }
+    );
+    return response.data;
+  },
+
+  getDataSchedule: async (params: ScheduleParams): Promise<ScheduleList> => {
+    const response = await axiosAuth.get<ScheduleList>(
+      apiEndPoint.GET_DATA_SCHEDULE,
+      { params }
+    );
+    return response.data;
+  },
+
+  getDataMenu: async (params: MenuParams): Promise<MenuResponse> => {
+    const response = await axiosAuth.get<MenuResponse>(
+      apiEndPoint.GET_DATA_MENU_CHILD,
+      { params }
+    );
+    return response.data;
+  },
+
+  getSchoolYearParent: async (params: {
+    page: number;
+    limit: number;
+  }): Promise<SchoolYearsListResponse> => {
+    const response = await axiosAuth.get<SchoolYearsListResponse>(
+      apiEndPoint.GET_SCHOOL_YEAR_PARENT,
+      { params }
+    );
+    return response.data;
+  },
+  getPDFById: async (id: string): Promise<ArrayBuffer> => {
+    const response = await axiosAuth.get<ArrayBuffer>(
+      apiEndPoint.GET_PDF_BY_PARENTS(id),
+      {
+        responseType: "arraybuffer",
+      }
     );
     return response.data;
   },
