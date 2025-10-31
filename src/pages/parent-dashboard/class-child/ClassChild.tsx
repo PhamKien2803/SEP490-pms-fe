@@ -7,141 +7,98 @@ import {
   Typography,
   Divider,
   Empty,
-  Select,
+  Button,
   Descriptions,
-  Table,
+  Select,
+  DatePicker,
   Tag,
 } from "antd";
 import {
-  UserOutlined,
-  TeamOutlined,
-  HomeOutlined,
-  ScheduleOutlined,
   CalendarOutlined,
+  UserOutlined,
+  ClockCircleOutlined,
   CheckCircleOutlined,
-  EnvironmentOutlined,
-  BookOutlined,
-  PhoneOutlined,
-  SolutionOutlined,
+  AlertOutlined,
+  HomeOutlined,
+  TeamOutlined,
+  ScheduleOutlined,
 } from "@ant-design/icons";
+import dayjs, { Dayjs } from "dayjs";
 import { useCurrentUser } from "../../../hooks/useCurrentUser";
 import { parentDashboardApis } from "../../../services/apiServices";
 import { Student } from "../../../types/parent";
-import { ClassDetailResponse } from "../../../types/parent";
-import { toast } from "react-toastify";
-import { SchoolYearListItem } from "../../../types/schoolYear";
+import { CheckInResponse, CheckInParams } from "../../../types/parent";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
-interface ClassChildParams {
-  studentId: string;
-  schoolYearId: string;
-}
+const defaultDate = dayjs();
 
-const studentColumns = [
-  {
-    title: "Mã HS",
-    dataIndex: "studentCode",
-    key: "studentCode",
-    width: 120,
-  },
-  {
-    title: "Họ và Tên",
-    dataIndex: "fullName",
-    key: "fullName",
-    render: (text: string) => <Text strong>{text}</Text>,
-  },
-  {
-    title: "Giới tính",
-    dataIndex: "gender",
-    key: "gender",
-    width: 100,
-    render: (gender: string) => (
-      <Tag color={gender?.toLowerCase() === "nam" ? "blue" : "pink"}>
-        {gender || "N/A"}
-      </Tag>
-    ),
-  },
-];
+const StatusTag: React.FC<{ status: string }> = ({ status }) => {
+  let color = "default";
+  let icon = <ClockCircleOutlined />;
+  let text = status;
 
-const teacherColumns = [
-  {
-    title: "Họ và Tên",
-    dataIndex: "fullName",
-    key: "fullName",
-    render: (text: string) => <Text strong>{text}</Text>,
-  },
-  {
-    title: "Số điện thoại",
-    dataIndex: "phoneNumber",
-    key: "phoneNumber",
-    width: 150,
-    render: (phone: string) =>
-      phone ? (
-        <>
-          <PhoneOutlined /> {phone}
-        </>
-      ) : (
-        "N/A"
-      ),
-  },
-];
+  switch (status.toLowerCase()) {
+    case "có mặt":
+      color = "success";
+      icon = <CheckCircleOutlined />;
+      text = "Có Mặt";
+      break;
+    case "vắng có phép":
+      color = "warning";
+      icon = <AlertOutlined />;
+      text = "Vắng (Có phép)";
+      break;
+    case "vắng không phép":
+      color = "error";
+      icon = <AlertOutlined />;
+      text = "Vắng (Không phép)";
+      break;
+    case "chưa điểm danh":
+      color = "processing";
+      icon = <ClockCircleOutlined />;
+      text = "Chưa điểm danh";
+      break;
+    default:
+      color = "default";
+      icon = <ClockCircleOutlined />;
+      break;
+  }
 
-const ClassChild: React.FC = () => {
+  return (
+    <Tag
+      icon={icon}
+      color={color}
+      style={{ fontSize: "1em", padding: "4px 8px" }}
+    >
+      {text}
+    </Tag>
+  );
+};
+
+const CheckIn: React.FC = () => {
   const user = useCurrentUser();
   const [listChild, setListChild] = useState<Student[]>([]);
   const [selectedStudentId, setSelectedStudentId] = useState<
     string | undefined
   >();
-  const [classDetail, setClassDetail] = useState<ClassDetailResponse | null>(
-    null
-  );
+  const [selectedDate, setSelectedDate] = useState<Dayjs>(defaultDate);
+  const [checkIn, setCheckIn] = useState<CheckInResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
-  const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
-  const [selectedSchoolYear, setSelectedSchoolYear] = useState<
-    string | undefined
-  >(undefined);
 
-  const params: ClassChildParams = useMemo(() => {
-    const schoolYear = schoolYears?.filter(
-      (item) => item?.schoolYear === selectedSchoolYear
-    );
-    return {
+  const params: CheckInParams = useMemo(
+    () => ({
       studentId: selectedStudentId || "",
-      schoolYearId: schoolYear?.[0]?._id || "",
-    };
-  }, [selectedStudentId, selectedSchoolYear]);
+      date: selectedDate.format("YYYY-MM-DD"),
+    }),
+    [selectedStudentId, selectedDate]
+  );
 
-  useEffect(() => {
-    const fetchSchoolYears = async () => {
-      try {
-        const response = await parentDashboardApis.getSchoolYearParent({
-          page: 1,
-          limit: 100,
-        });
-        if (response.data && response.data.length > 0) {
-          const sorted = [...response.data].sort((a, b) => {
-            const startA = parseInt(a.schoolYear.split("-")[0]);
-            const startB = parseInt(b.schoolYear.split("-")[0]);
-            return startB - startA;
-          });
-
-          const latestYear = sorted[0];
-
-          setSchoolYears(sorted);
-          setSelectedSchoolYear(latestYear.schoolYear);
-        }
-      } catch (error) {
-        typeof error === "string"
-          ? toast.warn(error)
-          : toast.error("Không thể tải danh sách năm học.");
-      }
-    };
-
-    fetchSchoolYears();
-  }, []);
+  const disabledDate = (current: Dayjs) => {
+    return current && current.isAfter(dayjs(), "day");
+  };
 
   useEffect(() => {
     getDataListChild();
@@ -169,9 +126,9 @@ const ClassChild: React.FC = () => {
     }
   };
 
-  const fetchClassDetail = async () => {
-    if (!selectedStudentId || !selectedSchoolYear) {
-      setClassDetail(null);
+  const fetchCheckIn = async () => {
+    if (!selectedStudentId || !selectedDate) {
+      setCheckIn(null);
       setIsLoading(false);
       return;
     }
@@ -179,20 +136,25 @@ const ClassChild: React.FC = () => {
     setIsLoading(true);
     setIsError(false);
     try {
-      const data = await parentDashboardApis.getDataClass(params);
-      setClassDetail(data);
+      const data = await parentDashboardApis.getDataCheckIn(params);
+      setCheckIn(data);
     } catch (error) {
       setIsError(true);
-      setClassDetail(null);
-      console.error("Lỗi khi fetch chi tiết lớp:", error);
+      setCheckIn(null);
+      console.error("Lỗi khi fetch check-in:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchClassDetail();
-  }, [params.studentId, params.schoolYearId]);
+    // Chỉ fetch khi cả studentId và date đều có giá trị
+    if (params.studentId && params.date) {
+      fetchCheckIn();
+    } else {
+      setCheckIn(null);
+    }
+  }, [params.studentId, params.date]);
 
   const selectedStudent = listChild.find((s) => s._id === selectedStudentId);
 
@@ -219,10 +181,8 @@ const ClassChild: React.FC = () => {
     );
   }
 
-  const classData = classDetail?.class;
-
   return (
-    <div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
+    <div style={{ padding: "24px", margin: "0 auto" }}>
       <Title
         level={2}
         style={{
@@ -231,8 +191,8 @@ const ClassChild: React.FC = () => {
           paddingBottom: 8,
         }}
       >
-        <HomeOutlined style={{ marginRight: 10 }} />
-        Thông Tin Chi Tiết Lớp Học
+        <ScheduleOutlined style={{ marginRight: 10 }} />
+        Báo Cáo Điểm Danh Hàng Ngày
       </Title>
       <Divider style={{ margin: "16px 0" }} />
 
@@ -244,8 +204,8 @@ const ClassChild: React.FC = () => {
           backgroundColor: "#e6fffb",
         }}
       >
-        <Row gutter={24} align="middle">
-          <Col span={12}>
+        <Row gutter={[16, 16]} align="middle">
+          <Col xs={24} md={12}>
             <Text
               strong
               style={{ display: "block", marginBottom: 4, color: "#595959" }}
@@ -266,69 +226,69 @@ const ClassChild: React.FC = () => {
               ))}
             </Select>
           </Col>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Text
               strong
               style={{ display: "block", marginBottom: 4, color: "#595959" }}
             >
-              <CalendarOutlined style={{ marginRight: 4 }} /> Chọn năm học:
+              <ClockCircleOutlined style={{ marginRight: 4 }} /> Chọn ngày:
             </Text>
-            <Select
-              value={selectedSchoolYear}
+            <DatePicker
+              value={selectedDate}
+              onChange={(date) => {
+                if (date) setSelectedDate(date);
+              }}
+              disabledDate={disabledDate}
+              format="DD/MM/YYYY"
               style={{ width: "100%" }}
-              onChange={(value) => setSelectedSchoolYear(value)}
-              placeholder="Chọn năm học"
               size="large"
-            >
-              {schoolYears.map((year) => (
-                <Option key={year._id} value={year.schoolYear}>
-                  {year.schoolYear}
-                </Option>
-              ))}
-            </Select>
+            />
           </Col>
         </Row>
       </Card>
 
       <Spin spinning={isLoading}>
-        {isError && !classData && (
+        {isError && !checkIn && (
           <div style={{ textAlign: "center", padding: "50px" }}>
             <Empty
               description={
                 <Title level={4} type="danger">
-                  Không thể tải dữ liệu lớp học. Vui lòng thử lại.
+                  Không thể tải dữ liệu điểm danh. Vui lòng thử lại.
                 </Title>
               }
             />
+            <Button type="primary" onClick={fetchCheckIn}>
+              Thử lại
+            </Button>
           </div>
         )}
 
-        {!classData && !isError && selectedStudentId && (
+        {!checkIn && !isError && selectedStudentId && (
           <div style={{ textAlign: "center", padding: "50px" }}>
             <Empty
               description={
                 <Title level={4}>
-                  Không tìm thấy thông tin lớp học của{" "}
-                  <Text strong>{selectedStudent?.fullName}</Text> trong{" "}
-                  <Text strong>{selectedSchoolYear}</Text>.
+                  Chưa có thông tin điểm danh cho{" "}
+                  <Text strong>{selectedStudent?.fullName}</Text> vào ngày{" "}
+                  <Text strong>{selectedDate.format("DD/MM/YYYY")}</Text>.
                 </Title>
               }
             />
+            <Button onClick={fetchCheckIn}>Tải lại dữ liệu</Button>
           </div>
         )}
 
-        {classData && (
+        {checkIn && (
           <>
             <Card
               title={
                 <Title level={4} style={{ margin: 0 }}>
-                  <TeamOutlined /> Chi Tiết Lớp {classData.className}
+                  <CheckCircleOutlined /> Tóm Tắt Điểm Danh
                 </Title>
               }
               bordered={false}
               style={{
                 marginBottom: 24,
-                backgroundColor: "#e6f7ff",
                 boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
               }}
             >
@@ -340,93 +300,117 @@ const ClassChild: React.FC = () => {
                 <Descriptions.Item
                   label={
                     <Text strong>
-                      <BookOutlined /> Tên Lớp
+                      <UserOutlined /> Học sinh
                     </Text>
                   }
                 >
                   <Text>
-                    {classData.className} ({classData.classCode})
+                    {checkIn.student.student.fullName} (
+                    {checkIn.student.student.studentCode})
                   </Text>
                 </Descriptions.Item>
                 <Descriptions.Item
                   label={
                     <Text strong>
-                      <EnvironmentOutlined /> Phòng Học
+                      <TeamOutlined /> Lớp học
                     </Text>
                   }
                 >
-                  <Text>{classData.room?.roomName || "N/A"}</Text>
+                  <Text>
+                    {checkIn.class.className} ({checkIn.class.classCode})
+                  </Text>
                 </Descriptions.Item>
                 <Descriptions.Item
                   label={
                     <Text strong>
-                      <ScheduleOutlined /> Sĩ số
+                      <CalendarOutlined /> Ngày
                     </Text>
                   }
                 >
-                  <Text>{classData.students?.length || 0} học sinh</Text>
+                  <Text>{dayjs(checkIn.date).format("DD/MM/YYYY")}</Text>
                 </Descriptions.Item>
+
                 <Descriptions.Item
                   label={
                     <Text strong>
-                      <CalendarOutlined /> Năm Học
+                      <CheckCircleOutlined /> Tình trạng
                     </Text>
                   }
+                  span={1.5}
                 >
-                  <Text>{classData.schoolYear?.schoolYear || "N/A"}</Text>
-                </Descriptions.Item>
-                <Descriptions.Item
-                  label={
-                    <Text strong>
-                      <SolutionOutlined /> Độ tuổi
-                    </Text>
-                  }
-                >
-                  <Text>{classData.age || "N/A"}</Text>
-                </Descriptions.Item>
-                <Descriptions.Item
-                  label={
-                    <Text strong>
-                      <CheckCircleOutlined /> Trạng Thái
-                    </Text>
-                  }
-                >
-                  <Tag color={classData.active ? "success" : "red"}>
-                    {classData.active ? "Đang hoạt động" : "Đã kết thúc"}
-                  </Tag>
+                  <StatusTag
+                    status={checkIn.student.status || "Chưa điểm danh"}
+                  />
                 </Descriptions.Item>
               </Descriptions>
             </Card>
 
-            <Title level={3} style={{ margin: 20 }}>
-              <TeamOutlined /> Danh Sách Giáo Viên
-            </Title>
-            <Card style={{ boxShadow: "0 2px 8px rgba(0, 0, 0, 0.09)" }}>
-              <Table
-                columns={teacherColumns}
-                dataSource={classData.teachers ?? []}
-                rowKey="_id"
-                pagination={false}
-                size="middle"
-                locale={{
-                  emptyText: "Chưa có thông tin giáo viên chính thức.",
-                }}
-              />
-            </Card>
+            <Row gutter={[16, 16]}>
+              <Col xs={24} md={12}>
+                <Card
+                  title={
+                    <Title level={4} style={{ margin: 0 }}>
+                      <TeamOutlined /> Thông tin giáo viên
+                    </Title>
+                  }
+                  bordered={false}
+                  style={{
+                    marginBottom: 24,
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.09)",
+                  }}
+                >
+                  <Descriptions
+                    column={1}
+                    size="small"
+                    layout="vertical"
+                    colon={false}
+                  >
+                    <Descriptions.Item label={<Text strong>Tên</Text>}>
+                      <Text>{checkIn.teacher.fullName}</Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label={<Text strong>Điện thoại</Text>}>
+                      <Text>
+                        {checkIn.teacher.phoneNumber || "Không cung cấp."}
+                      </Text>
+                    </Descriptions.Item>
+                  </Descriptions>
+                </Card>
+              </Col>
+              <Col xs={24} md={12}>
+                <Card
+                  title={
+                    <Title level={4} style={{ margin: 0 }}>
+                      <HomeOutlined /> Nhận xét chung của giáo viên
+                    </Title>
+                  }
+                  bordered={false}
+                  style={{
+                    marginBottom: 24,
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.09)",
+                  }}
+                >
+                  <Text italic>
+                    {checkIn.generalNote ||
+                      "Không có ghi chú chung cho ngày học này."}
+                  </Text>
+                </Card>
+              </Col>
+            </Row>
 
-            <Title level={3} style={{ margin: 20 }}>
-              <UserOutlined /> Danh Sách Học Sinh (
-              {classData.students?.length || 0})
-            </Title>
-            <Card style={{ boxShadow: "0 2px 8px rgba(0, 0, 0, 0.09)" }}>
-              <Table
-                columns={studentColumns}
-                dataSource={classData.students ?? []}
-                rowKey="_id"
-                pagination={{ pageSize: 10 }}
-                size="middle"
-              />
-            </Card>
+            <Divider orientation="left" style={{ margin: "24px 0" }}>
+              <Title level={3} style={{ margin: 0, color: "#08979c" }}>
+                <CalendarOutlined /> Chi Tiết Học Kỳ
+              </Title>
+            </Divider>
+
+            <Descriptions column={2} bordered size="middle">
+              <Descriptions.Item label={<Text strong>Năm học</Text>}>
+                <Text>{checkIn.schoolYear.schoolYear}</Text>
+              </Descriptions.Item>
+              <Descriptions.Item label={<Text strong>Mã năm học</Text>}>
+                <Text>{checkIn.schoolYear.schoolyearCode}</Text>
+              </Descriptions.Item>
+            </Descriptions>
           </>
         )}
       </Spin>
@@ -434,4 +418,4 @@ const ClassChild: React.FC = () => {
   );
 };
 
-export default ClassChild;
+export default CheckIn;

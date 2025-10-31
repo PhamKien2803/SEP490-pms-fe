@@ -238,15 +238,6 @@ const Menu: React.FC = () => {
   )?.label;
 
   const renderMealCard = (meal: Meal) => {
-    const mealTypeMap: { [key: string]: string } = {
-      BREAKFAST: "Bữa Sáng",
-      LUNCH: "Bữa Trưa",
-      SNACK: "Bữa Phụ/Chiều",
-      DINNER: "Bữa Tối",
-      SUPPER: "Bữa Khuya",
-    };
-    const title = mealTypeMap[meal.mealType] || meal.mealType;
-
     return (
       <Card
         key={meal.mealType}
@@ -261,10 +252,8 @@ const Menu: React.FC = () => {
             }}
           >
             {" "}
-            <ClockCircleOutlined
-              style={{ marginRight: 8, color: "#faad14" }}
-            />{" "}
-            {title}
+            <ClockCircleOutlined style={{ marginRight: 8, color: "#faad14" }} />
+            Bữa {meal?.mealType}
           </Text>
         }
         size="default"
@@ -304,7 +293,7 @@ const Menu: React.FC = () => {
               type="inner"
               title={
                 <Text strong style={{ color: "#2f54eb", fontSize: 16 }}>
-                  <ForkOutlined style={{ marginRight: 5 }} /> 
+                  <ForkOutlined style={{ marginRight: 5 }} />
                   {foodWrapper.food.foodName}
                 </Text>
               }
@@ -329,7 +318,7 @@ const Menu: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: "24px", maxWidth: "1400px", margin: "0 auto" }}>
+    <div style={{ padding: "24px", margin: "0 auto" }}>
       <Title
         level={2}
         style={{

@@ -195,7 +195,7 @@ const Feedback: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
+    <div style={{ padding: "24px", margin: "0 auto" }}>
       <Title
         level={2}
         style={{
@@ -214,7 +214,7 @@ const Feedback: React.FC = () => {
         style={{
           marginBottom: 24,
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-          backgroundColor: "#f0f2f5",
+          backgroundColor: "#e6fffb",
         }}
       >
         <Row gutter={24} align="middle">
