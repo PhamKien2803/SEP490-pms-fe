@@ -65,7 +65,8 @@ import TeacherReport from "../../pages/teacher/teacher-report/TeacherReport";
 import CreateReport from "../../pages/teacher/teacher-report/create-teacher-report/CreateReport";
 import UpdateReport from "../../pages/teacher/teacher-report/update-teacher-report/UpdateReport";
 import ReportDetails from "../../pages/teacher/teacher-report/teacher-report-details/ReportDetails";
-import ParentDashboard from "../../pages/parent-dashboard/ParentDashboard";
+import StudentInfo from "../../pages/parent-dashboard/dashboard-parents/StudentInfo";
+import DashboardMenu from "../../pages/parent-dashboard/dashboard-menu/DashboardMenu";
 
 export const routes: RouteObject[] = [
   {
@@ -617,14 +618,29 @@ export const routes: RouteObject[] = [
             path: "parents/student-info",
             element: (
               <PrivateRoute
-                requireFunction={`${constants.APP_PREFIX}/parents/student-info`}
+                requireFunction={`${constants.APP_PREFIX}/dashboard-parent`}
                 requireAction="view"
               />
             ),
             children: [
               {
                 index: true,
-                element: <ParentDashboard />,
+                element: <StudentInfo />,
+              },
+            ],
+          },
+          {
+            path: "dashboard-menus",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/dashboard-menus`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <DashboardMenu />,
               },
             ],
           },

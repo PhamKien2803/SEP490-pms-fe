@@ -129,6 +129,9 @@ export const apiEndPoint = {
   CREATE_MEDICAL: "/medicals/create",
   UPDATE_MEDICAL: (id: string) => `/medicals/update/${id}`,
   DELETE_MEDICAL: (id: string) => `/medicals/delete/${id}`,
+  GET_LIST_PARENT_STUDENT:(id: string) => `/dashboard-parent/getStudentByParent/${id}`,
+  GET_DASHBOARD_SCHEDULE: "/dashboard-schedules/getSchedulesByClassAndMonth",
+  GET_DASHBOARD_CLASS: "/dashboard-class/getClassByStuAndSY",
 };
 
 export const apiConfig = {
