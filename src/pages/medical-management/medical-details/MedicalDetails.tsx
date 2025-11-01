@@ -31,11 +31,13 @@ import { toast } from "react-toastify";
 import { enrollmentApis, medicalApis } from "../../../services/apiServices";
 import { HealthCertRecord } from "../../../types/medical-management";
 import { constants } from "../../../constants";
+import { usePageTitle } from "../../../hooks/usePageTitle";
 
 const { Title, Text } = Typography;
 const { Item } = Descriptions;
 
 const MedicalDetail: React.FC = () => {
+    usePageTitle('Chi tiết hồ sơ sức khỏe - Cá Heo Xanh');
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [medicalDetail, setMedicalDetail] = useState<HealthCertRecord | null>(null);
@@ -286,7 +288,7 @@ const MedicalDetail: React.FC = () => {
                     borderRadius: 8,
                 }}
             >
-                 <Descriptions bordered column={{ xs: 1, sm: 2, md: 3 }} size="middle">
+                <Descriptions bordered column={{ xs: 1, sm: 2, md: 3 }} size="middle">
                     <Item label={<Text strong>Tệp Hồ Sơ Gốc</Text>} span={3}>
                         {medicalDetail.healthCertFiles ? (
                             <Button

@@ -11,8 +11,10 @@ import { usePagePermission } from '../../hooks/usePagePermission';
 import { useExcelExport } from '../../hooks/useExcelExport';
 import dayjs from 'dayjs';
 import { constants } from '../../constants';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 const EnrollmentManagement: React.FC = () => {
+    usePageTitle('Quản lý tuyển sinh - Cá Heo Xanh');
     const { canUpdate, canApproveAll } = usePagePermission();
     const navigate = useNavigate();
     const [allEnrollments, setAllEnrollments] = useState<EnrollmentListItem[]>([]);

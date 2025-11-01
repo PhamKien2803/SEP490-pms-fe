@@ -35,6 +35,7 @@ import { teacherApis } from "../../../../services/apiServices";
 import type { ColumnsType } from "antd/es/table";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { usePageTitle } from "../../../../hooks/usePageTitle";
 const { Title, Text } = Typography;
 
 const formatMinutesToTime = (minutes?: number | null): string => {
@@ -101,6 +102,7 @@ interface IScheduleRow {
 }
 
 function CreateReport() {
+  usePageTitle('Tạo báo giảng - Cá Heo Xanh');
   const user = useCurrentUser();
   const navigate = useNavigate();
   const teacherId = useMemo(() => user?.staff, [user]);
@@ -433,9 +435,8 @@ function CreateReport() {
 
               {isEditable && (
                 <div
-                  className={`lesson-textarea-wrapper ${
-                    isEditing ? "open" : ""
-                  }`}
+                  className={`lesson-textarea-wrapper ${isEditing ? "open" : ""
+                    }`}
                   style={{ transition: "all 0.3s ease", marginTop: 10 }}
                 >
                   {isEditing ? (

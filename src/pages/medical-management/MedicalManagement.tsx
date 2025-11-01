@@ -27,10 +27,12 @@ import { useNavigate } from "react-router-dom";
 import ModalConfirm from "../../modal/common/ModalConfirm/ModalConfirm";
 import { HealthCertRecord } from "../../types/medical-management";
 import dayjs from "dayjs";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const { Title, Text } = Typography;
 
 const MedicalManagement: React.FC = () => {
+    usePageTitle('Hồ sơ sức khỏe - Cá Heo Xanh');
     const navigate = useNavigate();
     const [dataMedicals, setDataMedicals] = useState<HealthCertRecord[]>([]);
     const [searchKeyword, setSearchKeyword] = useState<string>("");

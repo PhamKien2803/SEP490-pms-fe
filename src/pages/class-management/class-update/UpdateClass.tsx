@@ -21,6 +21,7 @@ import {
 import AddMemberTableModal from '../../../modal/class-modal/AddMemberTableModal';
 import TransferModal from '../../../modal/class-modal/TransferModal';
 import { ageOptions } from '../../../components/hard-code-action';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -29,7 +30,7 @@ function UpdateClass() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [form] = Form.useForm();
-
+    usePageTitle('Chỉnh sửa lớp học - Cá Heo Xanh');
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);

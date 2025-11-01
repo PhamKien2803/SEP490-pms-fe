@@ -21,6 +21,7 @@ import { constants } from '../../constants';
 import { toast } from 'react-toastify';
 
 import './SchedulesManagement.css';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 dayjs.locale('vi');
 dayjs.extend(weekOfYear);
@@ -69,6 +70,7 @@ const groupDaysByWeek = (days: TScheduleDetailResponse, year: number, month: num
 };
 
 function SchedulesManagement() {
+    usePageTitle('Lịch học biểu - Cá Heo Xanh');
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const [loading, setLoading] = useState(false);

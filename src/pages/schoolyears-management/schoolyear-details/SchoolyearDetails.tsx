@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { schoolYearApis } from '../../../services/apiServices';
 import { SchoolYearListItem } from '../../../types/schoolYear';
 import dayjs from 'dayjs';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 const { Title } = Typography;
 
@@ -16,6 +17,7 @@ const STATUS_CONFIG = {
 };
 
 function SchoolyearDetails() {
+    usePageTitle('Chi tiết năm học - Cá Heo Xanh');
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);

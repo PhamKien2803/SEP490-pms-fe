@@ -27,9 +27,11 @@ import FeedbackDetailModal from '../../../modal/feedback-modal/FeedbackDetailMod
 import { useNavigate } from 'react-router-dom';
 import { constants } from '../../../constants';
 import { usePagePermission } from '../../../hooks/usePagePermission';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 const { Option } = Select;
 
 function FeedBack() {
+    usePageTitle('Phản hồi học sinh - Cá Heo Xanh');
     const user = useCurrentUser();
     const navigate = useNavigate();
     const teacherId = user?.staff;

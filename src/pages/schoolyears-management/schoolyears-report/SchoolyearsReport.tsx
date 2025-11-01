@@ -8,11 +8,13 @@ import { SchoolYearListItem, SchoolYearReport } from '../../../types/schoolYear'
 import { schoolYearApis } from '../../../services/apiServices';
 import { useExcelExport } from '../../../hooks/useExcelExport';
 import { usePagePermission } from '../../../hooks/usePagePermission';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 const { Title } = Typography;
 const { Option } = Select;
 
 function SchoolyearsReport() {
+    usePageTitle('Báo cáo năm học - Cá Heo Xanh');
     const { canExportfile } = usePagePermission();
     const [reportData, setReportData] = useState<SchoolYearReport[]>([]);
     const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);

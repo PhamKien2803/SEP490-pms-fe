@@ -17,6 +17,7 @@ import dayjs from 'dayjs';
 import { toast } from 'react-toastify';
 import { teacherApis } from '../../../../services/apiServices';
 import { IAttendanceDetailResponse } from '../../../../types/teacher';
+import { usePageTitle } from '../../../../hooks/usePageTitle';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -46,6 +47,7 @@ const STATUS_CONFIG: Record<TAttendanceStatus, { icon: React.ReactNode; color: s
 };
 
 function AttendanceDetails() {
+    usePageTitle('Chi tiết điểm danh - Cá Heo Xanh');
     const { id: attendanceId } = useParams<{ id: string }>();
     const navigate = useNavigate();
 

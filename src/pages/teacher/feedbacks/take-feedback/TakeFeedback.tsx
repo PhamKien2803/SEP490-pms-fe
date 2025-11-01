@@ -57,8 +57,10 @@ interface ITeacherData {
 }
 
 import { BEHAVIOR_OPTIONS, EATING_OPTIONS, EMOTION_OPTIONS, FOCUS_OPTIONS, GOOD_FEEDBACK_TEMPLATE, HANDWASH_OPTIONS, INTERACTION_OPTIONS, PARTICIPATION_OPTIONS, SLEEP_DURATION_OPTIONS, SLEEP_QUALITY_OPTIONS, TOILET_OPTIONS } from '../../../../components/hard-code-action';
+import { usePageTitle } from '../../../../hooks/usePageTitle';
 
 function TakeFeedback() {
+    usePageTitle('Tạo phản hồi học sinh - Cá Heo Xanh');
     const [form] = Form.useForm<IFeedbackBasePayload>();
     const user = useCurrentUser();
     const teacherId = user?.staff;

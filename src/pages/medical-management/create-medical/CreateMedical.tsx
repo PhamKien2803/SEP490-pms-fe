@@ -46,12 +46,13 @@ import {
   StudentInClass,
 } from "../../../types/class";
 import { SchoolYearListItem } from "../../../types/schoolYear";
+import { usePageTitle } from "../../../hooks/usePageTitle";
 
 const { Title } = Typography;
 const { Option } = Select;
 
-const currentSchoolYear =
-  (constants as any).CURRENT_SCHOOL_YEAR || new Date().getFullYear().toString();
+// const currentSchoolYear =
+//   (constants as any).CURRENT_SCHOOL_YEAR || new Date().getFullYear().toString();
 
 const calculateBMI = (
   height: number | undefined,
@@ -113,6 +114,7 @@ const ArrayItemInput: React.FC<ArrayItemInputProps> = ({
 };
 
 const CreateMedical: React.FC = () => {
+  usePageTitle('Tạo hồ sơ SK - Cá Heo Xanh');
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);

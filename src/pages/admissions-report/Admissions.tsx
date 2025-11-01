@@ -8,10 +8,12 @@ import { EnrollmentListItem } from '../../types/enrollment';
 import { useExcelExport } from '../../hooks/useExcelExport';
 import { usePagePermission } from "../../hooks/usePagePermission";
 import dayjs from 'dayjs';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 const { Title } = Typography;
 
 const Admissions: React.FC = () => {
+    usePageTitle('Báo cáo tuyển sinh - Cá Heo Xanh');
     const { canExportfile } = usePagePermission();
     const [allEnrollments, setAllEnrollments] = useState<EnrollmentListItem[]>([]);
     const [loading, setLoading] = useState<boolean>(false);

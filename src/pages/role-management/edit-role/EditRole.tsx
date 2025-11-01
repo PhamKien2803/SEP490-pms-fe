@@ -10,9 +10,11 @@ import { RoleDetails, RoleFunctionItem, RoleModuleItem, UpdateRoleDto } from '..
 import { constants } from '../../../constants';
 import { rolesApis } from '../../../services/apiServices';
 import { hardcodedActions } from '../../../components/hard-code-action';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 
 const EditRole: React.FC = () => {
+    usePageTitle('Chỉnh sửa vai trò - Cá Heo Xanh');
     const { id } = useParams<{ id: string }>();
     const [form] = Form.useForm();
     const navigate = useNavigate();

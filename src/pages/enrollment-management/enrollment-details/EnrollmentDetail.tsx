@@ -6,10 +6,12 @@ import { toast } from 'react-toastify';
 import { enrollmentApis } from '../../../services/apiServices';
 import { EnrollmentListItem } from '../../../types/enrollment';
 import dayjs from 'dayjs';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 const { Title } = Typography;
 
 const EnrollmentDetail: React.FC = () => {
+    usePageTitle('Thông tin chi tiết - Cá Heo Xanh');
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);

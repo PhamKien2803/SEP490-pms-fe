@@ -26,6 +26,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 import './ScheduleCreate.css';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 dayjs.extend(weekOfYear);
 dayjs.locale('vi');
@@ -41,6 +42,7 @@ const formatMinutesToTime = (minutes: number | null | undefined): string => {
 };
 
 const ScheduleCreate = () => {
+    usePageTitle('Tạo lịch học - Cá Heo Xanh');
     const { token } = useToken();
     const navigate = useNavigate();
     const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>();

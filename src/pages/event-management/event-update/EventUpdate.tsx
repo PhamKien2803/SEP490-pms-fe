@@ -30,12 +30,14 @@ import type { Dayjs } from 'dayjs';
 import { UpdateEventDto } from '../../../types/event';
 import { eventApis } from '../../../services/apiServices';
 import { useCurrentUser } from '../../../hooks/useCurrentUser';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 
 function EventUpdate() {
+    usePageTitle('Chỉnh sửa sự kiện - Cá Heo Xanh');
     const [form] = Form.useForm();
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();

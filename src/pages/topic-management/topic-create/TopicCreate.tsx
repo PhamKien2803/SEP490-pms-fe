@@ -38,6 +38,7 @@ import { ageOptions } from '../../../components/hard-code-action';
 import { toast } from 'react-toastify';
 import MergedActivityTable from '../../../components/table/MergedActivityTable';
 import { useCurrentUser } from '../../../hooks/useCurrentUser';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -53,6 +54,7 @@ const monthOptions = Array.from({ length: 12 }, (_, i) => ({
 
 
 function TopicCreate() {
+    usePageTitle('Tạo chủ đề - Cá Heo Xanh');
     const [form] = Form.useForm();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);

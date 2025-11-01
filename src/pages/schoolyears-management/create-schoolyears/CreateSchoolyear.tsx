@@ -6,11 +6,13 @@ import { toast } from 'react-toastify';
 import { schoolYearApis } from '../../../services/apiServices';
 import { CreateSchoolYearDto } from '../../../types/schoolYear';
 import { useCurrentUser } from '../../../hooks/useCurrentUser';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
 
 function CreateSchoolyear() {
+    usePageTitle('Tạo năm học - Cá Heo Xanh');
     const navigate = useNavigate();
     const user = useCurrentUser();
     const [form] = Form.useForm();

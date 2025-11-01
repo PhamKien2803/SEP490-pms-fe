@@ -16,6 +16,7 @@ import {
 import { schoolYearApis, teacherApis } from '../../../services/apiServices';
 import { constants } from '../../../constants';
 import { usePagePermission } from '../../../hooks/usePagePermission';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -25,6 +26,7 @@ interface AttendanceTableRecord extends IAttendanceDetailResponse {
 }
 
 function AttendanceHistory() {
+    usePageTitle('Điểm danh học sinh - Cá Heo Xanh');
     const navigate = useNavigate();
     const user = useCurrentUser();
     const teacherId = useMemo(() => user?.staff, [user]);

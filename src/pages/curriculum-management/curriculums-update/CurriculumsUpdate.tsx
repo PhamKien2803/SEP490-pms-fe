@@ -39,12 +39,14 @@ import { curriculumsApis, eventApis, schoolYearApis } from '../../../services/ap
 import { useCurrentUser } from '../../../hooks/useCurrentUser';
 import { ageOptions, categoryOptions } from '../../../components/hard-code-action';
 import { EventItem } from '../../../types/event';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 const { Title } = Typography;
 const { Option } = Select;
 
 
 function CurriculumsUpdate() {
+    usePageTitle('Chỉnh sửa hoạt động - Cá Heo Xanh');
     const [form] = Form.useForm();
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();

@@ -30,12 +30,14 @@ import {
   RoomState,
   UpdateRoomData,
 } from "../../types/room-management";
+import { usePageTitle } from "../../hooks/usePageTitle";
 const { Title, Text } = Typography;
 
 const PENDING_STATE: RoomState = "Chờ xử lý" as RoomState;
 const APPROVED_STATE: RoomState = "Hoàn thành" as RoomState;
 
 const RoomReportComponent: React.FC = () => {
+  usePageTitle('Báo cáo CSVC Phòng học - Cá Heo Xanh');
   const { canExportfile } = usePagePermission();
   const [allRooms, setAllRooms] = useState<RoomRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(false);

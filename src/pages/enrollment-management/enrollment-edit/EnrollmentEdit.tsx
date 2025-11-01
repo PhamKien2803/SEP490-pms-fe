@@ -10,11 +10,13 @@ import { ApproveEnrollmentDto, EnrollmentListItem } from '../../../types/enrollm
 import dayjs from 'dayjs';
 import TextArea from 'antd/es/input/TextArea';
 import { constants } from '../../../constants';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 const { Title } = Typography;
 const { Option } = Select;
 
 const EnrollmentEdit: React.FC = () => {
+    usePageTitle('Chỉnh sửa thông tin - Cá Heo Xanh');
     const { id } = useParams<{ id: string }>();
     const [form] = Form.useForm();
     const navigate = useNavigate();

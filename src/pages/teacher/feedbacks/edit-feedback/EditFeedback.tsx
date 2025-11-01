@@ -44,11 +44,13 @@ import {
     TOILET_OPTIONS,
 } from '../../../../components/hard-code-action';
 import dayjs from 'dayjs';
+import { usePageTitle } from '../../../../hooks/usePageTitle';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 function EditFeedback() {
+    usePageTitle('Chỉnh sửa phản hồi học sinh - Cá Heo Xanh');
     const { id } = useParams();
     const navigate = useNavigate();
     const [form] = Form.useForm<IFeedbackBasePayload>();

@@ -18,11 +18,13 @@ import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 import { ClassDetail, StudentInClass, TeacherInClass } from '../../../types/class';
 import { classApis } from '../../../services/apiServices';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
 function ClassDetails() {
+    usePageTitle('Thông tin lớp học - Cá Heo Xanh');
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [classData, setClassData] = useState<ClassDetail | null>(null);

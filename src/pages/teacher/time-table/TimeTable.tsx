@@ -16,6 +16,7 @@ import { IActivity, IGetTimetableTeacherResponse } from '../../../types/teacher'
 import type { ColumnsType } from 'antd/es/table';
 import { toast } from 'react-toastify';
 import TimetableDayView from './TimetableDayView';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isBetween);
@@ -56,7 +57,7 @@ interface IScheduleRow {
 const TimeTable = () => {
     const user = useCurrentUser();
     const teacherId = user?.staff;
-
+    usePageTitle('Thời khóa biểu - Cá Heo Xanh');
     const [currentMonth, setCurrentMonth] = useState(dayjs().month() + 1);
     const [currentWeek, setCurrentWeek] = useState(1);
     const [loading, setLoading] = useState(false);

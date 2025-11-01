@@ -27,6 +27,7 @@ import { RoomRecord, RoomState } from "../../types/room-management";
 import { constants } from "../../constants";
 import { useNavigate } from "react-router-dom";
 import ModalConfirm from "../../modal/common/ModalConfirm/ModalConfirm";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const { Title } = Typography;
 
@@ -48,6 +49,7 @@ const getStateTagColor = (state: RoomState) => {
 };
 
 const RoomManagement: React.FC = () => {
+  usePageTitle('Quản lý phòng học - Cá Heo Xanh');
   const navigate = useNavigate();
   const [dataRooms, setDataRooms] = useState<RoomRecord[]>([]);
   const [searchKeyword, setSearchKeyword] = useState<string>("");

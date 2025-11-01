@@ -12,6 +12,7 @@ import {
 } from '../../../../types/teacher';
 import { teacherApis } from '../../../../services/apiServices';
 import { toast } from 'react-toastify';
+import { usePageTitle } from '../../../../hooks/usePageTitle';
 
 const { Title, Text } = Typography;
 
@@ -75,7 +76,7 @@ const getStatusColor = (status: string) => {
 function UpdateReport() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-
+    usePageTitle('Cập nhật báo giảng - Cá Heo Xanh');
     const [lessonData, setLessonData] = useState<ILessonDetailResponse | null>(null);
     const [_, setLoading] = useState(false);
     const [topicName, setTopicName] = useState('');

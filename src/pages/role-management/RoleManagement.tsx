@@ -9,8 +9,10 @@ import { usePagePermission } from '../../hooks/usePagePermission';
 import { RoleListItem } from '../../types/role';
 import DeleteModal from '../../modal/delete-modal/DeleteModal';
 import { constants } from './../../constants/index';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 const RoleManagement: React.FC = () => {
+    usePageTitle('Quản lý vai trò - Cá Heo Xanh');
     const navigate = useNavigate();
     const [allRoles, setAllRoles] = useState<RoleListItem[]>([]);
     const [loading, setLoading] = useState<boolean>(false);

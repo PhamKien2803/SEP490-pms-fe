@@ -29,8 +29,10 @@ import ViewParentDetails from "../../modal/view-parent/ViewParentDetail";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { toast } from "react-toastify";
 import { usePagePermission } from '../../hooks/usePagePermission';
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const ParentManagement: React.FC = () => {
+    usePageTitle('Quản lý phụ huynh - Cá Heo Xanh');
     const [parents, setParents] = useState<Parent[]>([]);
     const [searchKeyword, setSearchKeyword] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
