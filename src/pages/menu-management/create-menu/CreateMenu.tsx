@@ -43,6 +43,7 @@ import {
   ListFoodParams,
   DayMenuCreate,
 } from "../../../types/menu-management";
+import { usePageTitle } from "../../../hooks/usePageTitle";
 
 dayjs.extend(weekday);
 dayjs.locale("vi");
@@ -402,7 +403,7 @@ const MealEditor: React.FC<MealEditorProps> = ({
                                   help={false} // Ngăn AntD dành không gian cho thông báo lỗi
                                   validateStatus={
                                     form.getFieldError(foodIdFieldName).length >
-                                    0
+                                      0
                                       ? "error"
                                       : undefined
                                   }
@@ -538,6 +539,7 @@ const MealEditor: React.FC<MealEditorProps> = ({
 };
 
 const CreateMenu: React.FC = () => {
+  usePageTitle('Tạo thực đơn - Cá Heo Xanh');
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);

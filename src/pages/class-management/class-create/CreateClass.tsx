@@ -16,6 +16,7 @@ import { toast } from 'react-toastify';
 import { StudentInClass, TeacherInClass, CreateClassDto, AvailableRoom } from '../../../types/class';
 import { classApis } from '../../../services/apiServices';
 import { ageOptions } from '../../../components/hard-code-action';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -23,7 +24,7 @@ const { Option } = Select;
 function CreateClass() {
     const navigate = useNavigate();
     const [form] = Form.useForm();
-
+    usePageTitle('Tạo mới lớp học - Cá Heo Xanh');
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);

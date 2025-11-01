@@ -31,6 +31,7 @@ import dayjs from "dayjs";
 import { constants } from "../../../constants";
 import { medicalApis } from "../../../services/apiServices";
 import { ComprehensiveExamination, HealthCertRecord, HealthCertUpdateData } from "../../../types/medical-management";
+import { usePageTitle } from "../../../hooks/usePageTitle";
 
 const { Title, Text: TextAnt } = Typography;
 const { TextArea } = Input;
@@ -43,6 +44,7 @@ const calculateBMI = (weight: number, height: number): number => {
 };
 
 const UpdateMedical: React.FC = () => {
+    usePageTitle('Cập nhật hồ sơ SK - Cá Heo Xanh');
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [form] = Form.useForm();
@@ -209,6 +211,8 @@ const UpdateMedical: React.FC = () => {
 
                 createdBy: medicalDetail.createdBy,
                 updatedBy: CurrentUserName,
+                class: "",
+                schoolYear: ""
             };
 
             await medicalApis.updateMedical(id, payload);

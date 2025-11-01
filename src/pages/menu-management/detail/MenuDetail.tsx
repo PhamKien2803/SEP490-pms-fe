@@ -29,6 +29,7 @@ import {
 } from "../../../types/menu-management";
 import { constants } from "../../../constants";
 import { menuApis } from "../../../services/apiServices";
+import { usePageTitle } from "../../../hooks/usePageTitle";
 
 dayjs.extend(updateLocale);
 dayjs.updateLocale("en", {
@@ -182,6 +183,7 @@ const foodColumns: any = [
 ];
 
 const MenuDetailPage: React.FC = () => {
+  usePageTitle('Chi tiết thực đơn - Cá Heo Xanh');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [menuDetail, setMenuDetail] = useState<MenuDetail | null>(null);

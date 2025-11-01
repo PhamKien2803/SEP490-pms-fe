@@ -31,6 +31,7 @@ import {
 } from "../../../types/room-management";
 import { roomApis } from "../../../services/apiServices";
 import { constants } from "../../../constants";
+import { usePageTitle } from "../../../hooks/usePageTitle";
 
 const { Title, Text } = Typography;
 const { Item } = Descriptions;
@@ -50,6 +51,7 @@ const getStateTagColor = (state: RoomState) => {
 };
 
 const RoomDetail: React.FC = () => {
+  usePageTitle('Chi tiết phòng học - Cá Heo Xanh');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [roomDetail, setRoomDetail] = useState<RoomRecord | null>(null);

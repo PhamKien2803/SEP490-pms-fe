@@ -32,8 +32,10 @@ import {
 import ViewStaffDetails from "../../modal/staff/view-staff/ViewStaffDetail";
 import UpdateStaff from "../../modal/staff/update-staff/UpdateStaff";
 import CreateStaff from "../../modal/staff/create-staff/CreateStaff";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const StaffManagement: React.FC = () => {
+  usePageTitle('Quản lý nhân viên - Cá Heo Xanh');
   const [dataStaff, setDataStaffs] = useState<StaffRecord[]>([]);
   const [searchKeyword, setSearchKeyword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);

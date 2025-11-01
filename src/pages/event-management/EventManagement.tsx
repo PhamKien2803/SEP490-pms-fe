@@ -28,6 +28,7 @@ import { SchoolYearListItem } from '../../types/schoolYear';
 import { useNavigate } from 'react-router-dom';
 import { constants } from '../../constants';
 import { usePagePermission } from '../../hooks/usePagePermission';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 
 const { Title } = Typography;
@@ -40,6 +41,7 @@ const formatDate = (dateString: string | undefined): string => {
 };
 
 function EventManagement() {
+    usePageTitle('Quản lý sự kiện - Cá Heo Xanh');
     const navigate = useNavigate();
     const { canCreate, canUpdate, canDelete } = usePagePermission();
     const [originalEvents, setOriginalEvents] = useState<EventItem[]>([]);

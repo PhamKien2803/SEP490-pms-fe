@@ -35,6 +35,7 @@ import {
   MenuListResponse,
   MenuRecord,
 } from "../../types/menu-management";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 dayjs.extend(weekOfYear);
 dayjs.locale("vi");
@@ -61,6 +62,7 @@ const AGE_GROUPS = [
 ];
 
 const MenuManagement: React.FC = () => {
+  usePageTitle('Thực đơn tuần - Cá Heo Xanh');
   const navigate = useNavigate();
 
   const defaultDateRange = useMemo<[Dayjs, Dayjs]>(() => {

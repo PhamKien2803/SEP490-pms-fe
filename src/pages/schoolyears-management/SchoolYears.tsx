@@ -10,6 +10,7 @@ import dayjs from 'dayjs';
 import { constants } from '../../constants';
 import DeleteModal from '../../modal/delete-modal/DeleteModal';
 import { usePagePermission } from '../../hooks/usePagePermission';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -21,6 +22,7 @@ const STATUS = {
 };
 
 function SchoolYears() {
+    usePageTitle('Quản lý năm học - Cá Heo Xanh');
     const navigate = useNavigate();
     const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
     const [loading, setLoading] = useState<boolean>(false);

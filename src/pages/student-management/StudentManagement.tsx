@@ -32,8 +32,10 @@ import dayjs from "dayjs";
 import UpdateStudent from "../../modal/student/update-student/UpdateStudent";
 import ModalConfirm from "../../modal/common/ModalConfirm/ModalConfirm";
 import ViewStudentDetails from "../../modal/student/view-student/ViewStudentDetail";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const StudentManagement: React.FC = () => {
+  usePageTitle('Quản lý học sinh - Cá Heo Xanh');
   const [dataStudents, setDataStudents] = useState<StudentRecord[]>([]);
   const [searchKeyword, setSearchKeyword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);

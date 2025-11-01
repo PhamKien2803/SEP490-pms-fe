@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 import { curriculumsApis } from '../../services/apiServices';
 import { CurriculumItem } from '../../types/curriculums';
 import { usePagePermission } from '../../hooks/usePagePermission';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -25,6 +26,7 @@ const formatMinutesToTime = (minutes: number) => {
 
 
 function CurriculumManagement() {
+    usePageTitle('Quản lý hoạt động - Cá Heo Xanh');
     const navigate = useNavigate();
     const { canCreate, canUpdate, canDelete } = usePagePermission();
     const [originalCurriculums, setOriginalCurriculums] = useState<CurriculumItem[]>([]);

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     Form, Input, Button, Space, Typography, Card, Select, Tooltip, Spin, Flex, Modal, Table, Popconfirm
 } from 'antd';
-import { ArrowLeftOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, PlusOutlined, DeleteOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useCurrentUser } from '../../../hooks/useCurrentUser';
@@ -10,9 +10,11 @@ import { RoleDetails, RoleFunctionItem, RoleModuleItem, UpdateRoleDto } from '..
 import { constants } from '../../../constants';
 import { rolesApis } from '../../../services/apiServices';
 import { hardcodedActions } from '../../../components/hard-code-action';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 
 const EditRole: React.FC = () => {
+    usePageTitle('Chỉnh sửa vai trò - Cá Heo Xanh');
     const { id } = useParams<{ id: string }>();
     const [form] = Form.useForm();
     const navigate = useNavigate();
@@ -155,7 +157,7 @@ const EditRole: React.FC = () => {
                         Phân quyền chức năng
                     </Typography.Title>
 
-                    <Form.List name="permissions">
+                    {/* <Form.List name="permissions">
                         {(fields, { add, remove }) => {
                             const columns = [
                                 {
@@ -215,6 +217,107 @@ const EditRole: React.FC = () => {
                                         <Popconfirm title="Bạn chắc chắn muốn xóa?" onConfirm={() => remove(record.name)}>
                                             <Button type="text" danger icon={<DeleteOutlined />} />
                                         </Popconfirm>
+                                    ),
+                                },
+                            ];
+
+                            return (
+                                <>
+                                    <Table
+                                        columns={columns}
+                                        dataSource={fields}
+                                        pagination={false}
+                                        rowKey="key"
+                                        bordered
+                                    />
+                                    <Form.Item style={{ marginTop: '16px' }}>
+                                        <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                                            Thêm quyền
+                                        </Button>
+                                    </Form.Item>
+                                </>
+                            );
+                        }}
+                    </Form.List> */}
+
+                    <Form.List name="permissions">
+                        {(fields, { add, remove, move }) => {
+                            const columns = [
+                                {
+                                    title: 'Tên chức năng',
+                                    key: 'function',
+                                    width: '25%',
+                                    render: (_: any, record: any, index: number) => {
+                                        const selectedFunctions = permissions.map((p: { function?: string }) => p?.function).filter(Boolean);
+                                        const currentFunction = permissions[index]?.function;
+                                        const availableFunctions = functionOptions.filter(
+                                            opt => !selectedFunctions.includes(opt.value) || opt.value === currentFunction
+                                        );
+                                        return (
+                                            <Form.Item
+                                                name={[record.name, 'function']}
+                                                rules={[{ required: true, message: 'Vui lòng chọn!' }]}
+                                                style={{ margin: 0 }}
+                                            >
+                                                <Select options={availableFunctions} placeholder="Chọn chức năng" />
+                                            </Form.Item>
+                                        );
+                                    },
+                                },
+                                {
+                                    title: 'Tên phân hệ',
+                                    key: 'module',
+                                    width: '25%',
+                                    render: (_: any, record: any) => (
+                                        <Form.Item
+                                            name={[record.name, 'module']}
+                                            rules={[{ required: true, message: 'Vui lòng chọn!' }]}
+                                            style={{ margin: 0 }}
+                                        >
+                                            <Select options={moduleOptions} placeholder="Chọn phân hệ" />
+                                        </Form.Item>
+                                    ),
+                                },
+                                {
+                                    title: 'Hành động',
+                                    key: 'actions',
+                                    width: '30%',
+                                    render: (_: any, record: any) => (
+                                        <Form.Item
+                                            name={[record.name, 'actions']}
+                                            rules={[{ required: true, message: 'Vui lòng chọn!' }]}
+                                            style={{ margin: 0 }}
+                                        >
+                                            <Select mode="multiple" allowClear options={hardcodedActions} placeholder="Chọn các hành động" />
+                                        </Form.Item>
+                                    ),
+                                },
+                                {
+                                    title: 'Sắp xếp/Thao tác',
+                                    key: 'action',
+                                    width: '20%',
+                                    render: (_: any, record: any, index: number) => (
+                                        <Space>
+                                            <Tooltip title="Đẩy lên">
+                                                <Button
+                                                    icon={<ArrowUpOutlined />}
+                                                    type="text"
+                                                    disabled={index === 0}
+                                                    onClick={() => move(index, index - 1)}
+                                                />
+                                            </Tooltip>
+                                            <Tooltip title="Đẩy xuống">
+                                                <Button
+                                                    icon={<ArrowDownOutlined />}
+                                                    type="text"
+                                                    disabled={index === fields.length - 1}
+                                                    onClick={() => move(index, index + 1)}
+                                                />
+                                            </Tooltip>
+                                            <Popconfirm title="Bạn chắc chắn muốn xóa?" onConfirm={() => remove(record.name)}>
+                                                <Button type="text" danger icon={<DeleteOutlined />} />
+                                            </Popconfirm>
+                                        </Space>
                                     ),
                                 },
                             ];

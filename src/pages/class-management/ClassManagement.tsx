@@ -14,12 +14,14 @@ import { classApis, schoolYearApis } from '../../services/apiServices';
 import { constants } from '../../constants';
 import { useNavigate } from 'react-router-dom';
 import { usePagePermission } from '../../hooks/usePagePermission';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 const { Title } = Typography;
 const { Option } = Select;
 const { Search } = Input;
 
 function ClassManagement() {
+    usePageTitle('Quản lý lớp học - Cá Heo Xanh');
     const navigate = useNavigate();
     const { canSyncData, canCreate } = usePagePermission();
     const [originalClassList, setOriginalClassList] = useState<ClassListItem[]>([]);

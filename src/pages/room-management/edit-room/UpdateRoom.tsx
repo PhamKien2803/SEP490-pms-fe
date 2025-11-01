@@ -42,6 +42,7 @@ import {
   RoomFacility,
   RoomState,
 } from "../../../types/room-management";
+import { usePageTitle } from "../../../hooks/usePageTitle";
 
 const { Title, Text } = Typography;
 const { Item } = Descriptions;
@@ -270,6 +271,7 @@ const FacilityInputRow: React.FC<{
 };
 
 const UpdateRoom: React.FC = () => {
+  usePageTitle('Cập nhật phòng học - Cá Heo Xanh');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [form] = Form.useForm();
@@ -296,15 +298,15 @@ const UpdateRoom: React.FC = () => {
         notesHRA: values.notesHRA || "",
         facilities: values.facilities
           ? values.facilities
-              .filter((f: any) => f)
-              .map((f: any) => ({
-                facilityName: f.facilityName,
-                facilityType: f.facilityType,
-                quantity: f.quantity,
-                quantityDefect: f.quantityDefect || 0,
-                quantityMissing: f.quantityMissing || 0,
-                notes: f.notes || "",
-              }))
+            .filter((f: any) => f)
+            .map((f: any) => ({
+              facilityName: f.facilityName,
+              facilityType: f.facilityType,
+              quantity: f.quantity,
+              quantityDefect: f.quantityDefect || 0,
+              quantityMissing: f.quantityMissing || 0,
+              notes: f.notes || "",
+            }))
           : [],
       })
     );
@@ -381,36 +383,36 @@ const UpdateRoom: React.FC = () => {
     try {
       const cleanedFacilities: RoomFacility[] = values.facilities
         ? values.facilities
-            .filter(
-              (facility: any) =>
-                facility.facilityName &&
-                facility.facilityName.trim() !== "" &&
-                facility.quantity &&
-                facility.quantity > 0
-            )
-            .map((facility: any) => {
-              const totalQuantity = facility.quantity;
-              let quantityDefect = facility.quantityDefect || 0;
-              let quantityMissing = facility.quantityMissing || 0;
+          .filter(
+            (facility: any) =>
+              facility.facilityName &&
+              facility.facilityName.trim() !== "" &&
+              facility.quantity &&
+              facility.quantity > 0
+          )
+          .map((facility: any) => {
+            const totalQuantity = facility.quantity;
+            let quantityDefect = facility.quantityDefect || 0;
+            let quantityMissing = facility.quantityMissing || 0;
 
-              if (quantityDefect + quantityMissing > totalQuantity) {
-                if (quantityDefect > totalQuantity) {
-                  quantityDefect = totalQuantity;
-                  quantityMissing = 0;
-                } else {
-                  quantityMissing = totalQuantity - quantityDefect;
-                }
+            if (quantityDefect + quantityMissing > totalQuantity) {
+              if (quantityDefect > totalQuantity) {
+                quantityDefect = totalQuantity;
+                quantityMissing = 0;
+              } else {
+                quantityMissing = totalQuantity - quantityDefect;
               }
+            }
 
-              return {
-                facilityName: facility.facilityName,
-                facilityType: facility.facilityType,
-                quantity: totalQuantity,
-                quantityDefect: quantityDefect,
-                quantityMissing: quantityMissing,
-                notes: facility.notes || "",
-              };
-            })
+            return {
+              facilityName: facility.facilityName,
+              facilityType: facility.facilityType,
+              quantity: totalQuantity,
+              quantityDefect: quantityDefect,
+              quantityMissing: quantityMissing,
+              notes: facility.notes || "",
+            };
+          })
         : [];
 
       if (cleanedFacilities.length === 0) {
@@ -428,8 +430,8 @@ const UpdateRoom: React.FC = () => {
         notes: values.notes || "",
         notesHRA:
           nextState === "Chờ giáo viên duyệt" &&
-          currentState === "Chờ nhân sự xác nhận" &&
-          hraNotes
+            currentState === "Chờ nhân sự xác nhận" &&
+            hraNotes
             ? hraNotes
             : values.notesHRA || "",
         createdBy: roomDetail.createdBy,

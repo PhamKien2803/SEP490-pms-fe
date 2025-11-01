@@ -77,6 +77,7 @@ const Dashboard: React.FC = () => {
           onClick: () => {
             dispatch(logout());
             toast.info("Đăng xuất thành công");
+            document.title = "Hệ thống quản lý mầm non - Cá Heo Xanh";
             navigate("/login");
           },
         },

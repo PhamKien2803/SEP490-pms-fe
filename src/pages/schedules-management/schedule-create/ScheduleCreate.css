@@ -1,0 +1,247 @@
+.schedule-create-page {
+  padding: 24px;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #f0f2f5, #ffffff);
+}
+
+.schedule-create-back-button {
+  margin-bottom: 16px;
+  padding-left: 0;
+  font-weight: 500;
+  color: #2f54eb;
+  transition: color 0.3s;
+}
+.schedule-create-back-button:hover {
+  color: #1d39c4;
+}
+
+/* ===========================================
+   BỘ LỌC - CARD
+=========================================== */
+.schedule-create-filter-card {
+  margin-bottom: 24px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
+  border: none;
+  padding: 16px;
+  transition: all 0.3s;
+}
+.schedule-create-filter-card:hover {
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
+}
+
+.schedule-create-filter-label,
+.schedule-create-filter-input {
+  margin-top: 8px;
+  width: 100%;
+}
+
+/* ===========================================
+   HÀNG NÚT ACTION
+=========================================== */
+.schedule-create-action-row {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* ===========================================
+   NAVIGATION
+=========================================== */
+.schedule-create-week-nav {
+  margin-bottom: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  color: #555;
+}
+
+/* ===========================================
+   SCROLL NGANG
+=========================================== */
+.schedule-create-scroll-container {
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scroll-behavior: auto;
+  -webkit-overflow-scrolling: touch;
+  transition: background 0.3s;
+}
+
+.schedule-create-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+.schedule-create-scroll-container {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.schedule-create-days-row {
+  display: flex;
+  gap: 16px;
+  min-width: max-content;
+}
+
+.schedule-create-day-column {
+  flex: 0 0 260px;
+  width: 260px;
+}
+
+.schedule-create-day-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #ffffffcc;
+  backdrop-filter: blur(4px);
+  border-radius: 18px;
+  border: 1px solid #d9d9d9;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease;
+}
+.schedule-create-day-card:hover {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.schedule-create-day-card .ant-card-head {
+  background: linear-gradient(135deg, #e6f7ff 0%, #f9f0ff 100%);
+  color: #003a8c;
+  border-bottom: 1px solid #cddcff;
+  font-weight: 600;
+  padding: 10px 14px;
+  font-size: 13px;
+  text-transform: capitalize;
+  backdrop-filter: blur(2px);
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+}
+
+.schedule-create-day-card .ant-card-body {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+.schedule-create-day-card .ant-card-body::-webkit-scrollbar {
+  width: 4px;
+}
+.schedule-create-day-card .ant-card-body::-webkit-scrollbar-thumb {
+  background: #d0d0d0;
+  border-radius: 4px;
+}
+.schedule-create-day-card .ant-card-body::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+.schedule-create-activity-card {
+  border-radius: 12px;
+  min-height: 76px;
+  position: relative;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+}
+
+.schedule-create-activity-display-card {
+  cursor: pointer;
+}
+.schedule-create-activity-display-card:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+  border-color: #91caff;
+  background-color: #f0faff;
+}
+
+.schedule-create-activity-select-card {
+  border-style: dashed;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+.schedule-create-activity-time {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+}
+.schedule-create-activity-content {
+  margin-top: 6px;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.schedule-create-activity-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  color: #222;
+}
+.schedule-create-activity-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.schedule-create-activity-tag {
+  font-size: 11px;
+  border-radius: 8px;
+  padding: 3px 8px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.schedule-tag-fixed {
+  background: #fff7e6;
+  color: #d48806;
+}
+.schedule-tag-event {
+  background: #f9f0ff;
+  color: #722ed1;
+}
+.schedule-tag-normal {
+  background: #e6f4ff;
+  color: #096dd9;
+}
+
+.schedule-create-activity-swap-icon {
+  position: absolute;
+  top: 8px;
+  right: 30px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #4096ff;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.schedule-create-activity-delete-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 16px;
+  color: #ff4d4f;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.schedule-create-activity-card:hover .schedule-create-activity-swap-icon,
+.schedule-create-activity-card:hover .schedule-create-activity-delete-icon {
+  opacity: 1;
+}
+
+.schedule-create-popover-list .ant-list-item {
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+.schedule-create-popover-list .ant-list-item:hover {
+  background-color: #e6f7ff;
+}

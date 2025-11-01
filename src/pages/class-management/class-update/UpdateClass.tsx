@@ -21,6 +21,7 @@ import {
 import AddMemberTableModal from '../../../modal/class-modal/AddMemberTableModal';
 import TransferModal from '../../../modal/class-modal/TransferModal';
 import { ageOptions } from '../../../components/hard-code-action';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -29,7 +30,7 @@ function UpdateClass() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [form] = Form.useForm();
-
+    usePageTitle('Chỉnh sửa lớp học - Cá Heo Xanh');
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -181,7 +182,11 @@ function UpdateClass() {
             toast.success(`Chuyển ${itemType} thành công!`);
             await fetchData();
         } catch (error) {
-            toast.error(`Chuyển ${itemType} thất bại.`);
+            if (error) {
+                toast.info("Bạn cần lưu giáo viên vào lớp rồi mới được chuyển")
+            } else {
+                toast.error(`Chuyển ${itemType} thất bại.`);
+            }
         } finally {
             setIsTransferLoading(false);
             setIsTransferModalVisible(false);
@@ -204,7 +209,7 @@ function UpdateClass() {
             await classApis.updateClass(id, payload);
             toast.success('Cập nhật lớp học thành công!');
             setIsDirty(false);
-            navigate(-1);
+            // navigate(-1);
         } catch (err) {
             toast.error('Cập nhật lớp học thất bại.');
         } finally {

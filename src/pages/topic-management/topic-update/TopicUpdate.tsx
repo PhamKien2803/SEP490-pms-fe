@@ -36,6 +36,7 @@ import { ageOptions } from '../../../components/hard-code-action';
 import { toast } from 'react-toastify';
 import ManualActivityTable from '../../../components/table/ManualActivityTable';
 import { useCurrentUser } from '../../../hooks/useCurrentUser';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -46,6 +47,7 @@ const monthOptions = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 function TopicUpdate() {
+    usePageTitle('Cập nhật chủ đề - Cá Heo Xanh');
     const [form] = Form.useForm();
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
@@ -190,7 +192,7 @@ function TopicUpdate() {
         try {
             await topicApis.updateTopic(id, payload);
             toast.success('Cập nhật chủ đề thành công!');
-            navigate(-1);
+            // navigate(-1);
         } catch (error) {
             toast.error('Cập nhật chủ đề thất bại!');
         } finally {

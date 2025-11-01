@@ -25,6 +25,7 @@ export interface UserProfile {
   staff?: string;
   isAdmin: boolean;
   isTeacher: boolean;
+  parent?: string;
 }
 
 export interface User extends UserProfile {

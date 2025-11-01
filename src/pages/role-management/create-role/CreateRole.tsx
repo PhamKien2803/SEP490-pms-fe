@@ -9,9 +9,11 @@ import { CreateRoleDto, RoleFunctionItem, RoleModuleItem } from '../../../types/
 import { rolesApis } from '../../../services/apiServices';
 import { constants } from '../../../constants';
 import { hardcodedActions } from '../../../components/hard-code-action';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 
 const CreateRole: React.FC = () => {
+    usePageTitle('Tạo vai trò - Cá Heo Xanh');
     const [form] = Form.useForm();
     const navigate = useNavigate();
     const user = useCurrentUser();

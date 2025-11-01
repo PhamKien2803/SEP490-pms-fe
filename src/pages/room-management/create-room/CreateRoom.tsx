@@ -10,7 +10,7 @@ import {
     Space,
     InputNumber,
     Tooltip,
-    Modal, 
+    Modal,
 } from "antd";
 import {
     SaveOutlined,
@@ -30,6 +30,7 @@ import { useNavigate } from "react-router-dom";
 import { constants } from "../../../constants";
 import { roomApis } from "../../../services/apiServices";
 import { CreateRoomData, RoomFacility } from "../../../types/room-management";
+import { usePageTitle } from "../../../hooks/usePageTitle";
 
 const { Title } = Typography;
 
@@ -134,11 +135,12 @@ const FacilityInputRow: React.FC<{
 };
 
 const CreateRoom: React.FC = () => {
+    usePageTitle('Tạo phòng học - Cá Heo Xanh');
     const navigate = useNavigate();
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
-    
-    const [isCancelConfirmVisible, setIsCancelConfirmVisible] = useState(false); 
+
+    const [isCancelConfirmVisible, setIsCancelConfirmVisible] = useState(false);
 
     const DEFAULT_STATE = "Dự thảo";
 
@@ -148,21 +150,21 @@ const CreateRoom: React.FC = () => {
         try {
             const cleanedFacilities: RoomFacility[] = values.facilities
                 ? values.facilities
-                      .filter(
-                          (facility: any) =>
-                              facility.facilityName &&
-                              facility.facilityName.trim() !== "" &&
-                              facility.quantity && 
-                              facility.quantity > 0
-                      )
-                      .map((facility: any) => ({
-                          facilityName: facility.facilityName,
-                          facilityType: facility.facilityType,
-                          quantity: facility.quantity,
-                          quantityDefect: 0, 
-                          quantityMissing: 0, 
-                          notes: facility.notes || "",
-                      }))
+                    .filter(
+                        (facility: any) =>
+                            facility.facilityName &&
+                            facility.facilityName.trim() !== "" &&
+                            facility.quantity &&
+                            facility.quantity > 0
+                    )
+                    .map((facility: any) => ({
+                        facilityName: facility.facilityName,
+                        facilityType: facility.facilityType,
+                        quantity: facility.quantity,
+                        quantityDefect: 0,
+                        quantityMissing: 0,
+                        notes: facility.notes || "",
+                    }))
                 : [];
 
             if (cleanedFacilities.length === 0) {
@@ -176,7 +178,7 @@ const CreateRoom: React.FC = () => {
                 roomType: values.roomType,
                 capacity: values.capacity,
                 facilities: cleanedFacilities,
-                state: DEFAULT_STATE, 
+                state: DEFAULT_STATE,
                 notes: values.notes || "",
                 createdBy: values.createdBy || "System",
                 updatedBy: values.updatedBy || "System",
@@ -197,7 +199,7 @@ const CreateRoom: React.FC = () => {
 
     const handleConfirmCancel = () => {
         setIsCancelConfirmVisible(false);
-        navigate(`${constants.APP_PREFIX}/rooms`); 
+        navigate(`${constants.APP_PREFIX}/rooms`);
     };
 
     return (
@@ -207,8 +209,8 @@ const CreateRoom: React.FC = () => {
                 layout="vertical"
                 onFinish={handleSubmit}
                 initialValues={{
-                    capacity: undefined, 
-                    state: DEFAULT_STATE, 
+                    capacity: undefined,
+                    state: DEFAULT_STATE,
                     facilities: [],
                     notes: "",
                     createdBy: "Admin",
@@ -387,7 +389,7 @@ const CreateRoom: React.FC = () => {
                             <Button
                                 icon={<RollbackOutlined />}
                                 // Thay đổi hành động: mở Modal
-                                onClick={() => setIsCancelConfirmVisible(true)} 
+                                onClick={() => setIsCancelConfirmVisible(true)}
                                 disabled={loading}
                             >
                                 Hủy và Quay lại
@@ -408,8 +410,8 @@ const CreateRoom: React.FC = () => {
             <Modal
                 title="Bạn có chắc muốn hủy?"
                 open={isCancelConfirmVisible}
-                onOk={handleConfirmCancel} 
-                onCancel={() => setIsCancelConfirmVisible(false)} 
+                onOk={handleConfirmCancel}
+                onCancel={() => setIsCancelConfirmVisible(false)}
                 okText="Đồng ý"
                 cancelText="Không"
                 zIndex={1001}

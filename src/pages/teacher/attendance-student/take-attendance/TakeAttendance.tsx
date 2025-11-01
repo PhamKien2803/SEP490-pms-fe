@@ -29,6 +29,7 @@ import {
 } from '../../../../types/teacher';
 import { SchoolYearListItem } from '../../../../types/schoolYear';
 import { teacherApis, schoolYearApis } from '../../../../services/apiServices';
+import { usePageTitle } from '../../../../hooks/usePageTitle';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -56,7 +57,7 @@ function TakeAttendance() {
     const user = useCurrentUser();
     const navigate = useNavigate();
     const [form] = Form.useForm();
-
+    usePageTitle('Tạo điểm danh - Cá Heo Xanh');
     const teacherId = useMemo(() => user?.staff, [user]);
 
     const [_, setSchoolYears] = useState<SchoolYearListItem[]>([]);
@@ -72,7 +73,6 @@ function TakeAttendance() {
     const [isFetchingAttendance, setIsFetchingAttendance] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
-    // ✅ current class + students
     const currentClass: IClassInfo | undefined = useMemo(
         () => teacherData?.classes?.find((c) => c._id === selectedClassId),
         [teacherData, selectedClassId]

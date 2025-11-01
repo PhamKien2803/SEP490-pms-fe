@@ -32,6 +32,7 @@ import { constants } from "../../constants";
 import { foodApis } from "../../services/apiServices";
 import type { ColumnsType } from "antd/es/table";
 import { FoodListParams, FoodListResponse, FoodRecord } from "../../types/food-management";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -57,6 +58,7 @@ const AGE_GROUPS = [
 ];
 
 const FoodManagement: React.FC = () => {
+    usePageTitle('Món ăn tuần - Cá Heo Xanh');
     const navigate = useNavigate();
     const defaultDateRange = useMemo<[Dayjs, Dayjs]>(() => {
         const now = dayjs();

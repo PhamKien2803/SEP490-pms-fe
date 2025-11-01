@@ -11,11 +11,13 @@ import dayjs from 'dayjs';
 import { constants } from '../../constants';
 import DeleteModal from '../../modal/delete-modal/DeleteModal';
 import { usePagePermission } from '../../hooks/usePagePermission';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 const { Title } = Typography;
 const { Option } = Select;
 
 function TopicManagement() {
+    usePageTitle('Quản lý chủ đề - Cá Heo Xanh');
     const navigate = useNavigate();
     const { canCreate, canUpdate, canDelete } = usePagePermission();
     const [topics, setTopics] = useState<TopicListItem[]>([]);

@@ -27,10 +27,12 @@ import { useNavigate } from "react-router-dom";
 import ModalConfirm from "../../modal/common/ModalConfirm/ModalConfirm";
 import { HealthCertRecord } from "../../types/medical-management";
 import dayjs from "dayjs";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const { Title, Text } = Typography;
 
 const MedicalManagement: React.FC = () => {
+    usePageTitle('Hồ sơ sức khỏe - Cá Heo Xanh');
     const navigate = useNavigate();
     const [dataMedicals, setDataMedicals] = useState<HealthCertRecord[]>([]);
     const [searchKeyword, setSearchKeyword] = useState<string>("");
@@ -199,19 +201,10 @@ const MedicalManagement: React.FC = () => {
                 ),
             },
             {
-                title: "Ngày tạo HS",
-                dataIndex: "createdAt",
-                key: "createdAt",
-                width: 120,
-                className: "ant-table-header-nowrap",
-                render: (date: string) => dayjs(date).format("DD/MM/YYYY"),
-            },
-            {
                 title: "Hành động",
                 key: "action",
                 align: "left",
                 width: 110,
-                fixed: "right",
                 className: "ant-table-header-nowrap",
                 render: (_: unknown, record: HealthCertRecord) => {
 
@@ -313,7 +306,6 @@ const MedicalManagement: React.FC = () => {
                     rowKey="_id"
                     pagination={searchKeyword.trim() ? false : pagination}
                     onChange={handleTableChange}
-                    scroll={{ x: "max-content" }}
                 />
             </Card>
 

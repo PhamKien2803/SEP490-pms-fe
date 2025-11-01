@@ -14,8 +14,9 @@ import { usePagePermission } from '../../hooks/usePagePermission';
 import { toast } from 'react-toastify';
 import { useAppDispatch } from '../../redux/hooks';
 import { forceRefetchUser } from '../../redux/authSlice';
-
+import { usePageTitle } from '../../hooks/usePageTitle';
 const FunctionsManagement: React.FC = () => {
+    usePageTitle('Quản lý chức năng - Cá Heo Xanh');
     const [functions, setFunctions] = useState<Functions[]>([]);
     const [searchKeyword, setSearchKeyword] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);

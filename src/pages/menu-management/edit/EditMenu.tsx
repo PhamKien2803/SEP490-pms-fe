@@ -50,6 +50,7 @@ import {
   MenuDetail,
 } from "../../../types/menu-management";
 import TextArea from "antd/es/input/TextArea";
+import { usePageTitle } from "../../../hooks/usePageTitle";
 
 interface Ingredient {
   ingredientName: string;
@@ -712,6 +713,7 @@ const MealEditor: React.FC<MealEditorProps> = ({
 };
 
 const EditMenu: React.FC = () => {
+  usePageTitle('Cập nhật thực đơn - Cá Heo Xanh');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [form] = Form.useForm();
@@ -765,36 +767,36 @@ const EditMenu: React.FC = () => {
 
         const mealFoods = existingMeal?.foods?.length
           ? existingMeal.foods.map((item) => {
-              const food = item.food;
-              const itemData: any = item;
+            const food = item.food;
+            const itemData: any = item;
 
-              let foodWeight = itemData.weight;
-              let foodCalo = itemData.calo;
-              let foodProtein = itemData.protein;
-              let foodLipid = itemData.lipid;
-              let foodCarb = itemData.carb;
+            let foodWeight = itemData.weight;
+            let foodCalo = itemData.calo;
+            let foodProtein = itemData.protein;
+            let foodLipid = itemData.lipid;
+            let foodCarb = itemData.carb;
 
-              if (food && !foodWeight && food.ingredients) {
-                const nutrients = calculateNutrientsFromIngredients(
-                  food.ingredients as Ingredient[]
-                );
-                foodWeight = nutrients.weight;
-                foodCalo = nutrients.calo;
-                foodProtein = nutrients.protein;
-                foodLipid = nutrients.lipid;
-                foodCarb = nutrients.carb;
-              }
+            if (food && !foodWeight && food.ingredients) {
+              const nutrients = calculateNutrientsFromIngredients(
+                food.ingredients as Ingredient[]
+              );
+              foodWeight = nutrients.weight;
+              foodCalo = nutrients.calo;
+              foodProtein = nutrients.protein;
+              foodLipid = nutrients.lipid;
+              foodCarb = nutrients.carb;
+            }
 
-              return {
-                foodId: food?._id,
-                name: food?.foodName,
-                weight: safeValue(foodWeight),
-                calo: safeValue(foodCalo),
-                protein: safeValue(foodProtein),
-                lipid: safeValue(foodLipid),
-                carb: safeValue(foodCarb),
-              };
-            })
+            return {
+              foodId: food?._id,
+              name: food?.foodName,
+              weight: safeValue(foodWeight),
+              calo: safeValue(foodCalo),
+              protein: safeValue(foodProtein),
+              lipid: safeValue(foodLipid),
+              carb: safeValue(foodCarb),
+            };
+          })
           : [];
 
         return {

@@ -92,15 +92,25 @@ export const apiEndPoint = {
   CREATE_TOPIC: "/topics/create",
   UPDATE_TOPIC: (id: string) => `/topics/update/${id}`,
   DELETE_TOPIC: (id: string) => `/topics/delete/${id}`,
-  GET_CLASS_AND_STUDENT_BY_TEACHER: (id: string) => `/teachers/getClassByTeacher/${id}`,
+  GET_CLASS_AND_STUDENT_BY_TEACHER: (id: string) =>
+    `/teachers/getClassByTeacher/${id}`,
   GET_ATTENDANCE_LIST: "/attendances/list",
   CREATE_ATTENDANCE: "/attendances/create",
   UPDATE_ATTENDANCE: (id: string) => `/attendances/update/${id}`,
   DELETE_ATTENDANCE: (id: string) => `/attendances/delete/${id}`,
   GET_ATTENDANCE_BY_ID: (id: string) => `/attendances/getById/${id}`,
-  GET_ATTENDANCE_BY_CLASS_AND_SCHOOLYEAR: (classId: string, schoolYearId: string) => `/attendances/getByClassAndSchoolYear/${classId}/${schoolYearId}`,
-  GET_ATTENDANCE_BY_CLASS_AND_DATE: (id: string, date: string) => `/attendances/getByClassAndDate/${id}/${date}`,
+  GET_ATTENDANCE_BY_CLASS_AND_SCHOOLYEAR: (
+    classId: string,
+    schoolYearId: string
+  ) => `/attendances/getByClassAndSchoolYear/${classId}/${schoolYearId}`,
+  GET_ATTENDANCE_BY_CLASS_AND_DATE: (id: string, date: string) =>
+    `/attendances/getByClassAndDate/${id}/${date}`,
   GET_STUDENT_DETAILS: (id: string) => `/teachers/getByIdStudent/${id}`,
+  GET_FEEDBACK_BY_CLASS_AND_DATE: `/feedbacks/getByClassAndDate`,
+  GET_FEEDBACK_BY_ID: (id: string) => `/feedbacks/getByIdFeedback/${id}`,
+  CREATE_FEEDBACK: "/feedbacks/createFeedbacks",
+  UPDATE_FEED_BACK: (id: string) => `/feedbacks/update/${id}`,
+  DELETE_FEED_BACK: (id: string) => `/feedbacks/delete/${id}`,
   GET_SCHEDULE_BY_ID: (id: string) => `/schedules/getById/${id}`,
   GET_SCHEDULE_PARAMS: "/schedules/getByParams",
   CREATE_SCHEDULE: "/schedules/createSchedule",
@@ -108,13 +118,38 @@ export const apiEndPoint = {
   PREVIEWS_SCHEDULE: "/schedules/previewSchedules",
   GET_FIX_ACTIVITY: "/schedules/getFixActivity",
   GET_AVAILABEL_ACTIVITY: "/schedules/getListAvailable",
+  GET_LIST_LESSON: "/lessons/get-list",
+  GET_SCHEDULE_WEEK: "/lessons/get-schedule-week",
+  GET_LESSON_BY_ID: (id: string) => `/lessons/getById/${id}`,
+  CREATE_LESSON: "/lessons/create",
+  UPDATE_LESSON: (id: string) => `/lessons/update/${id}`,
+  APPROVE_LESSON: (id: string) => `/lessons/approve-request/${id}`,
+  REJECT_LESSON: (id: string) => `/lessons/reject-request/${id}`,
+  SEND_LESSON: (id: string) => `/lessons/send-request/${id}`,
   CONFIRM_SCHEDULE: (id: string) => `/schedules/confirm/${id}`,
+  GET_TIMETABLE_TEACHER: "/time-table/get-timetable-teacher",
   GET_CLASS_BY_SCHOOLYEAR: "/schedules/getClassBySchoolYear",
   GET_LIST_MEDICAL: "/medicals/list",
   GET_MEDICAL_BY_ID: (id: string) => `/medicals/getById/${id}`,
   CREATE_MEDICAL: "/medicals/create",
   UPDATE_MEDICAL: (id: string) => `/medicals/update/${id}`,
   DELETE_MEDICAL: (id: string) => `/medicals/delete/${id}`,
+  GET_LIST_PARENT_STUDENT: (id: string) =>
+    `/dashboard-parent/getStudentByParent/${id}`,
+  GET_DASHBOARD_SCHEDULE: "/dashboard-schedules/getSchedulesByClassAndMonth",
+  GET_DASHBOARD_CLASS: "/dashboard-class/getClassByStuAndSY",
+
+  GET_LIST_FEEDBACK: "/dashboard-feedbacks/getFbByStuAndDate",
+  GET_LIST_MEDICAL_CHILD: (id: string) =>
+    `/dashboard-medicals/getMedicalByStudent/${id}`,
+  GET_LIST_CHILD: (parentId: string) =>
+    `/dashboard-parent/getStudentByParent/${parentId}`,
+  GET_DATA_CHECK_IN: "/dashboard-attendances/getAttByStuAndDate",
+  GET_DATA_CLASS: "/dashboard-class/getClassByStuAndSY",
+  GET_DATA_SCHEDULE: "/dashboard-schedules/getSchedulesByClassAndMonth",
+  GET_DATA_MENU_CHILD: "/dashboard-menus/getMenuByAgeAndDate",
+  GET_SCHOOL_YEAR_PARENT: "/dashboard-class/shoolYear/list",
+  GET_PDF_BY_PARENTS: (id: string) => `/dashboard-medicals/pdf/${id}`,
 };
 
 export const apiConfig = {

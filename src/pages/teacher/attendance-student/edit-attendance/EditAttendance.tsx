@@ -21,6 +21,7 @@ import dayjs from 'dayjs';
 import { teacherApis } from '../../../../services/apiServices';
 import { IAttendanceDetailResponse, IAttendanceUpdatePayload } from '../../../../types/teacher';
 import { useNavigate } from 'react-router-dom';
+import { usePageTitle } from '../../../../hooks/usePageTitle';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -55,6 +56,7 @@ const STATUS_CONFIG: Record<TAttendanceStatus, {
 };
 
 function EditAttendance() {
+    usePageTitle('Chỉnh sửa điểm danh - Cá Heo Xanh');
     const { id: attendanceId } = useParams<{ id: string }>();
     const [form] = Form.useForm();
     const navigate = useNavigate();
@@ -132,7 +134,7 @@ function EditAttendance() {
         try {
             await teacherApis.updateAttendance(attendanceId!, payload);
             toast.success('Cập nhật điểm danh thành công!');
-            navigate(-1);
+            // navigate(-1);
         } catch (error) {
             console.error(error);
             toast.error('Cập nhật thất bại.');

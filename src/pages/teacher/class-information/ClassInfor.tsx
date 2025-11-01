@@ -16,6 +16,7 @@ import { teacherApis, schoolYearApis } from '../../../services/apiServices';
 import { toast } from 'react-toastify';
 import { SchoolYearListItem } from '../../../types/schoolYear';
 import StudentDetailModal from '../../../modal/student-details/StudentDetailModal';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -25,7 +26,7 @@ const { Option } = Select;
 function ClassInfor() {
     const user = useCurrentUser();
     const { token } = useToken();
-
+    usePageTitle('Thông tin lớp học - Cá Heo Xanh');
     const teacherId = user?.staff;
     const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
     const [selectedYear, setSelectedYear] = useState<string>();

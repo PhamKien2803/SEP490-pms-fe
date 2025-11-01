@@ -30,12 +30,14 @@ import type { Dayjs } from 'dayjs';
 import { UpdateEventDto } from '../../../types/event';
 import { eventApis } from '../../../services/apiServices';
 import { useCurrentUser } from '../../../hooks/useCurrentUser';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 
 function EventUpdate() {
+    usePageTitle('Chỉnh sửa sự kiện - Cá Heo Xanh');
     const [form] = Form.useForm();
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
@@ -115,7 +117,7 @@ function EventUpdate() {
             await eventApis.updateEvent(id, payload);
             toast.success('Cập nhật sự kiện thành công!');
             setIsDirty(false);
-            navigate(-1);
+            // navigate(-1);
         } catch (error) {
             toast.error('Cập nhật sự kiện thất bại.');
             console.error("Event update failed:", error);

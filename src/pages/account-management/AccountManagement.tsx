@@ -7,8 +7,10 @@ import { accountsApis } from '../../services/apiServices';
 import { AccountListItem, UpdateAccountDto } from '../../types/account';
 import UpdateAccount from '../../modal/update-account/UpdateAccount';
 import DeleteModal from '../../modal/delete-modal/DeleteModal';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 const AccountManagement: React.FC = () => {
+    usePageTitle('Quản lý tài khoản - Cá Heo Xanh');
     const [allAccounts, setAllAccounts] = useState<AccountListItem[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [pagination, setPagination] = useState<TablePaginationConfig>({
@@ -136,11 +138,6 @@ const AccountManagement: React.FC = () => {
                     {record.roleList.map((role) => <Tag color="blue" key={role._id}>{role.roleName}</Tag>)}
                 </>
             ),
-        },
-        {
-            title: 'Người tạo',
-            dataIndex: 'createdBy',
-            key: 'createdBy',
         },
         {
             title: 'Người cập nhật',

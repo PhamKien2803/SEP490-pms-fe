@@ -7,6 +7,7 @@ import { schoolYearApis } from '../../../services/apiServices';
 import { SchoolYearListItem, UpdateSchoolYearDto } from '../../../types/schoolYear';
 import { useCurrentUser } from '../../../hooks/useCurrentUser';
 import dayjs from 'dayjs';
+import { usePageTitle } from '../../../hooks/usePageTitle';
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
@@ -24,6 +25,7 @@ const STATUS_CONFIG = {
 };
 
 function EditSchoolyear() {
+    usePageTitle('Chỉnh sửa năm học - Cá Heo Xanh');
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const user = useCurrentUser();
@@ -82,7 +84,7 @@ function EditSchoolyear() {
             await schoolYearApis.updateSchoolYear(id, payload);
             toast.success('Cập nhật năm học thành công!');
             // fetchData();
-            navigate(-1);
+            // navigate(-1);
         } catch (error) {
             typeof error === "string" ? toast.warn(error) : toast.error('Đã có lỗi xảy ra. Vui lòng thử lại!');
         } finally {
