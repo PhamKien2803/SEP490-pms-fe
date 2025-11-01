@@ -159,7 +159,7 @@ function CreateClass() {
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12} md={8}>
-                            <Form.Item name="age" label="Độ tuổi" rules={[{ required: true, message: 'Vui lòng chọn độ tuổi!' }]}>
+                            <Form.Item name="age" label="Độ tuổi">
                                 <Select
                                     placeholder="Chọn độ tuổi"
                                     style={{ width: '100%' }}

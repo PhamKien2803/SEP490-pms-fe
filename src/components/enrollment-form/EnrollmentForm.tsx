@@ -139,8 +139,40 @@ const EnrollmentForm: React.FC = () => {
                                 <Option value="Khác">Khác</Option>
                             </Select>
                         </Form.Item></Col>
-                        <Col xs={24} sm={12}><Form.Item name="studentNation" label="Dân tộc" rules={[{ required: true, message: "Vui lòng nhập dân tộc!" }]}><Input placeholder="Kinh" /></Form.Item></Col>
-                        <Col xs={24} sm={12}><Form.Item name="studentReligion" label="Tôn giáo"><Input placeholder="Không" /></Form.Item></Col>
+                        <Col xs={24} sm={12}>
+                            <Form.Item
+                                name="studentNation"
+                                label="Dân tộc"
+                                rules={[{ required: true, message: "Vui lòng chọn dân tộc!" }]}
+                            >
+                                <Select showSearch placeholder="Chọn dân tộc">
+                                    {[
+                                        "Kinh", "Tày", "Thái", "Hoa", "Khmer", "Mường", "Nùng", "H'Mông", "Dao", "Gia Rai",
+                                        "Ê Đê", "Ba Na", "Chăm", "Sán Chay", "Cơ Ho", "Xê Đăng", "Sán Dìu", "Hrê", "Ra Glai", "Mnông",
+                                        "Thổ", "Stiêng", "Khơ Mú", "Bru - Vân Kiều", "Cơ Tu", "Giáy", "Tà Ôi", "Mạ", "Co", "Chơ Ro",
+                                        "Xinh Mun", "Hà Nhì", "Chu Ru", "Lào", "La Chí", "La Ha", "Phù Lá", "La Hủ", "Kháng", "Lự",
+                                        "Lô Lô", "Chứt", "Mảng", "Pà Thẻn", "Co Lao", "Cống", "Bố Y", "Si La", "Pu Péo", "Brâu",
+                                        "Ơ Đu", "Rơ Măm"
+                                    ].map((ethnic) => (
+                                        <Option key={ethnic} value={ethnic}>
+                                            {ethnic}
+                                        </Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={12}>
+                            <Form.Item
+                                name="studentReligion"
+                                label="Tôn giáo"
+                                rules={[{ required: true, message: "Vui lòng chọn tôn giáo!" }]}
+                            >
+                                <Select placeholder="Có hoặc Không">
+                                    <Option value="Không">Không</Option>
+                                    <Option value="Có">Có</Option>
+                                </Select>
+                            </Form.Item>
+                        </Col>
                         <Col span={24}><Form.Item name="address" label="Địa chỉ thường trú" rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}><Input.TextArea rows={2} placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố" /></Form.Item></Col>
                     </Row>
 
