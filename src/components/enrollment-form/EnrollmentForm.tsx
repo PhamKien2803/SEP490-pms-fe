@@ -36,7 +36,29 @@ const EnrollmentForm: React.FC = () => {
     const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
     const [formData, setFormData] = useState<Partial<RegisterEnrollmentDto> | null>(null);
     const [isExistingParent, setIsExistingParent] = useState(false);
+    const [studentAge, setStudentAge] = useState<number | null>(null);
+    const [dobError, setDobError] = useState<string | null>(null);
 
+    const handleStudentDobChange = (date: dayjs.Dayjs | null) => {
+        setDobError(null);
+        setStudentAge(null);
+
+        if (!date) return;
+
+        const today = dayjs();
+        const age = today.diff(date, "year");
+
+        if (date.isAfter(today, "day")) {
+            setDobError("Ngày sinh không được trong tương lai!");
+        } else if (age < 1) {
+            setDobError("Học sinh phải đủ ít nhất 1 tuổi!");
+        } else if (age > 5) {
+            setDobError("Học sinh không được quá 5 tuổi!");
+        } else {
+            setDobError(null);
+            setStudentAge(age);
+        }
+    };
     const onFinish = (values: any) => {
         let payload: Partial<RegisterEnrollmentDto>;
         const { isExistingParentCheckbox, ...restValues } = values;
@@ -105,6 +127,22 @@ const EnrollmentForm: React.FC = () => {
         }
     };
 
+    const blockSpecialCharactersAndNumbers = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        const regex = /^[a-zA-ZÀ-ỹà-ỹ\s]*$/;
+        if (!regex.test(event.key)) {
+            event.preventDefault();
+        }
+    };
+
+    const handlePasteName = (event: React.ClipboardEvent<HTMLInputElement>) => {
+        const pasted = event.clipboardData.getData('Text');
+        const regex = /^[a-zA-ZÀ-ỹà-ỹ\s]*$/;
+        if (!regex.test(pasted)) {
+            event.preventDefault();
+        }
+    };
+
+
     return (
         <>
             <Card>
@@ -129,8 +167,45 @@ const EnrollmentForm: React.FC = () => {
 
                     <Divider orientation="left"><UserOutlined /> Thông tin học sinh</Divider>
                     <Row gutter={24}>
-                        <Col xs={24} sm={12}><Form.Item name="studentName" label="Họ và tên" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}><Input prefix={<UserOutlined />} placeholder="Nguyễn Văn A" /></Form.Item></Col>
-                        <Col xs={24} sm={12}><Form.Item name="studentDob" label="Ngày sinh" rules={[{ required: true, message: "Vui lòng chọn ngày sinh!" }]}><DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" placeholder="Chọn ngày" /></Form.Item></Col>
+                        <Col xs={24} sm={12}><Form.Item name="studentName" label="Họ và tên" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}><Input onKeyPress={blockSpecialCharactersAndNumbers}
+                            onPaste={handlePasteName} prefix={<UserOutlined />} placeholder="Nguyễn Văn A" /></Form.Item></Col>
+                        <Col xs={24} sm={12}>
+                            <Form.Item
+                                name="studentDob"
+                                label="Ngày sinh"
+                                rules={[
+                                    { required: true, message: "Vui lòng chọn ngày sinh!" },
+                                    {
+                                        validator: (_, value) => {
+                                            if (!value) return Promise.resolve();
+                                            const today = dayjs();
+                                            const age = today.diff(value, "year");
+
+                                            if (value.isAfter(today, "day"))
+                                                return Promise.reject(new Error("Ngày sinh không được trong tương lai!"));
+                                            if (age < 1)
+                                                return Promise.reject(new Error("Học sinh phải đủ ít nhất 1 tuổi!"));
+                                            if (age > 5)
+                                                return Promise.reject(new Error("Học sinh không được quá 5 tuổi!"));
+                                            return Promise.resolve();
+                                        },
+                                    },
+                                ]}
+                            >
+                                <Space direction="vertical" style={{ width: "100%" }}>
+                                    <DatePicker
+                                        style={{ width: "100%" }}
+                                        format="DD/MM/YYYY"
+                                        placeholder="Chọn ngày"
+                                        onChange={handleStudentDobChange}
+                                    />
+                                    {studentAge !== null && !dobError && (
+                                        <Text type="secondary">→ {studentAge} tuổi</Text>
+                                    )}
+                                    {dobError && <Text type="danger">{dobError}</Text>}
+                                </Space>
+                            </Form.Item>
+                        </Col>
                         <Col xs={24} sm={12}><Form.Item name="studentIdCard" label="CCCD/Mã định danh" rules={[{ required: true, message: "Vui lòng nhập mã định danh!" }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<IdcardOutlined />} placeholder="012345678901" /></Form.Item></Col>
                         <Col xs={24} sm={12}><Form.Item name="studentGender" label="Giới tính" rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}>
                             <Select placeholder="Chọn giới tính">
@@ -180,10 +255,11 @@ const EnrollmentForm: React.FC = () => {
                     <Row gutter={24}>
                         {!isExistingParent && (
                             <>
-                                <Col xs={24} sm={12}><Form.Item name="fatherName" label="Họ và tên Cha" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}><Input placeholder="Nguyễn Văn B" /></Form.Item></Col>
-                                <Col xs={24} sm={12}><Form.Item name="fatherJob" label="Nghề nghiệp"><Input placeholder="Kỹ sư" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="fatherName" label="Họ và tên Cha" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}><Input onKeyPress={blockSpecialCharactersAndNumbers}
+                                    onPaste={handlePasteName} placeholder="Nguyễn Văn B" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="fatherJob" label="Nghề nghiệp" rules={[{ required: true }]}><Input placeholder="Kỹ sư" /></Form.Item></Col>
                                 <Col xs={24} sm={12}><Form.Item name="fatherPhoneNumber" label="Số điện thoại Cha" rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<PhoneOutlined />} placeholder="09xxxxxxxx" /></Form.Item></Col>
-                                <Col xs={24} sm={12}><Form.Item name="fatherEmail" label="Email Cha" rules={[{ type: 'email', message: "Email không hợp lệ!" }]}><Input placeholder="example@email.com" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="fatherEmail" label="Email Cha" rules={[{ required: true, type: 'email', message: "Email không hợp lệ!" }]}><Input placeholder="example@email.com" /></Form.Item></Col>
                             </>
                         )}
                         <Col xs={24} sm={12}><Form.Item name="fatherIdCard" label="CCCD Cha" rules={[{ required: true, message: "Vui lòng nhập CCCD!" }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<IdcardOutlined />} placeholder="012345678901" /></Form.Item></Col>
@@ -193,10 +269,11 @@ const EnrollmentForm: React.FC = () => {
                     <Row gutter={24}>
                         {!isExistingParent && (
                             <>
-                                <Col xs={24} sm={12}><Form.Item name="motherName" label="Họ và tên Mẹ" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}><Input placeholder="Lê Thị C" /></Form.Item></Col>
-                                <Col xs={24} sm={12}><Form.Item name="motherJob" label="Nghề nghiệp"><Input placeholder="Giáo viên" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="motherName" label="Họ và tên Mẹ" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}><Input onKeyPress={blockSpecialCharactersAndNumbers}
+                                    onPaste={handlePasteName} placeholder="Lê Thị C" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="motherJob" label="Nghề nghiệp" rules={[{ required: true }]}><Input placeholder="Giáo viên" /></Form.Item></Col>
                                 <Col xs={24} sm={12}><Form.Item name="motherPhoneNumber" label="Số điện thoại Mẹ" rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<PhoneOutlined />} placeholder="09xxxxxxxx" /></Form.Item></Col>
-                                <Col xs={24} sm={12}><Form.Item name="motherEmail" label="Email Mẹ" rules={[{ type: 'email', message: "Email không hợp lệ!" }]}><Input placeholder="example@email.com" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="motherEmail" label="Email Mẹ" rules={[{ required: true, type: 'email', message: "Email không hợp lệ!" }]}><Input placeholder="example@email.com" /></Form.Item></Col>
                             </>
                         )}
                         <Col xs={24} sm={12}><Form.Item name="motherIdCard" label="CCCD Mẹ" rules={[{ required: true, message: "Vui lòng nhập CCCD!" }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<IdcardOutlined />} placeholder="012345678901" /></Form.Item></Col>
