@@ -515,7 +515,7 @@ export const menuApis = {
   },
 
   deleteMenu: async (menuId: string): Promise<void> => {
-    await axiosAuth.delete(apiEndPoint.DELETE_MENU(menuId));
+    await axiosAuth.post(apiEndPoint.DELETE_MENU(menuId));
   },
 
   editMenu: async (menuId: string, body: CreateMenuParams): Promise<void> => {

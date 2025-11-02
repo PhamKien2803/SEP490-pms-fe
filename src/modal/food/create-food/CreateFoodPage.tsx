@@ -397,7 +397,7 @@ const CreateFoodPage: React.FC = () => {
 
               <Title level={5} style={{ marginTop: 20 }}>
                 <CalculatorOutlined style={{ marginRight: 8 }} /> Giá trị Dinh
-                dưỡng **Tổng**
+                dưỡng tổng
               </Title>
 
               <NutrientDisplay

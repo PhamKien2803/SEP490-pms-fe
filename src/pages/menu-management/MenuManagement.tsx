@@ -79,7 +79,7 @@ const MenuManagement: React.FC = () => {
     total: 0,
   });
 
-  const [selectedAgeGroup, setSelectedAgeGroup] = useState<string>("1");
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState<string>("");
   const [selectedDateRange, setSelectedDateRange] = useState<
     [Dayjs, Dayjs] | null
   >(defaultDateRange);
@@ -334,11 +334,12 @@ const MenuManagement: React.FC = () => {
 
                 <Select
                   placeholder="Chọn Nhóm tuổi"
-                  style={{ width: 150 }}
+                  style={{ width: 200 }}
                   value={selectedAgeGroup}
                   onChange={handleAgeGroupChange}
                   disabled={loading}
                 >
+                  <Option key="all" value="">Tất cả nhóm tuổi</Option>
                   {AGE_GROUPS.map((group) => (
                     <Option key={group.value} value={group.value}>
                       {group.label}
@@ -351,7 +352,7 @@ const MenuManagement: React.FC = () => {
                   allowClear={true}
                   value={selectedDateRange}
                   onChange={handleDateRangeChange}
-                  style={{ width: 250 }}
+                  style={{ width: 260 }}
                 />
               </Space>
             </Col>
