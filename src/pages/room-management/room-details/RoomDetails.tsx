@@ -185,7 +185,7 @@ const RoomDetail: React.FC = () => {
           onClick={() => navigate(`${constants.APP_PREFIX}/rooms`)}
           style={{ marginRight: 16, cursor: "pointer", color: "#0050b3" }}
         />
-        Chi Tiết Phòng Học: **{roomDetail.roomName}**
+        Chi Tiết Phòng Học: {roomDetail.roomName}
       </Title>
 
       {/* PHẦN 1: THÔNG TIN CƠ BẢN VÀ LỊCH SỬ */}
