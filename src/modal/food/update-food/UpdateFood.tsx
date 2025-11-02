@@ -13,6 +13,7 @@ import {
   Col,
   Divider,
   Flex,
+  Modal,
 } from "antd";
 import {
   ArrowLeftOutlined,
@@ -54,7 +55,7 @@ const UpdateFoodPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-
+  const [isCancelConfirmVisible, setIsCancelConfirmVisible] = useState(false);
   const foodDetailFromState = location.state?.foodDetail as
     | FoodRecord
     | undefined;
@@ -62,6 +63,10 @@ const UpdateFoodPage: React.FC = () => {
   const [foodDetail, setFoodDetail] = useState<FoodRecord | null>(
     foodDetailFromState || null
   );
+  const handleConfirmCancel = () => {
+      setIsCancelConfirmVisible(false);
+      navigate(`${constants.APP_PREFIX}/foods`);
+    };
   const [loading, setLoading] = useState(!foodDetailFromState);
   const [form] = Form.useForm<UpdateFoodFormValues>();
 
@@ -576,7 +581,7 @@ const UpdateFoodPage: React.FC = () => {
           <Form.Item style={{ marginTop: 24, textAlign: "right" }}>
             <Space>
               <Button
-                onClick={() => navigate(`${constants.APP_PREFIX}/foods`)}
+                onClick={() => setIsCancelConfirmVisible(true)}
                 disabled={loading}
               >
                 Hủy
@@ -593,6 +598,17 @@ const UpdateFoodPage: React.FC = () => {
           </Form.Item>
         </Form>
       </Card>
+      <Modal
+        title="Bạn có chắc muốn hủy?"
+        open={isCancelConfirmVisible}
+        onOk={handleConfirmCancel}
+        onCancel={() => setIsCancelConfirmVisible(false)}
+        okText="Đồng ý"
+        cancelText="Không"
+        zIndex={1001}
+      >
+        <p>Các thay đổi chưa được lưu sẽ bị mất.</p>
+      </Modal>
     </div>
   );
 };

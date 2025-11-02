@@ -52,7 +52,6 @@ interface Pagination {
 }
 
 const AGE_GROUPS = [
-    { value: "1", label: "Dưới 1 tuổi" },
     { value: "2", label: "1-3 tuổi" },
     { value: "3", label: "4-5 tuổi" }
 ];
@@ -73,7 +72,6 @@ const FoodManagement: React.FC = () => {
         total: 0,
     });
 
-    // Giữ lại state cho Checkbox chọn hàng (dù không dùng để tính calo)
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
     const [selectedAgeGroup, setSelectedAgeGroup] = useState<string>("");
@@ -87,21 +85,17 @@ const FoodManagement: React.FC = () => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
-    // State cho API kích hoạt tính calo chung (API GET không tham số)
     const [isAITriggering, setIsAITriggering] = useState<boolean>(false);
 
     const { canCreate, canUpdate, canDelete } = usePagePermission();
 
-    // Hàm gọi API KÍCH HOẠT TÍNH CALO CHUNG (API GET: /caculate-calo)
     const handleTriggerAICalculation = async () => {
         setIsAITriggering(true);
         try {
-            // Gọi API GET không cần tham số
             const response = await foodApis.triggerAICalculation();
 
             toast.success(response.message || "Kích hoạt tính toán Calo AI thành công!");
 
-            // Sau khi tính toán xong, tải lại danh sách
             fetchFoodList(
                 pagination.page,
                 pagination.limit,
@@ -111,7 +105,7 @@ const FoodManagement: React.FC = () => {
             );
         } catch (error: any) {
             console.error("Lỗi kích hoạt tính toán Calo AI:", error);
-            const errorMessage = error.response?.data?.message || "Kích hoạt tính toán thất bại. Vui lòng thử lại.";
+            const errorMessage = error || "Kích hoạt tính toán thất bại. Vui lòng thử lại.";
             toast.error(errorMessage);
         } finally {
             setIsAITriggering(false);
@@ -210,7 +204,6 @@ const FoodManagement: React.FC = () => {
     ) => {
         setSelectedDateRange(dates as [Dayjs, Dayjs] | null);
         setPagination((prev) => ({ ...prev, page: 1 }));
-        setSelectedRowKeys([]); // Reset chọn hàng khi lọc
     };
 
     const handleDeleteFood = (foodId: string) => {
@@ -227,7 +220,6 @@ const FoodManagement: React.FC = () => {
             setIsDeleteModalOpen(false);
             setDeletingId(null);
 
-            // Bỏ chọn nếu món bị xóa
             setSelectedRowKeys(prev => prev.filter(key => key !== deletingId));
 
             fetchFoodList(
@@ -495,7 +487,6 @@ const FoodManagement: React.FC = () => {
                     loading={loading}
                     onChange={handlePaginationChange}
                     size="small"
-                    // Áp dụng rowSelection để có checkbox
                     rowSelection={rowSelection}
                     pagination={{
                         current: pagination.page,
