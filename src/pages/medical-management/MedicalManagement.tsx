@@ -151,7 +151,7 @@ const MedicalManagement: React.FC = () => {
                 title: "Mã HS",
                 dataIndex: ["student", "studentCode"],
                 key: "studentCode",
-                width: 100,
+                width: 130,
                 className: "ant-table-header-nowrap",
                 render: (text) => <Text>{text}</Text>,
             },
@@ -159,14 +159,14 @@ const MedicalManagement: React.FC = () => {
                 title: "Tên Học sinh",
                 dataIndex: ["student", "fullName"],
                 key: "fullName",
-                width: 150,
+                width: 180,
                 className: "ant-table-header-nowrap",
             },
             {
                 title: "Ngày sinh",
                 dataIndex: ["student", "dob"],
                 key: "dob",
-                width: 120,
+                width: 100,
                 render: (dob: string) => dayjs(dob).format("DD/MM/YYYY"),
             },
             {
@@ -204,7 +204,7 @@ const MedicalManagement: React.FC = () => {
                 title: "Hành động",
                 key: "action",
                 align: "left",
-                width: 110,
+                width: 100,
                 className: "ant-table-header-nowrap",
                 render: (_: unknown, record: HealthCertRecord) => {
 

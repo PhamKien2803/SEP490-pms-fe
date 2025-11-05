@@ -302,8 +302,7 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
 
       <Divider orientation="left" style={{ margin: "24px 0" }}>
         <Title level={3} style={{ margin: 0 }}>
-          <SolutionOutlined style={{ marginRight: 8 }} /> Khám Toàn Diện Chi
-          Tiết
+          <SolutionOutlined style={{ marginRight: 8 }} /> Khám Toàn Diện Chi Tiết
         </Title>
       </Divider>
 

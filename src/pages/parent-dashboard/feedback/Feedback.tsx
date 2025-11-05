@@ -214,14 +214,14 @@ const Feedback: React.FC = () => {
         style={{
           marginBottom: 24,
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-          backgroundColor: "#e6fffb",
+          backgroundColor: "#F0F8FF",
         }}
       >
         <Row gutter={24} align="middle">
           <Col span={12}>
             <Text
               strong
-              style={{ display: "block", marginBottom: 4, color: "#595959" }}
+              style={{ display: "block", marginBottom: 4, color: "#1890ff" }}
             >
               <UserOutlined style={{ marginRight: 4 }} /> Chọn con:
             </Text>
@@ -242,7 +242,7 @@ const Feedback: React.FC = () => {
           <Col span={12}>
             <Text
               strong
-              style={{ display: "block", marginBottom: 4, color: "#595959" }}
+              style={{ display: "block", marginBottom: 4, color: "#1890ff" }}
             >
               <ClockCircleOutlined style={{ marginRight: 4 }} /> Ngày báo cáo:
             </Text>

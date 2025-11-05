@@ -494,8 +494,8 @@ const Schedule: React.FC = () => {
       <Title
         level={2}
         style={{
-          color: "#08979c",
-          borderBottom: "2px solid #08979c",
+          color: "#1890ff",
+          borderBottom: "2px solid #1890ff",
           paddingBottom: 8,
           marginBottom: 16,
         }}
@@ -508,7 +508,7 @@ const Schedule: React.FC = () => {
       <Card
         bordered={true}
         title={
-          <Text strong style={{ color: "#08979c" }}>
+          <Text strong style={{ color: "#1890ff" }}>
             <UserOutlined /> Lọc Thông Tin
           </Text>
         }

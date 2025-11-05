@@ -322,8 +322,8 @@ const Menu: React.FC = () => {
       <Title
         level={2}
         style={{
-          color: "#fa8c16",
-          borderBottom: "2px solid #fa8c16",
+          color: "#1890ff",
+          borderBottom: "2px solid #1890ff",
           paddingBottom: 8,
           fontSize: 32,
         }}
@@ -336,14 +336,14 @@ const Menu: React.FC = () => {
       <Card
         bordered={false}
         title={
-          <Text strong style={{ color: "#fa8c16", fontSize: 18 }}>
+          <Text strong style={{ color: "#1890ff", fontSize: 18 }}>
             <CalendarOutlined /> Chọn Ngày và Nhóm tuổi
           </Text>
         }
         style={{
           marginBottom: 28,
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-          backgroundColor: "#fff7e6",
+          backgroundColor: "#F0F8FF",
         }}
       >
         <Row gutter={24} align="middle">

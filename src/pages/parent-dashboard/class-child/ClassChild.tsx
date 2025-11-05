@@ -77,6 +77,7 @@ const StatusTag: React.FC<{ status: string }> = ({ status }) => {
   );
 };
 
+
 const CheckIn: React.FC = () => {
   const user = useCurrentUser();
   const [listChild, setListChild] = useState<Student[]>([]);

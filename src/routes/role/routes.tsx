@@ -690,7 +690,7 @@ export const routes: RouteObject[] = [
             children: [
               {
                 index: true,
-                element: <ClassChild />,
+                element: <CheckIn />,
               },
             ],
           },
