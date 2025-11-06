@@ -121,7 +121,7 @@ export interface Parent {
   phoneNumber?: string;
   email?: string;
   IDCard: string;
-  gender: "male" | "female" | "other";
+  gender: "Nam" | "Nữ" | "Khác";
   students: string[]; // mảng id của student
   address?: string;
   nation?: string;
@@ -137,7 +137,7 @@ export interface Parent2 {
   dob?: string; // ISO date string
   phoneNumber?: string;
   email?: string;
-  gender?: "male" | "female" | "other";
+  gender?: "Nam" | "Nữ" | "Khác";
   students?: string[]; // mảng id của student
   address?: string;
   nation?: string;
@@ -150,7 +150,7 @@ export interface UpdateParentDto {
   dob?: string; // ISO date string
   phoneNumber?: string;
   email?: string;
-  gender?: "male" | "female" | "other";
+  gender?: "Nam" | "Nữ" | "Khác";
   students?: string[]; // mảng id của student
   address?: string;
   nation?: string;
@@ -164,7 +164,7 @@ export interface CreateParentDto {
   phoneNumber?: string;
   email?: string;
   IDCard: string;
-  gender: "male" | "female" | "other";
+  gender: "Nam" | "Nữ" | "Khác";
   students?: string[];
   address?: string;
   nation?: string;

@@ -10,7 +10,7 @@ export interface UpdateParentFormValues {
     dob?: Dayjs;
     phoneNumber?: string;
     email?: string;
-    gender?: "male" | "female" | "other";
+    gender?: "Nam" | "Nữ" | "Khác";
     students?: string[];
     address?: string;
     nation?: string;
@@ -117,14 +117,10 @@ const UpdateParent: React.FC<UpdateParentProps> = ({ open, loading, initialData,
                                 rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}
                             >
                                 <Radio.Group>
-                                    <Radio value="male">Nam</Radio>
-                                    <Radio value="female">Nữ</Radio>
-                                    <Radio value="other">Khác</Radio>
+                                    <Radio value="Nam">Nam</Radio>
+                                    <Radio value="Nữ">Nữ</Radio>
+                                    <Radio value="Khác">Khác</Radio>
                                 </Radio.Group>
-                            </Form.Item>
-
-                            <Form.Item name="nation" label="Dân tộc">
-                                <Input placeholder="e.g., Kinh" />
                             </Form.Item>
                         </Col>
 
@@ -150,10 +146,6 @@ const UpdateParent: React.FC<UpdateParentProps> = ({ open, loading, initialData,
                                 rules={[{ type: 'email', message: 'Email không hợp lệ!' }]}
                             >
                                 <Input placeholder="abc@gmail.com" />
-                            </Form.Item>
-
-                            <Form.Item name="religion" label="Tôn giáo">
-                                <Input placeholder="e.g., Không" />
                             </Form.Item>
                         </Col>
 
