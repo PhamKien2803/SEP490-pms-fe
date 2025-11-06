@@ -139,7 +139,7 @@ const Schedule: React.FC = () => {
   const [scheduleList, setScheduleList] = useState<ScheduleList>([]);
 
   const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
-  const [isClassLoading, setIsClassLoading] = useState<boolean>(false);
+  const [isClassLoading, setIsClassLoading] = useState<boolean>(true);
   const [isScheduleLoading, setIsScheduleLoading] = useState<boolean>(false);
   const [isClassError, setIsClassError] = useState<boolean>(false);
   const [isScheduleError, setIsScheduleError] = useState<boolean>(false);
@@ -250,8 +250,7 @@ const Schedule: React.FC = () => {
       setIsScheduleError(false);
       try {
         const params: ScheduleParams = {
-          // Thay thế "68f7aec1d534d267d0f61493" bằng classId thực tế
-          classId: "68f7aec1d534d267d0f61493",
+          classId: classId,
           month: selectedMonth,
         };
 
@@ -468,14 +467,6 @@ const Schedule: React.FC = () => {
     );
   };
 
-  if (isInitialLoading) {
-    return (
-      <div style={{ textAlign: "center", padding: "50px" }}>
-        <Spin size="large" tip="Đang tải thông tin học sinh..." />
-      </div>
-    );
-  }
-
   if (listChild.length === 0 && !isInitialLoading) {
     return (
       <div style={{ textAlign: "center", padding: "50px" }}>
@@ -612,7 +603,7 @@ const Schedule: React.FC = () => {
             }}
           />
         )}
-        {!selectedStudentId || !selectedSchoolYear ? (
+        {(!selectedStudentId || !selectedSchoolYear) && !isClassLoading ? (
           <Alert
             message="Vui lòng chọn Con và Năm học để xem thời khóa biểu."
             type="info"

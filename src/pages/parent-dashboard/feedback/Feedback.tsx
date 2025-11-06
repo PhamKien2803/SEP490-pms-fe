@@ -35,7 +35,7 @@ import dayjs, { Dayjs } from "dayjs";
 const { Title, Text } = Typography;
 const { Option } = Select;
 
-const defaultDate = "2025-10-27";
+const defaultDate = new Date();
 
 const HealthCard: React.FC<{ data: FeedbackData }> = ({ data }) => (
   <Card

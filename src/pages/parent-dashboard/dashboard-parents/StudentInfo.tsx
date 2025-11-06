@@ -41,9 +41,9 @@ import { parentDashboardApis } from "../../../services/apiServices";
 const { Title, Text } = Typography;
 const { Option } = Select;
 
-const ACCENT_COLOR = "#0050b3"; 
-const PRIMARY_COLOR = "#e6f7ff"; 
-const TEXT_COLOR = "#262626"; 
+const ACCENT_COLOR = "#0050b3";
+const PRIMARY_COLOR = "#e6f7ff";
+const TEXT_COLOR = "#262626";
 const BACKGROUND_GREY = "#F0F2F5";
 
 const getDisplayDate = (dob: dayjs.Dayjs | null): string => {
@@ -101,7 +101,7 @@ const StudentInfoSection: React.FC<{
           style={{
             padding: 40,
             background: PRIMARY_COLOR,
-            color: TEXT_COLOR, 
+            color: TEXT_COLOR,
             borderTopLeftRadius: 12,
             borderBottomLeftRadius: 12,
             borderBottomRightRadius: window.innerWidth < 992 ? 12 : 0,
@@ -146,7 +146,10 @@ const StudentInfoSection: React.FC<{
               color: TEXT_COLOR,
             }}
           >
-            Mã HS: <Text strong style={{ color: ACCENT_COLOR }}>{student.studentCode}</Text>
+            Mã HS:{" "}
+            <Text strong style={{ color: ACCENT_COLOR }}>
+              {student.studentCode}
+            </Text>
           </Text>
           <Divider
             style={{
@@ -387,83 +390,52 @@ const StudentInfo: React.FC = () => {
     [data, selectedStudentId, loading, fetchParentStudents]
   );
 
-  if (loading) {
-    return (
+  return (
+    <Spin spinning={loading}>
       <div
         style={{
           padding: "40px",
-          textAlign: "center",
           minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          backgroundColor: BACKGROUND_GREY,
         }}
       >
-        <Spin
-          indicator={
-            <LoadingOutlined
-              style={{ fontSize: 50, color: ACCENT_COLOR }}
-              spin
+        <Card
+          title={cardHeader}
+          bordered={false}
+          style={{
+            marginBottom: 24,
+            borderRadius: 12,
+            boxShadow: "0 8px 20px rgba(0, 0, 0, 0.08)",
+            border: "none",
+          }}
+          bodyStyle={{ padding: 0 }}
+        >
+          {error && (
+            <Alert
+              message="Lỗi Tải Dữ Liệu"
+              description={error}
+              type="error"
+              showIcon
+              style={{ margin: 24, borderRadius: 8 }}
             />
-          }
-          tip={
-            <Text
-              strong
-              style={{ marginTop: 20, color: TEXT_COLOR, fontSize: 18 }}
-            >
-              Đang tải hồ sơ của con bạn...
-            </Text>
-          }
-          style={{ padding: "80px 0" }}
-        />
+          )}
+
+          {(!data || data.students.length === 0) && !error && (
+            <Alert
+              message="Thông báo"
+              description="Không tìm thấy thông tin học sinh nào được liên kết với tài khoản này."
+              type="info"
+              showIcon
+              style={{ margin: 24, borderRadius: 8 }}
+            />
+          )}
+        </Card>
+
+        {currentStudent && data && (
+          <StudentInfoSection student={currentStudent} parent={data.parent} />
+        )}
       </div>
-    );
-  }
-
-  return (
-    <div
-      style={{
-        padding: "40px",
-        minHeight: "100vh",
-        backgroundColor: BACKGROUND_GREY, 
-      }}
-    >
-      <Card
-        title={cardHeader}
-        bordered={false}
-        style={{
-          marginBottom: 24,
-          borderRadius: 12,
-          boxShadow: "0 8px 20px rgba(0, 0, 0, 0.08)",
-          border: "none",
-        }}
-        bodyStyle={{ padding: 0 }}
-      >
-        {error && (
-          <Alert
-            message="Lỗi Tải Dữ Liệu"
-            description={error}
-            type="error"
-            showIcon
-            style={{ margin: 24, borderRadius: 8 }}
-          />
-        )}
-
-        {(!data || data.students.length === 0) && !error && (
-          <Alert
-            message="Thông báo"
-            description="Không tìm thấy thông tin học sinh nào được liên kết với tài khoản này."
-            type="info"
-            showIcon
-            style={{ margin: 24, borderRadius: 8 }}
-          />
-        )}
-      </Card>
-
-      {currentStudent && data && (
-        <StudentInfoSection student={currentStudent} parent={data.parent} />
-      )}
-    </div>
+    </Spin>
   );
 };
 
