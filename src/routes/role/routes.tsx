@@ -73,9 +73,6 @@ import Schedule from "../../pages/parent-dashboard/schedule/Schedule";
 import Menu from "../../pages/parent-dashboard/menu/Menu";
 import Medical from "../../pages/parent-dashboard/medical/Medical";
 import GuardianManagement from "../../pages/guardians/Guardians";
-import CreateGuardian from "../../modal/guardian/create-guardian/CreateGuardian";
-import UpdateGuardian from "../../modal/guardian/update-guardian/UpdateGuardian";
-import ViewGuardianDetails from "../../modal/guardian/view-guardian/ViewGuardianDetails";
 
 export const routes: RouteObject[] = [
   {
@@ -728,7 +725,7 @@ export const routes: RouteObject[] = [
               },
             ],
           },
-           {
+          {
             path: "guardians",
             element: (
               <PrivateRoute
@@ -740,18 +737,6 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <GuardianManagement />,
-              },
-              {
-                path: "view/:id",
-                element: <ViewGuardianDetails />,
-              },
-              {
-                path: "edit/:id",
-                element: <UpdateGuardian />,
-              },
-              {
-                path: "create",
-                element: <CreateGuardian />,
               },
             ],
           },

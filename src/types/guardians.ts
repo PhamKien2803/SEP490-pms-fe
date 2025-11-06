@@ -47,18 +47,13 @@ export interface IPopulatedStudent {
     fullName: string;
 }
 
-export interface IDelegationPeriod {
-    fromDate: string; 
-    toDate: string; 
-}
-
 export interface IGuardianRecord {
     _id: string;
     fullName: string;
     dob: dayjs.Dayjs | null; 
     studentId: IPopulatedStudent;
     parentId?: IPopulatedParent;
-    delegationPeriod: IDelegationPeriod;
+    pickUpDate: dayjs.Dayjs | null;
     phoneNumber: string;
     relationship: GuardianRelationship;
     relationshipDetail?: string;
