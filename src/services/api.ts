@@ -150,6 +150,12 @@ export const apiEndPoint = {
   GET_DATA_MENU_CHILD: "/dashboard-menus/getMenuByAgeAndDate",
   GET_SCHOOL_YEAR_PARENT: "/dashboard-class/shoolYear/list",
   GET_PDF_BY_PARENTS: (id: string) => `/dashboard-medicals/pdf/${id}`,
+  CREATE_GUARDIAN: "/guardians/create",
+  UPDATE_GUARDIAN: (id: string) => `/guardians/update/${id}`,
+  DELETE_GUARDIAN: (id: string) => `/guardians/delete/${id}`,
+  GET_GUARDIAN_BY_ID: (id: string) => `/guardians/getById/${id}`,
+  GET_LIST_GUARDIAN_BY_STUDENT: (studentId: string) => `/guardians/listByStudent/${studentId}`,
+  GET_LIST_GUARDIAN_BY_PARENT: (parentId: string) => `/guardians/listByParent/${parentId}`,
 };
 
 export const apiConfig = {

@@ -119,6 +119,9 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
                                     style={{ width: "100%" }}
                                     format="DD/MM/YYYY"
                                     placeholder="Chọn ngày"
+                                    disabledDate={(current) => {
+                                        return current && current.isAfter(dayjs().subtract(1, 'year'), 'day');
+                                    }}
                                 />
                             </Form.Item>
                         </Col>
@@ -144,17 +147,9 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
                                 </Select>
                             </Form.Item>
                         </Col>
+
                         <Col span={12}>
                             <Form.Item
-                                name="relationship"
-                                label="Mối quan hệ"
-                                rules={[{ required: true, message: "Vui lòng nhập mối quan hệ!" }]}
-                            >
-                                <Input placeholder="Cha/Mẹ/Người giám hộ" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                             <Form.Item
                                 name="nation"
                                 label="Dân tộc"
                                 rules={[{ required: true, message: "Vui lòng nhập dân tộc!" }]}
