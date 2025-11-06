@@ -164,6 +164,7 @@ import {
   ScheduleList,
   ScheduleParams,
 } from "../types/parent";
+import { CreateGuardianPayload, IGuardianByIdResponse, IGuardianListResponse, IGuardianRecord, UpdateGuardianPayload } from "../types/guardians";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -1384,6 +1385,58 @@ export const parentDashboardApis = {
       {
         responseType: "arraybuffer",
       }
+    );
+    return response.data;
+  },
+
+  
+};
+
+export const guardianApis = {
+  createGuardian: async (body: CreateGuardianPayload): Promise<IGuardianRecord> => {
+    const response = await axiosAuth.post<IGuardianRecord>(
+      apiEndPoint.CREATE_GUARDIAN,
+      body
+    );
+    return response.data;
+  },
+
+  updateGuardian: async (
+    id: string,
+    body: UpdateGuardianPayload
+  ): Promise<IGuardianRecord> => {
+    const response = await axiosAuth.put<IGuardianRecord>(
+      apiEndPoint.UPDATE_GUARDIAN(id),
+      body
+    );
+    return response.data;
+  },
+
+  deleteGuardian: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_GUARDIAN(id));
+  },
+
+  getGuardianById: async (id: string): Promise<IGuardianRecord> => {
+    const response = await axiosAuth.get<IGuardianByIdResponse>(
+      apiEndPoint.GET_GUARDIAN_BY_ID(id)
+    );
+    return response.data.data;
+  },
+
+  getListGuardianByStudent: async (
+    studentId: string, 
+  ): Promise<IGuardianListResponse> => {
+    const response = await axiosAuth.get<IGuardianListResponse>(
+      apiEndPoint.GET_LIST_GUARDIAN_BY_STUDENT(studentId), 
+    );
+    return response.data;
+  },
+
+  getListGuardianByParent: async (
+    parentId: string,
+  ): Promise<IGuardianListResponse> => {
+    const response = await axiosAuth.get<IGuardianListResponse>(
+      apiEndPoint.GET_LIST_GUARDIAN_BY_PARENT(parentId)
     );
     return response.data;
   },

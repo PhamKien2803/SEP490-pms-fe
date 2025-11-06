@@ -72,6 +72,7 @@ import ClassChild from "../../pages/parent-dashboard/class-child/ClassChild";
 import Schedule from "../../pages/parent-dashboard/schedule/Schedule";
 import Menu from "../../pages/parent-dashboard/menu/Menu";
 import Medical from "../../pages/parent-dashboard/medical/Medical";
+import GuardianManagement from "../../pages/guardians/Guardians";
 
 export const routes: RouteObject[] = [
   {
@@ -721,6 +722,21 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <Menu />,
+              },
+            ],
+          },
+          {
+            path: "guardians",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/guardians`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <GuardianManagement />,
               },
             ],
           },
