@@ -40,8 +40,8 @@ const ViewStudentDetails: React.FC<ViewStudentDetailsProps> = ({
   };
 
   const formatGender = (gender?: string) => {
-    if (gender === "male") return "Nam";
-    if (gender === "female") return "Nữ";
+    if (gender === "Nam") return "Nam";
+    if (gender === "Nữ") return "Nữ";
     return "Khác";
   };
 
