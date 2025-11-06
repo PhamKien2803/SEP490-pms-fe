@@ -9,7 +9,7 @@ export interface CreateParentFormDto {
   phoneNumber?: string;
   email?: string;
   IDCard: string;
-  gender: "male" | "female" | "other";
+  gender: "Nam" | "Nữ" | "Khác";
   address?: string;
   students?: string[];
   nation?: string;
@@ -129,14 +129,10 @@ const CreateParent: React.FC<CreateParentProps> = ({
                 rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
               >
                 <Select placeholder="Chọn giới tính">
-                  <Select.Option value="male">Nam</Select.Option>
-                  <Select.Option value="female">Nữ</Select.Option>
-                  <Select.Option value="other">Khác</Select.Option>
+                  <Select.Option value="Nam">Nam</Select.Option>
+                  <Select.Option value="Nữ">Nữ</Select.Option>
+                  <Select.Option value="Khác">Khác</Select.Option>
                 </Select>
-              </Form.Item>
-
-              <Form.Item name="nation" label="Dân tộc">
-                <Input placeholder="Ví dụ: Kinh" />
               </Form.Item>
             </Col>
 
@@ -176,10 +172,6 @@ const CreateParent: React.FC<CreateParentProps> = ({
                 ]}
               >
                 <Input placeholder="Ví dụ: example@gmail.com" />
-              </Form.Item>
-
-              <Form.Item name="religion" label="Tôn giáo">
-                <Input placeholder="Ví dụ: Không" />
               </Form.Item>
             </Col>
 
