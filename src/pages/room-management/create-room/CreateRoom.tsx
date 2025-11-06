@@ -189,7 +189,7 @@ const CreateRoom: React.FC = () => {
             navigate(`${constants.APP_PREFIX}/rooms`);
         } catch (error: any) {
             const errorMessage =
-                error?.response?.data?.message ||
+                error ||
                 "Tạo phòng học thất bại. Vui lòng kiểm tra dữ liệu và thử lại.";
             toast.error(errorMessage);
         } finally {

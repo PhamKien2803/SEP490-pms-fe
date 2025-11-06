@@ -41,10 +41,10 @@ import { parentDashboardApis } from "../../../services/apiServices";
 const { Title, Text } = Typography;
 const { Option } = Select;
 
-const PRIMARY_COLOR = "#e6fffb";
-const ACCENT_COLOR = "#08979c";
-const TEXT_COLOR = "#424242";
-const BACKGROUND_GREY = "#FAF3F8";
+const ACCENT_COLOR = "#0050b3";
+const PRIMARY_COLOR = "#e6f7ff";
+const TEXT_COLOR = "#262626";
+const BACKGROUND_GREY = "#F0F2F5";
 
 const getDisplayDate = (dob: dayjs.Dayjs | null): string => {
   return dob ? dob.format("DD/MM/YYYY") : "Chưa cập nhật";
@@ -60,7 +60,7 @@ const ParentCard: React.FC<ParentCardProps> = ({ icon, label, value }) => (
   <Card
     bordered={false}
     style={{
-      backgroundColor: "#e6fffb",
+      backgroundColor: PRIMARY_COLOR,
       borderRadius: 8,
       marginBottom: 16,
       boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
@@ -101,9 +101,10 @@ const StudentInfoSection: React.FC<{
           style={{
             padding: 40,
             background: PRIMARY_COLOR,
-            color: "white",
+            color: TEXT_COLOR,
             borderTopLeftRadius: 12,
             borderBottomLeftRadius: 12,
+            borderBottomRightRadius: window.innerWidth < 992 ? 12 : 0,
             display: "flex",
             flexDirection: "column",
             alignItems: "flex-start",
@@ -118,7 +119,7 @@ const StudentInfoSection: React.FC<{
                 backgroundColor: "white",
                 color: ACCENT_COLOR,
                 marginBottom: 20,
-                border: "6px solid rgba(255, 255, 255, 0.3)",
+                border: "6px solid rgba(0, 0, 0, 0.1)",
                 fontSize: 70,
               }}
             />
@@ -130,6 +131,7 @@ const StudentInfoSection: React.FC<{
                 fontSize: 28,
                 textAlign: "center",
                 width: "100%",
+                color: TEXT_COLOR,
               }}
             >
               {student.fullName}
@@ -141,14 +143,18 @@ const StudentInfoSection: React.FC<{
               textAlign: "center",
               width: "100%",
               marginTop: 10,
+              color: TEXT_COLOR,
             }}
           >
-            Mã HS: <Text strong>{student.studentCode}</Text>
+            Mã HS:{" "}
+            <Text strong style={{ color: ACCENT_COLOR }}>
+              {student.studentCode}
+            </Text>
           </Text>
           <Divider
             style={{
               margin: "30px 0",
-              borderColor: "rgba(255, 255, 255, 0.3)",
+              borderColor: "rgba(0, 0, 0, 0.2)",
             }}
           />
 
@@ -160,13 +166,14 @@ const StudentInfoSection: React.FC<{
             labelStyle={{
               fontWeight: 600,
               width: 120,
+              color: TEXT_COLOR,
             }}
-            contentStyle={{ fontWeight: 500 }}
+            contentStyle={{ fontWeight: 500, color: TEXT_COLOR }}
             style={{ width: "100%", maxWidth: 300, textAlign: "left" }}
           >
             <Descriptions.Item
               label={
-                <Space>
+                <Space style={{ color: ACCENT_COLOR }}>
                   <CalendarOutlined /> Ngày sinh:
                 </Space>
               }
@@ -175,7 +182,7 @@ const StudentInfoSection: React.FC<{
             </Descriptions.Item>
             <Descriptions.Item
               label={
-                <Space>
+                <Space style={{ color: ACCENT_COLOR }}>
                   <SmileOutlined /> Giới tính:
                 </Space>
               }
@@ -184,7 +191,7 @@ const StudentInfoSection: React.FC<{
             </Descriptions.Item>
             <Descriptions.Item
               label={
-                <Space>
+                <Space style={{ color: ACCENT_COLOR }}>
                   <IdcardOutlined /> CCCD:
                 </Space>
               }
@@ -383,82 +390,52 @@ const StudentInfo: React.FC = () => {
     [data, selectedStudentId, loading, fetchParentStudents]
   );
 
-  if (loading) {
-    return (
+  return (
+    <Spin spinning={loading}>
       <div
         style={{
           padding: "40px",
-          textAlign: "center",
           minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          backgroundColor: BACKGROUND_GREY,
         }}
       >
-        <Spin
-          indicator={
-            <LoadingOutlined
-              style={{ fontSize: 50, color: ACCENT_COLOR }}
-              spin
+        <Card
+          title={cardHeader}
+          bordered={false}
+          style={{
+            marginBottom: 24,
+            borderRadius: 12,
+            boxShadow: "0 8px 20px rgba(0, 0, 0, 0.08)",
+            border: "none",
+          }}
+          bodyStyle={{ padding: 0 }}
+        >
+          {error && (
+            <Alert
+              message="Lỗi Tải Dữ Liệu"
+              description={error}
+              type="error"
+              showIcon
+              style={{ margin: 24, borderRadius: 8 }}
             />
-          }
-          tip={
-            <Text
-              strong
-              style={{ marginTop: 20, color: TEXT_COLOR, fontSize: 18 }}
-            >
-              Đang tải hồ sơ của con bạn...
-            </Text>
-          }
-          style={{ padding: "80px 0" }}
-        />
+          )}
+
+          {(!data || data.students.length === 0) && !error && (
+            <Alert
+              message="Thông báo"
+              description="Không tìm thấy thông tin học sinh nào được liên kết với tài khoản này."
+              type="info"
+              showIcon
+              style={{ margin: 24, borderRadius: 8 }}
+            />
+          )}
+        </Card>
+
+        {currentStudent && data && (
+          <StudentInfoSection student={currentStudent} parent={data.parent} />
+        )}
       </div>
-    );
-  }
-
-  return (
-    <div
-      style={{
-        padding: "40px",
-        minHeight: "100vh",
-      }}
-    >
-      <Card
-        title={cardHeader}
-        bordered={false}
-        style={{
-          marginBottom: 24,
-          borderRadius: 12,
-          boxShadow: "0 8px 20px rgba(0, 0, 0, 0.08)",
-          border: "none",
-        }}
-        bodyStyle={{ padding: 0 }}
-      >
-        {error && (
-          <Alert
-            message="Lỗi Tải Dữ Liệu"
-            description={error}
-            type="error"
-            showIcon
-            style={{ margin: 24, borderRadius: 8 }}
-          />
-        )}
-
-        {(!data || data.students.length === 0) && !error && (
-          <Alert
-            message="Thông báo"
-            description="Không tìm thấy thông tin học sinh nào được liên kết với tài khoản này."
-            type="info"
-            showIcon
-            style={{ margin: 24, borderRadius: 8 }}
-          />
-        )}
-      </Card>
-
-      {currentStudent && data && (
-        <StudentInfoSection student={currentStudent} parent={data.parent} />
-      )}
-    </div>
+    </Spin>
   );
 };
 

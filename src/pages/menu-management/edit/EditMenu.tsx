@@ -932,7 +932,7 @@ const EditMenu: React.FC = () => {
       navigate(`${constants.APP_PREFIX}/menus`);
     } catch (error: any) {
       const errorMessage =
-        error?.response?.data?.message ||
+        error ||
         "Cập nhật thực đơn thất bại. Vui lòng kiểm tra dữ liệu và thử lại.";
       toast.error(errorMessage);
     } finally {

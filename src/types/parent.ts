@@ -22,7 +22,7 @@ export interface StudentListItem {
   name: string;
   label: string;
   nation?: string;
-  religion?: string
+  religion?: string;
 }
 
 export interface FeedbackParams {
@@ -255,6 +255,9 @@ export interface TeacherInfo {
 export interface CheckInStudentData {
   status: string;
   student: StudentShort;
+  note: string;
+  timeCheckIn: string;
+  timeCheckOut: string;
 }
 
 export interface StudentShort {
@@ -370,7 +373,7 @@ export interface ScheduleItem {
 export type ScheduleList = ScheduleItem[];
 
 export interface MenuParams {
-  ageGroup: string;
+  studentId: string;
   date: string;
 }
 

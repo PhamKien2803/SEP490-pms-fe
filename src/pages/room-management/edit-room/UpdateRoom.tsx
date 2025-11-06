@@ -460,7 +460,7 @@ const UpdateRoom: React.FC = () => {
       setRejectReason("");
     } catch (error: any) {
       const errorMessage =
-        error?.response?.data?.message ||
+        error ||
         "Cập nhật phòng học thất bại. Vui lòng kiểm tra dữ liệu và thử lại.";
       toast.error(errorMessage);
     } finally {
