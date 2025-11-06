@@ -124,7 +124,6 @@ const ParentManagement: React.FC = () => {
         setIsSubmitting(true);
         try {
             const payload = { ...values, createdBy: user.email };
-            console.log("🚀 ~ handleCreateParent ~ payload:", payload)
             await parentsApis.createParents(payload);
             toast.success("Tạo phụ huynh thành công!");
             setIsModalOpen(false);
