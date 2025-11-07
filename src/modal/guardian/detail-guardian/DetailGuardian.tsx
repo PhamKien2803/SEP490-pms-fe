@@ -79,11 +79,10 @@ const DetailGuardian: React.FC<DetailGuardianProps> = ({
           </Button>
         </Row>
       }
-      width={680}
+      width={600}
       closeIcon={
         <CloseCircleOutlined style={{ color: ACCENT_COLOR, fontSize: 18 }} />
       }
-      centered
       bodyStyle={{ padding: "0 24px 24px 24px" }}
     >
       <Divider style={{ margin: "10px 0 24px 0" }} />
@@ -109,43 +108,6 @@ const DetailGuardian: React.FC<DetailGuardianProps> = ({
             <Title level={3} style={{ margin: 0, color: ACCENT_COLOR }}>
               {guardianRecord.fullName}
             </Title>
-          </Space>
-        </Col>
-        <Col>
-          <Space direction="vertical" align="end" size={4}>
-            <Text
-              type="secondary"
-              style={{ fontSize: 13, textTransform: "uppercase" }}
-            >
-              Trạng thái
-            </Text>
-            {guardianRecord.active ? (
-              <Tag
-                icon={<CheckCircleOutlined />}
-                color="success"
-                style={{
-                  padding: "6px 12px",
-                  fontSize: 14,
-                  borderRadius: 15,
-                  fontWeight: 600,
-                }}
-              >
-                ĐANG HOẠT ĐỘNG
-              </Tag>
-            ) : (
-              <Tag
-                icon={<StopOutlined />}
-                color="error"
-                style={{
-                  padding: "6px 12px",
-                  fontSize: 14,
-                  borderRadius: 15,
-                  fontWeight: 600,
-                }}
-              >
-                NGỪNG HOẠT ĐỘNG
-              </Tag>
-            )}
           </Space>
         </Col>
       </Row>

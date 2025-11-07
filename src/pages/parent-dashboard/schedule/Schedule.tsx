@@ -302,9 +302,8 @@ const Schedule: React.FC = () => {
         : "N/A";
 
     console.log("activity", activity);
-    const category = activity.activity?.category || "";
-    const type = activity.activity?.type || "";
-
+    const type = activity?.type || "";
+    console.log("activity", activity);
     return (
       <div
         key={activity._id || index}
@@ -338,18 +337,10 @@ const Schedule: React.FC = () => {
           }}
         >
           <BulbOutlined style={{ marginRight: 5, color: "#faad14" }} />
-          {activity.activity?.activityName || "Hoạt động chung"}
+          {activity?.activityName || "Hoạt động chung"}
         </Text>
 
         <Row gutter={8}>
-          {!!category && (
-            <Col>
-              <Tag color={"geekblue"} icon={<TagOutlined />}>
-                {category}
-              </Tag>
-            </Col>
-          )}
-
           {!!type && (
             <Col>
               <Tag color="default" style={{ color: "#8c8c8c" }}>
@@ -588,7 +579,7 @@ const Schedule: React.FC = () => {
         {classData && (
           <Alert
             message={
-              <Text strong style={{ color: "#135200" }}>
+              <Text strong style={{ color: "#1890ff" }}>
                 <HomeOutlined style={{ marginRight: 5 }} /> Lớp Học:
                 {classData.className} ({classData.classCode})
               </Text>
@@ -598,8 +589,8 @@ const Schedule: React.FC = () => {
             showIcon
             style={{
               marginBottom: 24,
-              backgroundColor: "#f6ffed",
-              borderLeft: "5px solid #52c41a",
+              backgroundColor: "rgba(240, 248, 255, 1)",
+              border: "2px solid #e9f0f5ff",
             }}
           />
         )}

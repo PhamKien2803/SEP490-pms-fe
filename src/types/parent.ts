@@ -340,7 +340,9 @@ export interface ScheduleActivity {
   _id: string;
   startTime: number;
   endTime: number;
-  activity?: Activity | null;
+  activityCode: string;
+  activityName: string;
+  type: string;
 }
 
 export interface ScheduleDay {
