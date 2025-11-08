@@ -161,7 +161,6 @@ export const apiEndPoint = {
     `/dashboard-parent/getStudentByParent/${id}`,
   GET_DASHBOARD_SCHEDULE: "/dashboard-schedules/getSchedulesByClassAndMonth",
   GET_DASHBOARD_CLASS: "/dashboard-class/getClassByStuAndSY",
-
   GET_LIST_FEEDBACK: "/dashboard-feedbacks/getFbByStuAndDate",
   GET_LIST_MEDICAL_CHILD: (id: string) =>
     `/dashboard-medicals/getMedicalByStudent/${id}`,
