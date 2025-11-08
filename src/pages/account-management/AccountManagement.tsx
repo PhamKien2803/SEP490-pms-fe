@@ -51,7 +51,7 @@ const AccountManagement: React.FC = () => {
             return allAccounts;
         }
         return allAccounts.filter(acc => {
-            const name = acc.staff?.fullName || '';
+            const name = acc.staff?.fullName || acc.parent?.fullName || '';
             return acc.email.toLowerCase().includes(keyword) ||
                 name.toLowerCase().includes(keyword);
         });
@@ -116,7 +116,7 @@ const AccountManagement: React.FC = () => {
             dataIndex: 'email',
             key: 'email',
             render: (_, record) => {
-                const name = record.staff?.fullName || 'Chưa liên kết';
+                const name = record.staff?.fullName || record.parent?.fullName || 'Chưa liên kết';
                 return (
                     <Space>
                         <Avatar icon={<UserOutlined />} />

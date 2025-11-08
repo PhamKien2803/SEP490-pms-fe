@@ -13,6 +13,7 @@ const hardcodedActions = [
     { label: 'Đồng bộ dữ liệu', value: 'sync_data' },
     { label: 'Khóa', value: 'lock' },
     { label: 'Mở khóa', value: 'un_lock' },
+    { label: 'Xác nhận', value: 'confirm' },
 ];
 
 const ageOptions = [

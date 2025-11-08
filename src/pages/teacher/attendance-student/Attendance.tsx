@@ -1,8 +1,13 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
     Card, Table, Spin, Typography, Row, Col, Select, Empty, Button, Tooltip, Space, Tag
 } from 'antd';
-import { EyeOutlined, HistoryOutlined, EditOutlined } from '@ant-design/icons';
+import {
+    EyeOutlined,
+    HistoryOutlined,
+    EditOutlined,
+    ReloadOutlined
+} from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -106,68 +111,14 @@ function AttendanceHistory() {
         },
     ];
 
-    useEffect(() => {
-        const init = async () => {
-            if (!teacherId) return;
-
-            setLoading(true);
-            try {
-                const res = await schoolYearApis.getSchoolYearList({ page: 1, limit: 100 });
-                const sorted = res.data.sort(
-                    (a, b) =>
-                        parseInt(b.schoolYear.split('-')[0]) - parseInt(a.schoolYear.split('-')[0])
-                );
-                setSchoolYears(sorted);
-
-                const firstYearId = sorted[0]?._id;
-                setSelectedSchoolYearId(firstYearId);
-                if (!firstYearId) return;
-
-                const teacherData: ITeacherClassStudentResponse =
-                    await teacherApis.getClassAndStudentByTeacher(teacherId, firstYearId);
-                const currentClass = teacherData.classes?.[0];
-
-                if (!currentClass) {
-                    setTeacherClassInfo(null);
-                    toast.warn('Không tìm thấy lớp học trong năm học này');
-                    return;
-                }
-
-                setTeacherClassInfo(currentClass);
-
-                const attendanceData = await teacherApis.getAttendanceByClassAndSchoolYear(
-                    currentClass._id,
-                    firstYearId
-                );
-                const listData = Array.isArray(attendanceData)
-                    ? attendanceData
-                    : [attendanceData];
-
-                setAttendanceList(listData.map((item) => ({ ...item, key: item._id })));
-                setPagination((prev) => ({ ...prev, current: 1, total: listData.length }));
-            } catch (error) {
-                console.error('Lỗi tải dữ liệu:', error);
-                toast.error('Không thể tải dữ liệu điểm danh.');
-                setAttendanceList([]);
-                setPagination((prev) => ({ ...prev, current: 1, total: 0 }));
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        init();
-    }, [teacherId]);
-
-    const handleNavigateToTakeAttendance = () => {
-        navigate(`${constants.APP_PREFIX}/attendances/take-attendance`);
-    };
-
-    const handleSchoolYearChange = async (yearId: string) => {
-        setSelectedSchoolYearId(yearId);
-        setAttendanceList([]);
-        setPagination((prev) => ({ ...prev, current: 1, total: 0 }));
-
-        if (!teacherId) return;
+    // 2. Tách logic tải dữ liệu điểm danh
+    const fetchAttendanceData = useCallback(async (yearId: string | undefined) => {
+        if (!teacherId || !yearId) {
+            setAttendanceList([]);
+            setPagination((prev) => ({ ...prev, current: 1, total: 0 }));
+            setTeacherClassInfo(null);
+            return;
+        }
 
         setLoading(true);
         try {
@@ -177,6 +128,8 @@ function AttendanceHistory() {
 
             if (!currentClass) {
                 setTeacherClassInfo(null);
+                setAttendanceList([]);
+                setPagination((prev) => ({ ...prev, current: 1, total: 0 }));
                 toast.warn('Không tìm thấy lớp học trong năm học này');
                 return;
             }
@@ -193,11 +146,65 @@ function AttendanceHistory() {
             setAttendanceList(listData.map((item) => ({ ...item, key: item._id })));
             setPagination((prev) => ({ ...prev, current: 1, total: listData.length }));
         } catch (error) {
-            console.error('Lỗi khi đổi năm học:', error);
+            console.error('Lỗi tải dữ liệu:', error);
             toast.error('Không thể tải dữ liệu điểm danh.');
+            setAttendanceList([]);
+            setPagination((prev) => ({ ...prev, current: 1, total: 0 }));
         } finally {
             setLoading(false);
         }
+    }, [teacherId]);
+
+    // 3. useEffect này chỉ tải danh sách năm học
+    useEffect(() => {
+        const fetchSchoolYears = async () => {
+            setLoading(true); // Bật loading cho lần tải năm học
+            try {
+                const res = await schoolYearApis.getSchoolYearList({ page: 1, limit: 100 });
+                const sorted = res.data.sort(
+                    (a, b) =>
+                        parseInt(b.schoolYear.split('-')[0]) - parseInt(a.schoolYear.split('-')[0])
+                );
+                setSchoolYears(sorted);
+
+                const firstYearId = sorted[0]?._id;
+                if (firstYearId) {
+                    setSelectedSchoolYearId(firstYearId); // Set năm học, việc này sẽ trigger useEffect tiếp theo
+                }
+            } catch (error) {
+                console.error('Lỗi tải năm học:', error);
+                toast.error('Không thể tải danh sách năm học.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (teacherId) {
+            fetchSchoolYears();
+        }
+    }, [teacherId]);
+
+    // 4. useEffect này theo dõi năm học và tải dữ liệu điểm danh
+    useEffect(() => {
+        if (selectedSchoolYearId && teacherId) {
+            fetchAttendanceData(selectedSchoolYearId);
+        }
+    }, [selectedSchoolYearId, teacherId, fetchAttendanceData]);
+
+
+    const handleNavigateToTakeAttendance = () => {
+        navigate(`${constants.APP_PREFIX}/attendances/take-attendance`);
+    };
+
+    // 5. Đơn giản hóa hàm đổi năm học
+    const handleSchoolYearChange = (yearId: string) => {
+        setSelectedSchoolYearId(yearId);
+    };
+
+    // 6. Hàm làm mới
+    const handleRefresh = () => {
+        toast.info('Đang làm mới danh sách...');
+        fetchAttendanceData(selectedSchoolYearId);
     };
 
     return (
@@ -232,24 +239,34 @@ function AttendanceHistory() {
                     </Col>
                 </Row>
 
+                {/* 7. Thêm nút làm mới vào UI */}
                 <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-                    <Col xs={24} sm={12} md={8} lg={6}>
-                        <Select
-                            style={{ width: '100%' }}
-                            placeholder="Chọn năm học"
-                            value={selectedSchoolYearId}
-                            onChange={handleSchoolYearChange}
-                            allowClear
-                            showSearch
-                            optionFilterProp="children"
-                            loading={schoolYears.length === 0 && loading}
-                        >
-                            {schoolYears.map((sy) => (
-                                <Option key={sy._id} value={sy._id}>
-                                    {sy.schoolYear}
-                                </Option>
-                            ))}
-                        </Select>
+                    <Col xs={24} sm={24} md={12} lg={10}>
+                        <Space>
+                            <Select
+                                style={{ width: 200 }}
+                                placeholder="Chọn năm học"
+                                value={selectedSchoolYearId}
+                                onChange={handleSchoolYearChange}
+                                allowClear
+                                showSearch
+                                optionFilterProp="children"
+                                loading={schoolYears.length === 0 && loading}
+                            >
+                                {schoolYears.map((sy) => (
+                                    <Option key={sy._id} value={sy._id}>
+                                        {sy.schoolYear}
+                                    </Option>
+                                ))}
+                            </Select>
+                            <Button
+                                icon={<ReloadOutlined />}
+                                onClick={handleRefresh}
+                                disabled={loading || !selectedSchoolYearId}
+                            >
+                                Làm mới
+                            </Button>
+                        </Space>
                     </Col>
                 </Row>
 

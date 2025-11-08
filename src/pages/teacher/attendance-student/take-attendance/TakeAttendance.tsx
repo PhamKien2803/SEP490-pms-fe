@@ -12,10 +12,9 @@ import {
     UserOutlined,
     CheckCircleOutlined,
     CloseCircleOutlined,
-    MinusCircleOutlined,
-    ClockCircleOutlined,
     EditOutlined,
-    ArrowLeftOutlined
+    ArrowLeftOutlined,
+    ClockCircleOutlined
 } from '@ant-design/icons';
 import { useCurrentUser } from '../../../../hooks/useCurrentUser';
 import { useNavigate } from 'react-router-dom';
@@ -35,7 +34,7 @@ const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
-type TAttendanceStatus = 'Có mặt' | 'Vắng mặt có phép' | 'Vắng mặt không phép' | 'Đi muộn';
+type TAttendanceStatus = 'Có mặt' | 'Vắng mặt';
 
 const STATUS_CONFIG: Record<TAttendanceStatus, {
     icon: React.ReactNode;
@@ -43,15 +42,15 @@ const STATUS_CONFIG: Record<TAttendanceStatus, {
     text: string;
 }> = {
     'Có mặt': { icon: <CheckCircleOutlined />, color: '#52c41a', text: 'Có mặt' },
-    'Đi muộn': { icon: <ClockCircleOutlined />, color: '#1890ff', text: 'Đi muộn' },
-    'Vắng mặt có phép': { icon: <MinusCircleOutlined />, color: '#faad14', text: 'Vắng (P)' },
-    'Vắng mặt không phép': { icon: <CloseCircleOutlined />, color: '#f5222d', text: 'Vắng (K)' },
+    'Vắng mặt': { icon: <CloseCircleOutlined />, color: '#f5222d', text: 'Vắng mặt' },
 };
 
 interface IStudentAttendanceState {
     status: TAttendanceStatus;
     note?: string;
+    timeCheckIn?: string | null;
 }
+
 
 function TakeAttendance() {
     const user = useCurrentUser();
@@ -68,7 +67,8 @@ function TakeAttendance() {
     const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
     const [currentAttendanceId, setCurrentAttendanceId] = useState<string | null>(null);
     const [generalNote, setGeneralNote] = useState<string>('');
-
+    const [isFutureDate, setIsFutureDate] = useState(false);
+    const [isPastDate, setIsPastDate] = useState(false);
     const [isLoadingTeacherData, setIsLoadingTeacherData] = useState(true);
     const [isFetchingAttendance, setIsFetchingAttendance] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -114,24 +114,29 @@ function TakeAttendance() {
         };
 
         init();
-    }, [teacherId]);
+    }, [teacherId, teacherData]);
 
 
 
     useEffect(() => {
         const defaultState = new Map<string, IStudentAttendanceState>();
         studentList.forEach((student) => {
-            defaultState.set(student._id, { status: 'Vắng mặt không phép', note: '' });
+            defaultState.set(student._id, {
+                status: 'Vắng mặt',
+                note: '',
+                timeCheckIn: null,
+            });
         });
         setAttendanceState(defaultState);
         setGeneralNote('');
         form.setFieldsValue({ generalNote: '' });
-        setCurrentAttendanceId(null);
+        // setCurrentAttendanceId(null);
     }, [studentList, form]);
 
     const fetchAttendanceData = useCallback(
         async (classId: string, date: string) => {
             if (!classId || !date || studentList.length === 0) return;
+            setCurrentAttendanceId(null);
             setIsFetchingAttendance(true);
             try {
                 const data: IAttendanceDetailResponse =
@@ -139,9 +144,19 @@ function TakeAttendance() {
 
                 const newState = new Map<string, IStudentAttendanceState>();
                 data.students.forEach((item) => {
+                    let normalizedStatus: TAttendanceStatus;
+                    const oldStatus = item.status as any;
+
+                    if (oldStatus === 'Có mặt' || oldStatus === 'Đi muộn') {
+                        normalizedStatus = 'Có mặt';
+                    } else {
+                        normalizedStatus = 'Vắng mặt';
+                    }
+
                     newState.set(item.student._id, {
-                        status: item.status as TAttendanceStatus,
-                        note: item.note || '',
+                        status: normalizedStatus,
+                        note: item.note || item.noteCheckout || '',
+                        timeCheckIn: item.timeCheckIn || null,
                     });
                 });
                 setAttendanceState(newState);
@@ -169,6 +184,15 @@ function TakeAttendance() {
         }
     }, [selectedClassId, selectedDate, fetchAttendanceData]);
 
+    useEffect(() => {
+        const now = dayjs().startOf('day');
+        const selected = selectedDate.startOf('day');
+        setIsFutureDate(selected.isAfter(now));
+        setIsPastDate(selected.isBefore(now));
+    }, [selectedDate]);
+
+
+
     const handleAttendanceChange = (
         studentId: string,
         field: 'status' | 'note',
@@ -177,11 +201,20 @@ function TakeAttendance() {
         setAttendanceState((prev) => {
             const newMap = new Map(prev);
             const current = newMap.get(studentId) || {
-                status: 'Vắng mặt không phép',
+                status: 'Vắng mặt',
                 note: '',
+                timeCheckIn: null,
             };
-            if (field === 'status') current.status = value as TAttendanceStatus;
-            else current.note = value;
+            if (field === 'status') {
+                current.status = value as TAttendanceStatus;
+                if (current.status === 'Có mặt') {
+                    current.timeCheckIn = dayjs().toISOString();
+                } else {
+                    current.timeCheckIn = null;
+                }
+            } else if (field === 'note') {
+                current.note = value;
+            }
             newMap.set(studentId, current);
             return newMap;
         });
@@ -204,6 +237,10 @@ function TakeAttendance() {
                 student: studentId,
                 status: data.status,
                 note: data.note || undefined,
+                noteCheckout: undefined,
+                timeCheckIn: data.timeCheckIn || null,
+                timeCheckOut: null,
+                guardian: null,
             })
         );
 
@@ -229,13 +266,11 @@ function TakeAttendance() {
     };
 
     const attendanceSummary = useMemo(() => {
-        const stats = { present: 0, late: 0, absentPermitted: 0, absentNotPermitted: 0, total: 0 };
+        const stats = { present: 0, absent: 0, total: 0 };
         stats.total = studentList.length;
         for (const state of attendanceState.values()) {
             if (state.status === 'Có mặt') stats.present++;
-            else if (state.status === 'Đi muộn') stats.late++;
-            else if (state.status === 'Vắng mặt có phép') stats.absentPermitted++;
-            else if (state.status === 'Vắng mặt không phép') stats.absentNotPermitted++;
+            else if (state.status === 'Vắng mặt') stats.absent++;
         }
         return stats;
     }, [attendanceState, studentList]);
@@ -301,125 +336,153 @@ function TakeAttendance() {
                 {currentClass && (
                     <>
                         <Space wrap size="small" style={{ marginBottom: 16 }}>
+                            {isPastDate && (
+                                <Tag color="warning">
+                                    Ngày này đã qua, không thể điểm danh lại
+                                </Tag>
+                            )}
                             <Tag color="default">Sĩ số: {attendanceSummary.total}</Tag>
                             <Tag color="green">Có mặt: {attendanceSummary.present}</Tag>
-                            <Tag color="blue">Đi muộn: {attendanceSummary.late}</Tag>
-                            <Tag color="orange">Vắng (P): {attendanceSummary.absentPermitted}</Tag>
-                            <Tag color="red">Vắng (K): {attendanceSummary.absentNotPermitted}</Tag>
+                            <Tag color="red">Vắng mặt: {attendanceSummary.absent}</Tag>
                         </Space>
                         <Divider style={{ margin: '8px 0 16px' }} />
                     </>
                 )}
 
                 <Spin spinning={isFetchingAttendance || isSaving}>
-                    <Form form={form} layout="vertical" onFinish={handleSubmit}>
-                        {!currentClass ? (
-                            <Empty description="Vui lòng chọn lớp để điểm danh." />
-                        ) : studentList.length === 0 ? (
-                            <Empty description="Lớp học này chưa có học sinh." />
-                        ) : (
-                            <List
-                                itemLayout="vertical"
-                                dataSource={studentList}
-                                renderItem={(student) => {
-                                    const state = attendanceState.get(student._id) || {
-                                        status: 'Vắng mặt không phép',
-                                        note: '',
-                                    };
-                                    const showNote = state.status !== 'Có mặt';
+                    {isFutureDate ? (
+                        <Empty description="Ngày này hiện chưa có thông tin điểm danh. Vui lòng chọn ngày hôm nay hoặc quá khứ." />
+                    ) : (
+                        <Form form={form} layout="vertical" onFinish={handleSubmit}>
+                            {!currentClass ? (
+                                <Empty description="Vui lòng chọn lớp để điểm danh." />
+                            ) : studentList.length === 0 ? (
+                                <Empty description="Lớp học này chưa có học sinh." />
+                            ) : (
+                                <List
+                                    itemLayout="vertical"
+                                    dataSource={studentList}
+                                    renderItem={(student) => {
+                                        const state = attendanceState.get(student._id) || {
+                                            status: 'Vắng mặt',
+                                            note: '',
+                                            timeCheckIn: null,
+                                        };
 
-                                    return (
-                                        <List.Item
-                                            key={student._id}
-                                            style={{
-                                                padding: '16px 24px',
-                                                borderBottom: '1px solid #f0f0f0',
-                                            }}
-                                        >
-                                            <Row align="middle" gutter={[16, 16]}>
-                                                <Col xs={24} sm={8} md={6}>
-                                                    <Space>
-                                                        <Avatar
-                                                            style={{ backgroundColor: '#87d068' }}
-                                                            icon={<UserOutlined />}
-                                                        />
-                                                        <div>
-                                                            <Text strong>{student.fullName}</Text>
-                                                            <Text type="secondary" style={{ display: 'block' }}>
-                                                                {student.studentCode}
-                                                            </Text>
-                                                        </div>
-                                                    </Space>
-                                                </Col>
-                                                <Col xs={24} sm={16} md={12}>
-                                                    <Radio.Group
-                                                        value={state.status}
-                                                        onChange={(e) =>
-                                                            handleAttendanceChange(student._id, 'status', e.target.value)
-                                                        }
-                                                    >
-                                                        <Space wrap>
-                                                            {Object.keys(STATUS_CONFIG).map((key) => {
-                                                                const sKey = key as TAttendanceStatus;
-                                                                const cfg = STATUS_CONFIG[sKey];
-                                                                return (
-                                                                    <Radio.Button key={sKey} value={sKey}>
-                                                                        <Space>
-                                                                            {React.cloneElement(cfg.icon as any, {
-                                                                                style: { color: state.status === sKey ? undefined : cfg.color },
-                                                                            })}
-                                                                            {cfg.text}
-                                                                        </Space>
-                                                                    </Radio.Button>
-                                                                );
-                                                            })}
+                                        return (
+                                            <List.Item
+                                                key={student._id}
+                                                style={{
+                                                    padding: '16px 24px',
+                                                    borderBottom: '1px solid #f0f0f0',
+                                                }}
+                                            >
+                                                <Row align="middle" gutter={[16, 16]}>
+                                                    <Col xs={24} sm={8} md={6}>
+                                                        <Space>
+                                                            <Avatar
+                                                                style={{ backgroundColor: '#87d068' }}
+                                                                icon={<UserOutlined />}
+                                                            />
+                                                            <div>
+                                                                <Text strong>{student.fullName}</Text>
+                                                                <Text type="secondary" style={{ display: 'block' }}>
+                                                                    {student.studentCode}
+                                                                </Text>
+                                                            </div>
                                                         </Space>
-                                                    </Radio.Group>
-                                                </Col>
-                                                <Col xs={24} sm={24} md={6}>
-                                                    {showNote && (
-                                                        <Input
-                                                            prefix={<EditOutlined style={{ color: '#8c8c8c' }} />}
-                                                            placeholder="Ghi chú (Bị ốm, ...)"
-                                                            value={state.note}
+                                                    </Col>
+                                                    <Col xs={24} sm={16} md={10}>
+                                                        <Radio.Group
+                                                            value={state.status}
                                                             onChange={(e) =>
-                                                                handleAttendanceChange(student._id, 'note', e.target.value)
+                                                                handleAttendanceChange(student._id, 'status', e.target.value)
                                                             }
-                                                        />
-                                                    )}
-                                                </Col>
-                                            </Row>
-                                        </List.Item>
-                                    );
-                                }}
-                            />
-                        )}
+                                                        >
+                                                            <Space wrap>
+                                                                {Object.keys(STATUS_CONFIG).map((key) => {
+                                                                    const sKey = key as TAttendanceStatus;
+                                                                    const cfg = STATUS_CONFIG[sKey];
+                                                                    return (
+                                                                        <Radio.Button key={sKey} value={sKey}>
+                                                                            <Space>
+                                                                                {React.cloneElement(cfg.icon as any, {
+                                                                                    style: {
+                                                                                        color:
+                                                                                            state.status === sKey
+                                                                                                ? undefined
+                                                                                                : cfg.color,
+                                                                                    },
+                                                                                })}
+                                                                                {cfg.text}
+                                                                            </Space>
+                                                                        </Radio.Button>
+                                                                    );
+                                                                })}
+                                                            </Space>
+                                                        </Radio.Group>
+                                                    </Col>
 
-                        <Form.Item
-                            name="generalNote"
-                            label={<Title level={5}><ReadOutlined /> Ghi chú chung</Title>}
-                            style={{ marginTop: '24px' }}
-                        >
-                            <TextArea
-                                rows={3}
-                                placeholder="Nhập ghi chú chung (ví dụ: Lớp ngoan, thời tiết...)"
-                                onChange={(e) => setGeneralNote(e.target.value)}
-                            />
-                        </Form.Item>
+                                                    <Col xs={24} sm={24} md={8}>
+                                                        {state.status === 'Có mặt' && state.timeCheckIn && (
+                                                            <Text style={{ fontSize: '14px', color: '#595959' }}>
+                                                                <ClockCircleOutlined style={{ marginRight: 8, color: '#52c41a' }} />
+                                                                Giờ vào: {dayjs(state.timeCheckIn).format('HH:mm')}
+                                                            </Text>
+                                                        )}
+                                                        {state.status === 'Vắng mặt' && (
+                                                            <Input
+                                                                prefix={<EditOutlined style={{ color: '#8c8c8F' }} />}
+                                                                placeholder="Ghi chú (Bị ốm, ...)"
+                                                                value={state.note}
+                                                                onChange={(e) =>
+                                                                    handleAttendanceChange(
+                                                                        student._id,
+                                                                        'note',
+                                                                        e.target.value
+                                                                    )
+                                                                }
+                                                            />
+                                                        )}
+                                                    </Col>
+                                                </Row>
+                                            </List.Item>
+                                        );
+                                    }}
+                                />
+                            )}
 
-                        <Form.Item style={{ textAlign: 'right', marginTop: '24px' }}>
-                            <Button
-                                type="primary"
-                                htmlType="submit"
-                                size="large"
-                                icon={<SaveOutlined />}
-                                loading={isSaving}
-                                disabled={!!currentAttendanceId}
+                            <Form.Item
+                                name="generalNote"
+                                label={<Title level={5}><ReadOutlined /> Ghi chú chung</Title>}
+                                style={{ marginTop: '24px' }}
                             >
-                                {currentAttendanceId ? 'Đã điểm danh' : 'Lưu điểm danh'}
-                            </Button>
-                        </Form.Item>
-                    </Form>
+                                <TextArea
+                                    rows={3}
+                                    placeholder="Nhập ghi chú chung (ví dụ: Lớp ngoan, thời tiết...)"
+                                    onChange={(e) => setGeneralNote(e.target.value)}
+                                />
+                            </Form.Item>
+
+                            <Form.Item style={{ textAlign: 'right', marginTop: '24px' }}>
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    size="large"
+                                    icon={<SaveOutlined />}
+                                    loading={isSaving}
+                                    disabled={!!currentAttendanceId || isPastDate || isFetchingAttendance}
+                                >
+                                    {currentAttendanceId
+                                        ? 'Đã điểm danh'
+                                        : isPastDate
+                                            ? 'Không thể điểm danh'
+                                            : 'Lưu điểm danh'}
+                                </Button>
+
+                            </Form.Item>
+                        </Form>
+                    )}
                 </Spin>
             </Card>
         </div>
