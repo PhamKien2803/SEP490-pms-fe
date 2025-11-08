@@ -85,6 +85,7 @@ import TuitionList from "../../pages/tuition-management/TuitionList";
 import TuitionDetails from "../../pages/parent-dashboard/take-tuition/TuitionDetails";
 import Payment from "../../pages/parent-dashboard/take-tuition/tuition-payment/Payment";
 import HistoryFee from "../../pages/parent-dashboard/history-fee/HistoryFee";
+import GuardianManagement from "../../pages/guardians/Guardians";
 
 export const routes: RouteObject[] = [
   {
@@ -852,6 +853,21 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <Menu />,
+              },
+            ],
+          },
+          {
+            path: "guardians",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/guardians`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <GuardianManagement />,
               },
             ],
           },
