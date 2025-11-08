@@ -21,6 +21,7 @@ export const usePagePermission = () => {
                 canSyncData: false,
                 canLock: false,
                 canUnLock: false,
+                canConfirm: false
             };
         }
 
@@ -37,6 +38,7 @@ export const usePagePermission = () => {
             canSyncData: canAction(urlFunction, 'sync_data'),
             canLock: canAction(urlFunction, 'lock'),
             canUnLock: canAction(urlFunction, 'un_lock'),
+            canConfirm: canAction(urlFunction, 'confirm'),
         };
     }, [canAction, urlFunction]);
 

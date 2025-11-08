@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
     Card, List, Radio, Input, Button, Spin, Typography,
-    Row, Col, Form, Empty, Space, Tag, Avatar, Divider
+    Row, Col, Form, Empty, Space, Tag, Avatar, Divider, DatePicker,
+    Tooltip
 } from 'antd';
 import {
     SaveOutlined,
@@ -11,49 +12,44 @@ import {
     CheckCircleOutlined,
     CloseCircleOutlined,
     MinusCircleOutlined,
-    ClockCircleOutlined,
-    EditOutlined, ArrowLeftOutlined
+    EditOutlined, ArrowLeftOutlined, ClockCircleOutlined
 } from '@ant-design/icons';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 
 import { teacherApis } from '../../../../services/apiServices';
-import { IAttendanceDetailResponse, IAttendanceUpdatePayload } from '../../../../types/teacher';
+import {
+    IAttendanceDetailResponse,
+    IAttendanceUpdatePayload,
+    IGuardian
+} from '../../../../types/teacher';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '../../../../hooks/usePageTitle';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
-type TAttendanceStatus = 'Có mặt' | 'Vắng mặt có phép' | 'Vắng mặt không phép' | 'Đi muộn';
+type TAttendanceStatus = 'Có mặt' | 'Đã đón trẻ' | 'Vắng mặt';
 
 const STATUS_CONFIG: Record<TAttendanceStatus, {
     icon: React.ReactNode;
     color: string;
     text: string;
 }> = {
-    'Có mặt': {
-        icon: <CheckCircleOutlined />,
-        color: '#52c41a',
-        text: 'Có mặt'
-    },
-    'Đi muộn': {
-        icon: <ClockCircleOutlined />,
-        color: '#1890ff',
-        text: 'Đi muộn'
-    },
-    'Vắng mặt có phép': {
-        icon: <MinusCircleOutlined />,
-        color: '#faad14',
-        text: 'Vắng (P)'
-    },
-    'Vắng mặt không phép': {
-        icon: <CloseCircleOutlined />,
-        color: '#f5222d',
-        text: 'Vắng (K)'
-    },
+    'Có mặt': { icon: <CheckCircleOutlined />, color: '#52c41a', text: 'Có mặt' },
+    'Đã đón trẻ': { icon: <MinusCircleOutlined />, color: '#fa8c16', text: 'Đã đón trẻ' },
+    'Vắng mặt': { icon: <CloseCircleOutlined />, color: '#f5222d', text: 'Vắng mặt' },
 };
+
+interface IStudentAttendanceState {
+    status: TAttendanceStatus;
+    note?: string;
+    noteCheckout?: string;
+    timeCheckIn?: string | null;
+    timeCheckOut?: string | null;
+    guardian?: IGuardian | null;
+}
 
 function EditAttendance() {
     usePageTitle('Chỉnh sửa điểm danh - Cá Heo Xanh');
@@ -61,11 +57,14 @@ function EditAttendance() {
     const [form] = Form.useForm();
     const navigate = useNavigate();
     const [attendanceData, setAttendanceData] = useState<IAttendanceDetailResponse | null>(null);
-    const [attendanceState, setAttendanceState] = useState<Map<string, { status: TAttendanceStatus; note?: string }>>(new Map());
+    const [attendanceState, setAttendanceState] = useState<Map<string, IStudentAttendanceState>>(new Map());
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [generalNote, setGeneralNote] = useState<string>('');
     const [isEditLocked, setIsEditLocked] = useState(false);
+
+    // State mới để quản lý việc sửa giờ đón
+    const [editingTimeStudentId, setEditingTimeStudentId] = useState<string | null>(null);
 
 
     useEffect(() => {
@@ -77,14 +76,30 @@ function EditAttendance() {
                     setGeneralNote(data.generalNote || '');
                     form.setFieldsValue({ generalNote: data.generalNote || '' });
 
-                    const stateMap = new Map();
+                    const stateMap = new Map<string, IStudentAttendanceState>();
                     data.students.forEach(item => {
+                        let normalizedStatus: TAttendanceStatus;
+                        const oldStatus = item.status as any;
+
+                        if (oldStatus === 'Có mặt' || oldStatus === 'Đi muộn') {
+                            normalizedStatus = 'Có mặt';
+                        } else if (oldStatus === 'Đã đón trẻ') {
+                            normalizedStatus = 'Đã đón trẻ';
+                        } else {
+                            normalizedStatus = 'Vắng mặt';
+                        }
+
                         stateMap.set(item.student._id, {
-                            status: item.status as TAttendanceStatus,
-                            note: item.note || ''
+                            status: normalizedStatus,
+                            note: item.note || '',
+                            noteCheckout: item.noteCheckout || '',
+                            timeCheckIn: item.timeCheckIn || null,
+                            timeCheckOut: item.timeCheckOut || null,
+                            guardian: item.guardian || null
                         });
                     });
                     setAttendanceState(stateMap);
+
                     const attendanceDate = dayjs(data.date);
                     const today = dayjs();
                     const diffDays = today.diff(attendanceDate, 'day');
@@ -103,12 +118,36 @@ function EditAttendance() {
         }
     }, [attendanceId, form]);
 
-    const handleAttendanceChange = (studentId: string, field: 'status' | 'note', value: string) => {
+    const handleAttendanceChange = (
+        studentId: string,
+        field: 'status' | 'note' | 'noteCheckout' | 'timeCheckOut',
+        value: string | Dayjs | null
+    ) => {
         setAttendanceState(prev => {
             const newMap = new Map(prev);
-            const current = newMap.get(studentId) || { status: 'Vắng mặt không phép', note: '' };
-            if (field === 'status') current.status = value as TAttendanceStatus;
-            else current.note = value;
+            const current = newMap.get(studentId) || {
+                status: 'Vắng mặt',
+                note: '',
+                noteCheckout: '',
+                timeCheckIn: null,
+                timeCheckOut: null,
+                guardian: null
+            };
+
+            if (field === 'status') {
+                current.status = value as TAttendanceStatus;
+                if (current.status === 'Đã đón trẻ' && !current.timeCheckOut) {
+                    current.timeCheckOut = dayjs().toISOString();
+                }
+            } else if (field === 'note') {
+                current.note = value as string;
+            } else if (field === 'noteCheckout') {
+                current.noteCheckout = value as string;
+            } else if (field === 'timeCheckOut') {
+                current.timeCheckOut = dayjs.isDayjs(value) ? value.toISOString() : (value as string | null);
+                // Không tắt edit ở đây, để onBlur xử lý
+            }
+
             newMap.set(studentId, current);
             return newMap;
         });
@@ -126,7 +165,11 @@ function EditAttendance() {
             students: Array.from(attendanceState.entries()).map(([studentId, data]) => ({
                 student: studentId,
                 status: data.status,
-                note: data.note || undefined
+                note: data.note || undefined,
+                noteCheckout: data.noteCheckout || undefined,
+                timeCheckIn: data.timeCheckIn || null,
+                timeCheckOut: data.timeCheckOut || null,
+                guardian: data.guardian?._id || null,
             }))
         };
 
@@ -134,7 +177,6 @@ function EditAttendance() {
         try {
             await teacherApis.updateAttendance(attendanceId!, payload);
             toast.success('Cập nhật điểm danh thành công!');
-            // navigate(-1);
         } catch (error) {
             console.error(error);
             toast.error('Cập nhật thất bại.');
@@ -144,12 +186,11 @@ function EditAttendance() {
     };
 
     const summary = useMemo(() => {
-        const stats = { present: 0, late: 0, absentPermitted: 0, absentNotPermitted: 0, total: attendanceData?.students.length || 0 };
+        const stats = { present: 0, absent: 0, pickedUpChild: 0, total: attendanceData?.students.length || 0 };
         attendanceState.forEach(val => {
             if (val.status === 'Có mặt') stats.present++;
-            else if (val.status === 'Đi muộn') stats.late++;
-            else if (val.status === 'Vắng mặt có phép') stats.absentPermitted++;
-            else if (val.status === 'Vắng mặt không phép') stats.absentNotPermitted++;
+            else if (val.status === 'Đã đón trẻ') stats.pickedUpChild++;
+            else if (val.status === 'Vắng mặt') stats.absent++;
         });
         return stats;
     }, [attendanceState, attendanceData]);
@@ -190,9 +231,8 @@ function EditAttendance() {
                 <Space wrap size="small" style={{ marginBottom: 16 }}>
                     <Tag color="default" style={{ fontSize: 14, padding: '4px 8px' }}>Sĩ số: {summary.total}</Tag>
                     <Tag color="green" style={{ fontSize: 14, padding: '4px 8px' }}>Có mặt: {summary.present}</Tag>
-                    <Tag color="blue" style={{ fontSize: 14, padding: '4px 8px' }}>Đi muộn: {summary.late}</Tag>
-                    <Tag color="orange" style={{ fontSize: 14, padding: '4px 8px' }}>Vắng (P): {summary.absentPermitted}</Tag>
-                    <Tag color="red" style={{ fontSize: 14, padding: '4px 8px' }}>Vắng (K): {summary.absentNotPermitted}</Tag>
+                    <Tag color="orange" style={{ fontSize: 14, padding: '4px 8px' }}>Đã đón trẻ: {summary.pickedUpChild}</Tag>
+                    <Tag color="red" style={{ fontSize: 14, padding: '4px 8px' }}>Vắng mặt: {summary.absent}</Tag>
                 </Space>
 
                 <Divider style={{ margin: '8px 0 16px' }} />
@@ -203,8 +243,16 @@ function EditAttendance() {
                             itemLayout="vertical"
                             dataSource={attendanceData.students}
                             renderItem={(item) => {
-                                const state = attendanceState.get(item.student._id) || { status: 'Vắng mặt không phép', note: '' };
-                                const showNote = state.status !== 'Có mặt';
+                                const state = attendanceState.get(item.student._id) || {
+                                    status: 'Vắng mặt',
+                                    note: '',
+                                    noteCheckout: '',
+                                    timeCheckIn: null,
+                                    timeCheckOut: null,
+                                    guardian: null
+                                };
+
+                                const isEditingTime = editingTimeStudentId === item.student._id;
 
                                 return (
                                     <List.Item
@@ -214,7 +262,7 @@ function EditAttendance() {
                                             borderBottom: '1px solid #f0f0f0'
                                         }}
                                     >
-                                        <Row align="middle" gutter={[16, 16]}>
+                                        <Row align="top" gutter={[16, 16]}>
                                             <Col xs={24} sm={8} md={6}>
                                                 <Space>
                                                     <Avatar
@@ -232,7 +280,7 @@ function EditAttendance() {
                                                 </Space>
                                             </Col>
 
-                                            <Col xs={24} sm={16} md={12}>
+                                            <Col xs={24} sm={16} md={8}>
                                                 <Radio.Group
                                                     value={state.status}
                                                     onChange={(e) => handleAttendanceChange(item.student._id, 'status', e.target.value)}
@@ -244,10 +292,14 @@ function EditAttendance() {
                                                             return (
                                                                 <Radio.Button key={statusKey} value={statusKey}>
                                                                     <Space>
-                                                                        {React.isValidElement(config.icon) &&
-                                                                            React.cloneElement(config.icon, {
-                                                                                ...(React.isValidElement(config.icon) && { style: { color: state.status === statusKey ? undefined : config.color } })
-                                                                            })}
+                                                                        {React.cloneElement(config.icon as any, {
+                                                                            style: {
+                                                                                color:
+                                                                                    state.status === statusKey
+                                                                                        ? undefined
+                                                                                        : config.color,
+                                                                            },
+                                                                        })}
                                                                         {config.text}
                                                                     </Space>
                                                                 </Radio.Button>
@@ -257,15 +309,67 @@ function EditAttendance() {
                                                 </Radio.Group>
                                             </Col>
 
-                                            <Col xs={24} sm={24} md={6}>
-                                                {showNote && (
-                                                    <Input
-                                                        prefix={<EditOutlined style={{ color: '#8c8c8c' }} />}
-                                                        placeholder="Ghi chú (Bị ốm, ...)"
-                                                        value={state.note}
-                                                        onChange={(e) => handleAttendanceChange(item.student._id, 'note', e.target.value)}
-                                                    />
-                                                )}
+                                            <Col xs={24} sm={24} md={10}>
+                                                <Space direction="vertical" style={{ width: '100%' }}>
+                                                    {(state.status === 'Có mặt' || state.status === 'Đã đón trẻ') && state.timeCheckIn && (
+                                                        <Text style={{ fontSize: '14px', color: '#595959' }}>
+                                                            <ClockCircleOutlined style={{ marginRight: 8, color: '#52c41a' }} />
+                                                            Giờ vào: {dayjs(state.timeCheckIn).format('HH:mm')}
+                                                        </Text>
+                                                    )}
+
+                                                    {state.status === 'Đã đón trẻ' && (
+                                                        isEditingTime ? (
+                                                            <DatePicker
+                                                                picker="time"
+                                                                format="HH:mm"
+                                                                value={state.timeCheckOut ? dayjs(state.timeCheckOut) : null}
+                                                                onChange={(time) => handleAttendanceChange(item.student._id, 'timeCheckOut', time)}
+                                                                onBlur={() => setEditingTimeStudentId(null)}
+                                                                placeholder="Chọn giờ đón"
+                                                                suffixIcon={<ClockCircleOutlined />}
+                                                                style={{ width: '100%' }}
+                                                                autoFocus
+                                                            />
+                                                        ) : (
+                                                            <Text
+                                                                style={{ fontSize: '14px', color: '#595959', cursor: 'pointer', display: 'inline-block' }}
+                                                                onClick={() => setEditingTimeStudentId(item.student._id)}
+                                                            >
+                                                                <Tooltip title="Chỉnh sửa giờ ra">
+                                                                    <EditOutlined style={{ marginRight: 8, color: '#fa8c16' }} />
+                                                                    Giờ ra: {state.timeCheckOut ? dayjs(state.timeCheckOut).format('HH:mm') : 'Chưa có'}
+                                                                </Tooltip>
+
+                                                            </Text>
+                                                        )
+                                                    )}
+
+                                                    {state.status === 'Đã đón trẻ' && (
+                                                        <Input
+                                                            prefix={<EditOutlined style={{ color: '#8c8c8c' }} />}
+                                                            placeholder="Ghi chú khi đón"
+                                                            value={state.noteCheckout}
+                                                            onChange={(e) => handleAttendanceChange(item.student._id, 'noteCheckout', e.target.value)}
+                                                        />
+                                                    )}
+
+                                                    {state.status === 'Vắng mặt' && (
+                                                        <Input
+                                                            prefix={<EditOutlined style={{ color: '#8c8c8c' }} />}
+                                                            placeholder="Ghi chú (Bị ốm, ...)"
+                                                            value={state.note}
+                                                            onChange={(e) => handleAttendanceChange(item.student._id, 'note', e.target.value)}
+                                                        />
+                                                    )}
+
+                                                    <div style={{ marginTop: 8 }}>
+                                                        <Text strong>Người đón:</Text>{' '}
+                                                        <Text>
+                                                            {state.guardian?.fullName || '-'} ({state.guardian?.relationship || '...'}) - ({state.guardian?.phoneNumber || '...'})
+                                                        </Text>
+                                                    </div>
+                                                </Space>
                                             </Col>
                                         </Row>
                                     </List.Item>

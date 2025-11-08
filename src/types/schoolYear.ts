@@ -29,6 +29,8 @@ export interface CreateSchoolYearDto {
     numberTarget: number;
     enrollmentStartDate: string;
     enrollmentEndDate: string;
+    serviceStartTime: string;
+    serviceEndTime: string;
     createdBy: string;
 }
 
