@@ -25,12 +25,15 @@ function CreateSchoolyear() {
             const values = await form.validateFields();
             const [startDate, endDate] = values.dateRange;
             const [enrollmentStartDate, enrollmentEndDate] = values.enrollmentDateRange;
+            const [serviceStartTime, serviceEndTime] = values.serviceDateRange;
 
             const payload: CreateSchoolYearDto = {
                 startDate: startDate.toISOString(),
                 endDate: endDate.toISOString(),
                 enrollmentStartDate: enrollmentStartDate.toISOString(),
                 enrollmentEndDate: enrollmentEndDate.toISOString(),
+                serviceStartTime: serviceStartTime.toISOString(),
+                serviceEndTime: serviceEndTime.toISOString(),
                 numberTarget: values.numberTarget,
                 createdBy: user.email,
             };
@@ -117,6 +120,15 @@ function CreateSchoolyear() {
                                     style={{ width: '100%' }}
                                     format="DD/MM/YYYY"
                                 />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                name="serviceDateRange"
+                                label="Khung thời gian dịch vụ"
+                                rules={[{ required: true, message: 'Vui lòng chọn thời gian dịch vụ!' }]}
+                            >
+                                <RangePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
                             </Form.Item>
                         </Col>
                         <Col span={12}>

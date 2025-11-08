@@ -4,6 +4,11 @@ interface SimpleRole {
     roleName: string;
 }
 
+export interface SimpleParent {
+    _id: string;
+    fullName: string;
+}
+
 interface SimpleStaff {
     _id: string;
     staffCode: string;
@@ -16,6 +21,7 @@ export interface AccountListItem {
     roleList: SimpleRole[];
     isAdmin?: boolean;
     staff?: SimpleStaff;
+    parent?: SimpleParent;
     createdBy: string;
     updatedBy: string;
 }
