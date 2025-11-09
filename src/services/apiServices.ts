@@ -167,6 +167,9 @@ import { CreateOrUpdateServicePayload, PreviewServiceResponse, SchoolYearListRes
 import { CreateOrUpdateReceiptPayload, ReceiptDetailResponse, ReceiptListResponse, RevenueForReceiptItem } from "../types/receipts";
 import { CheckStatusTuitionResponse, ConfirmTuitionPayload, ConfirmTuitionResponse, GetHistoryFeeResponse, TuitionDetailResponse, TuitionListResponse } from "../types/tuition";
 import { CreateGuardianPayload, IGuardianByIdResponse, IGuardianListResponse, IGuardianRecord, UpdateGuardianPayload } from "../types/guardians";
+import { BalanceDetailResponse } from "../types/balances";
+import { ICreateOrUpdateDocumentPayload, IDocumentDetailResponse, IDocumentListResponse } from "../types/documents";
+import { IServiceReportResponse } from "../types/servicesReport";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -1425,8 +1428,71 @@ export const tuitionApis = {
     return response.data;
   },
 
-
 };
+
+export const balancesApis = {
+  getBalanceDetail: async (): Promise<BalanceDetailResponse> => {
+    const response = await axiosAuth.get<BalanceDetailResponse>(
+      apiEndPoint.GET_DETAIL_BALANCES
+    );
+    return response.data;
+  },
+};
+
+export const documentsApis = {
+  getDocumentList: async (params: {
+    schoolYear: string;
+    limit: number;
+    page: number;
+  }): Promise<IDocumentListResponse> => {
+    const response = await axiosAuth.get<IDocumentListResponse>(
+      apiEndPoint.GET_LIST_DOCUMENT,
+      { params }
+    );
+    return response.data;
+  },
+
+  getDocumentById: async (id: string): Promise<IDocumentDetailResponse> => {
+    const response = await axiosAuth.get<IDocumentDetailResponse>(
+      apiEndPoint.GET_DOCUMENT_BY_ID(id)
+    );
+    return response.data;
+  },
+
+  createDocument: async (
+    payload: ICreateOrUpdateDocumentPayload
+  ): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.CREATE_DOCUMENT, payload);
+  },
+
+  updateDocument: async (
+    id: string,
+    payload: ICreateOrUpdateDocumentPayload
+  ): Promise<void> => {
+    await axiosAuth.put(apiEndPoint.UPDATE_DOCUMENT(id), payload);
+  },
+
+  deleteDocument: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_DOCUMENT(id));
+  },
+
+  confirmDocument: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.CONFIRM_DOCUMENT(id));
+  },
+};
+
+export const reportsApis = {
+  getServiceReports: async (params: {
+    schoolYear: string;
+  }): Promise<IServiceReportResponse> => {
+    const response = await axiosAuth.get<IServiceReportResponse>(
+      apiEndPoint.GET_REPORT_SERVICES,
+      { params }
+    );
+    return response.data;
+  },
+};
+
 
 
 export const roomApis = {
@@ -1637,10 +1703,10 @@ export const guardianApis = {
   },
 
   getListGuardianByStudent: async (
-    studentId: string, 
+    studentId: string,
   ): Promise<IGuardianListResponse> => {
     const response = await axiosAuth.get<IGuardianListResponse>(
-      apiEndPoint.GET_LIST_GUARDIAN_BY_STUDENT(studentId), 
+      apiEndPoint.GET_LIST_GUARDIAN_BY_STUDENT(studentId),
     );
     return response.data;
   },

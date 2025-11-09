@@ -86,6 +86,11 @@ import TuitionDetails from "../../pages/parent-dashboard/take-tuition/TuitionDet
 import Payment from "../../pages/parent-dashboard/take-tuition/tuition-payment/Payment";
 import HistoryFee from "../../pages/parent-dashboard/history-fee/HistoryFee";
 import GuardianManagement from "../../pages/guardians/Guardians";
+import BalancesDetails from "../../pages/balances-details/BalancesDetails";
+import DocumentList from "../../pages/document-management/DocumentList";
+import DocumentCreate from "../../pages/document-management/document-create/DocumentCreate";
+import DocumentEdit from "../../pages/document-management/document-edit/DocumentEdit";
+import ServicesReport from "../../pages/services-reports/ServicesReport";
 
 export const routes: RouteObject[] = [
   {
@@ -548,6 +553,59 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <HistoryFee />,
+              }
+            ],
+          },
+          {
+            path: "balances",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/balances`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <BalancesDetails />,
+              }
+            ],
+          },
+          {
+            path: "documents",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/documents`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <DocumentList />,
+              },
+              {
+                path: "create",
+                element: <DocumentCreate />,
+              },
+              {
+                path: "edit/:id",
+                element: <DocumentEdit />,
+              },
+            ],
+          },
+          {
+            path: "manage-services",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/manage-services`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <ServicesReport />,
               }
             ],
           },

@@ -27,12 +27,14 @@ import { toast } from "react-toastify";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { constants } from "../../constants";
 import { useNavigate } from "react-router-dom";
+import { usePagePermission } from "../../hooks/usePagePermission";
 const { Title } = Typography;
 const { Option } = Select;
 
 function ReceiptsManagement() {
     const navigate = useNavigate();
     usePageTitle("Quản lý biên lai - Cá Heo Xanh");
+    const { canCreate, canUpdate, canDelete } = usePagePermission();
     const [data, setData] = useState<ReceiptItem[]>([]);
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
@@ -138,16 +140,20 @@ function ReceiptsManagement() {
                         icon={<EyeOutlined />}
                         onClick={() => navigate(`${constants.APP_PREFIX}/receipts/detail/${record._id}`)}
                     />
-                    <Button
-                        type="link"
-                        icon={<EditOutlined />}
-                        onClick={() => navigate(`${constants.APP_PREFIX}/receipts/edit/${record._id}`)}
-                    />
+                    {canUpdate && (
+                        <Button
+                            type="link"
+                            icon={<EditOutlined />}
+                            onClick={() => navigate(`${constants.APP_PREFIX}/receipts/edit/${record._id}`)}
+                        />
+                    )}
                     <Popconfirm
                         title="Bạn có chắc chắn muốn xoá biên lai này không?"
                         onConfirm={() => handleDelete(record._id)}
                     >
-                        <Button type="link" danger icon={<DeleteOutlined />} />
+                        {canDelete && (
+                            <Button type="link" danger icon={<DeleteOutlined />} />
+                        )}
                     </Popconfirm>
                 </Space>
             ),
@@ -176,10 +182,11 @@ function ReceiptsManagement() {
                         onClick={() => fetchReceipts()}
                         loading={loading}></Button>
                 </Tooltip>
-
-                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate(`${constants.APP_PREFIX}/receipts/create`)}>
-                    Tạo biên lai
-                </Button>
+                {canCreate && (
+                    <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate(`${constants.APP_PREFIX}/receipts/create`)}>
+                        Tạo biên lai
+                    </Button>
+                )}
             </Space>
 
             <Table
