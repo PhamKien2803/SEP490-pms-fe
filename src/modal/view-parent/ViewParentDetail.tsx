@@ -27,8 +27,8 @@ const ViewParentDetails: React.FC<ViewParentDetailsProps> = ({
   };
 
   const formatGender = (gender?: string) => {
-    if (gender === "male") return "Nam";
-    if (gender === "female") return "Nữ";
+    if (gender === "Nam") return "Nam";
+    if (gender === "Nữ") return "Nữ";
     return "Khác";
   };
 
@@ -62,13 +62,7 @@ const ViewParentDetails: React.FC<ViewParentDetailsProps> = ({
         <Descriptions.Item label="CMND/CCCD">
           {parentData.IDCard}
         </Descriptions.Item>
-        <Descriptions.Item label="Quốc tịch">
-          {parentData.nation}
-        </Descriptions.Item>
 
-        <Descriptions.Item label="Tôn giáo">
-          {parentData.religion || "-"}
-        </Descriptions.Item>
         <Descriptions.Item label="Địa chỉ" span={2}>
           {parentData.address}
         </Descriptions.Item>

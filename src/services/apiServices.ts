@@ -117,7 +117,6 @@ import {
 import {
   IAttendanceCreatePayload,
   IAttendanceDetailResponse,
-  IAttendanceListResponse,
   IAttendanceUpdatePayload,
   IFeedbackCreatePayload,
   IFeedbackDetailResponse,
@@ -127,7 +126,6 @@ import {
   ILessonDetailResponse,
   ILessonListResponse,
   ILessonPayload,
-  IPaginatedResponse,
   IScheduleWeekResponse,
   ITeacherClassStudentResponse,
   StudentDetailResponse,
@@ -164,6 +162,14 @@ import {
   ScheduleList,
   ScheduleParams,
 } from "../types/parent";
+import { CreateRevenuePayload, RevenueDetailResponse, RevenueListResponse, UpdateRevenuePayload } from "../types/revenues";
+import { CreateOrUpdateServicePayload, PreviewServiceResponse, SchoolYearListResponse, ServiceDetailResponse, StudentListByParentResponse } from "../types/services";
+import { CreateOrUpdateReceiptPayload, ReceiptDetailResponse, ReceiptListResponse, RevenueForReceiptItem } from "../types/receipts";
+import { CheckStatusTuitionResponse, ConfirmTuitionPayload, ConfirmTuitionResponse, GetHistoryFeeResponse, TuitionDetailResponse, TuitionListResponse } from "../types/tuition";
+import { CreateGuardianPayload, IGuardianByIdResponse, IGuardianListResponse, IGuardianRecord, UpdateGuardianPayload } from "../types/guardians";
+import { BalanceDetailResponse } from "../types/balances";
+import { ICreateOrUpdateDocumentPayload, IDocumentDetailResponse, IDocumentListResponse } from "../types/documents";
+import { IServiceReportResponse } from "../types/servicesReport";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -515,7 +521,7 @@ export const menuApis = {
   },
 
   deleteMenu: async (menuId: string): Promise<void> => {
-    await axiosAuth.delete(apiEndPoint.DELETE_MENU(menuId));
+    await axiosAuth.post(apiEndPoint.DELETE_MENU(menuId));
   },
 
   editMenu: async (menuId: string, body: CreateMenuParams): Promise<void> => {
@@ -888,19 +894,6 @@ export const teacherApis = {
     return response.data;
   },
 
-  getAttendanceList: async (params?: {
-    page: number;
-    limit: number;
-    [key: string]: any;
-  }): Promise<
-    IAttendanceListResponse | IPaginatedResponse<IAttendanceListResponse>
-  > => {
-    const response = await axiosAuth.get<
-      IAttendanceListResponse | IPaginatedResponse<IAttendanceListResponse>
-    >(apiEndPoint.GET_ATTENDANCE_LIST, { params });
-    return response.data;
-  },
-
   getAttendanceById: async (id: string): Promise<IAttendanceDetailResponse> => {
     const response = await axiosAuth.get<IAttendanceDetailResponse>(
       apiEndPoint.GET_ATTENDANCE_BY_ID(id)
@@ -1213,6 +1206,295 @@ export const scheduleApis = {
   },
 };
 
+export const revenuesApis = {
+  getListRevenues: async (params: {
+    page: number;
+    limit: number;
+  }): Promise<RevenueListResponse> => {
+    const response = await axiosAuth.get<RevenueListResponse>(
+      apiEndPoint.GET_LIST_REVENUES,
+      { params }
+    );
+    return response.data;
+  },
+
+  getRevenueById: async (id: string): Promise<RevenueDetailResponse> => {
+    const response = await axiosAuth.get<RevenueDetailResponse>(
+      apiEndPoint.GET_REVENUES_BY_ID(id)
+    );
+    return response.data;
+  },
+
+  createRevenue: async (
+    payload: CreateRevenuePayload
+  ): Promise<{ message: string }> => {
+    const response = await axiosAuth.post<{ message: string }>(
+      apiEndPoint.CREATE_REVENUES,
+      payload
+    );
+    return response.data;
+  },
+
+  updateRevenue: async (
+    id: string,
+    payload: UpdateRevenuePayload
+  ): Promise<{ message: string }> => {
+    const response = await axiosAuth.put<{ message: string }>(
+      apiEndPoint.UPDATE_REVENUES(id),
+      payload
+    );
+    return response.data;
+  },
+
+  deleteRevenue: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_REVENUES(id));
+  },
+};
+
+export const servicesApis = {
+  getSchoolYears: async (): Promise<SchoolYearListResponse> => {
+    const response = await axiosAuth.get<SchoolYearListResponse>(
+      apiEndPoint.GET_SCHOOLYEAR
+    );
+    return response.data;
+  },
+
+  getPreviewService: async (): Promise<PreviewServiceResponse> => {
+    const response = await axiosAuth.get<PreviewServiceResponse>(
+      apiEndPoint.GET_PREVIEW_SERVICES
+    );
+    return response.data;
+  },
+
+  getServiceById: async (
+    studentId: string,
+    schoolYear: string
+  ): Promise<ServiceDetailResponse> => {
+    const response = await axiosAuth.get<ServiceDetailResponse>(
+      apiEndPoint.GET_SERVICES_BY_ID(),
+      {
+        params: {
+          studentId,
+          schoolYear,
+        },
+      }
+    );
+    return response.data;
+  },
+
+
+  createService: async (
+    payload: CreateOrUpdateServicePayload
+  ): Promise<{ message: string }> => {
+    const response = await axiosAuth.post<{ message: string }>(
+      apiEndPoint.CREATE_SERVICES,
+      payload
+    );
+    return response.data;
+  },
+
+  updateService: async (
+    id: string,
+    payload: CreateOrUpdateServicePayload
+  ): Promise<{ message: string }> => {
+    const response = await axiosAuth.put<{ message: string }>(
+      apiEndPoint.UPDATE_SERVICES(id),
+      payload
+    );
+    return response.data;
+  },
+
+  getStudentByParent: async (parentId: string): Promise<StudentListByParentResponse> => {
+    const response = await axiosAuth.get<StudentListByParentResponse>(
+      apiEndPoint.GET_LIST_PARENT_STUDENT(parentId)
+    );
+    return response.data;
+  },
+};
+
+export const receiptsApis = {
+  getReceiptList: async (params: {
+    limit: number;
+    page: number;
+    schoolYear: string;
+  }): Promise<ReceiptListResponse> => {
+    const response = await axiosAuth.get<ReceiptListResponse>(
+      apiEndPoint.GET_RECEIPT_LIST,
+      { params }
+    );
+    return response.data;
+  },
+
+
+  getReceiptById: async (id: string): Promise<ReceiptDetailResponse> => {
+    const response = await axiosAuth.get<ReceiptDetailResponse>(
+      apiEndPoint.GET_RECEIPT_BY_ID(id)
+    );
+    return response.data;
+  },
+
+
+  createReceipt: async (
+    payload: CreateOrUpdateReceiptPayload
+  ): Promise<{ message: string }> => {
+    const response = await axiosAuth.post<{ message: string }>(
+      apiEndPoint.CREATE_RECEIPT,
+      payload
+    );
+    return response.data;
+  },
+
+
+  updateReceipt: async (
+    id: string,
+    payload: CreateOrUpdateReceiptPayload
+  ): Promise<{ message: string }> => {
+    const response = await axiosAuth.put<{ message: string }>(
+      apiEndPoint.UPDATE_RECEIPT(id),
+      payload
+    );
+    return response.data;
+  },
+
+
+  deleteReceipt: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_RECEIPT(id));
+  },
+
+
+  confirmReceipt: async (id: string): Promise<{ message: string }> => {
+    const response = await axiosAuth.post<{ message: string }>(
+      apiEndPoint.CONFIRM_RECEIPT(id)
+    );
+    return response.data;
+  },
+
+
+  getRevenuesForReceipt: async (): Promise<RevenueForReceiptItem[]> => {
+    const response = await axiosAuth.get<RevenueForReceiptItem[]>(
+      apiEndPoint.GET_REVENUES_RECEIPT
+    );
+    return response.data;
+  },
+};
+
+export const tuitionApis = {
+  getTuitionList: async (params: {
+    limit: number;
+    page: number;
+    schoolYear: string;
+  }): Promise<TuitionListResponse> => {
+    const response = await axiosAuth.get<TuitionListResponse>(
+      apiEndPoint.GET_TUITION_LIST,
+      { params }
+    );
+    return response.data;
+  },
+
+  getTuitionDetail: async (parentId: string): Promise<TuitionDetailResponse> => {
+    const response = await axiosAuth.get<TuitionDetailResponse>(
+      apiEndPoint.GET_DETAILS_TUITION(parentId)
+    );
+    return response.data;
+  },
+
+  confirmTuition: async (
+    payload: ConfirmTuitionPayload
+  ): Promise<ConfirmTuitionResponse> => {
+    const response = await axiosAuth.post<ConfirmTuitionResponse>(
+      apiEndPoint.CONFIRM_TUITION,
+      payload
+    );
+    return response.data;
+  },
+
+  checkTuitionStatus: async (
+    orderCode: string
+  ): Promise<CheckStatusTuitionResponse> => {
+    const response = await axiosAuth.get<CheckStatusTuitionResponse>(
+      apiEndPoint.CHECK_STATUS_TUITION(orderCode)
+    );
+    return response.data;
+  },
+
+  getHistoryFee: async (params: {
+    parentId: string;
+    schoolYear: string;
+  }): Promise<GetHistoryFeeResponse> => {
+    const response = await axiosAuth.get<GetHistoryFeeResponse>(
+      apiEndPoint.GET_LIST_HISTORY_FEE,
+      { params }
+    );
+    return response.data;
+  },
+
+};
+
+export const balancesApis = {
+  getBalanceDetail: async (): Promise<BalanceDetailResponse> => {
+    const response = await axiosAuth.get<BalanceDetailResponse>(
+      apiEndPoint.GET_DETAIL_BALANCES
+    );
+    return response.data;
+  },
+};
+
+export const documentsApis = {
+  getDocumentList: async (params: {
+    schoolYear: string;
+    limit: number;
+    page: number;
+  }): Promise<IDocumentListResponse> => {
+    const response = await axiosAuth.get<IDocumentListResponse>(
+      apiEndPoint.GET_LIST_DOCUMENT,
+      { params }
+    );
+    return response.data;
+  },
+
+  getDocumentById: async (id: string): Promise<IDocumentDetailResponse> => {
+    const response = await axiosAuth.get<IDocumentDetailResponse>(
+      apiEndPoint.GET_DOCUMENT_BY_ID(id)
+    );
+    return response.data;
+  },
+
+  createDocument: async (
+    payload: ICreateOrUpdateDocumentPayload
+  ): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.CREATE_DOCUMENT, payload);
+  },
+
+  updateDocument: async (
+    id: string,
+    payload: ICreateOrUpdateDocumentPayload
+  ): Promise<void> => {
+    await axiosAuth.put(apiEndPoint.UPDATE_DOCUMENT(id), payload);
+  },
+
+  deleteDocument: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_DOCUMENT(id));
+  },
+
+  confirmDocument: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.CONFIRM_DOCUMENT(id));
+  },
+};
+
+export const reportsApis = {
+  getServiceReports: async (params: {
+    schoolYear: string;
+  }): Promise<IServiceReportResponse> => {
+    const response = await axiosAuth.get<IServiceReportResponse>(
+      apiEndPoint.GET_REPORT_SERVICES,
+      { params }
+    );
+    return response.data;
+  },
+};
+
+
+
 export const roomApis = {
   getListRoom: async (params: {
     page: number;
@@ -1384,6 +1666,56 @@ export const parentDashboardApis = {
       {
         responseType: "arraybuffer",
       }
+    );
+    return response.data;
+  },
+};
+
+export const guardianApis = {
+  createGuardian: async (body: CreateGuardianPayload): Promise<IGuardianRecord> => {
+    const response = await axiosAuth.post<IGuardianRecord>(
+      apiEndPoint.CREATE_GUARDIAN,
+      body
+    );
+    return response.data;
+  },
+
+  updateGuardian: async (
+    id: string,
+    body: UpdateGuardianPayload
+  ): Promise<IGuardianRecord> => {
+    const response = await axiosAuth.put<IGuardianRecord>(
+      apiEndPoint.UPDATE_GUARDIAN(id),
+      body
+    );
+    return response.data;
+  },
+
+  deleteGuardian: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.DELETE_GUARDIAN(id));
+  },
+
+  getGuardianById: async (id: string): Promise<IGuardianRecord> => {
+    const response = await axiosAuth.get<IGuardianByIdResponse>(
+      apiEndPoint.GET_GUARDIAN_BY_ID(id)
+    );
+    return response.data.data;
+  },
+
+  getListGuardianByStudent: async (
+    studentId: string,
+  ): Promise<IGuardianListResponse> => {
+    const response = await axiosAuth.get<IGuardianListResponse>(
+      apiEndPoint.GET_LIST_GUARDIAN_BY_STUDENT(studentId),
+    );
+    return response.data;
+  },
+
+  getListGuardianByParent: async (
+    parentId: string,
+  ): Promise<IGuardianListResponse> => {
+    const response = await axiosAuth.get<IGuardianListResponse>(
+      apiEndPoint.GET_LIST_GUARDIAN_BY_PARENT(parentId)
     );
     return response.data;
   },

@@ -37,15 +37,12 @@ import {
   Meal,
   MenuParams,
   MenuResponse,
+  Student,
 } from "../../../types/parent";
+import { useCurrentUser } from "../../../hooks/useCurrentUser";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
-
-const AGE_GROUPS = [
-  { value: "1-3 tuổi", label: "1-3 tuổi (Nhà trẻ)" },
-  { value: "4-5 tuổi", label: "4-5 tuổi (Mẫu giáo)" },
-];
 
 const getTodayDateDayjs = () => dayjs();
 
@@ -182,9 +179,12 @@ const renderIngredientTable = (ingredients: Ingredient[]) => {
 };
 
 const Menu: React.FC = () => {
-  const [selectedAgeGroup, setSelectedAgeGroup] = useState<string>(
-    AGE_GROUPS[0].value
-  );
+  const user = useCurrentUser();
+  const [selectedStudentId, setSelectedStudentId] = useState<
+    string | undefined
+  >();
+  const [listChild, setListChild] = useState<Student[]>([]);
+
   const [selectedDateDayjs, setSelectedDateDayjs] = useState<Dayjs | null>(
     getTodayDateDayjs
   );
@@ -199,15 +199,41 @@ const Menu: React.FC = () => {
 
   const params: MenuParams = useMemo(
     () => ({
-      ageGroup: selectedAgeGroup,
+      studentId: selectedStudentId || "",
       date: selectedDateString,
     }),
-    [selectedAgeGroup, selectedDateString]
+    [selectedStudentId, selectedDateString]
   );
 
   useEffect(() => {
+    getDataListChild();
+  }, [user?.parent]);
+
+  const getDataListChild = async () => {
+    if (!user?.parent) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await parentDashboardApis.getListChild(user.parent);
+      const students = response?.students || [];
+      setListChild(students);
+
+      if (students.length > 0) {
+        setSelectedStudentId(students[0]._id);
+      } else {
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách con:", error);
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     const fetchMenu = async () => {
-      if (!params.ageGroup || !params.date) {
+      if (!params.studentId || !params.date) {
         setMenuData(null);
         return;
       }
@@ -230,12 +256,12 @@ const Menu: React.FC = () => {
     };
 
     fetchMenu();
-  }, [params.ageGroup, params.date]);
+  }, [params.studentId, params.date]);
 
-  const currentDayMenu: DayMenu | undefined = menuData?.days[0];
-  const selectedAgeGroupLabel = AGE_GROUPS.find(
-    (g) => g.value === selectedAgeGroup
-  )?.label;
+  const currentDayMenu: DayMenu | undefined = menuData?.days?.[0];
+  const selectedStudent = listChild.find(
+    (g) => g._id === selectedStudentId
+  )?.fullName;
 
   const renderMealCard = (meal: Meal) => {
     return (
@@ -322,8 +348,8 @@ const Menu: React.FC = () => {
       <Title
         level={2}
         style={{
-          color: "#fa8c16",
-          borderBottom: "2px solid #fa8c16",
+          color: "#1890ff",
+          borderBottom: "2px solid #1890ff",
           paddingBottom: 8,
           fontSize: 32,
         }}
@@ -336,14 +362,14 @@ const Menu: React.FC = () => {
       <Card
         bordered={false}
         title={
-          <Text strong style={{ color: "#fa8c16", fontSize: 18 }}>
+          <Text strong style={{ color: "#1890ff", fontSize: 18 }}>
             <CalendarOutlined /> Chọn Ngày và Nhóm tuổi
           </Text>
         }
         style={{
           marginBottom: 28,
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-          backgroundColor: "#fff7e6",
+          backgroundColor: "#F0F8FF",
         }}
       >
         <Row gutter={24} align="middle">
@@ -360,16 +386,15 @@ const Menu: React.FC = () => {
               Chọn Nhóm tuổi/Lớp học:
             </Text>
             <Select
-              value={selectedAgeGroup}
+              value={selectedStudentId}
               style={{ width: "100%" }}
-              onChange={(value) => setSelectedAgeGroup(value)}
-              placeholder="Chọn nhóm tuổi của con"
+              onChange={(value) => setSelectedStudentId(value)}
+              placeholder="Chọn con của bạn"
               size="large"
-              disabled={isLoading}
             >
-              {AGE_GROUPS.map((group) => (
-                <Option key={group.value} value={group.value}>
-                  {group.label}
+              {listChild.map((student) => (
+                <Option key={student._id} value={student._id}>
+                  {student?.fullName} ({student?.studentCode})
                 </Option>
               ))}
             </Select>
@@ -414,13 +439,10 @@ const Menu: React.FC = () => {
             <Empty
               description={
                 <Title level={4} style={{ fontSize: 22 }}>
-                  Chưa có Menu chính thức cho nhóm{" "}
-                  <Text strong>{selectedAgeGroupLabel}</Text> vào ngày{" "}
-                  <Text strong>
-                    {selectedDateDayjs
-                      ? selectedDateDayjs.format("DD/MM/YYYY")
-                      : "đã chọn"}
-                  </Text>
+                  Chưa có Menu chính thức cho {selectedStudent} vào ngày{" "}
+                  {selectedDateDayjs
+                    ? selectedDateDayjs.format("DD/MM/YYYY")
+                    : "đã chọn"}
                   .
                 </Title>
               }
@@ -465,11 +487,11 @@ const Menu: React.FC = () => {
                 <Descriptions.Item
                   label={
                     <Text strong style={{ fontSize: 15 }}>
-                      <UserOutlined /> Nhóm Tuổi
+                      <UserOutlined /> Con
                     </Text>
                   }
                 >
-                  <Text style={{ fontSize: 15 }}>{selectedAgeGroupLabel}</Text>
+                  <Text style={{ fontSize: 15 }}>{selectedStudent}</Text>
                 </Descriptions.Item>
                 <Descriptions.Item
                   label={

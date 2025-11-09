@@ -17,6 +17,7 @@ export interface IStudent {
   healthCertId: string;
   healthCertFile: IFileInfo | null;
   birthCertFile: IFileInfo | null;
+  guardianToday?: IGuardian | null;
 }
 
 export interface IRoomFacility {
@@ -139,9 +140,23 @@ export interface ITeacherClassStudentResponse {
 
 export interface IAttendanceStudentPayload {
   student: string;
-  status: "Có mặt" | "Vắng mặt có phép" | "Vắng mặt không phép" | "Đi muộn";
+  status: "Có mặt" | "Đã đón trẻ" | "Vắng mặt";
   note?: string;
+  noteCheckout?: string;
+  timeCheckIn?: string | null;
+  timeCheckOut?: string | null;
+  guardian?: string | null;
 }
+
+export interface IGuardian {
+  _id: string;
+  fullName: string;
+  dob: string;
+  phoneNumber: string;
+  relationship: string;
+  pickUpDate: string;
+}
+
 
 export interface IAttendanceCreatePayload {
   class: string;
@@ -160,6 +175,7 @@ export interface IAttendanceUpdatePayload {
   takenBy: string;
   generalNote?: string;
 }
+
 
 export interface IAttendanceDetailResponse {
   _id: string;
@@ -182,10 +198,21 @@ export interface IAttendanceDetailResponse {
       dob: string;
       gender: string;
       address: string;
-      classGroup: string;
+      classGroup?: string;
     };
     status: string;
     note?: string;
+    noteCheckout?: string;
+    timeCheckIn?: string | null;
+    timeCheckOut?: string | null;
+    guardian?: {
+      _id: string;
+      fullName: string;
+      dob: string;
+      phoneNumber: string;
+      relationship: string;
+      pickUpDate: string;
+    } | null;
   }[];
   takenBy: {
     _id: string;
@@ -196,6 +223,8 @@ export interface IAttendanceDetailResponse {
   generalNote?: string;
   takenAt: string;
 }
+
+
 
 export type IAttendanceListResponse = IAttendanceDetailResponse[];
 

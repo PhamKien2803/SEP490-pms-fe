@@ -349,7 +349,7 @@ const Medical: React.FC = () => {
   const [pagination, setPagination] = useState<
     PageParams & { totalCount: number }
   >({ page: 1, limit: 10, totalCount: 0 });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [detailRecord, setDetailRecord] = useState<HealthCheckRecord | null>(
     null
@@ -542,7 +542,7 @@ const Medical: React.FC = () => {
                 </Option>
               ))}
             </Select>
-            {listChild.length === 0 && (
+            {listChild.length === 0 && !isLoading && (
               <Text type="danger" style={{ marginLeft: 10 }}>
                 Không tìm thấy hồ sơ học sinh.
               </Text>

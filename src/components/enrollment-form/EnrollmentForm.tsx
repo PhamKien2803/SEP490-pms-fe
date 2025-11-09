@@ -39,26 +39,27 @@ const EnrollmentForm: React.FC = () => {
     const [studentAge, setStudentAge] = useState<number | null>(null);
     const [dobError, setDobError] = useState<string | null>(null);
 
-    const handleStudentDobChange = (date: dayjs.Dayjs | null) => {
-        setDobError(null);
-        setStudentAge(null);
+    // const handleStudentDobChange = (date: dayjs.Dayjs | null) => {
+    //     setDobError(null);
+    //     setStudentAge(null);
 
-        if (!date) return;
+    //     if (!date) return;
 
-        const today = dayjs();
-        const age = today.diff(date, "year");
+    //     const today = dayjs();
+    //     const age = today.diff(date, "year");
 
-        if (date.isAfter(today, "day")) {
-            setDobError("Ngày sinh không được trong tương lai!");
-        } else if (age < 1) {
-            setDobError("Học sinh phải đủ ít nhất 1 tuổi!");
-        } else if (age > 5) {
-            setDobError("Học sinh không được quá 5 tuổi!");
-        } else {
-            setDobError(null);
-            setStudentAge(age);
-        }
-    };
+    //     if (date.isAfter(today, "day")) {
+    //         setDobError("Ngày sinh không được trong tương lai!");
+    //     } else if (age < 1) {
+    //         setDobError("Học sinh phải đủ ít nhất 1 tuổi!");
+    //     } else if (age > 5) {
+    //         setDobError("Học sinh không được quá 5 tuổi!");
+    //     } else {
+    //         setDobError(null);
+    //         setStudentAge(age);
+    //     }
+    // };
+
     const onFinish = (values: any) => {
         let payload: Partial<RegisterEnrollmentDto>;
         const { isExistingParentCheckbox, ...restValues } = values;
@@ -178,10 +179,12 @@ const EnrollmentForm: React.FC = () => {
                                     {
                                         validator: (_, value) => {
                                             if (!value) return Promise.resolve();
-                                            const today = dayjs();
-                                            const age = today.diff(value, "year");
 
-                                            if (value.isAfter(today, "day"))
+                                            const date = dayjs(value);
+                                            const today = dayjs();
+                                            const age = today.diff(date, "year");
+
+                                            if (date.isAfter(today, "day"))
                                                 return Promise.reject(new Error("Ngày sinh không được trong tương lai!"));
                                             if (age < 1)
                                                 return Promise.reject(new Error("Học sinh phải đủ ít nhất 1 tuổi!"));
@@ -197,7 +200,31 @@ const EnrollmentForm: React.FC = () => {
                                         style={{ width: "100%" }}
                                         format="DD/MM/YYYY"
                                         placeholder="Chọn ngày"
-                                        onChange={handleStudentDobChange}
+                                        onChange={(date) => {
+                                            form.setFieldValue("studentDob", date);
+
+                                            if (date) {
+                                                const today = dayjs();
+                                                const age = today.diff(date, "year");
+
+                                                if (date.isAfter(today, "day")) {
+                                                    setDobError("Ngày sinh không được trong tương lai!");
+                                                    setStudentAge(null);
+                                                } else if (age < 1) {
+                                                    setDobError("Học sinh phải đủ ít nhất 1 tuổi!");
+                                                    setStudentAge(null);
+                                                } else if (age > 5) {
+                                                    setDobError("Học sinh không được quá 5 tuổi!");
+                                                    setStudentAge(null);
+                                                } else {
+                                                    setDobError(null);
+                                                    setStudentAge(age);
+                                                }
+                                            } else {
+                                                setStudentAge(null);
+                                                setDobError(null);
+                                            }
+                                        }}
                                     />
                                     {studentAge !== null && !dobError && (
                                         <Text type="secondary">→ {studentAge} tuổi</Text>

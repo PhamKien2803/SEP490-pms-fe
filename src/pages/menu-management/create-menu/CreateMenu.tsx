@@ -14,6 +14,7 @@ import {
   InputNumber,
   Tooltip,
   Spin,
+  Modal,
 } from "antd";
 import {
   SaveOutlined,
@@ -90,7 +91,6 @@ const MealEditor: React.FC<MealEditorProps> = ({
   const [foodOptions, setFoodOptions] = useState<FoodRecord[]>([]);
   const [foodLoading, setFoodLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
-
   const fetchFoodList = useCallback(
     async (search: string, ageGroupLabel: string) => {
       if (!ageGroupLabel) {
@@ -174,7 +174,6 @@ const MealEditor: React.FC<MealEditorProps> = ({
         },
       });
     } else {
-      // Clear fields if no food is selected
       form.setFieldsValue({
         days: {
           [dayIndex]: {
@@ -222,21 +221,19 @@ const MealEditor: React.FC<MealEditorProps> = ({
           key={`nutrient-item-${foodField.fieldKey as number}-${name}`}
           name={[foodField.name, name]}
           fieldKey={[foodField.fieldKey as number, name]}
-          style={{ marginBottom: 0 }} // Ngăn nhảy dòng
-          help={false} // Ngăn AntD dành không gian cho thông báo lỗi
-          validateStatus={undefined} // Đảm bảo không hiển thị trạng thái lỗi
+          style={{ marginBottom: 0,height:"30px" }}
+          help={false}
+          validateStatus={undefined}
         >
           <InputNumber
             style={{
               width: "100%",
               color: readOnly ? color : "inherit",
-              padding: readOnly ? "4px 7px" : undefined,
             }}
             readOnly={readOnly}
             controls={false}
             placeholder={readOnly ? "0" : "Nhập"}
             addonAfter={unit}
-            // FORMATTER: Giới hạn 2 chữ số thập phân
             formatter={(value) => (value ? Number(value).toFixed(2) : "")}
             parser={(value) => (value ? Number(value.replace(/,/g, "")) : NaN)}
           />
@@ -363,16 +360,6 @@ const MealEditor: React.FC<MealEditorProps> = ({
                           <Col span={2} />
                         </Row>
                         {foodFields.map((foodField) => {
-                          const foodIdFieldName = [
-                            "days",
-                            dayIndex,
-                            "meals",
-                            mealIndex,
-                            "foods",
-                            foodField.name,
-                            "foodId",
-                          ];
-
                           return (
                             <Row
                               key={foodField.key}
@@ -397,21 +384,14 @@ const MealEditor: React.FC<MealEditorProps> = ({
                                     "foodId",
                                   ]}
                                   rules={[
-                                    { required: true, message: "Chọn món ăn" },
+                                    { required: true, message: "Vui lòng chọn món ăn" },
                                   ]}
-                                  style={{ marginBottom: 0 }} // Ngăn nhảy dòng
-                                  help={false} // Ngăn AntD dành không gian cho thông báo lỗi
-                                  validateStatus={
-                                    form.getFieldError(foodIdFieldName).length >
-                                      0
-                                      ? "error"
-                                      : undefined
-                                  }
+                                  style={{ marginBottom: 0,height:"30px" }}
                                 >
                                   <Select
                                     placeholder={
                                       currentAgeGroupLabel
-                                        ? `Tìm món ăn cho ${currentAgeGroupLabel}`
+                                        ? `Món ăn cho ${currentAgeGroupLabel}`
                                         : "Vui lòng chọn Nhóm Tuổi trước"
                                     }
                                     showSearch
@@ -446,7 +426,7 @@ const MealEditor: React.FC<MealEditorProps> = ({
                                 </Form.Item>
                               </Col>
 
-                              <NutrientDisplay
+                               <NutrientDisplay
                                 label="Khối lượng"
                                 name="weight"
                                 icon={<ForkOutlined />}
@@ -463,7 +443,7 @@ const MealEditor: React.FC<MealEditorProps> = ({
                                 unit="kcal"
                                 color="#faad14"
                                 foodField={foodField}
-                                span={4} // <-- ĐÃ CHỈNH SỬA: Tăng span cho Calo
+                                span={4}
                               />
                               <NutrientDisplay
                                 label="Protein"
@@ -545,6 +525,11 @@ const CreateMenu: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [currentWeekDays, setCurrentWeekDays] = useState<Dayjs[]>([]);
   const [activeTabKey, setActiveTabKey] = useState<string>("0");
+  const [isCancelConfirmVisible, setIsCancelConfirmVisible] = useState(false);
+  const handleConfirmCancel = () => {
+    setIsCancelConfirmVisible(false);
+    navigate(`${constants.APP_PREFIX}/menus`);
+  };
 
   const currentAgeGroupValue = Form.useWatch("ageGroup", form);
 
@@ -606,7 +591,6 @@ const CreateMenu: React.FC = () => {
     try {
       const [weekStartDayjs, weekEndDayjs] = values.dateRange;
 
-      // Xử lý dữ liệu và lọc ra các món ăn/ngày hợp lệ
       const cleanedDays: DayMenuCreate[] = values.days
         .map((day: any) => {
           const dayMeals = day.meals.map((meal: any) => ({
@@ -614,7 +598,6 @@ const CreateMenu: React.FC = () => {
             foods: meal.foods
               .filter(
                 (food: any) =>
-                  // Chỉ lấy món ăn có foodId và khối lượng (weight) không bằng 0
                   food.foodId &&
                   food.foodId.trim() !== "" &&
                   food.weight !== 0 &&
@@ -629,7 +612,6 @@ const CreateMenu: React.FC = () => {
             meals: dayMeals,
           };
         })
-        // Chỉ giữ lại những ngày có ít nhất 1 bữa ăn có món ăn
         .filter((day: DayMenuCreate) =>
           day.meals.some((meal: any) => meal.foods.length > 0)
         );
@@ -653,7 +635,7 @@ const CreateMenu: React.FC = () => {
       navigate(`${constants.APP_PREFIX}/menus`);
     } catch (error: any) {
       const errorMessage =
-        error?.response?.data?.message ||
+        error ||
         "Tạo thực đơn thất bại. Vui lòng kiểm tra dữ liệu và thử lại.";
       toast.error(errorMessage);
     } finally {
@@ -679,7 +661,27 @@ const CreateMenu: React.FC = () => {
       ),
     }));
   }, [currentWeekDays, form, currentAgeGroupValue, currentAgeGroupLabel]);
+  const validateWeekRange = (name: any, value: [Dayjs | null, Dayjs | null] | null) => {
+    console.log(name);
+    if (!value) {
+      return Promise.resolve();
+    }
+    const [start, end] = value;
 
+    if (!start || !end) {
+      return Promise.resolve();
+    }
+
+    const diffInDays = end.diff(start, 'day');
+
+    if (diffInDays < 6) {
+      return Promise.reject(
+        new Error("Khoảng thời gian tối thiểu phải là 7 ngày.")
+      );
+    }
+
+    return Promise.resolve();
+  };
   return (
     <div style={{ padding: "16px 24px" }}>
       <Form
@@ -717,12 +719,13 @@ const CreateMenu: React.FC = () => {
               <Form.Item
                 label={
                   <Space>
-                    <CalendarOutlined /> **Tuần Áp Dụng**
+                    <CalendarOutlined /> Tuần Áp Dụng
                   </Space>
                 }
                 name="dateRange"
                 rules={[
                   { required: true, message: "Vui lòng chọn khoảng thời gian" },
+                  { validator: validateWeekRange },
                 ]}
                 required
               >
@@ -741,7 +744,7 @@ const CreateMenu: React.FC = () => {
               <Form.Item
                 label={
                   <Space>
-                    <UsergroupAddOutlined /> **Nhóm Tuổi**
+                    <UsergroupAddOutlined /> Nhóm Tuổi
                   </Space>
                 }
                 name="ageGroup"
@@ -790,7 +793,7 @@ const CreateMenu: React.FC = () => {
                   }}
                 >
                   <p style={{ color: "#8c8c8c", margin: 0 }}>
-                    Vui lòng **chọn Tuần Áp Dụng** để bắt đầu nhập thực đơn chi
+                    Vui lòng chọn Tuần Áp Dụng để bắt đầu nhập thực đơn chi
                     tiết cho 7 ngày.
                   </p>
                 </div>
@@ -816,7 +819,7 @@ const CreateMenu: React.FC = () => {
             <Space>
               <Button
                 icon={<RollbackOutlined />}
-                onClick={() => navigate(`${constants.APP_PREFIX}/menus`)}
+                onClick={() => setIsCancelConfirmVisible(true)}
                 disabled={loading}
               >
                 Hủy và Quay lại
@@ -834,6 +837,17 @@ const CreateMenu: React.FC = () => {
           </Row>
         </Card>
       </Form>
+      <Modal
+        title="Bạn có chắc muốn hủy?"
+        open={isCancelConfirmVisible}
+        onOk={handleConfirmCancel}
+        onCancel={() => setIsCancelConfirmVisible(false)}
+        okText="Đồng ý"
+        cancelText="Không"
+        zIndex={1001}
+      >
+        <p>Các thay đổi chưa được lưu sẽ bị mất.</p>
+      </Modal>
     </div>
   );
 };

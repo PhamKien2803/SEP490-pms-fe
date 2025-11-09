@@ -43,6 +43,7 @@ import {
   RoomState,
 } from "../../../types/room-management";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { useCurrentUser } from "../../../hooks/useCurrentUser";
 
 const { Title, Text } = Typography;
 const { Item } = Descriptions;
@@ -274,12 +275,15 @@ const UpdateRoom: React.FC = () => {
   usePageTitle('Cập nhật phòng học - Cá Heo Xanh');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+    const user = useCurrentUser();
   const [form] = Form.useForm();
   const [roomDetail, setRoomDetail] = useState<RoomRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isCancelConfirmVisible, setIsCancelConfirmVisible] = useState(false);
+      const isHRStaff = !user?.isTeacher || user?.isAdmin;
+          const isTeacher = user?.isTeacher || user?.isAdmin;
 
   const [isRejectModalVisible, setIsRejectModalVisible] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
@@ -456,7 +460,7 @@ const UpdateRoom: React.FC = () => {
       setRejectReason("");
     } catch (error: any) {
       const errorMessage =
-        error?.response?.data?.message ||
+        error ||
         "Cập nhật phòng học thất bại. Vui lòng kiểm tra dữ liệu và thử lại.";
       toast.error(errorMessage);
     } finally {
@@ -529,7 +533,7 @@ const UpdateRoom: React.FC = () => {
           </Tooltip>
         );
       }
-      return <Space>{confirmButton}</Space>;
+      return isHRStaff ? <Space>{confirmButton}</Space> : null;
     }
 
     switch (currentState) {
@@ -560,7 +564,7 @@ const UpdateRoom: React.FC = () => {
           </Space>
         );
       case "Chờ giáo viên duyệt":
-        return (
+        return isTeacher ?  (
           <Space>
             <Button
               icon={<EditOutlined />}
@@ -581,9 +585,9 @@ const UpdateRoom: React.FC = () => {
               Xác nhận hoàn thành
             </Button>
           </Space>
-        );
+        ) : null;
       case "Chờ nhân sự xác nhận":
-        return (
+        return isHRStaff ? (
           <Space>
             <Button
               type="primary"
@@ -604,7 +608,7 @@ const UpdateRoom: React.FC = () => {
               Xác Nhận
             </Button>
           </Space>
-        );
+        ) : null;
       case "Hoàn thành":
         return null;
       default:
@@ -648,7 +652,7 @@ const UpdateRoom: React.FC = () => {
           onClick={() => navigate(`${constants.APP_PREFIX}/rooms`)}
           style={{ marginRight: 16, cursor: "pointer", color: "#0050b3" }}
         />
-        Chỉnh Sửa Phòng Học: **{roomDetail.roomName}**
+        Chỉnh Sửa Phòng Học: {roomDetail.roomName}
       </Title>
       <Form
         form={form}

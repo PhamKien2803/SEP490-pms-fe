@@ -72,6 +72,25 @@ import ClassChild from "../../pages/parent-dashboard/class-child/ClassChild";
 import Schedule from "../../pages/parent-dashboard/schedule/Schedule";
 import Menu from "../../pages/parent-dashboard/menu/Menu";
 import Medical from "../../pages/parent-dashboard/medical/Medical";
+import RevenueList from "../../pages/revenue-management/RevenueList";
+import RevenueCreate from "../../pages/revenue-management/revenue-create/RevenueCreate";
+import RevenueEdit from "../../pages/revenue-management/revenue-edit/RevenueEdit";
+import TakeServices from "../../pages/parent-dashboard/take-services/TakeServices";
+import RegisterServices from "../../pages/parent-dashboard/take-services/register-services/RegisterServices";
+import ReceiptsManagement from "../../pages/receipts-management/ReceiptsManagement";
+import ReceiptsCreate from "../../pages/receipts-management/receipts-create/ReceiptsCreate";
+import ReceiptsEdit from "../../pages/receipts-management/receipts-edit/ReceiptsEdit";
+import ReceiptsDetails from "../../pages/receipts-management/receipts-details/ReceiptsDetails";
+import TuitionList from "../../pages/tuition-management/TuitionList";
+import TuitionDetails from "../../pages/parent-dashboard/take-tuition/TuitionDetails";
+import Payment from "../../pages/parent-dashboard/take-tuition/tuition-payment/Payment";
+import HistoryFee from "../../pages/parent-dashboard/history-fee/HistoryFee";
+import GuardianManagement from "../../pages/guardians/Guardians";
+import BalancesDetails from "../../pages/balances-details/BalancesDetails";
+import DocumentList from "../../pages/document-management/DocumentList";
+import DocumentCreate from "../../pages/document-management/document-create/DocumentCreate";
+import DocumentEdit from "../../pages/document-management/document-edit/DocumentEdit";
+import ServicesReport from "../../pages/services-reports/ServicesReport";
 
 export const routes: RouteObject[] = [
   {
@@ -420,6 +439,177 @@ export const routes: RouteObject[] = [
             ],
           },
           {
+            path: "revenues",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/revenues`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <RevenueList />,
+              },
+              {
+                path: "create",
+                element: <RevenueCreate />,
+              },
+              {
+                path: "edit/:id",
+                element: <RevenueEdit />,
+              },
+            ],
+          },
+          {
+            path: "services",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/services`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <TakeServices />,
+              },
+              {
+                path: "register",
+                element: <RegisterServices />,
+              },
+            ],
+          },
+          {
+            path: "receipts",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/receipts`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <ReceiptsManagement />,
+              },
+              {
+                path: "create",
+                element: <ReceiptsCreate />,
+              },
+              {
+                path: "edit/:id",
+                element: <ReceiptsEdit />,
+              },
+              {
+                path: "detail/:id",
+                element: <ReceiptsDetails />,
+              },
+            ],
+          },
+          {
+            path: "tuition-manage",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/tuition-manage`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <TuitionList />,
+              }
+            ],
+          },
+          {
+            path: "tuitions",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/tuitions`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <TuitionDetails />,
+              },
+              {
+                path: "payment",
+                element: <Payment />,
+              },
+            ],
+          },
+          {
+            path: "historyFees",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/historyFees`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <HistoryFee />,
+              }
+            ],
+          },
+          {
+            path: "balances",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/balances`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <BalancesDetails />,
+              }
+            ],
+          },
+          {
+            path: "documents",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/documents`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <DocumentList />,
+              },
+              {
+                path: "create",
+                element: <DocumentCreate />,
+              },
+              {
+                path: "edit/:id",
+                element: <DocumentEdit />,
+              },
+            ],
+          },
+          {
+            path: "manage-services",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/manage-services`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <ServicesReport />,
+              }
+            ],
+          },
+          {
             path: "attendances",
             element: (
               <PrivateRoute
@@ -721,6 +911,21 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <Menu />,
+              },
+            ],
+          },
+          {
+            path: "guardians",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/guardians`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <GuardianManagement />,
               },
             ],
           },

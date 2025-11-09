@@ -13,6 +13,7 @@ const hardcodedActions = [
     { label: 'Đồng bộ dữ liệu', value: 'sync_data' },
     { label: 'Khóa', value: 'lock' },
     { label: 'Mở khóa', value: 'un_lock' },
+    { label: 'Xác nhận', value: 'confirm' },
 ];
 
 const ageOptions = [
@@ -92,6 +93,25 @@ const GOOD_FEEDBACK_TEMPLATE: Partial<IFeedbackBasePayload> = {
     reminders: [],
 };
 
+const BANK_OPTIONS = [
+    { label: "Ngân hàng TMCP Ngoại thương Việt Nam (Vietcombank)", value: "Vietcombank" },
+    { label: "Ngân hàng TMCP Kỹ thương Việt Nam (Techcombank)", value: "Techcombank" },
+    { label: "Ngân hàng TMCP Đầu tư và Phát triển Việt Nam (BIDV)", value: "BIDV" },
+    { label: "Ngân hàng TMCP Công thương Việt Nam (VietinBank)", value: "VietinBank" },
+    { label: "Ngân hàng TMCP Quân đội (MB Bank)", value: "MB Bank" },
+    { label: "Ngân hàng TMCP Á Châu (ACB)", value: "ACB" },
+    { label: "Ngân hàng TMCP Sài Gòn Thương Tín (Sacombank)", value: "Sacombank" },
+    { label: "Ngân hàng TMCP Tiên Phong (TPBank)", value: "TPBank" },
+    { label: "Ngân hàng TMCP Việt Nam Thịnh Vượng (VPBank)", value: "VPBank" },
+    { label: "Ngân hàng TMCP Phát triển Nhà TP.HCM (HDBank)", value: "HDBank" },
+    { label: "Ngân hàng TMCP Đông Nam Á (SeABank)", value: "SeABank" },
+    { label: "Ngân hàng TMCP Xuất nhập khẩu Việt Nam (Eximbank)", value: "Eximbank" },
+    { label: "Ngân hàng TMCP Sài Gòn - Hà Nội (SHB)", value: "SHB" },
+    { label: "Ngân hàng TMCP Phương Đông (OCB)", value: "OCB" },
+    { label: "Ngân hàng TMCP Quốc tế Việt Nam (VIB)", value: "VIB" },
+    { label: "Ngân hàng TMCP Đông Á (DongA Bank)", value: "DongA Bank" },
+];
+
 
 
 // export { hardcodedActions, ageOptions, categoryOptions };
@@ -110,4 +130,5 @@ export {
     BEHAVIOR_OPTIONS,
     SLEEP_DURATION_OPTIONS,
     GOOD_FEEDBACK_TEMPLATE,
+    BANK_OPTIONS
 };
