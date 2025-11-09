@@ -15,8 +15,6 @@ import {
   CloseCircleOutlined,
   UserOutlined,
   TeamOutlined,
-  CheckCircleOutlined,
-  StopOutlined,
   ContainerOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";

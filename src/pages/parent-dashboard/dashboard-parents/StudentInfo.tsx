@@ -23,7 +23,6 @@ import {
   FlagOutlined,
   SmileOutlined,
   MailOutlined,
-  LoadingOutlined,
   SyncOutlined,
   IdcardOutlined,
   TeamOutlined,
