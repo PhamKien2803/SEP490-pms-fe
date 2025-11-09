@@ -22,9 +22,11 @@ import { usePageTitle } from "../../hooks/usePageTitle";
 import { constants } from "../../constants";
 import RevenueDetailsModal from "../../modal/revenues-details/RevenueDetailsModal";
 import DeleteModal from "../../modal/delete-modal/DeleteModal";
+import { usePagePermission } from "../../hooks/usePagePermission";
 
 const RevenueList: React.FC = () => {
     usePageTitle("Quản lý khoản thu - Cá Heo Xanh");
+    const { canCreate, canUpdate, canDelete } = usePagePermission();
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [deletingLoading, setDeletingLoading] = useState(false);
@@ -137,19 +139,22 @@ const RevenueList: React.FC = () => {
                             setShowModal(true);
                         }}
                     />
-                    <Button
-                        icon={<EditOutlined />}
-                        onClick={() => navigate(`${constants.APP_PREFIX}/revenues/edit/${record._id}`)}
-                    />
-                    <Button
-                        icon={<DeleteOutlined />}
-                        danger
-                        onClick={() => {
-                            setDeletingId(record._id);
-                            setShowDeleteModal(true);
-                        }}
-                    />
-
+                    {canUpdate && (
+                        <Button
+                            icon={<EditOutlined />}
+                            onClick={() => navigate(`${constants.APP_PREFIX}/revenues/edit/${record._id}`)}
+                        />
+                    )}
+                    {canDelete && (
+                        <Button
+                            icon={<DeleteOutlined />}
+                            danger
+                            onClick={() => {
+                                setDeletingId(record._id);
+                                setShowDeleteModal(true);
+                            }}
+                        />
+                    )}
                 </Space>
             ),
         },
@@ -165,13 +170,15 @@ const RevenueList: React.FC = () => {
                 }}
             >
                 <h2>Quản lý khoản thu</h2>
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => navigate(`${constants.APP_PREFIX}/revenues/create`)}
-                >
-                    Tạo khoản thu
-                </Button>
+                {canCreate && (
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={() => navigate(`${constants.APP_PREFIX}/revenues/create`)}
+                    >
+                        Tạo khoản thu
+                    </Button>
+                )}
             </Space>
             <Tooltip title="Làm mới danh sách">
                 <Button icon={<ReloadOutlined />}
