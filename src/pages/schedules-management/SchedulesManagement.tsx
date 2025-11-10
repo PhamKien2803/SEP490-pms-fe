@@ -425,8 +425,6 @@ function SchedulesManagement() {
             month: selectedMonth.toString(),
             scheduleDays: scheduleData
         };
-        console.log(payload);
-
 
         setIsSaving(true);
         try {
@@ -646,7 +644,7 @@ function SchedulesManagement() {
                                                     onClick={() => {
                                                         setOriginalScheduleData(JSON.parse(JSON.stringify(scheduleData)));
                                                         setEditMode(true);
-                                                        setHasEditedAfterPreview(true); // ✅ Bấm chỉnh sửa
+                                                        setHasEditedAfterPreview(true);
                                                         setHasUnsavedChanges(false);
                                                     }}
                                                     type="primary"

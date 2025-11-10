@@ -23,6 +23,7 @@ import { TuitionDetailItem } from "../../../types/tuition";
 import { tuitionApis } from "../../../services/apiServices";
 import { constants } from "../../../constants";
 import { usePagePermission } from "../../../hooks/usePagePermission";
+import { usePageTitle } from "../../../hooks/usePageTitle";
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -46,6 +47,7 @@ const getStateTag = (state: string) => {
 const { Title, Text } = Typography;
 
 function TuitionDetails() {
+    usePageTitle("Chi tiết học phí - Cá Heo Xanh");
     const navigate = useNavigate();
     const currentUser = useCurrentUser();
     const parentId = currentUser?.parent;
@@ -141,6 +143,7 @@ function TuitionDetails() {
 
                     <Button
                         type="primary"
+                        style={{backgroundColor: "#08979c"}}
                         size="large"
                         block
                         loading={confirmLoading}

@@ -12,22 +12,25 @@ import {
   Select,
   DatePicker,
   Tag,
+  Form,
+  Avatar,
 } from "antd";
 import {
-  CalendarOutlined,
   UserOutlined,
   ClockCircleOutlined,
   CheckCircleOutlined,
-  AlertOutlined,
-  HomeOutlined,
   TeamOutlined,
   ScheduleOutlined,
+  FilterOutlined,
+  StopOutlined,
+  CommentOutlined,
 } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
 import { useCurrentUser } from "../../../hooks/useCurrentUser";
 import { parentDashboardApis } from "../../../services/apiServices";
 import { Student } from "../../../types/parent";
 import { CheckInResponse, CheckInParams } from "../../../types/parent";
+import { usePageTitle } from "../../../hooks/usePageTitle";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -40,29 +43,20 @@ const StatusTag: React.FC<{ status: string }> = ({ status }) => {
   let text = status;
 
   switch (status.toLowerCase()) {
-    case "Có mặt":
+    case "có mặt":
       color = "success";
       icon = <CheckCircleOutlined />;
       text = "Có Mặt";
       break;
-    case "Vắng mặt có phép":
-      color = "warning";
-      icon = <AlertOutlined />;
-      text = "Vắng (Có phép)";
-      break;
-    case "vắng không phép":
-      color = "Vắng mặt không phép";
-      icon = <AlertOutlined />;
-      text = "Vắng (Không phép)";
-      break;
-    case "Đi muộn":
-      color = "processing";
-      icon = <ClockCircleOutlined />;
-      text = "Đi muộn";
+    case "vắng mặt":
+      color = "error";
+      icon = <StopOutlined />;
+      text = "Vắng Mặt";
       break;
     default:
       color = "default";
       icon = <ClockCircleOutlined />;
+      text = "Chưa điểm danh";
       break;
   }
 
@@ -70,14 +64,31 @@ const StatusTag: React.FC<{ status: string }> = ({ status }) => {
     <Tag
       icon={icon}
       color={color}
-      style={{ fontSize: "1em", padding: "4px 8px" }}
+      style={{
+        fontSize: "1.1em",
+        padding: "5px 10px",
+        borderRadius: "12px",
+        fontWeight: "bold",
+      }}
     >
       {text}
     </Tag>
   );
 };
 
+const getStatusBorderColor = (status: string): string => {
+  switch (status.toLowerCase()) {
+    case "có mặt":
+      return "#52c41a";
+    case "vắng mặt":
+      return "#f5222d";
+    default:
+      return "#bfbfbf";
+  }
+};
+
 const CheckIn: React.FC = () => {
+  usePageTitle("Điểm danh hàng ngày - Cá Heo Xanh");
   const user = useCurrentUser();
   const [listChild, setListChild] = useState<Student[]>([]);
   const [selectedStudentId, setSelectedStudentId] = useState<
@@ -181,8 +192,8 @@ const CheckIn: React.FC = () => {
       <Title
         level={2}
         style={{
-          color: "#1890ff",
-          borderBottom: "2px solid #1890ff",
+          color: "#08979c",
+          borderBottom: "2px solid #08979c",
           paddingBottom: 8,
         }}
       >
@@ -192,54 +203,69 @@ const CheckIn: React.FC = () => {
       <Divider style={{ margin: "16px 0" }} />
 
       <Card
-        bordered={false}
+        bordered
+        title={
+          <Text strong>
+            <FilterOutlined style={{ marginRight: 8 }} />
+            Lọc Thông Tin
+          </Text>
+        }
         style={{
           marginBottom: 24,
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-          backgroundColor: "#F0F8FF",
         }}
       >
-        <Row gutter={24} align="middle">
-          <Col span={12}>
-            <Text
-              strong
-              style={{ display: "block", marginBottom: 4, color: "#1890ff" }}
-            >
-              <UserOutlined style={{ marginRight: 4 }} /> Chọn con:
-            </Text>
-            <Select
-              value={selectedStudentId}
-              style={{ width: "100%" }}
-              onChange={(value) => setSelectedStudentId(value)}
-              placeholder="Chọn con của bạn"
-              size="large"
-            >
-              {listChild.map((student) => (
-                <Option key={student._id} value={student._id}>
-                  {student?.fullName} ({student?.studentCode})
-                </Option>
-              ))}
-            </Select>
-          </Col>
-          <Col span={12}>
-            <Text
-              strong
-              style={{ display: "block", marginBottom: 4, color: "#1890ff" }}
-            >
-              <ClockCircleOutlined style={{ marginRight: 4 }} /> Chọn ngày:
-            </Text>
-            <DatePicker
-              value={selectedDate}
-              onChange={(date) => {
-                if (date) setSelectedDate(date);
-              }}
-              disabledDate={disabledDate}
-              format="DD/MM/YYYY"
-              style={{ width: "100%" }}
-              size="large"
-            />
-          </Col>
-        </Row>
+        <Form layout="vertical">
+          <Row gutter={[24, 0]}>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label={
+                  <Text strong>
+                    <UserOutlined style={{ marginRight: 4 }} />
+                    Chọn con
+                  </Text>
+                }
+              >
+                <Select
+                  value={selectedStudentId}
+                  style={{ width: "100%" }}
+                  onChange={(value) => setSelectedStudentId(value)}
+                  placeholder="Chọn con của bạn"
+                  size="large"
+                  loading={isLoading && listChild.length === 0}
+                >
+                  {listChild.map((student) => (
+                    <Option key={student._id} value={student._id}>
+                      {student?.fullName} ({student?.studentCode})
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label={
+                  <Text strong>
+                    <ClockCircleOutlined style={{ marginRight: 4 }} />
+                    Chọn ngày
+                  </Text>
+                }
+              >
+                <DatePicker
+                  value={selectedDate}
+                  onChange={(date) => {
+                    if (date) setSelectedDate(date);
+                  }}
+                  disabledDate={disabledDate}
+                  format="DD/MM/YYYY"
+                  style={{ width: "100%" }}
+                  size="large"
+                  allowClear={false}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+        </Form>
       </Card>
 
       <Spin spinning={isLoading}>
@@ -274,139 +300,109 @@ const CheckIn: React.FC = () => {
         )}
 
         {checkIn && (
-          <>
-            <Card
-              title={
-                <Title level={4} style={{ margin: 0 }}>
-                  <CheckCircleOutlined /> Tóm Tắt Điểm Danh
-                </Title>
-              }
-              bordered={false}
-              style={{
-                marginBottom: 24,
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-              }}
-            >
-              <Descriptions
-                column={{ xs: 1, sm: 2, md: 3 }}
-                bordered
-                size="middle"
+          <Row gutter={[24, 24]}>
+            <Col xs={24} md={10} lg={8}>
+              <Card
+                title={
+                  <Text strong style={{ fontSize: "1.1rem" }}>
+                    <CheckCircleOutlined style={{ marginRight: 8 }} />
+                    Thông Tin Điểm Danh
+                  </Text>
+                }
+                bordered={false}
+                style={{
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+                  borderTop: `5px solid ${getStatusBorderColor(
+                    checkIn.student.status
+                  )}`,
+                }}
               >
-                <Descriptions.Item
-                  label={
-                    <Text strong>
-                      <UserOutlined /> Học sinh
-                    </Text>
-                  }
-                >
-                  <Text>
-                    {checkIn.student.student.fullName} (
-                    {checkIn.student.student.studentCode})
-                  </Text>
-                </Descriptions.Item>
-                <Descriptions.Item
-                  label={
-                    <Text strong>
-                      <TeamOutlined /> Lớp học
-                    </Text>
-                  }
-                >
-                  <Text>
-                    {checkIn.class.className} ({checkIn.class.classCode})
-                  </Text>
-                </Descriptions.Item>
-                <Descriptions.Item
-                  label={
-                    <Text strong>
-                      <CalendarOutlined /> Ngày
-                    </Text>
-                  }
-                >
-                  <Text>{dayjs(checkIn.date).format("DD/MM/YYYY")}</Text>
-                </Descriptions.Item>
-
-                <Descriptions.Item
-                  label={
-                    <Text strong>
-                      <CheckCircleOutlined /> Tình trạng
-                    </Text>
-                  }
-                  span={1.5}
-                >
-                  <StatusTag
-                    status={checkIn.student.status || "Chưa điểm danh"}
-                  />
-                </Descriptions.Item>
-              </Descriptions>
-            </Card>
-
-            <Row gutter={24}>
-              <Col span={12}>
-                <Card
-                  title={
-                    <Title level={4} style={{ margin: 0 }}>
-                      <TeamOutlined /> Thông tin giáo viên
-                    </Title>
-                  }
-                  bordered={false}
-                  style={{
-                    marginBottom: 24,
-                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.09)",
-                  }}
-                >
-                  <Descriptions
-                    column={1}
-                    size="small"
-                    layout="vertical"
-                    colon={false}
+                <Descriptions column={1} size="middle" layout="vertical">
+                  <Descriptions.Item
+                    label={<Text strong>Học sinh</Text>}
+                    style={{ paddingBottom: 16 }}
                   >
-                    <Descriptions.Item label={<Text strong>Tên</Text>}>
-                      <Text>{checkIn.teacher.fullName}</Text>
-                    </Descriptions.Item>
-                    <Descriptions.Item label={<Text strong>Điện thoại</Text>}>
-                      <Text>
-                        {checkIn.teacher.phoneNumber || "Không cung cấp."}
-                      </Text>
-                    </Descriptions.Item>
-                  </Descriptions>
-                </Card>
-              </Col>
-              <Col span={12}>
-                <Card
-                  title={
-                    <Title level={4} style={{ margin: 0 }}>
-                      <HomeOutlined /> Nhận xét chung của giáo viên
-                    </Title>
-                  }
-                  bordered={false}
-                  style={{
-                    marginBottom: 24,
-                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.09)",
-                  }}
-                >
-                  <Text italic>
-                    {checkIn.generalNote ||
-                      "Không có ghi chú chung cho ngày học này."}
+                    <Text strong style={{ fontSize: "1.1em", color: "#1890ff" }}>
+                      {checkIn.student.student.fullName} (
+                      {checkIn.student.student.studentCode})
+                    </Text>
+                  </Descriptions.Item>
+
+                  <Descriptions.Item
+                    label={<Text strong>Lớp học</Text>}
+                    style={{ paddingBottom: 16 }}
+                  >
+                    <Text>
+                      {checkIn.class.className} ({checkIn.class.classCode})
+                    </Text>
+                  </Descriptions.Item>
+
+                  <Descriptions.Item
+                    label={<Text strong>Trạng thái ngày học</Text>}
+                  >
+                    <StatusTag
+                      status={checkIn.student.status || "Chưa điểm danh"}
+                    />
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card>
+            </Col>
+
+            <Col xs={24} md={14} lg={16}>
+              <Card
+                title={
+                  <Text strong style={{ fontSize: "1.1rem" }}>
+                    <TeamOutlined style={{ marginRight: 8 }} />
+                    Chi Tiết từ Giáo Viên
                   </Text>
-                </Card>
-              </Col>
-            </Row>
+                }
+                bordered={false}
+                style={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)" }}
+              >
+                <Descriptions column={1} layout="vertical" size="middle">
+                  <Descriptions.Item
+                    label={<Text strong>Giáo viên phụ trách</Text>}
+                  >
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <Avatar
+                        icon={<UserOutlined />}
+                        style={{ marginRight: 12, backgroundColor: "#08979c" }}
+                      />
+                      <div>
+                        <Text strong style={{ display: "block" }}>
+                          {checkIn.teacher.fullName}
+                        </Text>
+                        <Text type="secondary">
+                          {checkIn.teacher.phoneNumber || "Không có SĐT"}
+                        </Text>
+                      </div>
+                    </div>
+                  </Descriptions.Item>
 
-            <Divider orientation="left" style={{ margin: "24px 0" }}>
-              <Title level={3} style={{ margin: 0 }}>
-                <CalendarOutlined /> Chi Tiết Học Kỳ
-              </Title>
-            </Divider>
+                  <Descriptions.Item
+                    label={
+                      <Text strong>
+                        <CommentOutlined style={{ marginRight: 4 }} />
+                        Nhận xét chung của giáo viên
+                      </Text>
+                    }
+                  >
+                    {checkIn.generalNote ? (
+                      <Text italic style={{ fontSize: "1em" }}>
+                        "{checkIn.generalNote}"
+                      </Text>
+                    ) : (
+                      <Text italic type="secondary">
+                        Không có ghi chú chung cho ngày học này.
+                      </Text>
+                    )}
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card>
+            </Col>
 
-            <Descriptions column={2} bordered size="middle">
-              <Descriptions.Item label={<Text strong>Năm học</Text>}>
-                <Text>{checkIn.schoolYear.schoolYear}</Text>
-              </Descriptions.Item>
-              <Descriptions.Item label={<Text strong>Mã năm học</Text>}>
-                <Text>{checkIn.schoolYear.schoolyearCode}</Text>
-              </Descriptions.Item>
-            </Descriptions>
-          </>
+            {/* Xóa phần thông tin học kỳ */}
+          </Row>
         )}
       </Spin>
     </div>

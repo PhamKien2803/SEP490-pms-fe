@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
 import {
   Card,
   Spin,
@@ -7,13 +13,13 @@ import {
   Typography,
   Divider,
   Empty,
-  Select,
   Tag,
   Alert,
   Tabs,
+  Collapse,
+  Space,
 } from "antd";
 import {
-  UserOutlined,
   CalendarOutlined,
   ClockCircleOutlined,
   HomeOutlined,
@@ -22,6 +28,9 @@ import {
   ScheduleOutlined,
   BulbOutlined,
   TagOutlined,
+  CoffeeOutlined,
+  SunOutlined,
+  ReadOutlined,
 } from "@ant-design/icons";
 
 import { useCurrentUser } from "../../../hooks/useCurrentUser";
@@ -34,88 +43,102 @@ import {
 } from "../../../types/parent";
 import { SchoolYearListItem } from "../../../types/schoolYear";
 import { toast } from "react-toastify";
+import ScheduleFilters from "../../../components/schedule-filter/ScheduleFilters";
+import { Student, ClassDetailResponse } from "../../../types/schedule-parent";
+import { formatMinutesToTime, groupDaysIntoWeeks } from "../../../utils/format";
 
 const { Title, Text } = Typography;
-const { Option } = Select;
 const { TabPane } = Tabs;
+const { Panel } = Collapse;
 
-interface Student {
-  _id: string;
-  fullName: string;
-  studentCode?: string;
-  gender?: string;
-}
-interface SchoolYear {
-  _id: string;
-  schoolYear: string;
-}
-interface ClassInfo {
-  _id: string;
-  classCode: string;
-  className: string;
-  room?: { roomName: string };
-  students?: Student[];
-  teachers?: any[];
-  schoolYear?: SchoolYear;
-  age?: string | number;
-  active?: boolean;
-}
-interface ClassDetailResponse {
-  class: ClassInfo | null;
-}
-
-const FAKE_MONTHS = Array.from({ length: 12 }, (_, i) => ({
+const monthOptions = Array.from({ length: 12 }, (_, i) => ({
   value: (i + 1).toString().padStart(2, "0"),
   label: `Tháng ${i + 1}`,
 }));
 
-const groupDaysIntoWeeks = (
-  days: ScheduleDay[]
-): { label: string; key: string; days: ScheduleDay[] }[] => {
-  if (days.length === 0) return [];
+const getActivityUiProps = (
+  type: string | undefined
+): { color: string; tag: string; icon: React.ReactElement } => {
+  const activityType = type || "Bình thường";
+  switch (activityType.toLowerCase()) {
+    case "cố định":
+      return {
+        color: "#faad14",
+        tag: "Cố định",
+        icon: <ScheduleOutlined />,
+      };
+    case "sự kiện":
+      return {
+        color: "#13c2c2",
+        tag: "Sự kiện",
+        icon: <BulbOutlined />,
+      };
+    case "bình thường":
+    default:
+      return {
+        color: "#40a9ff",
+        tag: "Bình thường",
+        icon: <FileTextOutlined />,
+      };
+  }
+};
 
-  const sortedDays = [...days].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
-  const weeks: { [key: string]: ScheduleDay[] } = {};
-
-  sortedDays.forEach((day) => {
-    const date = new Date(day.date);
-    const dayOfWeek = date.getDay();
-    const diff = date.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-
-    const monday = new Date(date);
-    monday.setDate(diff);
-
-    const weekKey = monday.toISOString().split("T")[0];
-
-    if (!weeks[weekKey]) {
-      weeks[weekKey] = [];
-    }
-    weeks[weekKey].push(day);
+const DraggableRow: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const dragStateRef = useRef({
+    isDragging: false,
+    startX: 0,
+    scrollLeftStart: 0,
   });
 
-  return Object.keys(weeks).map((key, index) => {
-    const startDate = new Date(key);
-    const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 6);
-
-    const label = `Tuần ${index + 1}: ${startDate.toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-    })} - ${endDate.toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-    })}`;
-
-    return {
-      label: label,
-      key: key,
-      days: weeks[key].sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-      ),
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const container = scrollRef.current;
+    if (!container) return;
+    e.preventDefault();
+    dragStateRef.current = {
+      isDragging: true,
+      startX: e.clientX,
+      scrollLeftStart: container.scrollLeft,
     };
-  });
+    container.style.cursor = "grabbing";
+    container.style.userSelect = "none";
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!dragStateRef.current.isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.clientX;
+    const walk = x - dragStateRef.current.startX;
+    scrollRef.current.scrollLeft = dragStateRef.current.scrollLeftStart - walk;
+  }, []);
+
+  const stopDragging = useCallback(() => {
+    const container = scrollRef.current;
+    if (container) {
+      container.style.cursor = "grab";
+      container.style.userSelect = "auto";
+    }
+    dragStateRef.current.isDragging = false;
+  }, []);
+
+  return (
+    <div
+      ref={scrollRef}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={stopDragging}
+      onMouseLeave={stopDragging}
+      style={{
+        overflowX: "auto",
+        padding: "10px 0",
+        cursor: "grab",
+      }}
+    >
+      {children}
+    </div>
+  );
 };
 
 const Schedule: React.FC = () => {
@@ -130,7 +153,7 @@ const Schedule: React.FC = () => {
   >(undefined);
   const currentMonthIndex = new Date().getMonth();
   const [selectedMonth, setSelectedMonth] = useState<string>(
-    FAKE_MONTHS[currentMonthIndex].value
+    monthOptions[currentMonthIndex].value
   );
 
   const [classDetail, setClassDetail] = useState<ClassDetailResponse | null>(
@@ -275,7 +298,7 @@ const Schedule: React.FC = () => {
   const currentSchedule = scheduleList.length > 0 ? scheduleList[0] : null;
 
   const selectedStudent = listChild.find((s) => s._id === selectedStudentId);
-  const selectedMonthName = FAKE_MONTHS.find(
+  const selectedMonthName = monthOptions.find(
     (m) => m.value === selectedMonth
   )?.label;
 
@@ -284,179 +307,251 @@ const Schedule: React.FC = () => {
     return groupDaysIntoWeeks(currentSchedule.scheduleDays);
   }, [currentSchedule]);
 
-  const formatMinutesToTime = (minutes: number) => {
-    if (isNaN(minutes) || minutes === null) return "N/A";
-    const hours = Math.floor(minutes / 60)
-      .toString()
-      .padStart(2, "0");
-    const mins = (minutes % 60).toString().padStart(2, "0");
-    return `${hours}:${mins}`;
-  };
-
-  const renderActivityBlock = (activity: ScheduleActivity, index: number) => {
-    const timeDisplay =
-      activity.startTime && activity.endTime
-        ? `${formatMinutesToTime(activity.startTime)} - ${formatMinutesToTime(
+  const renderActivityBlock = useCallback(
+    (activity: ScheduleActivity, index: number) => {
+      const timeDisplay =
+        activity.startTime && activity.endTime
+          ? `${formatMinutesToTime(activity.startTime)} - ${formatMinutesToTime(
             activity.endTime
           )}`
-        : "N/A";
+          : "N/A";
 
-    console.log("activity", activity);
-    const type = activity?.type || "";
-    console.log("activity", activity);
-    return (
-      <div
-        key={activity._id || index}
-        style={{
-          padding: "10px 12px",
-          marginBottom: 10,
-          borderLeft: `5px solid geekblue`,
-          backgroundColor: "#ffffff",
-          borderRadius: 6,
-          boxShadow: "0 2px 5px rgba(0,0,0,0.08)",
-        }}
-      >
-        <Text
-          strong
+      const uiProps = getActivityUiProps(activity.type);
+
+      return (
+        <div
+          key={activity._id || index}
           style={{
-            color: "#096dd9",
-            display: "block",
-            fontSize: 14,
-            marginBottom: 4,
+            padding: "10px 12px",
+            marginBottom: 10,
+            borderLeft: `5px solid ${uiProps.color}`,
+            backgroundColor: "#ffffff",
+            borderRadius: 6,
+            boxShadow: "0 2px 5px rgba(0,0,0,0.08)",
           }}
         >
-          <ClockCircleOutlined style={{ marginRight: 5 }} /> {timeDisplay}
-        </Text>
-        <Text
-          style={{
-            display: "block",
-            marginBottom: 8,
-            fontWeight: 600,
-            fontSize: 14,
-            color: "#333",
-          }}
-        >
-          <BulbOutlined style={{ marginRight: 5, color: "#faad14" }} />
-          {activity?.activityName || "Hoạt động chung"}
-        </Text>
+          <Text
+            style={{
+              display: "block",
+              marginBottom: 4,
+              fontWeight: 600,
+              fontSize: 14,
+              color: "#333",
+            }}
+          >
+            <span style={{ marginRight: 5, color: uiProps.color }}>
+              {uiProps.icon}
+            </span>
+            {activity?.activityName || "Trống"}
+          </Text>
 
-        <Row gutter={8}>
-          {!!type && (
-            <Col>
-              <Tag color="default" style={{ color: "#8c8c8c" }}>
-                {type}
-              </Tag>
-            </Col>
-          )}
-        </Row>
-      </div>
-    );
-  };
+          <Text
+            strong
+            style={{
+              color: uiProps.color,
+              display: "block",
+              fontSize: 13,
+              marginBottom: 8,
+            }}
+          >
+            <ClockCircleOutlined style={{ marginRight: 5 }} /> {timeDisplay}
+          </Text>
 
-  const renderDayCard = (day: ScheduleDay) => {
-    const dateDisplay = new Date(day.date).toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-    });
-
-    const isWeekend =
-      day.dayName.includes("Chủ Nhật") || day.dayName.includes("Thứ Bảy");
-    const dayColor = day.isHoliday
-      ? "#cf1322"
-      : isWeekend
-      ? "#fa8c16"
-      : "#08979c";
-    const headerBgColor = day.isHoliday
-      ? "#fff1f0"
-      : isWeekend
-      ? "#fff7e6"
-      : "#e6fffa";
-
-    const title = (
-      <Text strong style={{ color: dayColor, fontSize: 16 }}>
-        {day.dayName}, {dateDisplay}
-      </Text>
-    );
-
-    return (
-      <Col
-        style={{
-          minWidth: 280,
-          flexGrow: 1,
-          paddingBottom: 20,
-        }}
-        key={day._id}
-      >
-        <Card
-          title={title}
-          size="small"
-          style={{
-            height: "100%",
-            borderTop: `5px solid ${dayColor}`,
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-          }}
-          headStyle={{
-            padding: "12px 16px",
-            backgroundColor: headerBgColor,
-            borderBottom: `1px solid ${dayColor}50`,
-          }}
-          bodyStyle={{ padding: "12px 12px" }}
-        >
-          {day.isHoliday ? (
-            <div style={{ textAlign: "center", padding: "30px 0" }}>
-              <RestOutlined
-                style={{ color: "#cf1322", fontSize: 32, marginBottom: 15 }}
-              />
-              <Title level={5} type="danger" style={{ margin: 0 }}>
-                NGHỈ HỌC TRONG NGÀY
-              </Title>
-              {day.notes && (
-                <Text
-                  type="secondary"
-                  style={{ display: "block", marginTop: 8 }}
-                >
-                  {day.notes}
-                </Text>
-              )}
-            </div>
-          ) : day.activities.length > 0 ? (
-            day.activities
-              .sort((a, b) => (a.startTime || 0) - (b.startTime || 0))
-              .map(renderActivityBlock)
-          ) : (
-            <div
+          {activity?.tittle && (
+            <Text
+              strong
               style={{
-                textAlign: "center",
-                padding: "30px 0",
-                backgroundColor: "#f5f5f5",
-                borderRadius: 4,
+                display: "block",
+                paddingTop: 8,
+                marginTop: 8,
+                fontSize: 14,
+                color: "#434343",
+                borderTop: "1px dashed #d9d9d9",
               }}
             >
-              <TagOutlined
-                style={{ color: "#bfbfbf", fontSize: 20, marginBottom: 10 }}
-              />
-              <Text italic type="secondary" style={{ display: "block" }}>
-                Không có hoạt động chính thức.
-              </Text>
-            </div>
+              <ReadOutlined style={{ marginRight: 8, color: uiProps.color }} />
+              {activity.tittle}
+            </Text>
           )}
-          {day.notes && !day.isHoliday && (
-            <Alert
-              message={
-                <Text strong style={{ color: "#08979c" }}>
-                  <FileTextOutlined style={{ marginRight: 5 }} /> Ghi chú
+
+          <Row gutter={8} style={{ marginTop: 10 }}>
+            {!!activity.type && (
+              <Col>
+                <Tag color={uiProps.color}>{uiProps.tag}</Tag>
+              </Col>
+            )}
+          </Row>
+        </div>
+      );
+    },
+    []
+  );
+
+  const renderDayColumn = useCallback(
+    (day: ScheduleDay) => {
+      const dateDisplay = new Date(day.date).toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+      });
+
+      const isWeekend =
+        day.dayName.includes("Chủ Nhật") || day.dayName.includes("Thứ Bảy");
+      const dayColor = day.isHoliday
+        ? "#cf1322"
+        : isWeekend
+          ? "#fa8c16"
+          : "#08979c";
+      const headerBgColor = day.isHoliday
+        ? "#fff1f0"
+        : isWeekend
+          ? "#fff7e6"
+          : "#e6fffa";
+
+      const title = (
+        <Text strong style={{ color: dayColor, fontSize: 16 }}>
+          {day.dayName}, {dateDisplay}
+        </Text>
+      );
+
+      const morningActivities = day.activities
+        .filter((act) => (act.startTime || 0) < 720)
+        .sort((a, b) => (a.startTime || 0) - (b.startTime || 0));
+
+      const afternoonActivities = day.activities
+        .filter((act) => (act.startTime || 0) >= 720)
+        .sort((a, b) => (a.startTime || 0) - (b.startTime || 0));
+
+      return (
+        <Col
+          style={{
+            minWidth: 300,
+            flexGrow: 1,
+            paddingBottom: 20,
+          }}
+          key={day._id}
+        >
+          <Card
+            title={title}
+            size="small"
+            style={{
+              height: "100%",
+              borderTop: `5px solid ${dayColor}`,
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+              backgroundColor: "#f9f9f9",
+            }}
+            headStyle={{
+              padding: "12px 16px",
+              backgroundColor: headerBgColor,
+              borderBottom: `1px solid ${dayColor}50`,
+            }}
+            bodyStyle={{ padding: "12px" }}
+          >
+            {day.isHoliday ? (
+              <div style={{ textAlign: "center", padding: "30px 0" }}>
+                <RestOutlined
+                  style={{ color: "#cf1322", fontSize: 32, marginBottom: 15 }}
+                />
+                <Title level={5} type="danger" style={{ margin: 0 }}>
+                  NGHỈ HỌC TRONG NGÀY
+                </Title>
+                {day.notes && (
+                  <Text
+                    type="secondary"
+                    style={{ display: "block", marginTop: 8 }}
+                  >
+                    {day.notes}
+                  </Text>
+                )}
+              </div>
+            ) : day.activities.length > 0 ? (
+              <Collapse
+                defaultActiveKey={["morning", "afternoon"]}
+                bordered={false}
+                style={{ backgroundColor: "transparent" }}
+              >
+                <Panel
+                  header={
+                    <Text strong style={{ fontSize: 15, color: "#0050b3" }}>
+                      <CoffeeOutlined style={{ marginRight: 8 }} />
+                      Buổi Sáng ({morningActivities.length})
+                    </Text>
+                  }
+                  key="morning"
+                  style={{
+                    backgroundColor: "#f0f5ff",
+                    borderRadius: 4,
+                    marginBottom: 12,
+                    border: "1px solid #d6e4ff",
+                  }}
+                >
+                  {morningActivities.length > 0 ? (
+                    morningActivities.map(renderActivityBlock)
+                  ) : (
+                    <Text italic type="secondary">
+                      Không có hoạt động buổi sáng.
+                    </Text>
+                  )}
+                </Panel>
+
+                <Panel
+                  header={
+                    <Text strong style={{ fontSize: 15, color: "#d46b08" }}>
+                      <SunOutlined style={{ marginRight: 8 }} />
+                      Buổi Chiều ({afternoonActivities.length})
+                    </Text>
+                  }
+                  key="afternoon"
+                  style={{
+                    backgroundColor: "#fff7e6",
+                    borderRadius: 4,
+                    border: "1px solid #ffe7ba",
+                  }}
+                >
+                  {afternoonActivities.length > 0 ? (
+                    afternoonActivities.map(renderActivityBlock)
+                  ) : (
+                    <Text italic type="secondary">
+                      Không có hoạt động buổi chiều.
+                    </Text>
+                  )}
+                </Panel>
+              </Collapse>
+            ) : (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "30px 0",
+                  backgroundColor: "#f5f5f5",
+                  borderRadius: 4,
+                }}
+              >
+                <TagOutlined
+                  style={{ color: "#bfbfbf", fontSize: 20, marginBottom: 10 }}
+                />
+                <Text italic type="secondary" style={{ display: "block" }}>
+                  Không có hoạt động chính thức.
                 </Text>
-              }
-              description={<Text type="secondary">{day.notes}</Text>}
-              type="info"
-              style={{ marginTop: 15, borderLeft: "4px solid #08979c" }}
-              showIcon={false}
-            />
-          )}
-        </Card>
-      </Col>
-    );
-  };
+              </div>
+            )}
+            {day.notes && !day.isHoliday && (
+              <Alert
+                message={
+                  <Text strong style={{ color: "#08979c" }}>
+                    <FileTextOutlined style={{ marginRight: 5 }} /> Ghi chú
+                  </Text>
+                }
+                description={<Text type="secondary">{day.notes}</Text>}
+                type="info"
+                style={{ marginTop: 15, borderLeft: "4px solid #08979c" }}
+                showIcon={false}
+              />
+            )}
+          </Card>
+        </Col>
+      );
+    },
+    [renderActivityBlock]
+  );
 
   if (listChild.length === 0 && !isInitialLoading) {
     return (
@@ -476,8 +571,8 @@ const Schedule: React.FC = () => {
       <Title
         level={2}
         style={{
-          color: "#1890ff",
-          borderBottom: "2px solid #1890ff",
+          color: "#08979c",
+          borderBottom: "2px solid #08979c",
           paddingBottom: 8,
           marginBottom: 16,
         }}
@@ -487,88 +582,21 @@ const Schedule: React.FC = () => {
       </Title>
       <Divider style={{ margin: "0 0 24px 0" }} />
 
-      <Card
-        bordered={true}
-        title={
-          <Text strong style={{ color: "#1890ff" }}>
-            <UserOutlined /> Lọc Thông Tin
-          </Text>
-        }
-        style={{
-          marginBottom: 24,
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-          backgroundColor: "#ffffff",
-        }}
-      >
-        <Row gutter={[24, 16]} align="middle">
-          <Col xs={24} md={8}>
-            <Text
-              strong
-              style={{ display: "block", marginBottom: 4, color: "#595959" }}
-            >
-              Chọn con:
-            </Text>
-            <Select
-              value={selectedStudentId}
-              style={{ width: "100%" }}
-              onChange={(value) => setSelectedStudentId(value)}
-              placeholder="Chọn con của bạn"
-              size="large"
-              disabled={isInitialLoading}
-            >
-              {listChild.map((student) => (
-                <Option key={student._id} value={student._id}>
-                  {student?.fullName}
-                </Option>
-              ))}
-            </Select>
-          </Col>
-          <Col xs={24} md={8}>
-            <Text
-              strong
-              style={{ display: "block", marginBottom: 4, color: "#595959" }}
-            >
-              Chọn năm học:
-            </Text>
-            <Select
-              value={selectedSchoolYear}
-              style={{ width: "100%" }}
-              onChange={(value) => setSelectedSchoolYear(value)}
-              placeholder="Chọn năm học"
-              size="large"
-              disabled={!selectedStudentId || isClassLoading}
-            >
-              {schoolYears.map((year) => (
-                <Option key={year._id} value={year.schoolYear}>
-                  {year.schoolYear}
-                </Option>
-              ))}
-            </Select>
-          </Col>
-          <Col xs={24} md={8}>
-            <Text
-              strong
-              style={{ display: "block", marginBottom: 4, color: "#595959" }}
-            >
-              Chọn tháng:
-            </Text>
-            <Select
-              value={selectedMonth}
-              style={{ width: "100%" }}
-              onChange={(value) => setSelectedMonth(value)}
-              placeholder="Chọn tháng"
-              size="large"
-              disabled={!classData || isScheduleLoading}
-            >
-              {FAKE_MONTHS.map((month) => (
-                <Option key={month.value} value={month.value}>
-                  {month.label}
-                </Option>
-              ))}
-            </Select>
-          </Col>
-        </Row>
-      </Card>
+      <ScheduleFilters
+        listChild={listChild}
+        selectedStudentId={selectedStudentId}
+        setSelectedStudentId={setSelectedStudentId}
+        schoolYears={schoolYears}
+        selectedSchoolYear={selectedSchoolYear}
+        setSelectedSchoolYear={setSelectedSchoolYear}
+        selectedMonth={selectedMonth}
+        setSelectedMonth={setSelectedMonth}
+        monthOptions={monthOptions}
+        isInitialLoading={isInitialLoading}
+        isClassLoading={isClassLoading}
+        isScheduleLoading={isScheduleLoading}
+        classData={classData}
+      />
 
       <Spin
         spinning={isClassLoading || isScheduleLoading}
@@ -580,13 +608,13 @@ const Schedule: React.FC = () => {
           <Alert
             message={
               <Text strong style={{ color: "#1890ff" }}>
-                <HomeOutlined style={{ marginRight: 5 }} /> Lớp Học:
+                <HomeOutlined style={{ marginRight: 5 }} /> Lớp Học:{" "}
                 {classData.className} ({classData.classCode})
               </Text>
             }
             description={`Thời khóa biểu của bé ${selectedStudent?.fullName} trong ${selectedMonthName} (${selectedSchoolYear}).`}
             type="success"
-            showIcon
+            // showIcon
             style={{
               marginBottom: 24,
               backgroundColor: "rgba(240, 248, 255, 1)",
@@ -614,7 +642,7 @@ const Schedule: React.FC = () => {
             <Empty
               description={
                 <Title level={4}>
-                  Không tìm thấy thông tin lớp học của bé
+                  Không tìm thấy thông tin lớp học của bé{" "}
                   {selectedStudent?.fullName} trong năm {selectedSchoolYear}.
                 </Title>
               }
@@ -636,7 +664,7 @@ const Schedule: React.FC = () => {
             <Empty
               description={
                 <Title level={4}>
-                  Chưa có Thời khóa biểu chính thức cho lớp
+                  Chưa có Thời khóa biểu chính thức cho lớp{" "}
                   {classData.className} trong {selectedMonthName}.
                 </Title>
               }
@@ -647,8 +675,10 @@ const Schedule: React.FC = () => {
           <Card
             title={
               <Title level={4} style={{ margin: 0, color: "#08979c" }}>
-                <CalendarOutlined />
-                Lịch Học Chi Tiết theo Tuần
+                <Space>
+                  <CalendarOutlined />
+                  Lịch Học Chi Tiết theo Tuần
+                </Space>
               </Title>
             }
             bordered={false}
@@ -667,7 +697,7 @@ const Schedule: React.FC = () => {
               >
                 {weeklyScheduleTabs.map((week) => (
                   <TabPane tab={week.label} key={week.key}>
-                    <div style={{ overflowX: "auto", padding: "10px 0" }}>
+                    <DraggableRow>
                       <Row
                         gutter={[20, 0]}
                         wrap={false}
@@ -678,9 +708,9 @@ const Schedule: React.FC = () => {
                           flexWrap: "nowrap",
                         }}
                       >
-                        {week.days.map(renderDayCard)}
+                        {week.days.map(renderDayColumn)}
                       </Row>
-                    </div>
+                    </DraggableRow>
                   </TabPane>
                 ))}
               </Tabs>

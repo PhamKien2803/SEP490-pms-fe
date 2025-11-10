@@ -149,7 +149,7 @@ function EditSchoolyear() {
                     toast.success(successMessage);
                     navigate(-1);
                 } catch (error) {
-                    toast.error(errorMessage);
+                    typeof error === "string" ? toast.info(error) : toast.error(errorMessage);
                 } finally {
                     setIsSubmitting(false);
                 }

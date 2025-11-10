@@ -6,7 +6,6 @@ import {
   Row,
   Col,
   Tag,
-  Collapse,
   Divider,
   Spin,
   Empty,
@@ -14,6 +13,8 @@ import {
   Select,
   Table,
   Pagination,
+  Form,
+  Tabs,
 } from "antd";
 import {
   UserOutlined,
@@ -25,6 +26,12 @@ import {
   EyeOutlined,
   CheckCircleOutlined,
   FileTextOutlined,
+  ArrowLeftOutlined,
+  FilterOutlined,
+  ReconciliationOutlined,
+  FilePdfOutlined,
+  NumberOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -47,10 +54,13 @@ import {
 import { parentDashboardApis } from "../../../services/apiServices";
 import { useCurrentUser } from "../../../hooks/useCurrentUser";
 import { toast } from "react-toastify";
+import { usePageTitle } from "../../../hooks/usePageTitle";
 
-const { Title, Text } = Typography;
-const { Panel } = Collapse;
+const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
+const { TabPane } = Tabs;
+
+const THEME_COLOR = "#08979c";
 
 interface HealthCheckDetailProps {
   data: HealthCheckRecord;
@@ -63,6 +73,7 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
 }) => {
   const formatDate = (dateString: string) =>
     dayjs(dateString).format("DD/MM/YYYY");
+
   const getHealthTagColor = (status: string) => {
     if (status.toLowerCase().includes("tốt")) return "success";
     if (status.toLowerCase().includes("theo dõi")) return "warning";
@@ -79,30 +90,71 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
       bordered={false}
       style={{
         marginBottom: 24,
-        backgroundColor: "#e6f7ff",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+        backgroundColor: "#e6fffb",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+        border: "1px solid #b5f5ec",
       }}
     >
       <Descriptions
         title={
-          <Title level={4} style={{ margin: 0, color: "#1890ff" }}>
+          <Title level={4} style={{ margin: 0, color: THEME_COLOR }}>
             <UserOutlined style={{ marginRight: 8 }} /> Thông Tin Khám
           </Title>
         }
         column={{ xs: 1, sm: 2, lg: 3 }}
       >
-        <Descriptions.Item label="Họ tên">{student.fullName}</Descriptions.Item>
-        <Descriptions.Item label="Mã học sinh">
+        <Descriptions.Item
+          label={
+            <Text strong>
+              <UserOutlined /> Họ tên
+            </Text>
+          }
+        >
+          {student.fullName}
+        </Descriptions.Item>
+        <Descriptions.Item
+          label={
+            <Text strong>
+              <NumberOutlined /> Mã học sinh
+            </Text>
+          }
+        >
           {student.studentCode}
         </Descriptions.Item>
-        <Descriptions.Item label="Ngày sinh">
+        <Descriptions.Item
+          label={
+            <Text strong>
+              <CalendarOutlined /> Ngày sinh
+            </Text>
+          }
+        >
           {formatDate(student.dob)}
         </Descriptions.Item>
-        <Descriptions.Item label="Lớp">{classInfo.className}</Descriptions.Item>
-        <Descriptions.Item label="Năm học">
+        <Descriptions.Item
+          label={
+            <Text strong>
+              <TeamOutlined /> Lớp
+            </Text>
+          }
+        >
+          {classInfo.className}
+        </Descriptions.Item>
+        <Descriptions.Item
+          label={
+            <Text strong>
+              <CalendarOutlined /> Năm học
+            </Text>
+          }
+        >
           {schoolYear.schoolYear}
         </Descriptions.Item>
-        <Descriptions.Item label="Ngày khám">
+        <Descriptions.Item
+          label={
+            <Text strong>
+              <CalendarOutlined /> Ngày khám
+            </Text>
+          }
+        >
           {formatDate(data.createdAt)}
         </Descriptions.Item>
       </Descriptions>
@@ -110,22 +162,34 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
   );
 
   const renderPhysicalDevelopment = (pd: PhysicalDevelopment) => (
-    <Descriptions column={1} layout="vertical" size="middle" bordered>
-      <Descriptions.Item label="Chiều cao (cm)">
-        <Text strong style={{ color: "#52c41a", fontSize: "1.1em" }}>
-          {pd.height}
+    <Descriptions column={2} layout="horizontal" size="middle" bordered>
+      <Descriptions.Item
+        label={
+          <Text strong>
+            <RiseOutlined /> Chiều cao (cm)
+          </Text>
+        }
+      >
+        <Text strong style={{ color: "#52c41a", fontSize: "1.2em" }}>
+          {pd.height} cm
         </Text>
       </Descriptions.Item>
-      <Descriptions.Item label="Cân nặng (kg)">
-        <Text strong style={{ color: "#faad14", fontSize: "1.1em" }}>
-          {pd.weight}
+      <Descriptions.Item
+        label={
+          <Text strong>
+            <RiseOutlined /> Cân nặng (kg)
+          </Text>
+        }
+      >
+        <Text strong style={{ color: "#faad14", fontSize: "1.2em" }}>
+          {pd.weight} kg
         </Text>
       </Descriptions.Item>
-      <Descriptions.Item label="Chỉ số BMI">
+      <Descriptions.Item label="Chỉ số BMI" span={2}>
         <Text strong>{pd.bodyMassIndex.toFixed(1)}</Text>
       </Descriptions.Item>
-      <Descriptions.Item label="Đánh giá chung">
-        <Text italic>{pd.evaluation}</Text>
+      <Descriptions.Item label="Đánh giá chung" span={2}>
+        <Paragraph italic>{pd.evaluation}</Paragraph>
       </Descriptions.Item>
     </Descriptions>
   );
@@ -139,49 +203,55 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
         <Text>{ce.motorDevelopment}</Text>
       </Descriptions.Item>
       <Descriptions.Item label="Bệnh lý đã phát hiện">
-        {ce.diseasesDetected.map((item, index) => (
-          <Tag color="error" key={index} style={{ marginBottom: 4 }}>
-            {item}
-          </Tag>
-        ))}
+        {ce.diseasesDetected.length > 0 ? (
+          ce.diseasesDetected.map((item, index) => (
+            <Tag color="error" key={index} style={{ marginBottom: 4 }}>
+              {item}
+            </Tag>
+          ))
+        ) : (
+          <Text type="secondary">Không có.</Text>
+        )}
       </Descriptions.Item>
       <Descriptions.Item label="Dấu hiệu bất thường">
-        {ce.abnormalSigns.map((item, index) => (
-          <Tag color="warning" key={index} style={{ marginBottom: 4 }}>
-            {item}
-          </Tag>
-        ))}
+        {ce.abnormalSigns.length > 0 ? (
+          ce.abnormalSigns.map((item, index) => (
+            <Tag color="warning" key={index} style={{ marginBottom: 4 }}>
+              {item}
+            </Tag>
+          ))
+        ) : (
+          <Text type="secondary">Không có.</Text>
+        )}
       </Descriptions.Item>
       <Descriptions.Item label="Ghi chú thêm từ bác sĩ">
         <Text italic type="secondary">
-          {ce.notes}
+          {ce.notes || "Không có."}
         </Text>
       </Descriptions.Item>
     </Descriptions>
   );
 
   const renderConclusion = (conclusion: Conclusion) => (
-    <Card
-      bordered={false}
-      style={{ boxShadow: "0 2px 8px rgba(0, 0, 0, 0.09)" }}
-    >
-      <Descriptions column={1} layout="vertical" size="middle">
-        <Descriptions.Item label="Tình trạng sức khỏe tổng quát">
-          <Tag
-            icon={<CheckCircleOutlined />}
-            color={getHealthTagColor(conclusion.healthStatus)}
-            style={{ fontSize: "1em", padding: "4px 8px" }}
-          >
-            <Text strong style={{ color: "inherit" }}>
-              {conclusion.healthStatus.toUpperCase()}
-            </Text>
-          </Tag>
-        </Descriptions.Item>
-        <Descriptions.Item label="Lời khuyên từ chuyên gia">
-          <Text mark>{conclusion.advice}</Text>
-        </Descriptions.Item>
-      </Descriptions>
-    </Card>
+    <Descriptions column={1} layout="vertical" size="middle">
+      <Descriptions.Item label="Tình trạng sức khỏe tổng quát">
+        <Tag
+          icon={<CheckCircleOutlined />}
+          color={getHealthTagColor(conclusion.healthStatus)}
+          style={{
+            fontSize: "1.1em",
+            padding: "5px 10px",
+            borderRadius: "12px",
+            fontWeight: "bold",
+          }}
+        >
+          {conclusion.healthStatus.toUpperCase()}
+        </Tag>
+      </Descriptions.Item>
+      <Descriptions.Item label="Lời khuyên từ chuyên gia">
+        <Paragraph mark>{conclusion.advice}</Paragraph>
+      </Descriptions.Item>
+    </Descriptions>
   );
 
   const handleViewPDF = useCallback(async (fileId: string) => {
@@ -201,16 +271,17 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
     <div style={{ padding: "24px", margin: "0 auto" }}>
       <Button
         type="primary"
+        icon={<ArrowLeftOutlined />}
         onClick={onBack}
-        style={{ marginBottom: 16, border: "none" }}
+        style={{ marginBottom: 16 }}
       >
-        &larr; Quay lại danh sách hồ sơ
+        Quay lại danh sách
       </Button>
       <Title
         level={2}
         style={{
-          color: "#0050b3",
-          borderBottom: "2px solid #0050b3",
+          color: THEME_COLOR,
+          borderBottom: `2px solid ${THEME_COLOR}`,
           paddingBottom: 8,
         }}
       >
@@ -225,39 +296,51 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
 
       {renderStudentInfo(data.student, data.class, data.schoolYear)}
 
-      <Row gutter={24}>
-        <Col span={12}>
+      <Row gutter={[24, 24]}>
+        <Col xs={24} lg={14}>
           <Card
-            title={
-              <Title level={4} style={{ margin: 0 }}>
-                <RiseOutlined style={{ marginRight: 8, color: "#52c41a" }} />{" "}
-                Phát Triển Thể Chất
-              </Title>
-            }
+            style={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)" }}
             bordered={false}
-            style={{
-              marginBottom: 24,
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-            }}
           >
-            {renderPhysicalDevelopment(data.physicalDevelopment)}
+            <Tabs defaultActiveKey="1" size="large">
+              <TabPane
+                tab={
+                  <span>
+                    <RiseOutlined />
+                    Phát Triển Thể Chất
+                  </span>
+                }
+                key="1"
+              >
+                {renderPhysicalDevelopment(data.physicalDevelopment)}
+              </TabPane>
+              <TabPane
+                tab={
+                  <span>
+                    <ReconciliationOutlined />
+                    Khám Toàn Diện
+                  </span>
+                }
+                key="2"
+              >
+                {renderComprehensiveExamination(data.comprehensiveExamination)}
+              </TabPane>
+            </Tabs>
           </Card>
         </Col>
 
-        <Col span={12}>
+        <Col xs={24} lg={10}>
           <Card
             title={
-              <Title level={4} style={{ margin: 0 }}>
-                <SolutionOutlined
-                  style={{ marginRight: 8, color: "#1890ff" }}
-                />{" "}
+              <Title level={4} style={{ margin: 0, color: THEME_COLOR }}>
+                <SolutionOutlined style={{ marginRight: 8 }} />
                 Kết Luận
               </Title>
             }
             bordered={false}
             style={{
               marginBottom: 24,
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
             }}
           >
             {renderConclusion(data.conclusion)}
@@ -265,17 +348,15 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
 
           <Card
             title={
-              <Title level={4} style={{ margin: 0 }}>
-                <FileTextOutlined
-                  style={{ marginRight: 8, color: "#722ed1" }}
-                />{" "}
+              <Title level={4} style={{ margin: 0, color: THEME_COLOR }}>
+                <FileTextOutlined style={{ marginRight: 8 }} />
                 Tài Liệu Đính Kèm
               </Title>
             }
             bordered={false}
             style={{
               marginBottom: 24,
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
             }}
           >
             <Descriptions column={1} size="small">
@@ -288,46 +369,17 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
               <Descriptions.Item label="Hành động">
                 <Button
                   onClick={() => handleViewPDF(data?.student?.healthCertId)}
-                  type="link"
+                  type="primary"
                   size="small"
-                  icon={<EyeOutlined />}
+                  icon={<FilePdfOutlined />}
                 >
-                  Xem chi tiết
+                  Xem file PDF
                 </Button>
               </Descriptions.Item>
             </Descriptions>
           </Card>
         </Col>
       </Row>
-
-      <Divider orientation="left" style={{ margin: "24px 0" }}>
-        <Title level={3} style={{ margin: 0 }}>
-          <SolutionOutlined style={{ marginRight: 8 }} /> Khám Toàn Diện Chi
-          Tiết
-        </Title>
-      </Divider>
-
-      <Collapse
-        defaultActiveKey={["1"]}
-        expandIconPosition="right"
-        style={{
-          marginBottom: 24,
-          border: "1px solid #d9d9d9",
-          borderRadius: 8,
-        }}
-      >
-        <Panel
-          header={
-            <Title level={4} style={{ margin: 0 }}>
-              <SolutionOutlined style={{ marginRight: 8, color: "#eb2f96" }} />{" "}
-              Chi Tiết Khám Toàn Diện
-            </Title>
-          }
-          key="1"
-        >
-          {renderComprehensiveExamination(data.comprehensiveExamination)}
-        </Panel>
-      </Collapse>
 
       <Divider />
       <Text type="secondary" style={{ fontSize: "0.85em" }}>
@@ -339,6 +391,7 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
 };
 
 const Medical: React.FC = () => {
+  usePageTitle("Hồ sơ sức khỏe - Cá Heo Xanh");
   const user = useCurrentUser();
   const [selectedStudentId, setSelectedStudentId] = useState<
     string | undefined
@@ -438,30 +491,30 @@ const Medical: React.FC = () => {
         width: 150,
       },
       {
-        title: "Chiều Cao/Cân Nặng (cm/kg)",
+        title: "Chiều Cao/Cân Nặng",
         key: "physicalDevelopment",
         render: (record: HealthCheckRecord) => (
           <Text>
-            {record.physicalDevelopment.height} /{" "}
-            {record.physicalDevelopment.weight}
+            {record.physicalDevelopment.height}cm /{" "}
+            {record.physicalDevelopment.weight}kg
           </Text>
         ),
       },
       {
-        title: "Đánh Giá Tổng Quát",
+        title: "Đánh Giá",
         dataIndex: ["physicalDevelopment", "evaluation"],
         key: "evaluation",
       },
       {
-        title: "Kết Luận Sức Khỏe",
+        title: "Kết Luận",
         dataIndex: ["conclusion", "healthStatus"],
         key: "healthStatus",
         render: (text: string) => {
           const color = text.toLowerCase().includes("tốt")
             ? "success"
             : text.toLowerCase().includes("theo dõi")
-            ? "warning"
-            : "default";
+              ? "warning"
+              : "default";
           return <Tag color={color}>{text.toUpperCase()}</Tag>;
         },
         width: 150,
@@ -469,16 +522,16 @@ const Medical: React.FC = () => {
       {
         title: "Hành Động",
         key: "action",
-        width: 100,
+        width: 120,
+        fixed: "right" as const,
         render: (record: HealthCheckRecord) => (
           <Button
-            type="link"
+            type="primary"
             icon={<EyeOutlined />}
             onClick={() => setDetailRecord(record)}
             size="small"
-            style={{ padding: 0 }}
           >
-            Xem chi tiết
+            Xem
           </Button>
         ),
       },
@@ -501,68 +554,71 @@ const Medical: React.FC = () => {
     <div style={{ padding: "24px", margin: "0 auto" }}>
       <Title
         level={2}
-        style={{ color: "#1890ff", display: "flex", alignItems: "center" }}
+        style={{
+          color: THEME_COLOR,
+          borderBottom: `2px solid ${THEME_COLOR}`,
+          paddingBottom: 8,
+        }}
       >
-        <HeartOutlined style={{ marginRight: 10 }} /> Hồ Sơ Khám Sức Khỏe Định
-        Kỳ
+        <HeartOutlined style={{ marginRight: 10 }} />
+        Quản Lý Sức Khỏe
       </Title>
       <Divider style={{ margin: "16px 0" }} />
-
       <Card
+        bordered
         title={
-          <Title level={4} style={{ margin: 0 }}>
-            <UserOutlined /> Lựa Chọn Hồ Sơ
-          </Title>
+          <Text strong>
+            <FilterOutlined style={{ marginRight: 8 }} />
+            Lọc Hồ Sơ
+          </Text>
         }
-        bordered={false}
         style={{
           marginBottom: 24,
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-          backgroundColor: "#fafafa",
         }}
       >
-        <Row gutter={16} align="middle">
-          <Col span={6}>
-            <Text strong style={{ color: "#595959" }}>
-              Chọn tên con để xem hồ sơ:
-            </Text>
-          </Col>
-          <Col span={18}>
-            <Select
-              value={selectedStudentId}
-              style={{ width: 350 }}
-              onChange={(value) => setSelectedStudentId(value)}
-              placeholder="Chọn con của bạn"
-              size="large"
-              disabled={listChild.length === 0}
-            >
-              {listChild.map((student) => (
-                <Option key={student._id} value={student._id}>
-                  {student.fullName} ({student.studentCode})
-                </Option>
-              ))}
-            </Select>
-            {listChild.length === 0 && !isLoading && (
-              <Text type="danger" style={{ marginLeft: 10 }}>
-                Không tìm thấy hồ sơ học sinh.
-              </Text>
-            )}
-          </Col>
-        </Row>
+        <Form layout="vertical">
+          <Row gutter={[24, 0]}>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label={
+                  <Text strong>
+                    <UserOutlined style={{ marginRight: 4 }} />
+                    Chọn con
+                  </Text>
+                }
+              >
+                <Select
+                  value={selectedStudentId}
+                  style={{ width: "100%" }}
+                  onChange={(value) => setSelectedStudentId(value)}
+                  placeholder="Chọn con của bạn"
+                  size="large"
+                  loading={listChild.length === 0 && isLoading}
+                  disabled={listChild.length === 0}
+                >
+                  {listChild.map((student) => (
+                    <Option key={student._id} value={student._id}>
+                      {student.fullName} ({student.studentCode})
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+        </Form>
       </Card>
 
       <Title
         level={3}
         style={{
-          color: "#1890ff",
-          borderBottom: "1px solid #e8e8e8",
+          color: THEME_COLOR,
           paddingBottom: 8,
         }}
       >
         <ContainerOutlined style={{ marginRight: 8 }} />
         Danh Sách Hồ Sơ Khám ({selectedStudent?.fullName || "..."})
       </Title>
-      <Divider style={{ margin: "10px 0 20px 0" }} />
 
       <Spin spinning={isLoading}>
         {listData.length > 0 ? (
@@ -574,6 +630,7 @@ const Medical: React.FC = () => {
               pagination={false}
               bordered
               style={{ boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}
+              scroll={{ x: 800 }}
             />
             <div
               style={{

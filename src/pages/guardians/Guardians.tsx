@@ -36,14 +36,16 @@ import { usePagePermission } from "../../hooks/usePagePermission";
 import CreateGuardian from "../../modal/guardian/create-guardian/CreateGuardian";
 import UpdateGuardian from "../../modal/guardian/update-guardian/UpdateGuardian";
 import DetailGuardian from "../../modal/guardian/detail-guardian/DetailGuardian";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
-const ACCENT_COLOR = "#1890ff";
-const TEXT_COLOR = "#1890ff";
+const ACCENT_COLOR = "#08979c";
+const TEXT_COLOR = "#08979c";
 
 const GuardianManagement: React.FC = () => {
+  usePageTitle("Đăng ký người đón - Cá Heo Xanh");
   const [studentsData, setStudentsData] =
     useState<ParentStudentsListResponse | null>(null);
   const [guardians, setGuardians] = useState<IGuardianRecord[]>([]);
