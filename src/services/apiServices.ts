@@ -162,14 +162,53 @@ import {
   ScheduleList,
   ScheduleParams,
 } from "../types/parent";
-import { CreateRevenuePayload, RevenueDetailResponse, RevenueListResponse, UpdateRevenuePayload } from "../types/revenues";
-import { CreateOrUpdateServicePayload, PreviewServiceResponse, SchoolYearListResponse, ServiceDetailResponse, StudentListByParentResponse } from "../types/services";
-import { CreateOrUpdateReceiptPayload, ReceiptDetailResponse, ReceiptListResponse, RevenueForReceiptItem } from "../types/receipts";
-import { CheckStatusTuitionResponse, ConfirmTuitionPayload, ConfirmTuitionResponse, GetHistoryFeeResponse, TuitionDetailResponse, TuitionListResponse } from "../types/tuition";
-import { CreateGuardianPayload, IGuardianByIdResponse, IGuardianListResponse, IGuardianRecord, UpdateGuardianPayload } from "../types/guardians";
+import {
+  CreateRevenuePayload,
+  RevenueDetailResponse,
+  RevenueListResponse,
+  UpdateRevenuePayload,
+} from "../types/revenues";
+import {
+  CreateOrUpdateServicePayload,
+  PreviewServiceResponse,
+  SchoolYearListResponse,
+  ServiceDetailResponse,
+  StudentListByParentResponse,
+} from "../types/services";
+import {
+  CreateOrUpdateReceiptPayload,
+  ReceiptDetailResponse,
+  ReceiptListResponse,
+  RevenueForReceiptItem,
+} from "../types/receipts";
+import {
+  CheckStatusTuitionResponse,
+  ConfirmTuitionPayload,
+  ConfirmTuitionResponse,
+  GetHistoryFeeResponse,
+  TuitionDetailResponse,
+  TuitionListResponse,
+} from "../types/tuition";
+import {
+  CreateGuardianPayload,
+  IGuardianByIdResponse,
+  IGuardianListResponse,
+  IGuardianRecord,
+  UpdateGuardianPayload,
+} from "../types/guardians";
 import { BalanceDetailResponse } from "../types/balances";
-import { ICreateOrUpdateDocumentPayload, IDocumentDetailResponse, IDocumentListResponse } from "../types/documents";
+import {
+  ICreateOrUpdateDocumentPayload,
+  IDocumentDetailResponse,
+  IDocumentListResponse,
+} from "../types/documents";
 import { IServiceReportResponse } from "../types/servicesReport";
+import {
+  ClassData,
+  CreatePostParams,
+  CreatePostResponse,
+  PostsResponse,
+} from "../types/post";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -1282,7 +1321,6 @@ export const servicesApis = {
     return response.data;
   },
 
-
   createService: async (
     payload: CreateOrUpdateServicePayload
   ): Promise<{ message: string }> => {
@@ -1304,7 +1342,9 @@ export const servicesApis = {
     return response.data;
   },
 
-  getStudentByParent: async (parentId: string): Promise<StudentListByParentResponse> => {
+  getStudentByParent: async (
+    parentId: string
+  ): Promise<StudentListByParentResponse> => {
     const response = await axiosAuth.get<StudentListByParentResponse>(
       apiEndPoint.GET_LIST_PARENT_STUDENT(parentId)
     );
@@ -1325,14 +1365,12 @@ export const receiptsApis = {
     return response.data;
   },
 
-
   getReceiptById: async (id: string): Promise<ReceiptDetailResponse> => {
     const response = await axiosAuth.get<ReceiptDetailResponse>(
       apiEndPoint.GET_RECEIPT_BY_ID(id)
     );
     return response.data;
   },
-
 
   createReceipt: async (
     payload: CreateOrUpdateReceiptPayload
@@ -1343,7 +1381,6 @@ export const receiptsApis = {
     );
     return response.data;
   },
-
 
   updateReceipt: async (
     id: string,
@@ -1356,11 +1393,9 @@ export const receiptsApis = {
     return response.data;
   },
 
-
   deleteReceipt: async (id: string): Promise<void> => {
     await axiosAuth.post(apiEndPoint.DELETE_RECEIPT(id));
   },
-
 
   confirmReceipt: async (id: string): Promise<{ message: string }> => {
     const response = await axiosAuth.post<{ message: string }>(
@@ -1368,7 +1403,6 @@ export const receiptsApis = {
     );
     return response.data;
   },
-
 
   getRevenuesForReceipt: async (): Promise<RevenueForReceiptItem[]> => {
     const response = await axiosAuth.get<RevenueForReceiptItem[]>(
@@ -1391,7 +1425,9 @@ export const tuitionApis = {
     return response.data;
   },
 
-  getTuitionDetail: async (parentId: string): Promise<TuitionDetailResponse> => {
+  getTuitionDetail: async (
+    parentId: string
+  ): Promise<TuitionDetailResponse> => {
     const response = await axiosAuth.get<TuitionDetailResponse>(
       apiEndPoint.GET_DETAILS_TUITION(parentId)
     );
@@ -1427,7 +1463,6 @@ export const tuitionApis = {
     );
     return response.data;
   },
-
 };
 
 export const balancesApis = {
@@ -1492,8 +1527,6 @@ export const reportsApis = {
     return response.data;
   },
 };
-
-
 
 export const roomApis = {
   getListRoom: async (params: {
@@ -1672,7 +1705,9 @@ export const parentDashboardApis = {
 };
 
 export const guardianApis = {
-  createGuardian: async (body: CreateGuardianPayload): Promise<IGuardianRecord> => {
+  createGuardian: async (
+    body: CreateGuardianPayload
+  ): Promise<IGuardianRecord> => {
     const response = await axiosAuth.post<IGuardianRecord>(
       apiEndPoint.CREATE_GUARDIAN,
       body
@@ -1703,20 +1738,98 @@ export const guardianApis = {
   },
 
   getListGuardianByStudent: async (
-    studentId: string,
+    studentId: string
   ): Promise<IGuardianListResponse> => {
     const response = await axiosAuth.get<IGuardianListResponse>(
-      apiEndPoint.GET_LIST_GUARDIAN_BY_STUDENT(studentId),
+      apiEndPoint.GET_LIST_GUARDIAN_BY_STUDENT(studentId)
     );
     return response.data;
   },
 
   getListGuardianByParent: async (
-    parentId: string,
+    parentId: string
   ): Promise<IGuardianListResponse> => {
     const response = await axiosAuth.get<IGuardianListResponse>(
       apiEndPoint.GET_LIST_GUARDIAN_BY_PARENT(parentId)
     );
+    return response.data;
+  },
+};
+
+export const postApis = {
+  createNewPost: async (
+    params: CreatePostParams
+  ): Promise<CreatePostResponse> => {
+    const response = await axiosAuth.post<CreatePostResponse>(
+      apiEndPoint.CREATE_NEW_POST,
+      params
+    );
+    return response.data;
+  },
+
+  getClass: async (teacherId: string): Promise<ClassData> => {
+    const response = await axiosAuth.get<ClassData>(
+      apiEndPoint.GET_CLASS_OF_TEACHER(teacherId)
+    );
+    return response.data;
+  },
+
+  getListPost: async (teacherId: string): Promise<PostsResponse> => {
+    const response = await axiosAuth.get<PostsResponse>(
+      apiEndPoint.GET_LIST_POST(teacherId)
+    );
+    return response.data;
+  },
+
+  deletePost: async (postId: string): Promise<any> => {
+    const response = await axiosAuth.post<any>(apiEndPoint.DELETE_POST(postId));
+    return response.data;
+  },
+
+  deleteImage: async (imageId: string): Promise<any> => {
+    const response = await axiosAuth.post<any>(
+      apiEndPoint.DELETE_IMAGE(imageId)
+    );
+    return response.data;
+  },
+
+  updatePost: async (
+    postId: string,
+    params: CreatePostParams
+  ): Promise<any> => {
+    const response = await axiosAuth.put<any>(
+      apiEndPoint.UPDATE_POST(postId),
+      params
+    );
+    return response.data;
+  },
+
+  getListPostByStudent: async (studentId: string): Promise<PostsResponse> => {
+    const response = await axiosAuth.get<PostsResponse>(
+      apiEndPoint.GET_LIST_POST_BY_STUDENT(studentId)
+    );
+    return response.data;
+  },
+
+  uploadAlbum: async (
+    postId: string,
+    files: File[]
+  ): Promise<CreatePostResponse> => {
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    const response = await axiosAuth.post<CreatePostResponse>(
+      apiEndPoint.UPLOAD_ALBUM(postId),
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
     return response.data;
   },
 };
