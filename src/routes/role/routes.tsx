@@ -91,6 +91,7 @@ import DocumentList from "../../pages/document-management/DocumentList";
 import DocumentCreate from "../../pages/document-management/document-create/DocumentCreate";
 import DocumentEdit from "../../pages/document-management/document-edit/DocumentEdit";
 import ServicesReport from "../../pages/services-reports/ServicesReport";
+import HomeNews from "../../pages/home-news/HomeNews";
 
 export const routes: RouteObject[] = [
   {
@@ -109,7 +110,7 @@ export const routes: RouteObject[] = [
         children: [
           {
             index: true,
-            element: <div>Trang chủ PMS</div>,
+            element: <HomeNews />,
           },
           {
             path: "accounts",
