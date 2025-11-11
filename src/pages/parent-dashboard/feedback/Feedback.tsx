@@ -38,6 +38,7 @@ import { parentDashboardApis } from "../../../services/apiServices";
 import { useCurrentUser } from "../../../hooks/useCurrentUser";
 import dayjs, { Dayjs } from "dayjs";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { toast } from "react-toastify";
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -85,7 +86,7 @@ const Feedback: React.FC = () => {
         setIsLoading(false);
       }
     } catch (error) {
-      console.error("Lỗi khi tải danh sách con:", error);
+      typeof error === "string" ? toast.info(error) : toast.error("Lỗi khi tải danh sách con")
       setIsLoading(false);
     }
   };
@@ -105,7 +106,7 @@ const Feedback: React.FC = () => {
     } catch (error) {
       setIsError(true);
       setFeedbackData(null);
-      console.error("Lỗi khi fetch feedback:", error);
+      typeof error === "string" ? toast.info(error) : toast.error("Lỗi khi tải đánh giá")
     } finally {
       setIsLoading(false);
     }

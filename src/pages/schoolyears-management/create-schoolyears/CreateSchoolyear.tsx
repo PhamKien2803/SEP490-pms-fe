@@ -43,7 +43,7 @@ function CreateSchoolyear() {
             toast.success('Thêm mới năm học thành công!');
             navigate(-1);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Đã có lỗi xảy ra. Vui lòng thử lại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Đã có lỗi xảy ra. Vui lòng thử lại!');
         } finally {
             setIsSubmitting(false);
         }

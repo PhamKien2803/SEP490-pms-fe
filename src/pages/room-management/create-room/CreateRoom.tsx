@@ -188,10 +188,7 @@ const CreateRoom: React.FC = () => {
             toast.success(`Tạo Phòng học "${payload.roomName}" thành công!`);
             navigate(`${constants.APP_PREFIX}/rooms`);
         } catch (error: any) {
-            const errorMessage =
-                error ||
-                "Tạo phòng học thất bại. Vui lòng kiểm tra dữ liệu và thử lại.";
-            toast.error(errorMessage);
+            typeof error === "string" ? toast.info(error) : toast.error("Tạo phòng học thất bại. Vui lòng kiểm tra dữ liệu và thử lại.");
         } finally {
             setLoading(false);
         }

@@ -52,8 +52,8 @@ function RegisterServices() {
             try {
                 const res = await servicesApis.getPreviewService();
                 setPreview(res);
-            } catch {
-                toast.error("Không thể tải thông tin dịch vụ đăng ký");
+            } catch (error) {
+                typeof error === "string" ? toast.info(error) : toast.error("Không thể tải thông tin dịch vụ đăng ký");
             } finally {
                 setLoading(false);
             }
@@ -101,7 +101,7 @@ function RegisterServices() {
                 },
             });
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Đăng ký dịch vụ thất bại");
+            typeof error === "string" ? toast.info(error) : toast.error("Đăng ký dịch vụ thất bại");
         } finally {
             setCreating(false);
         }

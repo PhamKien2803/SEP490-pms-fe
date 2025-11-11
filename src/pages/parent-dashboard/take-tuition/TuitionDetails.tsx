@@ -71,7 +71,7 @@ function TuitionDetails() {
                 setDetails(response.data);
                 setTotalAmount(response.totalAmount);
             } catch (error) {
-                typeof error === "string" ? toast.warn(error) : toast.error("Không thể tải chi tiết học phí");
+                typeof error === "string" ? toast.info(error) : toast.error("Không thể tải chi tiết học phí");
             } finally {
                 setLoading(false);
             }
@@ -102,7 +102,7 @@ function TuitionDetails() {
                 toast.error(response.message || "Xác nhận thất bại");
             }
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Có lỗi xảy ra khi xác nhận thanh toán");
+            typeof error === "string" ? toast.info(error) : toast.error("Có lỗi xảy ra khi xác nhận thanh toán");
         } finally {
             setConfirmLoading(false);
         }
@@ -143,7 +143,7 @@ function TuitionDetails() {
 
                     <Button
                         type="primary"
-                        style={{backgroundColor: "#08979c"}}
+                        style={{ backgroundColor: "#08979c" }}
                         size="large"
                         block
                         loading={confirmLoading}

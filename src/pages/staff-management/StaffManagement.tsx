@@ -77,7 +77,7 @@ const StaffManagement: React.FC = () => {
           pageSize: response.page.limit,
         }));
       } catch (error) {
-        typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách nhân viên.');
+        typeof error === "string" ? toast.info(error) : toast.error('Không thể tải danh sách nhân viên.');
       } finally {
         setLoading(false);
       }

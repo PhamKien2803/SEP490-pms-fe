@@ -87,7 +87,7 @@ const RoomManagement: React.FC = () => {
         }));
       } catch (error) {
         typeof error === "string"
-          ? toast.warn(error)
+          ? toast.info(error)
           : toast.error("Không thể tải danh sách phòng học.");
       } finally {
         setLoading(false);

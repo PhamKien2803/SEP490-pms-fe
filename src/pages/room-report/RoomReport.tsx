@@ -52,7 +52,7 @@ const RoomReportComponent: React.FC = () => {
       const response = await roomApis.getListRoom({ page: 1, limit: 1000 });
       setAllRooms(response.data);
     } catch (error) {
-      toast.error("Không thể tải danh sách phòng học cho báo cáo.");
+      typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách phòng học cho báo cáo.");
       setAllRooms([]);
     } finally {
       setLoading(false);
@@ -107,7 +107,7 @@ const RoomReportComponent: React.FC = () => {
       toast.success(`Phòng học ${roomData.roomName} đã được duyệt!`);
       await fetchAllRooms();
     } catch (error) {
-      toast.error(`Cập nhật trạng thái thất bại.`);
+      typeof error === "string" ? toast.info(error) : toast.error(`Cập nhật trạng thái thất bại.`);
     } finally {
       setIsProcessing(false);
     }
@@ -191,17 +191,7 @@ const RoomReportComponent: React.FC = () => {
     )}`,
   });
 
-  // const handleExportRoomDetails = (record: RoomRecord) => {
-  //     const dataToExport = getExportDataForRoom(record);
-  //     if (dataToExport.length === 0) {
-  //         toast.info(`Phòng ${record.roomName} không có thiết bị hỏng hoặc thiếu nào cần báo cáo.`);
-  //         return;
-  //     }
-  //     exportToExcel({
-  //         data: dataToExport,
-  //         fileName: `BC_Loi_${record.roomName}_${dayjs().format('YYYYMMDDHHmmss')}`,
-  //     });
-  // };
+
   const handleExportRoomDetails = (record: RoomRecord) => {
     const dataToExport = getExportDataForRoom(record);
     if (dataToExport.length === 0) {

@@ -12,7 +12,6 @@ import {
   Col,
   Button,
   Space,
-  message,
   Popconfirm,
 } from 'antd';
 import {
@@ -26,6 +25,7 @@ import dayjs from 'dayjs';
 import { ILessonDetailResponse } from '../../../../types/teacher';
 import { teacherApis } from '../../../../services/apiServices';
 import { useCurrentUser } from '../../../../hooks/useCurrentUser';
+import { toast } from 'react-toastify';
 
 const { Title, Text } = Typography;
 
@@ -68,10 +68,10 @@ function ReportDetails() {
     setActionLoading(true);
     try {
       await teacherApis.approveLesson(id);
-      message.success('Đã duyệt báo giảng');
+      toast.success('Đã duyệt báo giảng');
       fetchLesson();
-    } catch {
-      message.error('Lỗi khi duyệt báo giảng');
+    } catch (error) {
+      typeof error === "string" ? toast.info(error) : toast.error('Lỗi khi duyệt báo giảng');
     } finally {
       setActionLoading(false);
     }
@@ -82,10 +82,10 @@ function ReportDetails() {
     setActionLoading(true);
     try {
       await teacherApis.rejectLesson(id);
-      message.success('Đã từ chối báo giảng');
+      toast.success('Đã từ chối báo giảng');
       fetchLesson();
-    } catch {
-      message.error('Lỗi khi từ chối báo giảng');
+    } catch (error) {
+      typeof error === "string" ? toast.info(error) : toast.error('Lỗi khi từ chối báo giảng');
     } finally {
       setActionLoading(false);
     }
@@ -157,8 +157,8 @@ function ReportDetails() {
               normalizedStatus === 'dự thảo'
                 ? 'orange'
                 : normalizedStatus === 'chờ duyệt'
-                ? 'gold'
-                : 'green'
+                  ? 'gold'
+                  : 'green'
             }
           >
             {lesson.status}
@@ -226,8 +226,8 @@ function ReportDetails() {
                       type === 'Cố định'
                         ? 'blue'
                         : type === 'Bình thường'
-                        ? 'green'
-                        : 'gold'
+                          ? 'green'
+                          : 'gold'
                     }
                   >
                     {type}

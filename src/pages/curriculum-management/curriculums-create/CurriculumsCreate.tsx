@@ -70,7 +70,7 @@ function CurriculumsCreate() {
                     toast.info('Không tìm thấy năm học nào.');
                 }
             } catch (error) {
-                toast.error('Lỗi tải dữ liệu năm học.');
+                typeof error === "string" ? toast.info(error) : toast.error('Lỗi tải dữ liệu năm học.');
             } finally {
                 setIsLoadingSchoolYear(false);
             }
@@ -188,7 +188,7 @@ function CurriculumsCreate() {
             navigate(-1);
 
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Tạo chương trình học thất bại.');
+            typeof error === "string" ? toast.info(error) : toast.error('Tạo chương trình học thất bại.');
         } finally {
             setIsSubmitting(false);
         }

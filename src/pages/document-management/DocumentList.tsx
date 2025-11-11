@@ -55,7 +55,7 @@ function DocumentList() {
             setData(res.data);
             setTotal(res.page.totalCount);
         } catch (err) {
-            typeof err === "string" ? toast.warn(err) : toast.error("Không thể tải danh sách chứng từ");
+            typeof err === "string" ? toast.info(err) : toast.error("Không thể tải danh sách chứng từ");
         }
     };
 
@@ -73,7 +73,7 @@ function DocumentList() {
                 setSchoolYear(sorted[0].schoolYear);
             }
         } catch (err) {
-            typeof err === "string" ? toast.warn(err) : toast.error("Không thể tải danh sách năm học");
+            typeof err === "string" ? toast.info(err) : toast.error("Không thể tải danh sách năm học");
         }
     };
 
@@ -83,7 +83,7 @@ function DocumentList() {
             toast.success("Đã xóa chứng từ");
             fetchDocuments();
         } catch (err) {
-            typeof err === "string" ? toast.warn(err) : toast.error("Xóa thất bại");
+            typeof err === "string" ? toast.info(err) : toast.error("Xóa thất bại");
         }
     };
 
@@ -93,7 +93,7 @@ function DocumentList() {
             setViewData(res);
             setViewModalOpen(true);
         } catch (err) {
-            typeof err === "string" ? toast.warn(err) : toast.error("Không thể tải chi tiết");
+            typeof err === "string" ? toast.info(err) : toast.error("Không thể tải chi tiết");
         }
     };
 

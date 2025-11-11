@@ -165,7 +165,7 @@ const UpdateMedical: React.FC = () => {
 
                 setIsDataDirty(false);
             } catch (error) {
-                toast.error("Tải chi tiết hồ sơ sức khỏe thất bại.");
+                typeof error === "string" ? toast.info(error) : toast.error("Tải chi tiết hồ sơ sức khỏe thất bại.");
                 setMedicalDetail(null);
             } finally {
                 setLoading(false);
@@ -223,10 +223,7 @@ const UpdateMedical: React.FC = () => {
             await fetchMedicalDetail(id);
 
         } catch (error: any) {
-            const errorMessage =
-                error?.response?.data?.message ||
-                "Cập nhật hồ sơ sức khỏe thất bại. Vui lòng kiểm tra dữ liệu và thử lại.";
-            toast.error(errorMessage);
+            typeof error === "string" ? toast.info(error) : toast.error("Cập nhật hồ sơ sức khỏe thất bại. Vui lòng kiểm tra dữ liệu và thử lại.");
         } finally {
             setIsSaving(false);
         }

@@ -257,9 +257,8 @@ function CreateReport() {
       setCreatedLesson(res);
       toast.success("Tạo báo giảng thành công!");
       navigate(-1);
-    } catch (err) {
-      console.error(err);
-      toast.error("Không thể tạo báo giảng. Vui lòng thử lại!");
+    } catch (error) {
+      typeof error === "string" ? toast.info(error) : toast.error("Không thể tạo báo giảng. Vui lòng thử lại!");
     } finally {
       setLoading(false);
     }

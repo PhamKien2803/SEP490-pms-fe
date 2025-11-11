@@ -92,8 +92,8 @@ function UpdateReport() {
             const data = await teacherApis.getLessonById(lessonId);
             setLessonData(data);
             setTopicName(data.topicName || '');
-        } catch {
-            toast.error('Không thể tải dữ liệu báo giảng.');
+        } catch (error) {
+            typeof error === "string" ? toast.info(error) : toast.error('Không thể tải dữ liệu báo giảng.');
         } finally {
             setLoading(false);
         }
@@ -152,8 +152,8 @@ function UpdateReport() {
             await teacherApis.updateLesson(id, payload);
             toast.success('Cập nhật báo giảng thành công!');
             await fetchLessonData(id);
-        } catch {
-            toast.error('Cập nhật báo giảng thất bại.');
+        } catch (error) {
+            typeof error === "string" ? toast.info(error) : toast.error('Cập nhật báo giảng thất bại.');
         } finally {
             setLoadingUpdate(false);
         }
@@ -166,8 +166,8 @@ function UpdateReport() {
             await teacherApis.sendLesson(id);
             toast.success('Gửi duyệt báo giảng thành công!');
             await fetchLessonData(id);
-        } catch {
-            toast.error('Gửi duyệt báo giảng thất bại.');
+        } catch (error) {
+            typeof error === "string" ? toast.info(error) : toast.error('Gửi duyệt báo giảng thất bại.');
         } finally {
             setLoadingSend(false);
         }

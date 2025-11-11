@@ -15,6 +15,7 @@ import { WalletOutlined, ReloadOutlined } from "@ant-design/icons";
 import { BalanceTransaction } from "../../types/balances";
 import { balancesApis } from "../../services/apiServices";
 import { formatCurrency, formatDateTime } from "../../utils/format";
+import { toast } from "react-toastify";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -34,7 +35,8 @@ function BalancesDetails() {
             setTransactions(res.transactions);
             setFilterType("all");
             form.setFieldsValue({ type: "all" });
-        } catch {
+        } catch (error) {
+            typeof error === "string" ? toast.info(error) : toast.error("Lỗi không hiện số dư")
         } finally {
             setLoading(false);
         }

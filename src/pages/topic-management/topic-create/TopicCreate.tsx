@@ -136,7 +136,7 @@ function TopicCreate() {
             setIsDirty(true);
             toast.info('Đã tải gợi ý. Bạn có thể nhập số buổi hoặc thêm hoạt động.');
         } catch (error) {
-            toast.info('Vui lòng chọn Độ tuổi và Tháng');
+            typeof error === "string" ? toast.info(error) : toast.error('Vui lòng chọn Độ tuổi và Tháng');
         } finally {
             setSuggestLoading(false);
         }
@@ -267,7 +267,7 @@ function TopicCreate() {
             toast.success('Tạo chủ đề thành công!');
             navigate(-1);
         } catch (error) {
-            toast.error('Tạo chủ đề thất bại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Tạo chủ đề thất bại!');
         } finally {
             setLoading(false);
         }

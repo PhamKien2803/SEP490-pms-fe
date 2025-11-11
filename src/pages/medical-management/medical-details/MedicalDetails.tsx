@@ -64,7 +64,7 @@ const MedicalDetail: React.FC = () => {
             window.open(fileURL, "_blank");
         } catch (error) {
             typeof error === "string"
-                ? toast.warn(error)
+                ? toast.info(error)
                 : toast.error("Không thể mở file PDF hồ sơ sức khỏe.");
         }
     }, []);

@@ -40,6 +40,7 @@ import {
   Student,
 } from "../../../types/parent";
 import { useCurrentUser } from "../../../hooks/useCurrentUser";
+import { toast } from "react-toastify";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -226,7 +227,7 @@ const Menu: React.FC = () => {
         setIsLoading(false);
       }
     } catch (error) {
-      console.error("Lỗi khi tải danh sách con:", error);
+      typeof error === "string" ? toast.info(error) : toast.error("Lỗi khi tải danh sách con")
       setIsLoading(false);
     }
   };
@@ -249,7 +250,7 @@ const Menu: React.FC = () => {
         setMenuData(data);
       } catch (error) {
         setIsError(true);
-        console.error("Lỗi khi fetch menu:", error);
+        typeof error === "string" ? toast.info(error) : toast.error("Lỗi khi tải thực đơn")
       } finally {
         setIsLoading(false);
       }

@@ -178,8 +178,7 @@ function EditAttendance() {
             await teacherApis.updateAttendance(attendanceId!, payload);
             toast.success('Cập nhật điểm danh thành công!');
         } catch (error) {
-            console.error(error);
-            toast.error('Cập nhật thất bại.');
+            typeof error === "string" ? toast.info(error) : toast.error('Cập nhật thất bại.');
         } finally {
             setIsSaving(false);
         }

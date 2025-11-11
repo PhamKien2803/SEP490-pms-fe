@@ -107,7 +107,7 @@ function TakeFeedback() {
                     }
                 }
             } catch (error) {
-                toast.error('Không thể tải thông tin lớp hoặc năm học.');
+                typeof error === "string" ? toast.info(error) : toast.error('Không thể tải thông tin lớp hoặc năm học.');
             } finally {
                 setIsLoadingTeacherData(false);
             }
@@ -125,8 +125,8 @@ function TakeFeedback() {
         try {
             const data = await teacherApis.getFeedbackByClassAndDate(currentClass._id, date.format('YYYY-MM-DD'));
             setExistingFeedbacks(data);
-        } catch {
-            toast.error('Không thể tải các phản hồi đã có.');
+        } catch (error) {
+            typeof error === "string" ? toast.info(error) : toast.error('Không thể tải các phản hồi đã có.');
             setExistingFeedbacks([]);
         } finally {
             setLoading(false);
@@ -176,8 +176,8 @@ function TakeFeedback() {
             await teacherApis.createFeedback(payload);
             toast.success(`Đã lưu phản hồi cho học sinh ${selectedStudent.fullName}!`);
             fetchExistingFeedbacks();
-        } catch {
-            toast.error('Lưu phản hồi thất bại.');
+        } catch (error) {
+            typeof error === "string" ? toast.info(error) : toast.error('Lưu phản hồi thất bại.');
         } finally {
             setIsSubmitting(false);
         }

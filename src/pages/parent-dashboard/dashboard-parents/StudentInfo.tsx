@@ -318,7 +318,7 @@ const StudentInfo: React.FC = () => {
         "Không thể tải dữ liệu. Vui lòng kiểm tra kết nối hoặc quyền truy cập."
       );
       setData(null);
-      toast.error("Tải dữ liệu học sinh thất bại. Vui lòng thử lại.");
+      typeof error === "string" ? toast.info(error) : toast.error("Tải dữ liệu học sinh thất bại. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }

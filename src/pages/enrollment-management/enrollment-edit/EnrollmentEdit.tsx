@@ -74,7 +74,7 @@ const EnrollmentEdit: React.FC = () => {
                 setHealthCertFile([]);
             }
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải chi tiết đơn đăng ký.');
+            typeof error === "string" ? toast.info(error) : toast.error('Không thể tải chi tiết đơn đăng ký.');
             navigate(-1);
         } finally {
             setPageLoading(false);
@@ -96,7 +96,7 @@ const EnrollmentEdit: React.FC = () => {
             setIsEditing(false);
             fetchData();
         } catch (formError) {
-            typeof formError === "string" ? toast.warn(formError) : toast.error('Dữ liệu chưa hợp lệ để cập nhật. Vui lòng kiểm tra lại.');
+            typeof formError === "string" ? toast.info(formError) : toast.error('Dữ liệu chưa hợp lệ để cập nhật. Vui lòng kiểm tra lại.');
         } finally {
             setIsUpdating(false);
         }
@@ -109,7 +109,7 @@ const EnrollmentEdit: React.FC = () => {
             const fileURL = URL.createObjectURL(blob);
             window.open(fileURL, '_blank');
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Không thể mở file PDF.');
+            typeof error === "string" ? toast.info(error) : toast.error('Không thể mở file PDF.');
         }
     }, []);
 
@@ -127,7 +127,7 @@ const EnrollmentEdit: React.FC = () => {
             toast.success('Duyệt đơn đăng ký thành công!');
             navigate(`${constants.APP_PREFIX}/enrollments`);
         } catch (formError) {
-            typeof formError === "string" ? toast.warn(formError) : toast.error('Dữ liệu chưa hợp lệ để duyệt. Vui lòng kiểm tra lại.');
+            typeof formError === "string" ? toast.info(formError) : toast.error('Dữ liệu chưa hợp lệ để duyệt. Vui lòng kiểm tra lại.');
         } finally {
             setIsApproving(false);
         }
@@ -145,7 +145,7 @@ const EnrollmentEdit: React.FC = () => {
             setIsRejectModalVisible(false);
             navigate(`${constants.APP_PREFIX}/enrollments`);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Từ chối đơn đăng ký thất bại. Vui lòng thử lại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Từ chối đơn đăng ký thất bại. Vui lòng thử lại!');
         } finally {
             setIsRejecting(false);
         }
@@ -193,7 +193,7 @@ const EnrollmentEdit: React.FC = () => {
             }
             toast.success(`Tải lên ${type === 'birth' ? 'giấy khai sinh' : 'giấy khám sức khỏe'} thành công!`);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Tải file thất bại. Vui lòng thử lại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Tải file thất bại. Vui lòng thử lại!');
         }
     }, []);
 

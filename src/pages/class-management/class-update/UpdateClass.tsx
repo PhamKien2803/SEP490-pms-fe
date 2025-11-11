@@ -80,7 +80,7 @@ function UpdateClass() {
             setAllAvailableTeachers(allTeachers);
             setAvailableRooms(allRooms);
         } catch (err) {
-            setError('Không thể tải dữ liệu để chỉnh sửa.');
+            typeof error === "string" ? toast.info(error) : toast.error("Không tải được thông tin")
         } finally {
             setLoading(false);
         }
@@ -146,7 +146,7 @@ function UpdateClass() {
             const availableClasses = await apiCall;
             setTransferableClasses(availableClasses.filter(cls => cls._id !== id));
         } catch (error) {
-            toast.error("Không thể tải danh sách lớp có thể chuyển.");
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách lớp có thể chuyển.");
             setIsTransferModalVisible(false);
         }
     };
@@ -183,9 +183,9 @@ function UpdateClass() {
             await fetchData();
         } catch (error) {
             if (error) {
-                toast.info("Bạn cần lưu giáo viên vào lớp rồi mới được chuyển")
+                typeof error === "string" ? toast.info(error) : toast.info("Bạn cần lưu giáo viên vào lớp rồi mới được chuyển")
             } else {
-                toast.error(`Chuyển ${itemType} thất bại.`);
+                typeof error === "string" ? toast.info(error) : toast.error(`Chuyển ${itemType} thất bại.`);
             }
         } finally {
             setIsTransferLoading(false);
@@ -210,8 +210,8 @@ function UpdateClass() {
             toast.success('Cập nhật lớp học thành công!');
             setIsDirty(false);
             // navigate(-1);
-        } catch (err) {
-            toast.error('Cập nhật lớp học thất bại.');
+        } catch (error) {
+            typeof error === "string" ? toast.info(error) : toast.error('Cập nhật lớp học thất bại.');
         } finally {
             setIsSubmitting(false);
         }
@@ -224,7 +224,7 @@ function UpdateClass() {
     const handleDownloadTeacherTemplate = useCallback(() => {
         downloadExcelTemplate('Mau_Them_Giao_Vien', [{ 'Mã GV': 'GV001', 'Họ tên': 'Trần Thị B', 'Email': 'tran.b@example.com' }]);
     }, []);
-    // ...
+
 
     const mainStudentColumns: ColumnsType<StudentInClass> = [
         { title: 'Mã HS', dataIndex: 'studentCode', key: 'studentCode' },

@@ -44,7 +44,7 @@ function TopicManagement() {
             }
         } catch (error) {
             setLoading(false);
-            toast.error("Không thể tải danh sách năm học.");
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách năm học.");
         }
     }, []);
 
@@ -100,7 +100,7 @@ function TopicManagement() {
             setTopics(prev => prev.filter(t => t._id !== deletingId));
             hideDeleteModal();
         } catch (error) {
-            toast.error("Xóa chủ đề thất bại.");
+            typeof error === "string" ? toast.info(error) : toast.error("Xóa chủ đề thất bại.");
         } finally {
             setIsDeleting(false);
         }

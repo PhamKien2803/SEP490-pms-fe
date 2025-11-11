@@ -262,7 +262,7 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
       window.open(fileURL, "_blank");
     } catch (error) {
       typeof error === "string"
-        ? toast.warn(error)
+        ? toast.info(error)
         : toast.error("Không thể mở file PDF hồ sơ sức khỏe.");
     }
   }, []);
@@ -425,7 +425,7 @@ const Medical: React.FC = () => {
         setSelectedStudentId(response.students[0]._id);
       }
     } catch (error) {
-      console.error("Lỗi khi tải danh sách con:", error);
+      typeof error === "string" ? toast.info(error) : toast.error("Lỗi khi tải danh sách con")
     }
   };
 
@@ -451,7 +451,7 @@ const Medical: React.FC = () => {
         page: response.page.page,
       });
     } catch (error) {
-      console.error("Lỗi khi tải danh sách hồ sơ:", error);
+      typeof error === "string" ? toast.info(error) : toast.error("Lỗi khi tải danh sách hồ sơ")
       setListData([]);
       setPagination((prev) => ({ ...prev, totalCount: 0 }));
     } finally {

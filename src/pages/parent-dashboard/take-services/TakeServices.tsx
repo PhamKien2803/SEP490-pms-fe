@@ -56,7 +56,7 @@ function TakeServices() {
                 form.setFieldsValue({ schoolYearId: newestYearId });
             }
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Không thể tải danh sách năm học");
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách năm học");
         }
     };
 
@@ -67,7 +67,7 @@ function TakeServices() {
             const res = await servicesApis.getStudentByParent(parentId);
             setStudents(res.students);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Không thể tải danh sách học sinh");
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách học sinh");
         }
     };
 
@@ -92,7 +92,7 @@ function TakeServices() {
             setSelectedQty(res.qty || 1);
 
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Không thể tải thông tin dịch vụ");
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải thông tin dịch vụ");
             setService(null);
         } finally {
             setLoading(false);
@@ -123,7 +123,7 @@ function TakeServices() {
             });
             toast.success("Cập nhật dịch vụ thành công");
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Cập nhật thất bại");
+            typeof error === "string" ? toast.info(error) : toast.error("Cập nhật thất bại");
         } finally {
             setUpdating(false);
         }

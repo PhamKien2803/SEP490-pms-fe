@@ -76,12 +76,12 @@ function EventManagement() {
                     setLoading(false);
                 }
             } catch (error) {
-                toast.error('Không thể tải danh sách năm học.');
+                typeof error === "string" ? toast.info(error) : toast.error('Không thể tải danh sách năm học.');
                 setLoading(false);
             }
         };
         fetchSchoolYears();
-    }, []); // Run once on mount
+    }, []);
 
     const fetchEvents = async (year?: string, page = 1, limit = 10) => {
         if (!year) {
@@ -99,7 +99,7 @@ function EventManagement() {
             setFilteredEvents(response.data);
             setPagination(prev => ({ ...prev, total: response.page.totalCount, current: page, pageSize: limit }));
         } catch (error) {
-            toast.info(`Không có sự kiện nào cho năm học ${year}.`);
+            typeof error === "string" ? toast.info(error) : toast.error(`Không có sự kiện nào cho năm học ${year}.`);
             setOriginalEvents([]);
             setFilteredEvents([]);
             setPagination(prev => ({ ...prev, total: 0, current: 1 }));
@@ -140,7 +140,7 @@ function EventManagement() {
                 fetchEvents(selectedSchoolYear, newCurrentPage, pagination.pageSize);
             }
         } catch (error) {
-            toast.error('Xóa sự kiện thất bại.');
+            typeof error === "string" ? toast.info(error) : toast.error('Xóa sự kiện thất bại.');
         }
     };
 

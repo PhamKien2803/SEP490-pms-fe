@@ -10,7 +10,6 @@ import {
     UserOutlined,
     CheckCircleOutlined,
     StopOutlined,
-    InfoCircleOutlined,
     ApartmentOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -29,11 +28,10 @@ function ClassDetails() {
     const navigate = useNavigate();
     const [classData, setClassData] = useState<ClassDetail | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    // const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!id) {
-            setError('Không tìm thấy ID của lớp học.');
             setLoading(false);
             return;
         }
@@ -43,9 +41,8 @@ function ClassDetails() {
             try {
                 const response = await classApis.getClassById(id);
                 setClassData(response);
-            } catch (err) {
-                setError('Không thể tải thông tin chi tiết của lớp học.');
-                toast.error('Có lỗi xảy ra, vui lòng thử lại.');
+            } catch (error) {
+                typeof error === "string" ? toast.info(error) : toast.error('Có lỗi xảy ra, vui lòng thử lại.');
             } finally {
                 setLoading(false);
             }
@@ -93,17 +90,17 @@ function ClassDetails() {
             );
         }
 
-        if (error) {
-            return (
-                <Alert
-                    message="Lỗi"
-                    description={error}
-                    type="error"
-                    showIcon
-                    icon={<InfoCircleOutlined />}
-                />
-            );
-        }
+        // if (error) {
+        //     return (
+        //         <Alert
+        //             message="Lỗi"
+        //             description={error}
+        //             type="error"
+        //             showIcon
+        //             icon={<InfoCircleOutlined />}
+        //         />
+        //     );
+        // }
 
         if (classData) {
             return (

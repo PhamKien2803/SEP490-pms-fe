@@ -8,6 +8,8 @@ export interface SchoolYearListItem {
     active: boolean;
     enrollmentStartDate: string;
     enrollmentEndDate: string;
+    serviceStartTime: string;
+    serviceEndTime: string;
     createdBy: string;
     createdAt: string;
     updatedAt: string;
@@ -40,6 +42,8 @@ export interface UpdateSchoolYearDto {
     numberTarget?: number;
     enrollmentStartDate: string;
     enrollmentEndDate: string;
+    serviceStartTime: string;
+    serviceEndTime: string;
     createdBy?: string;
 }
 

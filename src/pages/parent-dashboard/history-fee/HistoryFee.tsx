@@ -32,7 +32,7 @@ function HistoryFee() {
                 setSelectedYear(newestYear);
             }
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Không thể tải danh sách năm học");
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách năm học");
         }
     };
 
@@ -48,7 +48,7 @@ function HistoryFee() {
             setHistoryData(res.data);
             setTotalAmount(res.totalAmount);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Không thể tải dữ liệu học phí");
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải dữ liệu học phí");
         } finally {
             setLoading(false);
         }

@@ -35,7 +35,7 @@ const AccountManagement: React.FC = () => {
             const response = await accountsApis.getAccountList({ page: 1, limit: 1000 });
             setAllAccounts(response.data);
         } catch (error) {
-            toast.info('Hiện chưa có tài khoản nào.');
+            typeof error === "string" ? toast.info(error) : toast.info('Hiện chưa có tài khoản nào.');
         } finally {
             setLoading(false);
         }
@@ -83,7 +83,7 @@ const AccountManagement: React.FC = () => {
             setIsUpdateModalOpen(false);
             fetchAllAccounts();
         } catch (error) {
-            toast.error('Cập nhật tài khoản thất bại.');
+            typeof error === "string" ? toast.info(error) : toast.error('Cập nhật tài khoản thất bại.');
         } finally {
             setIsUpdating(false);
         }
@@ -103,7 +103,7 @@ const AccountManagement: React.FC = () => {
             setIsDeleteModalOpen(false);
             fetchAllAccounts();
         } catch (error) {
-            toast.error('Xóa tài khoản thất bại.');
+            typeof error === "string" ? toast.info(error) : toast.error('Xóa tài khoản thất bại.');
         } finally {
             setIsDeleting(false);
             setDeletingId(null);

@@ -40,7 +40,7 @@ const RevenueEdit = () => {
             const data = await revenuesApis.getRevenueById(id!);
             form.setFieldsValue(data);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Không thể tải dữ liệu khoản thu");
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải dữ liệu khoản thu");
         } finally {
             setLoading(false);
         }
@@ -78,7 +78,7 @@ const RevenueEdit = () => {
             toast.success("Cập nhật khoản thu thành công!");
             navigate(-1);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Cập nhật khoản thu thất bại!");
+            typeof error === "string" ? toast.info(error) : toast.error("Cập nhật khoản thu thất bại!");
         } finally {
             setIsSubmitting(false);
         }

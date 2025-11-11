@@ -73,8 +73,7 @@ function FeedBack() {
                     }
                 }
             } catch (error) {
-                console.error(error);
-                toast.error('Không thể tải thông tin lớp hoặc năm học.');
+                typeof error === "string" ? toast.info(error) : toast.error('Không thể tải thông tin lớp hoặc năm học.');
             } finally {
                 setIsLoadingTeacherData(false);
             }
@@ -89,7 +88,7 @@ function FeedBack() {
             const data = await teacherApis.getFeedbackByClassAndDate(selectedClassId, date);
             setFeedbacks(data);
         } catch (error) {
-            toast.error('Không thể tải dữ liệu phản hồi.');
+            typeof error === "string" ? toast.info(error) : toast.error('Không thể tải dữ liệu phản hồi.');
         } finally {
             setLoading(false);
         }

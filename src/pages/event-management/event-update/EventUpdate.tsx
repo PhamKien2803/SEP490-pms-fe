@@ -70,7 +70,7 @@ function EventUpdate() {
             form.setFieldsValue(formData);
 
         } catch (error) {
-            toast.error("Không thể tải dữ liệu sự kiện.");
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải dữ liệu sự kiện.");
             navigate(-1);
         } finally {
             setLoading(false);
@@ -119,8 +119,7 @@ function EventUpdate() {
             setIsDirty(false);
             // navigate(-1);
         } catch (error) {
-            toast.error('Cập nhật sự kiện thất bại.');
-            console.error("Event update failed:", error);
+            typeof error === "string" ? toast.info(error) : toast.error('Cập nhật sự kiện thất bại.');
         } finally {
             setIsSubmitting(false);
         }

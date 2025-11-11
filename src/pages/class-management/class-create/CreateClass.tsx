@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    Card, Spin, Alert, Button, Row, Col, Typography, Flex, Table,
+    Card, Spin, Button, Row, Col, Typography, Flex, Table,
     Form, Input, Modal, Popconfirm,
     Space, Select
 } from 'antd';
@@ -27,7 +27,7 @@ function CreateClass() {
     usePageTitle('Tạo mới lớp học - Cá Heo Xanh');
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    // const [error, setError] = useState<string | null>(null);
     const [isDirty, setIsDirty] = useState(false);
     const [isBackConfirmVisible, setIsBackConfirmVisible] = useState(false);
     const [students, setStudents] = useState<StudentInClass[]>([]);
@@ -48,9 +48,8 @@ function CreateClass() {
                 setAllAvailableStudents(allStudents);
                 setAllAvailableTeachers(allTeachers);
                 setAvailableRooms(allRooms);
-            } catch (err) {
-                setError('Không thể tải dữ liệu cần thiết để tạo lớp.');
-                toast.error('Có lỗi xảy ra, vui lòng thử lại.');
+            } catch (error) {
+                typeof error === "string" ? toast.info(error) : toast.error('Có lỗi xảy ra, vui lòng thử lại.');
             } finally {
                 setLoading(false);
             }
@@ -106,8 +105,8 @@ function CreateClass() {
             await classApis.createClass(payload);
             toast.success('Tạo mới lớp học thành công!');
             navigate(-1);
-        } catch (err) {
-            toast.error('Tạo mới lớp học thất bại.');
+        } catch (error) {
+            typeof error === "string" ? toast.info(error) : toast.error('Tạo mới lớp học thất bại.');
         } finally {
             setIsSubmitting(false);
         }
@@ -130,9 +129,9 @@ function CreateClass() {
     if (loading) {
         return <Flex align="center" justify="center" style={{ minHeight: '400px' }}><Spin size="large" /></Flex>;
     }
-    if (error) {
-        return <Alert message="Lỗi" description={error} type="error" showIcon />;
-    }
+    // if (error) {
+    //     return <Alert message="Lỗi" description={error} type="error" showIcon />;
+    // }
 
     return (
         <div style={{ padding: '24px', background: '#f0f2f5' }}>

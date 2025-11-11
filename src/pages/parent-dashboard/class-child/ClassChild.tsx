@@ -170,7 +170,7 @@ const ClassChild: React.FC = () => {
         setIsLoading(false);
       }
     } catch (error) {
-      console.error("Lỗi khi tải danh sách con:", error);
+      typeof error === "string" ? toast.info(error) : toast.error("Lỗi khi tải danh sách con")
       setIsLoading(false);
     }
   };
@@ -190,7 +190,7 @@ const ClassChild: React.FC = () => {
     } catch (error) {
       setIsError(true);
       setClassDetail(null);
-      console.error("Lỗi khi fetch chi tiết lớp:", error);
+      typeof error === "string" ? toast.info(error) : toast.error("Lỗi khi tải chi tiết lớp")
     } finally {
       setIsLoading(false);
     }

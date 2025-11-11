@@ -75,7 +75,7 @@ const ParentManagement: React.FC = () => {
                 }));
             } catch (error) {
                 // typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách phụ huynh.');
-                toast.info('Hiện tại không có phụ huynh nào trong hệ thống.');
+                typeof error === "string" ? toast.info(error) : toast.info('Hiện tại không có phụ huynh nào trong hệ thống.');
             } finally {
                 setLoading(false);
             }
@@ -133,7 +133,7 @@ const ParentManagement: React.FC = () => {
                 fetchParents({ page: 1, limit: pagination.pageSize! });
             }
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Tạo phụ huynh thất bại. Vui lòng thử lại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Tạo phụ huynh thất bại. Vui lòng thử lại!');
         } finally {
             setIsSubmitting(false);
         }
@@ -161,7 +161,7 @@ const ParentManagement: React.FC = () => {
                 limit: pagination.pageSize!,
             });
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Cập nhật phụ huynh thất bại. Vui lòng thử lại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Cập nhật phụ huynh thất bại. Vui lòng thử lại!');
         } finally {
             setIsUpdating(false);
         }
@@ -190,7 +190,7 @@ const ParentManagement: React.FC = () => {
                 });
             }
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Xóa phụ huynh thất bại. Vui lòng thử lại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Xóa phụ huynh thất bại. Vui lòng thử lại!');
         } finally {
             setIsDeleting(false);
             setDeletingId(null);

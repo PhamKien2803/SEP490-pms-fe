@@ -51,9 +51,6 @@ import { usePageTitle } from "../../../hooks/usePageTitle";
 const { Title } = Typography;
 const { Option } = Select;
 
-// const currentSchoolYear =
-//   (constants as any).CURRENT_SCHOOL_YEAR || new Date().getFullYear().toString();
-
 const calculateBMI = (
   height: number | undefined,
   weight: number | undefined
@@ -129,11 +126,10 @@ const CreateMedical: React.FC = () => {
   const [selectedStudent, setSelectedStudent] = useState<StudentInClass | null>(
     null
   );
-  const [selectedSchoolYear, setSelectedSchoolYear] = useState<
+  const [_, setSelectedSchoolYear] = useState<
     string | undefined
   >(undefined);
   const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
-  console.log(selectedSchoolYear);
   const handleViewPDF = useCallback(async (fileId: string) => {
     try {
       const arrayBuffer = await enrollmentApis.getPDFById(fileId);
@@ -142,7 +138,7 @@ const CreateMedical: React.FC = () => {
       window.open(fileURL, "_blank");
     } catch (error) {
       typeof error === "string"
-        ? toast.warn(error)
+        ? toast.info(error)
         : toast.error("Không thể mở file PDF.");
     }
   }, []);
@@ -157,7 +153,7 @@ const CreateMedical: React.FC = () => {
       });
       setClasses(response.data || []);
     } catch (error) {
-      toast.info("Hiện chưa có lớp học nào trong năm học này !");
+      typeof error === "string" ? toast.info(error) : toast.error("Hiện chưa có lớp học nào trong năm học này !");
     } finally {
       setClassLoading(false);
     }
@@ -184,7 +180,7 @@ const CreateMedical: React.FC = () => {
         }
       } catch (error) {
         typeof error === "string"
-          ? toast.warn(error)
+          ? toast.info(error)
           : toast.error("Không thể tải danh sách năm học.");
       }
     };
@@ -203,8 +199,7 @@ const CreateMedical: React.FC = () => {
 
         setStudentsInSelectedClass(response.students || []);
       } catch (error) {
-        console.error(error);
-        toast.error("Không thể tải danh sách học sinh của lớp này.");
+        typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách học sinh của lớp này.");
         setStudentsInSelectedClass([]);
       } finally {
         setStudentLoading(false);
@@ -251,7 +246,6 @@ const CreateMedical: React.FC = () => {
     );
 
     const studentId = values.studentId;
-    console.log("values", values);
     if (!studentId) {
       toast.warn("Vui lòng chọn một Học sinh.");
       setLoading(false);
@@ -300,10 +294,7 @@ const CreateMedical: React.FC = () => {
       toast.success(`Tạo Hồ sơ Sức khỏe cho học sinh thành công!`);
       navigate(`${constants.APP_PREFIX}/medicals`);
     } catch (error: any) {
-      const errorMessage =
-        error?.response?.data?.message ||
-        "Tạo hồ sơ sức khỏe thất bại. Vui lòng kiểm tra dữ liệu và thử lại.";
-      toast.error(errorMessage);
+      typeof error === "string" ? toast.info(error) : toast.error("Tạo hồ sơ sức khỏe thất bại. Vui lòng kiểm tra dữ liệu và thử lại.");
     } finally {
       setLoading(false);
     }

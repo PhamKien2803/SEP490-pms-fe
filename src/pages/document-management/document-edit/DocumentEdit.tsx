@@ -50,7 +50,7 @@ function DocumentEdit() {
                 documentDate: dayjs(res.documentDate),
             });
         } catch (err) {
-            typeof err === "string" ? toast.warn(err) : toast.error("Không thể tải dữ liệu chứng từ");
+            typeof err === "string" ? toast.info(err) : toast.error("Không thể tải dữ liệu chứng từ");
         } finally {
             setLoading(false);
         }
@@ -65,9 +65,9 @@ function DocumentEdit() {
         try {
             await documentsApis.updateDocument(id as string, payload);
             toast.success("Cập nhật thành công");
-            navigate(-1);
+            // navigate(-1);
         } catch (err) {
-            typeof err === "string" ? toast.warn(err) : toast.error("Cập nhật thất bại");
+            typeof err === "string" ? toast.info(err) : toast.error("Cập nhật thất bại");
         }
     };
 
@@ -77,7 +77,7 @@ function DocumentEdit() {
             toast.success("Đã xác nhận thanh toán");
             fetchDocument();
         } catch (err) {
-            typeof err === "string" ? toast.warn(err) : toast.error("Xác nhận thất bại");
+            typeof err === "string" ? toast.info(err) : toast.error("Xác nhận thất bại");
         }
     };
 

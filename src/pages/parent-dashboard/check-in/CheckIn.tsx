@@ -31,6 +31,7 @@ import { parentDashboardApis } from "../../../services/apiServices";
 import { Student } from "../../../types/parent";
 import { CheckInResponse, CheckInParams } from "../../../types/parent";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { toast } from "react-toastify";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -132,7 +133,7 @@ const CheckIn: React.FC = () => {
         setIsLoading(false);
       }
     } catch (error) {
-      console.error("Lỗi khi tải danh sách con:", error);
+      typeof error === "string" ? toast.info(error) : toast.error("Lỗi khi tải danh sách con")
       setIsLoading(false);
     }
   };
@@ -152,7 +153,7 @@ const CheckIn: React.FC = () => {
     } catch (error) {
       setIsError(true);
       setCheckIn(null);
-      console.error("Lỗi khi fetch check-in:", error);
+      typeof error === "string" ? toast.info(error) : toast.error("Lỗi khi tải check-in")
     } finally {
       setIsLoading(false);
     }

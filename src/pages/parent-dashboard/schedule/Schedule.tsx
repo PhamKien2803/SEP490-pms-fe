@@ -191,7 +191,7 @@ const Schedule: React.FC = () => {
         }
       } catch (error) {
         typeof error === "string"
-          ? toast.warn(error)
+          ? toast.info(error)
           : toast.error("Không thể tải danh sách năm học.");
       }
     };
@@ -216,7 +216,7 @@ const Schedule: React.FC = () => {
           setIsInitialLoading(false);
         }
       } catch (error) {
-        console.error("Lỗi khi tải danh sách con:", error);
+        typeof error === "string" ? toast.info(error) : toast.error("Lỗi khi tải danh sách con")
         setIsInitialLoading(false);
       }
     };
@@ -248,7 +248,7 @@ const Schedule: React.FC = () => {
     } catch (error) {
       setIsClassError(true);
       setClassDetail(null);
-      console.error("Lỗi khi fetch chi tiết lớp:", error);
+      typeof error === "string" ? toast.info(error) : toast.error("Lỗi khi tải chi tiết lớp")
     } finally {
       setIsClassLoading(false);
       setIsInitialLoading(false);
@@ -284,7 +284,7 @@ const Schedule: React.FC = () => {
       } catch (error) {
         setIsScheduleError(true);
         setScheduleList([]);
-        console.error("Lỗi khi fetch lịch học:", error);
+        typeof error === "string" ? toast.info(error) : toast.error("Lỗi khi tải lịch học")
       } finally {
         setIsScheduleLoading(false);
       }

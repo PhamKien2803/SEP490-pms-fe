@@ -146,8 +146,7 @@ function AttendanceHistory() {
             setAttendanceList(listData.map((item) => ({ ...item, key: item._id })));
             setPagination((prev) => ({ ...prev, current: 1, total: listData.length }));
         } catch (error) {
-            console.error('Lỗi tải dữ liệu:', error);
-            toast.error('Không thể tải dữ liệu điểm danh.');
+            typeof error === "string" ? toast.info(error) : toast.error('Không thể tải dữ liệu điểm danh.');
             setAttendanceList([]);
             setPagination((prev) => ({ ...prev, current: 1, total: 0 }));
         } finally {
@@ -169,11 +168,10 @@ function AttendanceHistory() {
 
                 const firstYearId = sorted[0]?._id;
                 if (firstYearId) {
-                    setSelectedSchoolYearId(firstYearId); // Set năm học, việc này sẽ trigger useEffect tiếp theo
+                    setSelectedSchoolYearId(firstYearId);
                 }
             } catch (error) {
-                console.error('Lỗi tải năm học:', error);
-                toast.error('Không thể tải danh sách năm học.');
+                typeof error === "string" ? toast.info(error) : toast.error('Không thể tải danh sách năm học.');
             } finally {
                 setLoading(false);
             }
@@ -196,14 +194,11 @@ function AttendanceHistory() {
         navigate(`${constants.APP_PREFIX}/attendances/take-attendance`);
     };
 
-    // 5. Đơn giản hóa hàm đổi năm học
     const handleSchoolYearChange = (yearId: string) => {
         setSelectedSchoolYearId(yearId);
     };
 
-    // 6. Hàm làm mới
     const handleRefresh = () => {
-        toast.info('Đang làm mới danh sách...');
         fetchAttendanceData(selectedSchoolYearId);
     };
 

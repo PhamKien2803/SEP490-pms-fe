@@ -275,15 +275,15 @@ const UpdateRoom: React.FC = () => {
   usePageTitle('Cập nhật phòng học - Cá Heo Xanh');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-    const user = useCurrentUser();
+  const user = useCurrentUser();
   const [form] = Form.useForm();
   const [roomDetail, setRoomDetail] = useState<RoomRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isCancelConfirmVisible, setIsCancelConfirmVisible] = useState(false);
-      const isHRStaff = !user?.isTeacher || user?.isAdmin;
-          const isTeacher = user?.isTeacher || user?.isAdmin;
+  const isHRStaff = !user?.isTeacher || user?.isAdmin;
+  const isTeacher = user?.isTeacher || user?.isAdmin;
 
   const [isRejectModalVisible, setIsRejectModalVisible] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
@@ -354,7 +354,7 @@ const UpdateRoom: React.FC = () => {
         setIsEditing(false);
         setIsDataDirty(false);
       } catch (error) {
-        toast.error("Tải chi tiết phòng học thất bại.");
+        typeof error === "string" ? toast.info(error) : toast.error("Tải chi tiết phòng học thất bại.");
         setRoomDetail(null);
       } finally {
         setLoading(false);
@@ -459,10 +459,7 @@ const UpdateRoom: React.FC = () => {
       setIsRejectModalVisible(false);
       setRejectReason("");
     } catch (error: any) {
-      const errorMessage =
-        error ||
-        "Cập nhật phòng học thất bại. Vui lòng kiểm tra dữ liệu và thử lại.";
-      toast.error(errorMessage);
+      typeof error === "string" ? toast.info(error) : toast.error("Cập nhật phòng học thất bại. Vui lòng kiểm tra dữ liệu và thử lại.");
     } finally {
       setIsSaving(false);
     }
@@ -564,7 +561,7 @@ const UpdateRoom: React.FC = () => {
           </Space>
         );
       case "Chờ giáo viên duyệt":
-        return isTeacher ?  (
+        return isTeacher ? (
           <Space>
             <Button
               icon={<EditOutlined />}

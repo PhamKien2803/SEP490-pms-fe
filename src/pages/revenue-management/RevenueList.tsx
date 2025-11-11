@@ -60,7 +60,7 @@ const RevenueList: React.FC = () => {
                 total: res.page.totalCount,
             }));
         } catch (err) {
-            typeof err === "string" ? toast.warn(err) : toast.error("Không thể tải danh sách khoản thu");
+            typeof err === "string" ? toast.info(err) : toast.error("Không thể tải danh sách khoản thu");
         } finally {
             setLoading(false);
         }
@@ -81,7 +81,7 @@ const RevenueList: React.FC = () => {
             setShowDeleteModal(false);
             setDeletingId(null);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Xóa thất bại");
+            typeof error === "string" ? toast.info(error) : toast.error("Xóa thất bại");
         } finally {
             setDeletingLoading(false);
         }

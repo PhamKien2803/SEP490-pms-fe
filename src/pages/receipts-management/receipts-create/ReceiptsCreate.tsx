@@ -51,7 +51,7 @@ function ReceiptsCreate() {
                 form.setFieldsValue({ schoolYear: resSchoolYears.data[0]._id });
             }
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Không thể tải dữ liệu khởi tạo");
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải dữ liệu khởi tạo");
         }
     };
 
@@ -78,7 +78,7 @@ function ReceiptsCreate() {
             setUnsavedChanges(false);
             navigate(-1);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Tạo biên lai thất bại");
+            typeof error === "string" ? toast.info(error) : toast.error("Tạo biên lai thất bại");
         }
     };
 

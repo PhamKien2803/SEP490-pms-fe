@@ -30,7 +30,7 @@ const EnrollmentDetail: React.FC = () => {
                 const response = await enrollmentApis.getEnrollmentById(id);
                 setData(response);
             } catch (error) {
-                typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải chi tiết đơn tuyển sinh.');
+                typeof error === "string" ? toast.info(error) : toast.error('Không thể tải chi tiết đơn tuyển sinh.');
                 navigate(-1);
             } finally {
                 setLoading(false);

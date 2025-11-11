@@ -85,9 +85,7 @@ const GuardianManagement: React.FC = () => {
       }
       setStudentsData(response);
     } catch (err) {
-      const errorMessage =
-        error || "Không thể tải danh sách học sinh. Vui lòng thử lại.";
-      toast.error(errorMessage);
+      typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách học sinh. Vui lòng thử lại.");
     } finally {
       setIsLoading(false);
     }
@@ -100,8 +98,7 @@ const GuardianManagement: React.FC = () => {
         const response = await guardianApis.getListGuardianByStudent(studentId);
         setGuardians(response.data);
       } catch (err) {
-        const errorMessage = error || "Tải danh sách người đưa đón thất bại.";
-        toast.error(errorMessage);
+        typeof error === "string" ? toast.info(error) : toast.error("Tải danh sách người đưa đón thất bại.");
         setGuardians([]);
       } finally {
         setIsLoading(false);
@@ -143,8 +140,7 @@ const GuardianManagement: React.FC = () => {
       toast.success("Xóa người đưa đón thành công!");
       fetchGuardians(selectedStudentId);
     } catch (error: any) {
-      const errorMessage = error || "Xóa người đưa đón thất bại.";
-      toast.error(errorMessage);
+      typeof error === "string" ? toast.info(error) : toast.error("Xóa người đưa đón thất bại.");
     }
   };
 

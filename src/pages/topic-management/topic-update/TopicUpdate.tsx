@@ -111,7 +111,7 @@ function TopicUpdate() {
                 setManualCoreRows(transformApiToRows(topicData.activitiCore));
                 setManualEventRows(transformApiToRows(topicData.activitiEvent));
             } catch (error) {
-                toast.error('Lỗi khi tải dữ liệu chủ đề.');
+                typeof error === "string" ? toast.info(error) : toast.error('Lỗi khi tải dữ liệu chủ đề.');
                 navigate(-1);
             } finally {
                 setIsLoading(false);
@@ -194,7 +194,7 @@ function TopicUpdate() {
             toast.success('Cập nhật chủ đề thành công!');
             // navigate(-1);
         } catch (error) {
-            toast.error('Cập nhật chủ đề thất bại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Cập nhật chủ đề thất bại!');
         } finally {
             setIsSaving(false);
         }

@@ -39,7 +39,7 @@ function SchoolYears() {
             const response = await schoolYearApis.getSchoolYearList({ page: 1, limit: 1000 });
             setSchoolYears(response.data || []);
         } catch (error) {
-            toast.info('Hiện chưa có năm học nào. Vui lòng tạo mới!');
+            typeof error === "string" ? toast.info(error) : toast.error('Hiện chưa có năm học nào. Vui lòng tạo mới!');
         } finally {
             setLoading(false);
         }
@@ -78,7 +78,7 @@ function SchoolYears() {
             setSchoolYears(prevYears => prevYears.filter(year => year._id !== deletingId));
             hideDeleteModal();
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Đã có lỗi xảy ra. Vui lòng thử lại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Đã có lỗi xảy ra. Vui lòng thử lại!');
         } finally {
             setIsDeleting(false);
         }

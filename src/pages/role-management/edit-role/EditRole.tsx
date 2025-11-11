@@ -64,7 +64,7 @@ const EditRole: React.FC = () => {
                 });
 
             } catch (error) {
-                toast.error('Không thể tải dữ liệu của vai trò.');
+                typeof error === "string" ? toast.info(error) : toast.error('Không thể tải dữ liệu của vai trò.');
                 navigate(`${constants.APP_PREFIX}/roles`);;
             } finally {
                 setPageLoading(false);
@@ -119,7 +119,7 @@ const EditRole: React.FC = () => {
             navigate(`${constants.APP_PREFIX}/roles`);;
             window.location.reload();
         } catch (error) {
-            toast.error('Cập nhật vai trò thất bại.');
+            typeof error === "string" ? toast.info(error) : toast.error('Cập nhật vai trò thất bại.');
         } finally {
             setSubmitting(false);
         }
