@@ -56,8 +56,7 @@ const FunctionsManagement: React.FC = () => {
                 pageSize: response.page.limit,
             }));
         } catch (error) {
-            // typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách chức năng.');
-            toast.info('Hiện chưa có chức năng nào. Vui lòng tạo mới!');
+            typeof error === "string" ? toast.info(error) : toast.error('Hiện chưa có chức năng nào. Vui lòng tạo mới!');
         } finally {
             setLoading(false);
         }
@@ -102,7 +101,7 @@ const FunctionsManagement: React.FC = () => {
                 fetchFunctions({ page: 1, limit: pagination.pageSize! });
             }
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Tạo chức năng thất bại. Vui lòng thử lại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Tạo chức năng thất bại. Vui lòng thử lại!');
         } finally {
             setIsSubmitting(false);
         }
@@ -127,7 +126,7 @@ const FunctionsManagement: React.FC = () => {
             setIsUpdateModalOpen(false);
             fetchFunctions({ page: pagination.current!, limit: pagination.pageSize! });
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Cập nhật chức năng thất bại. Vui lòng thử lại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Cập nhật chức năng thất bại. Vui lòng thử lại!');
         } finally {
             setIsUpdating(false);
         }
@@ -152,7 +151,7 @@ const FunctionsManagement: React.FC = () => {
                 fetchFunctions({ page: pagination.current!, limit: pagination.pageSize! });
             }
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Xóa chức năng thất bại. Vui lòng thử lại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Xóa chức năng thất bại. Vui lòng thử lại!');
         } finally {
             setIsDeleting(false);
             setDeletingId(null);

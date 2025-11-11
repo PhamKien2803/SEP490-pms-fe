@@ -11,6 +11,8 @@ import {
   Descriptions,
   Table,
   Tag,
+  Form,
+  Tabs,
 } from "antd";
 import {
   UserOutlined,
@@ -23,6 +25,7 @@ import {
   BookOutlined,
   PhoneOutlined,
   SolutionOutlined,
+  FilterOutlined,
 } from "@ant-design/icons";
 import { useCurrentUser } from "../../../hooks/useCurrentUser";
 import { parentDashboardApis } from "../../../services/apiServices";
@@ -30,9 +33,11 @@ import { Student } from "../../../types/parent";
 import { ClassDetailResponse } from "../../../types/parent";
 import { toast } from "react-toastify";
 import { SchoolYearListItem } from "../../../types/schoolYear";
+import { usePageTitle } from "../../../hooks/usePageTitle";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
+const { TabPane } = Tabs;
 
 interface ClassChildParams {
   studentId: string;
@@ -89,6 +94,7 @@ const teacherColumns = [
 ];
 
 const ClassChild: React.FC = () => {
+  usePageTitle("Thông tin lớp học - Cá Heo Xanh");
   const user = useCurrentUser();
   const [listChild, setListChild] = useState<Student[]>([]);
   const [selectedStudentId, setSelectedStudentId] = useState<
@@ -112,7 +118,7 @@ const ClassChild: React.FC = () => {
       studentId: selectedStudentId || "",
       schoolYearId: schoolYear?.[0]?._id || "",
     };
-  }, [selectedStudentId, selectedSchoolYear]);
+  }, [selectedStudentId, selectedSchoolYear, schoolYears]);
 
   useEffect(() => {
     const fetchSchoolYears = async () => {
@@ -164,13 +170,13 @@ const ClassChild: React.FC = () => {
         setIsLoading(false);
       }
     } catch (error) {
-      console.error("Lỗi khi tải danh sách con:", error);
+      typeof error === "string" ? toast.info(error) : toast.error("Lỗi khi tải danh sách con")
       setIsLoading(false);
     }
   };
 
   const fetchClassDetail = async () => {
-    if (!selectedStudentId || !selectedSchoolYear) {
+    if (!selectedStudentId || !params.schoolYearId) {
       setClassDetail(null);
       setIsLoading(false);
       return;
@@ -184,14 +190,16 @@ const ClassChild: React.FC = () => {
     } catch (error) {
       setIsError(true);
       setClassDetail(null);
-      console.error("Lỗi khi fetch chi tiết lớp:", error);
+      typeof error === "string" ? toast.info(error) : toast.error("Lỗi khi tải chi tiết lớp")
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchClassDetail();
+    if (params.studentId && params.schoolYearId) {
+      fetchClassDetail();
+    }
   }, [params.studentId, params.schoolYearId]);
 
   const selectedStudent = listChild.find((s) => s._id === selectedStudentId);
@@ -237,57 +245,72 @@ const ClassChild: React.FC = () => {
       <Divider style={{ margin: "16px 0" }} />
 
       <Card
-        bordered={false}
+        bordered
+        title={
+          <Text strong>
+            <FilterOutlined style={{ marginRight: 8 }} />
+            Lọc Thông Tin
+          </Text>
+        }
         style={{
           marginBottom: 24,
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-          backgroundColor: "#e6fffb",
         }}
       >
-        <Row gutter={24} align="middle">
-          <Col span={12}>
-            <Text
-              strong
-              style={{ display: "block", marginBottom: 4, color: "#595959" }}
-            >
-              <UserOutlined style={{ marginRight: 4 }} /> Chọn con:
-            </Text>
-            <Select
-              value={selectedStudentId}
-              style={{ width: "100%" }}
-              onChange={(value) => setSelectedStudentId(value)}
-              placeholder="Chọn con của bạn"
-              size="large"
-            >
-              {listChild.map((student) => (
-                <Option key={student._id} value={student._id}>
-                  {student?.fullName} ({student?.studentCode})
-                </Option>
-              ))}
-            </Select>
-          </Col>
-          <Col span={12}>
-            <Text
-              strong
-              style={{ display: "block", marginBottom: 4, color: "#595959" }}
-            >
-              <CalendarOutlined style={{ marginRight: 4 }} /> Chọn năm học:
-            </Text>
-            <Select
-              value={selectedSchoolYear}
-              style={{ width: "100%" }}
-              onChange={(value) => setSelectedSchoolYear(value)}
-              placeholder="Chọn năm học"
-              size="large"
-            >
-              {schoolYears.map((year) => (
-                <Option key={year._id} value={year.schoolYear}>
-                  {year.schoolYear}
-                </Option>
-              ))}
-            </Select>
-          </Col>
-        </Row>
+        <Form layout="vertical">
+          <Row gutter={[24, 0]}>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label={
+                  <Text strong>
+                    <UserOutlined style={{ marginRight: 4 }} />
+                    Chọn con
+                  </Text>
+                }
+              >
+                <Select
+                  value={selectedStudentId}
+                  style={{ width: "100%" }}
+                  onChange={(value) => setSelectedStudentId(value)}
+                  placeholder="Chọn con của bạn"
+                  size="large"
+                  loading={isLoading && listChild.length === 0}
+                >
+                  {listChild.map((student) => (
+                    <Option key={student._id} value={student._id}>
+                      {student?.fullName} ({student?.studentCode})
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label={
+                  <Text strong>
+                    <CalendarOutlined style={{ marginRight: 4 }} />
+                    Chọn năm học
+                  </Text>
+                }
+              >
+                <Select
+                  value={selectedSchoolYear}
+                  style={{ width: "100%" }}
+                  onChange={(value) => setSelectedSchoolYear(value)}
+                  placeholder="Chọn năm học"
+                  size="large"
+                  loading={schoolYears.length === 0}
+                >
+                  {schoolYears.map((year) => (
+                    <Option key={year._id} value={year.schoolYear}>
+                      {year.schoolYear}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+        </Form>
       </Card>
 
       <Spin spinning={isLoading}>
@@ -318,116 +341,136 @@ const ClassChild: React.FC = () => {
         )}
 
         {classData && (
-          <>
-            <Card
-              title={
-                <Title level={4} style={{ margin: 0 }}>
-                  <TeamOutlined /> Chi Tiết Lớp {classData.className}
-                </Title>
-              }
-              bordered={false}
-              style={{
-                marginBottom: 24,
-                backgroundColor: "#e6f7ff",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-              }}
-            >
-              <Descriptions
-                column={{ xs: 1, sm: 2, md: 3 }}
-                bordered
-                size="middle"
-              >
-                <Descriptions.Item
-                  label={
-                    <Text strong>
-                      <BookOutlined /> Tên Lớp
-                    </Text>
-                  }
-                >
-                  <Text>
-                    {classData.className} ({classData.classCode})
-                  </Text>
-                </Descriptions.Item>
-                <Descriptions.Item
-                  label={
-                    <Text strong>
-                      <EnvironmentOutlined /> Phòng Học
-                    </Text>
-                  }
-                >
-                  <Text>{classData.room?.roomName || "N/A"}</Text>
-                </Descriptions.Item>
-                <Descriptions.Item
-                  label={
-                    <Text strong>
-                      <ScheduleOutlined /> Sĩ số
-                    </Text>
-                  }
-                >
-                  <Text>{classData.students?.length || 0} học sinh</Text>
-                </Descriptions.Item>
-                <Descriptions.Item
-                  label={
-                    <Text strong>
-                      <CalendarOutlined /> Năm Học
-                    </Text>
-                  }
-                >
-                  <Text>{classData.schoolYear?.schoolYear || "N/A"}</Text>
-                </Descriptions.Item>
-                <Descriptions.Item
-                  label={
-                    <Text strong>
-                      <SolutionOutlined /> Độ tuổi
-                    </Text>
-                  }
-                >
-                  <Text>{classData.age || "N/A"}</Text>
-                </Descriptions.Item>
-                <Descriptions.Item
-                  label={
-                    <Text strong>
-                      <CheckCircleOutlined /> Trạng Thái
-                    </Text>
-                  }
-                >
-                  <Tag color={classData.active ? "success" : "red"}>
-                    {classData.active ? "Đang hoạt động" : "Đã kết thúc"}
-                  </Tag>
-                </Descriptions.Item>
-              </Descriptions>
-            </Card>
-
-            <Title level={3} style={{ margin: 20 }}>
-              <TeamOutlined /> Danh Sách Giáo Viên
-            </Title>
-            <Card style={{ boxShadow: "0 2px 8px rgba(0, 0, 0, 0.09)" }}>
-              <Table
-                columns={teacherColumns}
-                dataSource={classData.teachers ?? []}
-                rowKey="_id"
-                pagination={false}
-                size="middle"
-                locale={{
-                  emptyText: "Chưa có thông tin giáo viên chính thức.",
+          <Row gutter={[24, 24]}>
+            <Col xs={24} md={10} lg={8}>
+              <Card
+                title={
+                  <Title level={4} style={{ margin: 0, color: "#08979c" }}>
+                    <SolutionOutlined style={{ marginRight: 8 }} />
+                    Thông Tin Lớp
+                  </Title>
+                }
+                bordered={false}
+                style={{
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+                  borderTop: "4px solid #08979c",
                 }}
-              />
-            </Card>
+              >
+                <Descriptions
+                  column={1}
+                  bordered
+                  size="middle"
+                  layout="horizontal"
+                >
+                  <Descriptions.Item
+                    label={
+                      <Text strong>
+                        <BookOutlined /> Tên Lớp
+                      </Text>
+                    }
+                  >
+                    <Text>
+                      {classData.className} ({classData.classCode})
+                    </Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item
+                    label={
+                      <Text strong>
+                        <EnvironmentOutlined /> Phòng
+                      </Text>
+                    }
+                  >
+                    <Text>{classData.room?.roomName || "N/A"}</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item
+                    label={
+                      <Text strong>
+                        <ScheduleOutlined /> Sĩ số
+                      </Text>
+                    }
+                  >
+                    <Text>{classData.students?.length || 0} học sinh</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item
+                    label={
+                      <Text strong>
+                        <CalendarOutlined /> Năm Học
+                      </Text>
+                    }
+                  >
+                    <Text>{classData.schoolYear?.schoolYear || "N/A"}</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item
+                    label={
+                      <Text strong>
+                        <SolutionOutlined /> Độ tuổi
+                      </Text>
+                    }
+                  >
+                    <Text>{classData.age || "N/A"}</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item
+                    label={
+                      <Text strong>
+                        <CheckCircleOutlined /> Trạng Thái
+                      </Text>
+                    }
+                  >
+                    <Tag color={classData.active ? "success" : "red"}>
+                      {classData.active ? "Đang hoạt động" : "Đã kết thúc"}
+                    </Tag>
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card>
+            </Col>
 
-            <Title level={3} style={{ margin: 20 }}>
-              <UserOutlined /> Danh Sách Học Sinh (
-              {classData.students?.length || 0})
-            </Title>
-            <Card style={{ boxShadow: "0 2px 8px rgba(0, 0, 0, 0.09)" }}>
-              <Table
-                columns={studentColumns}
-                dataSource={classData.students ?? []}
-                rowKey="_id"
-                pagination={{ pageSize: 10 }}
-                size="middle"
-              />
-            </Card>
-          </>
+            <Col xs={24} md={14} lg={16}>
+              <Card
+                style={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)" }}
+                bordered={false}
+              >
+                <Tabs defaultActiveKey="1">
+                  <TabPane
+                    tab={
+                      <span>
+                        <TeamOutlined />
+                        Giáo Viên ({classData.teachers?.length || 0})
+                      </span>
+                    }
+                    key="1"
+                  >
+                    <Table
+                      columns={teacherColumns}
+                      dataSource={classData.teachers ?? []}
+                      rowKey="_id"
+                      pagination={false}
+                      size="middle"
+                      locale={{
+                        emptyText: "Chưa có thông tin giáo viên chính thức.",
+                      }}
+                    />
+                  </TabPane>
+                  <TabPane
+                    tab={
+                      <span>
+                        <UserOutlined />
+                        Học Sinh ({classData.students?.length || 0})
+                      </span>
+                    }
+                    key="2"
+                  >
+                    <Table
+                      columns={studentColumns}
+                      dataSource={classData.students ?? []}
+                      rowKey="_id"
+                      pagination={{ pageSize: 10, hideOnSinglePage: true }}
+                      size="middle"
+                    />
+                  </TabPane>
+                </Tabs>
+              </Card>
+            </Col>
+          </Row>
         )}
       </Spin>
     </div>

@@ -54,7 +54,7 @@ function CurriculumManagement() {
                 current: 1
             }));
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Lấy danh sách chương trình học thất bại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Lấy danh sách chương trình học thất bại!');
             setOriginalCurriculums([]);
             setFilteredCurriculums([]);
         } finally {
@@ -88,7 +88,7 @@ function CurriculumManagement() {
             toast.success('Xóa chương trình học thành công!');
             fetchCurriculums();
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Xóa chương trình học thất bại. Vui lòng thử lại.');
+            typeof error === "string" ? toast.info(error) : toast.error('Xóa chương trình học thất bại. Vui lòng thử lại.');
         }
     };
 

@@ -338,6 +338,7 @@ export interface Activity {
 
 export interface ScheduleActivity {
   _id: string;
+  tittle: string;
   startTime: number;
   endTime: number;
   activityCode: string;

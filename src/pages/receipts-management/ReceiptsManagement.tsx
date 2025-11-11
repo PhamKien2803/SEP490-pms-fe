@@ -57,7 +57,7 @@ function ReceiptsManagement() {
                 setSchoolYear(sorted[0].schoolYear);
             }
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Không thể tải danh sách năm học");
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách năm học");
         }
     };
 
@@ -72,7 +72,7 @@ function ReceiptsManagement() {
             setData(res.data);
             setTotal(res.page.totalCount);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Không thể tải danh sách biên lai");
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách biên lai");
         } finally {
             setLoading(false);
         }
@@ -94,7 +94,7 @@ function ReceiptsManagement() {
             toast.success("Xoá biên lai thành công");
             fetchReceipts();
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Xoá thất bại");
+            typeof error === "string" ? toast.info(error) : toast.error("Xoá thất bại");
         }
     };
 

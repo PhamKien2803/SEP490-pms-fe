@@ -36,14 +36,16 @@ import { usePagePermission } from "../../hooks/usePagePermission";
 import CreateGuardian from "../../modal/guardian/create-guardian/CreateGuardian";
 import UpdateGuardian from "../../modal/guardian/update-guardian/UpdateGuardian";
 import DetailGuardian from "../../modal/guardian/detail-guardian/DetailGuardian";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
-const ACCENT_COLOR = "#1890ff";
-const TEXT_COLOR = "#1890ff";
+const ACCENT_COLOR = "#08979c";
+const TEXT_COLOR = "#08979c";
 
 const GuardianManagement: React.FC = () => {
+  usePageTitle("Đăng ký người đón - Cá Heo Xanh");
   const [studentsData, setStudentsData] =
     useState<ParentStudentsListResponse | null>(null);
   const [guardians, setGuardians] = useState<IGuardianRecord[]>([]);
@@ -83,9 +85,7 @@ const GuardianManagement: React.FC = () => {
       }
       setStudentsData(response);
     } catch (err) {
-      const errorMessage =
-        error || "Không thể tải danh sách học sinh. Vui lòng thử lại.";
-      toast.error(errorMessage);
+      typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách học sinh. Vui lòng thử lại.");
     } finally {
       setIsLoading(false);
     }
@@ -98,8 +98,7 @@ const GuardianManagement: React.FC = () => {
         const response = await guardianApis.getListGuardianByStudent(studentId);
         setGuardians(response.data);
       } catch (err) {
-        const errorMessage = error || "Tải danh sách người đưa đón thất bại.";
-        toast.error(errorMessage);
+        typeof error === "string" ? toast.info(error) : toast.error("Tải danh sách người đưa đón thất bại.");
         setGuardians([]);
       } finally {
         setIsLoading(false);
@@ -141,8 +140,7 @@ const GuardianManagement: React.FC = () => {
       toast.success("Xóa người đưa đón thành công!");
       fetchGuardians(selectedStudentId);
     } catch (error: any) {
-      const errorMessage = error || "Xóa người đưa đón thất bại.";
-      toast.error(errorMessage);
+      typeof error === "string" ? toast.info(error) : toast.error("Xóa người đưa đón thất bại.");
     }
   };
 

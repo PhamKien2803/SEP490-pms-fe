@@ -36,7 +36,7 @@ function ServicesReport() {
                 setSchoolYear(sorted[0].schoolYear);
             }
         } catch (err) {
-            typeof err === "string" ? toast.warn(err) : toast.error("Không thể tải danh sách năm học");
+            typeof err === "string" ? toast.info(err) : toast.error("Không thể tải danh sách năm học");
         }
     };
 
@@ -47,7 +47,7 @@ function ServicesReport() {
             const res = await reportsApis.getServiceReports({ schoolYear });
             setData(res.data);
         } catch (err) {
-            typeof err === "string" ? toast.warn(err) : toast.error("Không thể tải dữ liệu báo cáo");
+            typeof err === "string" ? toast.info(err) : toast.error("Không thể tải dữ liệu báo cáo");
         } finally {
             setLoading(false);
         }

@@ -77,7 +77,7 @@ function CurriculumsUpdate() {
                     toast.warn('Không tìm thấy năm học nào.');
                 }
             } catch (error) {
-                toast.error('Lỗi tải dữ liệu năm học.');
+                typeof error === "string" ? toast.info(error) : toast.error('Lỗi tải dữ liệu năm học.');
             } finally {
                 setLoadingSchoolYear(false);
             }
@@ -118,8 +118,8 @@ function CurriculumsUpdate() {
                 try {
                     const eventResponse = await eventApis.getEventList({ page: 1, limit: 1000, schoolYear: schoolYear });
                     setEvents(eventResponse.data);
-                } catch (e) {
-                    toast.error("Lỗi tải danh sách sự kiện.");
+                } catch (error) {
+                    typeof error === "string" ? toast.info(error) : toast.error("Lỗi tải danh sách sự kiện.");
                 } finally {
                     setIsLoadingEvents(false);
                 }
@@ -129,7 +129,7 @@ function CurriculumsUpdate() {
             setActivityType(data.type as any);
 
         } catch (error) {
-            toast.error("Không thể tải dữ liệu chương trình học.");
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải dữ liệu chương trình học.");
             navigate(-1);
         } finally {
             setLoading(false);
@@ -164,7 +164,7 @@ function CurriculumsUpdate() {
                     });
                     setEvents(response.data);
                 } catch (error) {
-                    toast.error('Lỗi tải danh sách sự kiện.');
+                    typeof error === "string" ? toast.info(error) : toast.error('Lỗi tải danh sách sự kiện.');
                 } finally {
                     setIsLoadingEvents(false);
                 }
@@ -227,7 +227,7 @@ function CurriculumsUpdate() {
             setIsDirty(false);
             // navigate(-1);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Cập nhật chương trình học thất bại.');
+            typeof error === "string" ? toast.info(error) : typeof error === "string" ? toast.warn(error) : toast.error('Cập nhật chương trình học thất bại.');
         } finally {
             setIsSubmitting(false);
         }

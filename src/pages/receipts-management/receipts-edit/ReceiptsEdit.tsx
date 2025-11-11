@@ -54,7 +54,7 @@ function ReceiptsEdit() {
             });
             setRevenueMap(map);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Không thể tải danh sách khoản thu");
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách khoản thu");
         }
     };
 
@@ -78,7 +78,7 @@ function ReceiptsEdit() {
                 totalAmount: res.totalAmount,
             });
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Không thể tải dữ liệu");
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải dữ liệu");
         } finally {
             setLoading(false);
         }
@@ -104,7 +104,7 @@ function ReceiptsEdit() {
             toast.success("Cập nhật thành công!");
             navigate(-1);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Lỗi khi cập nhật");
+            typeof error === "string" ? toast.info(error) : toast.error("Lỗi khi cập nhật");
         } finally {
             setSubmitting(false);
         }
@@ -117,7 +117,7 @@ function ReceiptsEdit() {
             toast.success("Đã xác nhận phiếu thu!");
             fetchDetail();
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Lỗi xác nhận");
+            typeof error === "string" ? toast.info(error) : toast.error("Lỗi xác nhận");
         } finally {
             setSubmitting(false);
         }

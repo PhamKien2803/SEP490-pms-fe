@@ -113,8 +113,15 @@ const BANK_OPTIONS = [
 ];
 
 
+export const ETHNIC_OPTIONS = [
+    "Kinh", "Tày", "Thái", "Hoa", "Khmer", "Mường", "Nùng", "H'Mông", "Dao", "Gia Rai",
+    "Ê Đê", "Ba Na", "Chăm", "Sán Chay", "Cơ Ho", "Xê Đăng", "Sán Dìu", "Hrê", "Ra Glai", "Mnông",
+    "Thổ", "Stiêng", "Khơ Mú", "Bru - Vân Kiều", "Cơ Tu", "Giáy", "Tà Ôi", "Mạ", "Co", "Chơ Ro",
+    "Xinh Mun", "Hà Nhì", "Chu Ru", "Lào", "La Chí", "La Ha", "Phù Lá", "La Hủ", "Kháng", "Lự",
+    "Lô Lô", "Chứt", "Mảng", "Pà Thẻn", "Co Lao", "Cống", "Bố Y", "Si La", "Pu Péo", "Brâu",
+    "Ơ Đu", "Rơ Măm"
+];
 
-// export { hardcodedActions, ageOptions, categoryOptions };
 export {
     hardcodedActions,
     ageOptions,

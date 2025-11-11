@@ -78,8 +78,8 @@ function EditFeedback() {
                     setIsExpired(true);
                     toast.info('Không thể chỉnh sửa phản hồi đã quá 24 giờ.');
                 }
-            } catch {
-                toast.error('Không thể tải dữ liệu phản hồi.');
+            } catch (error) {
+                typeof error === "string" ? toast.info(error) : toast.error('Không thể tải dữ liệu phản hồi.');
                 navigate(-1);
             } finally {
                 setLoading(false);
@@ -114,8 +114,8 @@ function EditFeedback() {
             await teacherApis.updateFeedback(feedbackDetail._id, payload);
             toast.success('Cập nhật phản hồi thành công!');
             // navigate(-1);
-        } catch {
-            toast.error('Lỗi khi cập nhật phản hồi.');
+        } catch (error) {
+            typeof error === "string" ? toast.info(error) : toast.error('Lỗi khi cập nhật phản hồi.');
         } finally {
             setSubmitting(false);
         }

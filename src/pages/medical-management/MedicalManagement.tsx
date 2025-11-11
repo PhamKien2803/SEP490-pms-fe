@@ -67,7 +67,7 @@ const MedicalManagement: React.FC = () => {
                     pageSize: response.page.limit,
                 }));
             } catch (error) {
-                toast.error("Không thể tải danh sách hồ sơ sức khỏe.");
+                typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách hồ sơ sức khỏe.");
                 setDataMedicals([]);
             } finally {
                 setLoading(false);
@@ -126,7 +126,7 @@ const MedicalManagement: React.FC = () => {
                 });
             }
         } catch (error) {
-            toast.error("Xóa hồ sơ sức khỏe thất bại.");
+            typeof error === "string" ? toast.info(error) : toast.error("Xóa hồ sơ sức khỏe thất bại.");
         } finally {
             setIsDeleting(false);
             setDeletingId(null);

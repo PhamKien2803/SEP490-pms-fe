@@ -79,8 +79,7 @@ function EventCreate() {
             setIsDirty(false);
             navigate(-1);
         } catch (error) {
-            toast.error('Tạo sự kiện thất bại.');
-            console.error("Event creation failed:", error);
+            typeof error === "string" ? toast.info(error) : toast.error('Tạo sự kiện thất bại.');
         } finally {
             setIsSubmitting(false);
         }

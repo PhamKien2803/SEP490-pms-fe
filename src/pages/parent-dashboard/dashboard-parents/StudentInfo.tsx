@@ -36,6 +36,7 @@ import {
 } from "../../../types/parent";
 import { useCurrentUser } from "../../../hooks/useCurrentUser";
 import { parentDashboardApis } from "../../../services/apiServices";
+import { usePageTitle } from "../../../hooks/usePageTitle";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -273,6 +274,7 @@ const StudentInfoSection: React.FC<{
 };
 
 const StudentInfo: React.FC = () => {
+  usePageTitle("Hồ sơ học sinh - Cá Heo Xanh");
   const [data, setData] = useState<ParentStudentsListResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -316,7 +318,7 @@ const StudentInfo: React.FC = () => {
         "Không thể tải dữ liệu. Vui lòng kiểm tra kết nối hoặc quyền truy cập."
       );
       setData(null);
-      toast.error("Tải dữ liệu học sinh thất bại. Vui lòng thử lại.");
+      typeof error === "string" ? toast.info(error) : toast.error("Tải dữ liệu học sinh thất bại. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }

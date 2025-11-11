@@ -45,7 +45,7 @@ function DocumentCreate() {
             toast.success("Tạo chứng từ thành công");
             navigate(-1);
         } catch (err) {
-            typeof err === "string" ? toast.warn(err) : toast.error("Tạo chứng từ thất bại");
+            typeof err === "string" ? toast.info(err) : toast.error("Tạo chứng từ thất bại");
         }
     };
 

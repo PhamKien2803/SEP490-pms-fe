@@ -50,10 +50,11 @@ function EditSchoolyear() {
                 dateRange: [dayjs(data.startDate), dayjs(data.endDate)],
                 enrollmentDateRange: [dayjs(data.enrollmentStartDate), dayjs(data.enrollmentEndDate)],
                 numberTarget: data.numberTarget,
+                serviceDateRange: [dayjs(data.serviceStartTime), dayjs(data.serviceEndTime)],
             });
             setIsFormDirty(false);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Đã có lỗi xảy ra. Vui lòng thử lại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Đã có lỗi xảy ra. Vui lòng thử lại!');
             navigate(-1);
         } finally {
             setLoading(false);
@@ -70,23 +71,23 @@ function EditSchoolyear() {
             const values = await form.validateFields();
             const [startDate, endDate] = values.dateRange;
             const [enrollmentStartDate, enrollmentEndDate] = values.enrollmentDateRange;
-
+            const [serviceStartDate, serviceEndDate] = values.serviceDateRange;
             const payload: UpdateSchoolYearDto = {
                 startDate: startDate.toISOString(),
                 endDate: endDate.toISOString(),
                 numberTarget: values.numberTarget,
                 enrollmentStartDate: enrollmentStartDate.toISOString(),
                 enrollmentEndDate: enrollmentEndDate.toISOString(),
+                serviceStartTime: serviceStartDate.toISOString(),
+                serviceEndTime: serviceEndDate.toISOString(),
                 createdBy: user.email,
-            };
+            }
 
             setIsSubmitting(true);
             await schoolYearApis.updateSchoolYear(id, payload);
             toast.success('Cập nhật năm học thành công!');
-            // fetchData();
-            // navigate(-1);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Đã có lỗi xảy ra. Vui lòng thử lại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Đã có lỗi xảy ra. Vui lòng thử lại!');
         } finally {
             setIsSubmitting(false);
         }
@@ -125,6 +126,10 @@ function EditSchoolyear() {
     const showConfirmAction = (action: 'activate' | 'end') => {
         if (!schoolYearData) return;
 
+        if (isFormDirty) {
+            toast.warning("Bạn có thay đổi chưa được lưu. Vui lòng lưu thông tin trước khi xác nhận.");
+            return;
+        }
         const isActivating = action === 'activate';
         const actionText = isActivating ? 'xác nhận' : 'kết thúc';
 
@@ -149,7 +154,7 @@ function EditSchoolyear() {
                     toast.success(successMessage);
                     navigate(-1);
                 } catch (error) {
-                    toast.error(errorMessage);
+                    typeof error === "string" ? toast.info(error) : toast.error(errorMessage);
                 } finally {
                     setIsSubmitting(false);
                 }
@@ -260,6 +265,20 @@ function EditSchoolyear() {
                                 />
                             </Form.Item>
                         </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                name="serviceDateRange"
+                                label="Khung thời gian dịch vụ"
+                                rules={[{ required: true, message: 'Vui lòng chọn thời gian dịch vụ!' }]}
+                            >
+                                <RangePicker
+                                    style={{ width: '100%' }}
+                                    format="DD/MM/YYYY"
+                                    disabled={schoolYearData?.state !== STATUS.NOT_ACTIVE}
+                                />
+                            </Form.Item>
+                        </Col>
+
                     </Row>
                 </Form>
             </Card>

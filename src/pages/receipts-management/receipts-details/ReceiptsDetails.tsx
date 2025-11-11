@@ -24,7 +24,7 @@ function ReceiptsDetails() {
             const res = await receiptsApis.getReceiptById(id);
             setReceipt(res);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Không thể tải chi tiết biên lai");
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải chi tiết biên lai");
         } finally {
             setLoading(false);
         }

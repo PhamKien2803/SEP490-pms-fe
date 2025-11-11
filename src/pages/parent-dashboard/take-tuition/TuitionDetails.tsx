@@ -23,6 +23,7 @@ import { TuitionDetailItem } from "../../../types/tuition";
 import { tuitionApis } from "../../../services/apiServices";
 import { constants } from "../../../constants";
 import { usePagePermission } from "../../../hooks/usePagePermission";
+import { usePageTitle } from "../../../hooks/usePageTitle";
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -46,6 +47,7 @@ const getStateTag = (state: string) => {
 const { Title, Text } = Typography;
 
 function TuitionDetails() {
+    usePageTitle("Chi tiết học phí - Cá Heo Xanh");
     const navigate = useNavigate();
     const currentUser = useCurrentUser();
     const parentId = currentUser?.parent;
@@ -69,7 +71,7 @@ function TuitionDetails() {
                 setDetails(response.data);
                 setTotalAmount(response.totalAmount);
             } catch (error) {
-                typeof error === "string" ? toast.warn(error) : toast.error("Không thể tải chi tiết học phí");
+                typeof error === "string" ? toast.info(error) : toast.error("Không thể tải chi tiết học phí");
             } finally {
                 setLoading(false);
             }
@@ -100,7 +102,7 @@ function TuitionDetails() {
                 toast.error(response.message || "Xác nhận thất bại");
             }
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Có lỗi xảy ra khi xác nhận thanh toán");
+            typeof error === "string" ? toast.info(error) : toast.error("Có lỗi xảy ra khi xác nhận thanh toán");
         } finally {
             setConfirmLoading(false);
         }
@@ -141,6 +143,7 @@ function TuitionDetails() {
 
                     <Button
                         type="primary"
+                        style={{ backgroundColor: "#08979c" }}
                         size="large"
                         block
                         loading={confirmLoading}

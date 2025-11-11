@@ -192,7 +192,7 @@ const MealEditor: React.FC<MealEditorProps> = ({
         const response = await menuApis.getListFood(params);
         setFoodOptions(response?.data || []);
       } catch (error) {
-        toast.error("Lỗi tải món ăn. Vui lòng thử lại.");
+        typeof error === "string" ? toast.info(error) : toast.error("Lỗi tải món ăn. Vui lòng thử lại.");
         setFoodOptions([]);
       } finally {
         setFoodLoading(false);

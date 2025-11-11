@@ -195,7 +195,7 @@ const MenuDetailPage: React.FC = () => {
       const response: MenuDetail = await menuApis.getMenuById(menuId || "");
       setMenuDetail(response);
     } catch (error) {
-      toast.error("Tải chi tiết thực đơn thất bại.");
+      typeof error === "string" ? toast.info(error) : toast.error("Tải chi tiết thực đơn thất bại.");
       setMenuDetail(null);
     } finally {
       setLoading(false);

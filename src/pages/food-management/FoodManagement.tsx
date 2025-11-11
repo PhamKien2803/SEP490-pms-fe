@@ -104,9 +104,7 @@ const FoodManagement: React.FC = () => {
                 selectedDateRange
             );
         } catch (error: any) {
-            console.error("Lỗi kích hoạt tính toán Calo AI:", error);
-            const errorMessage = error || "Kích hoạt tính toán thất bại. Vui lòng thử lại.";
-            toast.error(errorMessage);
+            typeof error === "string" ? toast.info(error) : toast.error("Kích hoạt tính toán thất bại. Vui lòng thử lại.");
         } finally {
             setIsAITriggering(false);
         }
@@ -157,8 +155,8 @@ const FoodManagement: React.FC = () => {
                     total: response?.page?.totalCount || 0,
                 }));
             } catch (error) {
-                console.error("Lỗi tải danh sách món ăn:", error);
-                toast.error("Tải danh sách món ăn thất bại. Vui lòng thử lại.");
+                // console.error("Lỗi tải danh sách món ăn:", error);
+                typeof error === "string" ? toast.info(error) : toast.error("Tải danh sách món ăn thất bại. Vui lòng thử lại.");
                 setFoodList([]);
                 setPagination((prev) => ({ ...prev, total: 0 }));
             } finally {
@@ -230,8 +228,8 @@ const FoodManagement: React.FC = () => {
                 selectedDateRange
             );
         } catch (error) {
-            console.error("Lỗi xóa món ăn:", error);
-            toast.error("Xóa món ăn thất bại. Vui lòng thử lại.");
+            // console.error("Lỗi xóa món ăn:", error);
+            typeof error === "string" ? toast.info(error) : toast.error("Xóa món ăn thất bại. Vui lòng thử lại.");
         } finally {
             setIsDeleting(false);
         }

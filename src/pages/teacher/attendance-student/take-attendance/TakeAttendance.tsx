@@ -106,8 +106,7 @@ function TakeAttendance() {
                     }
                 }
             } catch (error) {
-                console.error(error);
-                toast.error('Không thể tải thông tin giáo viên hoặc năm học.');
+                typeof error === "string" ? toast.info(error) : toast.error('Không thể tải thông tin giáo viên hoặc năm học.');
             } finally {
                 setIsLoadingTeacherData(false);
             }
@@ -258,8 +257,7 @@ function TakeAttendance() {
             setCurrentAttendanceId(res._id);
             toast.success('Đã lưu điểm danh thành công!');
         } catch (error) {
-            console.error(error);
-            toast.error('Lưu điểm danh thất bại.');
+            typeof error === "string" ? toast.info(error) : toast.error('Lưu điểm danh thất bại.');
         } finally {
             setIsSaving(false);
         }

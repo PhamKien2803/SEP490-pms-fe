@@ -82,7 +82,7 @@ function TuitionList() {
                 setSelectedSchoolYear(sorted[0].schoolYear);
             }
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Không thể tải danh sách năm học");
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách năm học");
         }
     }, [selectedSchoolYear]);
 
@@ -105,7 +105,7 @@ function TuitionList() {
                 await tuitionApis.getTuitionList(params);
             setData(response.data);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Không thể tải danh sách học phí");
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách học phí");
         } finally {
             setLoading(false);
         }

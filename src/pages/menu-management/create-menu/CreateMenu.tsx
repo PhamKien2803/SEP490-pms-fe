@@ -112,7 +112,7 @@ const MealEditor: React.FC<MealEditorProps> = ({
         const response = await menuApis.getListFood(params);
         setFoodOptions(response.data);
       } catch (error) {
-        toast.error("Lỗi tải món ăn. Vui lòng thử lại.");
+        typeof error === "string" ? toast.info(error) : toast.error("Lỗi tải món ăn. Vui lòng thử lại.");
         setFoodOptions([]);
       } finally {
         setFoodLoading(false);
@@ -221,7 +221,7 @@ const MealEditor: React.FC<MealEditorProps> = ({
           key={`nutrient-item-${foodField.fieldKey as number}-${name}`}
           name={[foodField.name, name]}
           fieldKey={[foodField.fieldKey as number, name]}
-          style={{ marginBottom: 0,height:"30px" }}
+          style={{ marginBottom: 0, height: "30px" }}
           help={false}
           validateStatus={undefined}
         >
@@ -386,7 +386,7 @@ const MealEditor: React.FC<MealEditorProps> = ({
                                   rules={[
                                     { required: true, message: "Vui lòng chọn món ăn" },
                                   ]}
-                                  style={{ marginBottom: 0,height:"30px" }}
+                                  style={{ marginBottom: 0, height: "30px" }}
                                 >
                                   <Select
                                     placeholder={
@@ -426,7 +426,7 @@ const MealEditor: React.FC<MealEditorProps> = ({
                                 </Form.Item>
                               </Col>
 
-                               <NutrientDisplay
+                              <NutrientDisplay
                                 label="Khối lượng"
                                 name="weight"
                                 icon={<ForkOutlined />}

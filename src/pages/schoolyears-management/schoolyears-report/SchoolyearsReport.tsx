@@ -55,7 +55,7 @@ function SchoolyearsReport() {
             setReportData(response.data || []);
             setPagination(prev => ({ ...prev, total: response.page.totalCount }));
         } catch (error) {
-            toast.info('Hiện năm học chưa kết thúc hoặc không có học sinh tốt nghiệp.');
+            typeof error === "string" ? toast.info(error) : toast.error('Hiện năm học chưa kết thúc hoặc không có học sinh tốt nghiệp.');
             setReportData([]);
         } finally {
             setLoading(false);
@@ -73,7 +73,7 @@ function SchoolyearsReport() {
                     setSelectedYearId(activeOrLatestYear._id);
                 }
             } catch (error) {
-                toast.error('Không thể tải danh sách năm học.');
+                typeof error === "string" ? toast.info(error) : toast.error('Không thể tải danh sách năm học.');
             } finally {
                 setLoading(false);
             }

@@ -131,7 +131,7 @@ const MenuManagement: React.FC = () => {
           total: response?.page?.totalCount || 0,
         }));
       } catch (error) {
-        toast.error("Tải danh sách thực đơn thất bại. Vui lòng thử lại.");
+        typeof error === "string" ? toast.info(error) : toast.error("Tải danh sách thực đơn thất bại. Vui lòng thử lại.");
         setMenuList([]);
         setPagination((prev) => ({ ...prev, total: 0 }));
       } finally {
@@ -196,7 +196,7 @@ const MenuManagement: React.FC = () => {
         selectedDateRange
       );
     } catch (error) {
-      toast.error("Xóa thực đơn thất bại.");
+      typeof error === "string" ? toast.info(error) : toast.error("Xóa thực đơn thất bại.");
     } finally {
       setIsDeleting(false);
     }

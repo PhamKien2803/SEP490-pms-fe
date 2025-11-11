@@ -63,7 +63,7 @@ const RoomDetail: React.FC = () => {
       const response: RoomRecord = await roomApis.getRoomById(roomId || "");
       setRoomDetail(response);
     } catch (error) {
-      toast.error("Tải chi tiết phòng học thất bại.");
+      typeof error === "string" ? toast.info(error) : toast.error("Tải chi tiết phòng học thất bại.");
       setRoomDetail(null);
     } finally {
       setLoading(false);

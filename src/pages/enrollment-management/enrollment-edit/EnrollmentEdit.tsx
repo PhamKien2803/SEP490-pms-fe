@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Form, Input, Button, Space, Typography, Card, Select, DatePicker, Row, Col, Tooltip, Spin, Flex, Upload, Popconfirm, Modal } from 'antd';
+import { Form, Input, Button, Space, Card, Select, DatePicker, Row, Col, Tooltip, Spin, Flex, Upload, Popconfirm, Modal, Typography } from 'antd';
 import { ArrowLeftOutlined, CheckCircleOutlined, CloseCircleOutlined, UploadOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
 import type { RcFile, UploadFile } from 'antd/es/upload/interface';
 import { useCurrentUser } from '../../../hooks/useCurrentUser';
@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 import TextArea from 'antd/es/input/TextArea';
 import { constants } from '../../../constants';
 import { usePageTitle } from '../../../hooks/usePageTitle';
+import { ETHNIC_OPTIONS } from '../../../components/hard-code-action';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -21,7 +22,8 @@ const EnrollmentEdit: React.FC = () => {
     const [form] = Form.useForm();
     const navigate = useNavigate();
     const user = useCurrentUser();
-
+    const [studentAge, setStudentAge] = useState<number | null>(null);
+    const [dobError, setDobError] = useState<string | null>(null);
     const [pageLoading, setPageLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
@@ -46,6 +48,12 @@ const EnrollmentEdit: React.FC = () => {
         pattern: /^\d{12}$/,
         message: 'CCCD phải có đúng 12 chữ số!',
     }), []);
+
+    const nameValidationRule = {
+        pattern: /^[\p{L} ]+$/u,
+        message: 'Chỉ được nhập chữ cái và dấu cách!',
+    };
+
 
     const fetchData = useCallback(async () => {
         if (!id) {
@@ -74,7 +82,7 @@ const EnrollmentEdit: React.FC = () => {
                 setHealthCertFile([]);
             }
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải chi tiết đơn đăng ký.');
+            typeof error === "string" ? toast.info(error) : toast.error('Không thể tải chi tiết đơn đăng ký.');
             navigate(-1);
         } finally {
             setPageLoading(false);
@@ -96,7 +104,7 @@ const EnrollmentEdit: React.FC = () => {
             setIsEditing(false);
             fetchData();
         } catch (formError) {
-            typeof formError === "string" ? toast.warn(formError) : toast.error('Dữ liệu chưa hợp lệ để cập nhật. Vui lòng kiểm tra lại.');
+            typeof formError === "string" ? toast.info(formError) : toast.error('Dữ liệu chưa hợp lệ để cập nhật. Vui lòng kiểm tra lại.');
         } finally {
             setIsUpdating(false);
         }
@@ -109,7 +117,7 @@ const EnrollmentEdit: React.FC = () => {
             const fileURL = URL.createObjectURL(blob);
             window.open(fileURL, '_blank');
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Không thể mở file PDF.');
+            typeof error === "string" ? toast.info(error) : toast.error('Không thể mở file PDF.');
         }
     }, []);
 
@@ -127,7 +135,7 @@ const EnrollmentEdit: React.FC = () => {
             toast.success('Duyệt đơn đăng ký thành công!');
             navigate(`${constants.APP_PREFIX}/enrollments`);
         } catch (formError) {
-            typeof formError === "string" ? toast.warn(formError) : toast.error('Dữ liệu chưa hợp lệ để duyệt. Vui lòng kiểm tra lại.');
+            typeof formError === "string" ? toast.info(formError) : toast.error('Dữ liệu chưa hợp lệ để duyệt. Vui lòng kiểm tra lại.');
         } finally {
             setIsApproving(false);
         }
@@ -145,7 +153,7 @@ const EnrollmentEdit: React.FC = () => {
             setIsRejectModalVisible(false);
             navigate(`${constants.APP_PREFIX}/enrollments`);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Từ chối đơn đăng ký thất bại. Vui lòng thử lại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Từ chối đơn đăng ký thất bại. Vui lòng thử lại!');
         } finally {
             setIsRejecting(false);
         }
@@ -193,7 +201,7 @@ const EnrollmentEdit: React.FC = () => {
             }
             toast.success(`Tải lên ${type === 'birth' ? 'giấy khai sinh' : 'giấy khám sức khỏe'} thành công!`);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Tải file thất bại. Vui lòng thử lại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Tải file thất bại. Vui lòng thử lại!');
         }
     }, []);
 
@@ -232,11 +240,39 @@ const EnrollmentEdit: React.FC = () => {
                     <Row gutter={32}>
                         <Col xs={24} md={8}>
                             <Title level={4}>Thông tin học sinh</Title>
-                            <Form.Item name="studentName" label="Họ và tên" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}>
+                            <Form.Item name="studentName" label="Họ và tên" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }, nameValidationRule]}>
                                 <Input disabled={!isEditing} />
                             </Form.Item>
                             <Form.Item name="studentDob" label="Ngày sinh" rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}>
-                                <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" disabled={!isEditing} />
+                                <DatePicker onChange={(date) => {
+                                    form.setFieldValue("studentDob", date);
+
+                                    if (date) {
+                                        const today = dayjs();
+                                        const age = today.diff(date, "year");
+
+                                        if (date.isAfter(today, "day")) {
+                                            setDobError("Ngày sinh không được trong tương lai!");
+                                            setStudentAge(null);
+                                        } else if (age < 1) {
+                                            setDobError("Học sinh phải đủ ít nhất 1 tuổi!");
+                                            setStudentAge(null);
+                                        } else if (age > 5) {
+                                            setDobError("Học sinh không được quá 5 tuổi!");
+                                            setStudentAge(null);
+                                        } else {
+                                            setDobError(null);
+                                            setStudentAge(age);
+                                        }
+                                    } else {
+                                        setStudentAge(null);
+                                        setDobError(null);
+                                    }
+                                }} style={{ width: '100%' }} format="DD/MM/YYYY" disabled={!isEditing} />
+                                {studentAge !== null && !dobError && (
+                                    <Typography.Text type="secondary">→ {studentAge} tuổi</Typography.Text>
+                                )}
+                                {dobError && <Typography.Text type="danger">{dobError}</Typography.Text>}
                             </Form.Item>
                             <Form.Item name="studentIdCard" label="CCCD/ Mã định danh" rules={[{ required: true, message: 'Vui lòng nhập mã định danh!' }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} disabled={!isEditing} /></Form.Item>
                             <Form.Item name="address" label="Địa chỉ thường trú" rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}><Input.TextArea rows={3} disabled={!isEditing} /></Form.Item>
@@ -247,21 +283,42 @@ const EnrollmentEdit: React.FC = () => {
                                     <Option value="Khác">Khác</Option>
                                 </Select>
                             </Form.Item>
-                            <Form.Item name="studentReligion" label="Tôn giáo" rules={[{ required: true, message: 'Vui lòng nhập tôn giáo!' }]}><Input disabled={!isEditing} /></Form.Item>
-                            <Form.Item name="studentNation" label="Dân tộc" rules={[{ required: true, message: 'Vui lòng nhập dân tộc!' }]}><Input disabled={!isEditing} /></Form.Item>
+                            <Form.Item
+                                name="studentReligion"
+                                label="Tôn giáo"
+                                rules={[{ required: true, message: 'Vui lòng chọn!' }]}
+                            >
+                                <Select disabled={!isEditing}>
+                                    <Option value="Có">Có</Option>
+                                    <Option value="Không">Không</Option>
+                                </Select>
+                            </Form.Item>
+
+                            <Form.Item
+                                name="studentNation"
+                                label="Dân tộc"
+                                rules={[{ required: true, message: 'Vui lòng chọn dân tộc!' }]}
+                            >
+                                <Select showSearch optionFilterProp="children" disabled={!isEditing}>
+                                    {ETHNIC_OPTIONS.map((ethnic) => (
+                                        <Option key={ethnic} value={ethnic}>{ethnic}</Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+
                         </Col>
                         <Col xs={24} md={8}>
                             <Title level={4}>Thông tin cha</Title>
-                            <Form.Item name="fatherName" label="Họ và tên Cha" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}><Input disabled={!isEditing} /></Form.Item>
-                            <Form.Item name="fatherJob" label="Nghề nghiệp" rules={[{ required: true, message: 'Vui lòng nhập nghề nghiệp!' }]}><Input disabled={!isEditing} /></Form.Item>
+                            <Form.Item name="fatherName" label="Họ và tên Cha" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }, nameValidationRule]}><Input disabled={!isEditing} /></Form.Item>
+                            <Form.Item name="fatherJob" label="Nghề nghiệp" rules={[{ required: true, message: 'Vui lòng nhập nghề nghiệp!' }, nameValidationRule]}><Input disabled={!isEditing} /></Form.Item>
                             <Form.Item name="fatherPhoneNumber" label="Số điện thoại Cha" rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} disabled={!isEditing} /></Form.Item>
                             <Form.Item name="fatherIdCard" label="CCCD Cha" rules={[{ required: true, message: 'Vui lòng nhập CCCD!' }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} disabled={!isEditing} /></Form.Item>
                             <Form.Item name="fatherEmail" label="Email Cha" rules={[{ required: true, message: 'Vui lòng nhập email!' }, { type: 'email', message: 'Email không hợp lệ!' }]}><Input disabled={!isEditing} /></Form.Item>
                         </Col>
                         <Col xs={24} md={8}>
                             <Title level={4}>Thông tin mẹ</Title>
-                            <Form.Item name="motherName" label="Họ và tên Mẹ" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}><Input disabled={!isEditing} /></Form.Item>
-                            <Form.Item name="motherJob" label="Nghề nghiệp" rules={[{ required: true, message: 'Vui lòng nhập nghề nghiệp!' }]}><Input disabled={!isEditing} /></Form.Item>
+                            <Form.Item name="motherName" label="Họ và tên Mẹ" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }, nameValidationRule]}><Input disabled={!isEditing} /></Form.Item>
+                            <Form.Item name="motherJob" label="Nghề nghiệp" rules={[{ required: true, message: 'Vui lòng nhập nghề nghiệp!' }, nameValidationRule]}><Input disabled={!isEditing} /></Form.Item>
                             <Form.Item name="motherPhoneNumber" label="Số điện thoại Mẹ" rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} disabled={!isEditing} /></Form.Item>
                             <Form.Item name="motherIdCard" label="CCCD Mẹ" rules={[{ required: true, message: 'Vui lòng nhập CCCD!' }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} disabled={!isEditing} /></Form.Item>
                             <Form.Item name="motherEmail" label="Email Mẹ" rules={[{ required: true, message: 'Vui lòng nhập email!' }, { type: 'email', message: 'Email không hợp lệ!' }]}><Input disabled={!isEditing} /></Form.Item>

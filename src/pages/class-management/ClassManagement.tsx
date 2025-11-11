@@ -50,7 +50,7 @@ function ClassManagement() {
             setFilteredClassList(response.data);
             setPagination(prev => ({ ...prev, total: response.page.totalCount, current: 1 }));
         } catch (error) {
-            toast.info('Hiện chưa có lớp học nào trong năm học này !');
+            typeof error === "string" ? toast.info(error) : toast.error('Hiện chưa có lớp học nào trong năm học này !');
             setOriginalClassList([]);
             setFilteredClassList([]);
         } finally {
@@ -67,7 +67,7 @@ function ClassManagement() {
                 await fetchClassList(selectedSchoolYear);
             }
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Đồng bộ dữ liệu thất bại. Vui lòng thử lại.');
+            typeof error === "string" ? toast.info(error) : toast.error('Đồng bộ dữ liệu thất bại. Vui lòng thử lại.');
         } finally {
             setSyncLoading(false);
         }
@@ -91,7 +91,7 @@ function ClassManagement() {
                 }
             } catch (error) {
                 typeof error === "string"
-                    ? toast.warn(error)
+                    ? toast.info(error)
                     : toast.error('Không thể tải danh sách năm học.');
             }
         };

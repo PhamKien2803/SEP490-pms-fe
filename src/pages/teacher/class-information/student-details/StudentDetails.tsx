@@ -23,8 +23,7 @@ function StudentDetails() {
                 const data = await teacherApis.getStudentDetails(id);
                 setStudent(data);
             } catch (error) {
-                console.error(error);
-                toast.error('Không thể tải thông tin học sinh.');
+                typeof error === "string" ? toast.info(error) : toast.error('Không thể tải thông tin học sinh.');
             } finally {
                 setLoading(false);
             }

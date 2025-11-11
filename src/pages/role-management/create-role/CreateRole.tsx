@@ -34,7 +34,7 @@ const CreateRole: React.FC = () => {
                 setFunctions(functionsRes);
                 setModules(modulesRes);
             } catch (error) {
-                typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải dữ liệu cho các dropdown.');
+                typeof error === "string" ? toast.info(error) : toast.error('Không thể tải dữ liệu cho các dropdown.');
             }
         };
         fetchDataForDropdowns();
@@ -99,7 +99,7 @@ const CreateRole: React.FC = () => {
             navigate(`${constants.APP_PREFIX}/roles`);
             window.location.reload();
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Tạo vai trò thất bại. Vui lòng thử lại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Tạo vai trò thất bại. Vui lòng thử lại!');
         } finally {
             setLoading(false);
         }

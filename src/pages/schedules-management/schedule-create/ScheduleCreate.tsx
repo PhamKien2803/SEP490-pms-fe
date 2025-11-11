@@ -99,8 +99,7 @@ const ScheduleCreate = () => {
             });
             setAvailableActivities(res);
         } catch (error) {
-            console.error('Lỗi khi lấy danh sách hoạt động:', error);
-            toast.error('Không thể tải danh sách hoạt động.');
+            typeof error === "string" ? toast.info(error) : toast.error('Không thể tải danh sách hoạt động.');
         } finally {
             setIsFetchingActivities(false);
         }
@@ -120,7 +119,7 @@ const ScheduleCreate = () => {
             setFixedActivities(data);
         } catch (err: any) {
             const errorMsg = err?.response?.data?.message || 'Không thể tải hoạt động cố định.';
-            toast.error(errorMsg);
+            typeof error === "string" ? toast.info(error) : toast.error('Không thể tải hoạt động cố định.');
             setError(errorMsg);
         } finally {
             setIsLoadingFix(false);
@@ -257,7 +256,7 @@ const ScheduleCreate = () => {
             navigate(-1);
         } catch (error: any) {
             const msg = error?.response?.data?.message || `Lịch học tháng này của lớp này đã được tạo`;
-            toast.warn(msg);
+            typeof error === "string" ? toast.info(error) : toast.error(msg);
         }
     };
 

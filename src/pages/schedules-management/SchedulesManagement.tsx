@@ -254,7 +254,8 @@ function SchedulesManagement() {
             if (!id) {
                 setSelectedClassId(res?.[0]?._id);
             }
-        } catch {
+        } catch (error) {
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải lớp học")
             setClasses([]);
         }
     }, [id]);
@@ -298,7 +299,8 @@ function SchedulesManagement() {
                 setScheduleData([]);
                 setScheduleStatus(null);
             }
-        } catch {
+        } catch (error) {
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải lịch học")
             setScheduleData([]);
             setScheduleStatus(null);
         } finally {
@@ -318,7 +320,7 @@ function SchedulesManagement() {
 
             setAvailableActivities(res);
         } catch (error) {
-            toast.error('Không thể tải danh sách hoạt động');
+            typeof error === "string" ? toast.info(error) : toast.error('Không thể tải danh sách hoạt động');
             setAvailableActivities([]);
         } finally {
             setIsFetchingActivities(false);
@@ -398,8 +400,7 @@ function SchedulesManagement() {
                 setScheduleStatus(null);
             }
         } catch (error) {
-            console.error('Lỗi khi gợi ý lịch học:', error);
-            toast.error('Không thể tải gợi ý lịch học. Vui lòng thử lại.');
+            typeof error === "string" ? toast.info(error) : toast.error('Không thể tải gợi ý lịch học. Vui lòng thử lại.');
             setScheduleData([]);
             setScheduleStatus(null);
         } finally {
@@ -425,8 +426,6 @@ function SchedulesManagement() {
             month: selectedMonth.toString(),
             scheduleDays: scheduleData
         };
-        console.log(payload);
-
 
         setIsSaving(true);
         try {
@@ -435,8 +434,7 @@ function SchedulesManagement() {
             setEditMode(false);
             fetchScheduleData();
         } catch (error) {
-            console.error('Lỗi khi cập nhật lịch học:', error);
-            toast.error('Cập nhật lịch học thất bại. Vui lòng thử lại.');
+            typeof error === "string" ? toast.info(error) : toast.error('Cập nhật lịch học thất bại. Vui lòng thử lại.');
         } finally {
             setIsSaving(false);
         }
@@ -455,8 +453,7 @@ function SchedulesManagement() {
             toast.success('Lịch học đã được xác nhận!');
             fetchScheduleData();
         } catch (error) {
-            console.error('Lỗi khi xác nhận lịch học:', error);
-            toast.error('Xác nhận lịch học thất bại. Vui lòng thử lại.');
+            typeof error === "string" ? toast.info(error) : toast.error('Xác nhận lịch học thất bại. Vui lòng thử lại.');
         } finally {
             setIsSaving(false);
         }
@@ -481,8 +478,7 @@ function SchedulesManagement() {
             toast.success('Tạo lịch học thành công!');
             fetchScheduleData();
         } catch (error) {
-            console.error('Lỗi khi tạo lịch học:', error);
-            toast.error('Tạo lịch học thất bại. Vui lòng thử lại.');
+            typeof error === "string" ? toast.info(error) : toast.error('Tạo lịch học thất bại. Vui lòng thử lại.');
         } finally {
             setIsSaving(false);
             setIsPreview(false);
@@ -646,7 +642,7 @@ function SchedulesManagement() {
                                                     onClick={() => {
                                                         setOriginalScheduleData(JSON.parse(JSON.stringify(scheduleData)));
                                                         setEditMode(true);
-                                                        setHasEditedAfterPreview(true); // ✅ Bấm chỉnh sửa
+                                                        setHasEditedAfterPreview(true);
                                                         setHasUnsavedChanges(false);
                                                     }}
                                                     type="primary"

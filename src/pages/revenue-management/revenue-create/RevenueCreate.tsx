@@ -68,7 +68,7 @@ const RevenueCreate: React.FC = () => {
             toast.success("Tạo khoản thu thành công!");
             navigate(-1);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error("Tạo khoản thu thất bại!");
+            typeof error === "string" ? toast.info(error) : toast.error("Tạo khoản thu thất bại!");
         } finally {
             setIsSubmitting(false);
         }
