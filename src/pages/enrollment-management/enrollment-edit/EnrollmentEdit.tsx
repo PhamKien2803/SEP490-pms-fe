@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Form, Input, Button, Space, Typography, Card, Select, DatePicker, Row, Col, Tooltip, Spin, Flex, Upload, Popconfirm, Modal } from 'antd';
+import { Form, Input, Button, Space, Card, Select, DatePicker, Row, Col, Tooltip, Spin, Flex, Upload, Popconfirm, Modal, Typography } from 'antd';
 import { ArrowLeftOutlined, CheckCircleOutlined, CloseCircleOutlined, UploadOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
 import type { RcFile, UploadFile } from 'antd/es/upload/interface';
 import { useCurrentUser } from '../../../hooks/useCurrentUser';
@@ -22,7 +22,8 @@ const EnrollmentEdit: React.FC = () => {
     const [form] = Form.useForm();
     const navigate = useNavigate();
     const user = useCurrentUser();
-
+    const [studentAge, setStudentAge] = useState<number | null>(null);
+    const [dobError, setDobError] = useState<string | null>(null);
     const [pageLoading, setPageLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
@@ -243,7 +244,35 @@ const EnrollmentEdit: React.FC = () => {
                                 <Input disabled={!isEditing} />
                             </Form.Item>
                             <Form.Item name="studentDob" label="Ngày sinh" rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}>
-                                <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" disabled={!isEditing} />
+                                <DatePicker onChange={(date) => {
+                                    form.setFieldValue("studentDob", date);
+
+                                    if (date) {
+                                        const today = dayjs();
+                                        const age = today.diff(date, "year");
+
+                                        if (date.isAfter(today, "day")) {
+                                            setDobError("Ngày sinh không được trong tương lai!");
+                                            setStudentAge(null);
+                                        } else if (age < 1) {
+                                            setDobError("Học sinh phải đủ ít nhất 1 tuổi!");
+                                            setStudentAge(null);
+                                        } else if (age > 5) {
+                                            setDobError("Học sinh không được quá 5 tuổi!");
+                                            setStudentAge(null);
+                                        } else {
+                                            setDobError(null);
+                                            setStudentAge(age);
+                                        }
+                                    } else {
+                                        setStudentAge(null);
+                                        setDobError(null);
+                                    }
+                                }} style={{ width: '100%' }} format="DD/MM/YYYY" disabled={!isEditing} />
+                                {studentAge !== null && !dobError && (
+                                    <Typography.Text type="secondary">→ {studentAge} tuổi</Typography.Text>
+                                )}
+                                {dobError && <Typography.Text type="danger">{dobError}</Typography.Text>}
                             </Form.Item>
                             <Form.Item name="studentIdCard" label="CCCD/ Mã định danh" rules={[{ required: true, message: 'Vui lòng nhập mã định danh!' }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} disabled={!isEditing} /></Form.Item>
                             <Form.Item name="address" label="Địa chỉ thường trú" rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}><Input.TextArea rows={3} disabled={!isEditing} /></Form.Item>
