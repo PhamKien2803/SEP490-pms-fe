@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 import TextArea from 'antd/es/input/TextArea';
 import { constants } from '../../../constants';
 import { usePageTitle } from '../../../hooks/usePageTitle';
+import { ETHNIC_OPTIONS } from '../../../components/hard-code-action';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -46,6 +47,12 @@ const EnrollmentEdit: React.FC = () => {
         pattern: /^\d{12}$/,
         message: 'CCCD phải có đúng 12 chữ số!',
     }), []);
+
+    const nameValidationRule = {
+        pattern: /^[\p{L} ]+$/u,
+        message: 'Chỉ được nhập chữ cái và dấu cách!',
+    };
+
 
     const fetchData = useCallback(async () => {
         if (!id) {
@@ -232,7 +239,7 @@ const EnrollmentEdit: React.FC = () => {
                     <Row gutter={32}>
                         <Col xs={24} md={8}>
                             <Title level={4}>Thông tin học sinh</Title>
-                            <Form.Item name="studentName" label="Họ và tên" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}>
+                            <Form.Item name="studentName" label="Họ và tên" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }, nameValidationRule]}>
                                 <Input disabled={!isEditing} />
                             </Form.Item>
                             <Form.Item name="studentDob" label="Ngày sinh" rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}>
@@ -247,21 +254,42 @@ const EnrollmentEdit: React.FC = () => {
                                     <Option value="Khác">Khác</Option>
                                 </Select>
                             </Form.Item>
-                            <Form.Item name="studentReligion" label="Tôn giáo" rules={[{ required: true, message: 'Vui lòng nhập tôn giáo!' }]}><Input disabled={!isEditing} /></Form.Item>
-                            <Form.Item name="studentNation" label="Dân tộc" rules={[{ required: true, message: 'Vui lòng nhập dân tộc!' }]}><Input disabled={!isEditing} /></Form.Item>
+                            <Form.Item
+                                name="studentReligion"
+                                label="Tôn giáo"
+                                rules={[{ required: true, message: 'Vui lòng chọn!' }]}
+                            >
+                                <Select disabled={!isEditing}>
+                                    <Option value="Có">Có</Option>
+                                    <Option value="Không">Không</Option>
+                                </Select>
+                            </Form.Item>
+
+                            <Form.Item
+                                name="studentNation"
+                                label="Dân tộc"
+                                rules={[{ required: true, message: 'Vui lòng chọn dân tộc!' }]}
+                            >
+                                <Select showSearch optionFilterProp="children" disabled={!isEditing}>
+                                    {ETHNIC_OPTIONS.map((ethnic) => (
+                                        <Option key={ethnic} value={ethnic}>{ethnic}</Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+
                         </Col>
                         <Col xs={24} md={8}>
                             <Title level={4}>Thông tin cha</Title>
-                            <Form.Item name="fatherName" label="Họ và tên Cha" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}><Input disabled={!isEditing} /></Form.Item>
-                            <Form.Item name="fatherJob" label="Nghề nghiệp" rules={[{ required: true, message: 'Vui lòng nhập nghề nghiệp!' }]}><Input disabled={!isEditing} /></Form.Item>
+                            <Form.Item name="fatherName" label="Họ và tên Cha" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }, nameValidationRule]}><Input disabled={!isEditing} /></Form.Item>
+                            <Form.Item name="fatherJob" label="Nghề nghiệp" rules={[{ required: true, message: 'Vui lòng nhập nghề nghiệp!' }, nameValidationRule]}><Input disabled={!isEditing} /></Form.Item>
                             <Form.Item name="fatherPhoneNumber" label="Số điện thoại Cha" rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} disabled={!isEditing} /></Form.Item>
                             <Form.Item name="fatherIdCard" label="CCCD Cha" rules={[{ required: true, message: 'Vui lòng nhập CCCD!' }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} disabled={!isEditing} /></Form.Item>
                             <Form.Item name="fatherEmail" label="Email Cha" rules={[{ required: true, message: 'Vui lòng nhập email!' }, { type: 'email', message: 'Email không hợp lệ!' }]}><Input disabled={!isEditing} /></Form.Item>
                         </Col>
                         <Col xs={24} md={8}>
                             <Title level={4}>Thông tin mẹ</Title>
-                            <Form.Item name="motherName" label="Họ và tên Mẹ" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}><Input disabled={!isEditing} /></Form.Item>
-                            <Form.Item name="motherJob" label="Nghề nghiệp" rules={[{ required: true, message: 'Vui lòng nhập nghề nghiệp!' }]}><Input disabled={!isEditing} /></Form.Item>
+                            <Form.Item name="motherName" label="Họ và tên Mẹ" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }, nameValidationRule]}><Input disabled={!isEditing} /></Form.Item>
+                            <Form.Item name="motherJob" label="Nghề nghiệp" rules={[{ required: true, message: 'Vui lòng nhập nghề nghiệp!' }, nameValidationRule]}><Input disabled={!isEditing} /></Form.Item>
                             <Form.Item name="motherPhoneNumber" label="Số điện thoại Mẹ" rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} disabled={!isEditing} /></Form.Item>
                             <Form.Item name="motherIdCard" label="CCCD Mẹ" rules={[{ required: true, message: 'Vui lòng nhập CCCD!' }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} disabled={!isEditing} /></Form.Item>
                             <Form.Item name="motherEmail" label="Email Mẹ" rules={[{ required: true, message: 'Vui lòng nhập email!' }, { type: 'email', message: 'Email không hợp lệ!' }]}><Input disabled={!isEditing} /></Form.Item>
