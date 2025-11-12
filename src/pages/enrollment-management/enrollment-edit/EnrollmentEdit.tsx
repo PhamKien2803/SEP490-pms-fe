@@ -274,7 +274,7 @@ const EnrollmentEdit: React.FC = () => {
         const { file, onSuccess, onError } = options;
         try {
             const response = await enrollmentApis.uploadEnrollmentImage(file as File);
-            setStudentImageId(response.image);
+            setStudentImageId(response.url || null);
             toast.success("Tải ảnh học sinh thành công!");
             if (onSuccess) onSuccess(response);
         } catch (err) {
