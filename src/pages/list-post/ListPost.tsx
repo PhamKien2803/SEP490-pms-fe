@@ -61,7 +61,7 @@ const ListPost = (props: ListPostProps) => {
       }}
     >
       <Row justify="center">
-        <Col xs={24} sm={20} md={18} lg={12} xl={10}>
+        <Col xs={24} sm={22} md={20} lg={20} xl={20}>
           {canCreate && (
             <Card
               style={{
