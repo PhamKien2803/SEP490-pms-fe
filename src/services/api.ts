@@ -149,7 +149,8 @@ export const apiEndPoint = {
   GET_TUITION_LIST: "/tuition-manage/list",
   GET_DETAILS_TUITION: (parentid: string) => `/tuitions/detail/${parentid}`,
   CONFIRM_TUITION: "/tuitions/confirm/",
-  CHECK_STATUS_TUITION: (orderCode: string) => `/tuitions/check-status/${orderCode}`,
+  CHECK_STATUS_TUITION: (orderCode: string) =>
+    `/tuitions/check-status/${orderCode}`,
   GET_LIST_HISTORY_FEE: "/tuitions/historyFees",
   GET_DETAIL_BALANCES: "/balances/detail",
   GET_LIST_DOCUMENT: "/documents/list",
@@ -185,8 +186,22 @@ export const apiEndPoint = {
   UPDATE_GUARDIAN: (id: string) => `/guardians/update/${id}`,
   DELETE_GUARDIAN: (id: string) => `/guardians/delete/${id}`,
   GET_GUARDIAN_BY_ID: (id: string) => `/guardians/getById/${id}`,
-  GET_LIST_GUARDIAN_BY_STUDENT: (studentId: string) => `/guardians/listByStudent/${studentId}`,
-  GET_LIST_GUARDIAN_BY_PARENT: (parentId: string) => `/guardians/listByParent/${parentId}`,
+  GET_LIST_GUARDIAN_BY_STUDENT: (studentId: string) =>
+    `/guardians/listByStudent/${studentId}`,
+  GET_LIST_GUARDIAN_BY_PARENT: (parentId: string) =>
+    `/guardians/listByParent/${parentId}`,
+
+  CREATE_NEW_POST: "/posts/create",
+  UPLOAD_ALBUM: (postId: string) => `/post-files/${postId}/upload`,
+  GET_CLASS_OF_TEACHER: (teacherId: string) =>
+    `/post-files/getClassByTeacher/${teacherId}`,
+  GET_LIST_POST: (teacherId: string) =>
+    `/post-files/getPostFileByTeacher/${teacherId}`,
+  DELETE_POST: (postId: string) => `/posts/delete/${postId}`,
+  DELETE_IMAGE: (imageId: string) => `/post-files/${imageId}/delete`,
+  UPDATE_POST: (postId: string) => `/posts/update/${postId}`,
+  GET_LIST_POST_BY_STUDENT: (studentId: string) =>
+    `/dashboard-posts/getPostFileByStudent/${studentId}`,
 };
 
 export const apiConfig = {
