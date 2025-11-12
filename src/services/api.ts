@@ -159,6 +159,8 @@ export const apiEndPoint = {
   DELETE_DOCUMENT: (id: string) => `/documents/delete/${id}`,
   CONFIRM_DOCUMENT: (id: string) => `/documents/confirmPayment/${id}`,
   GET_REPORT_SERVICES: "/manage-services/reports",
+  PAYMENT_ENROLLMENT_CONFIRM: (id: string) => `/enrollments/payment-enroll/${id}`,
+  UPLOAD_IMAGE: "/enrollments/uploadImage",
   GET_LIST_MEDICAL: "/medicals/list",
   GET_MEDICAL_BY_ID: (id: string) => `/medicals/getById/${id}`,
   CREATE_MEDICAL: "/medicals/create",

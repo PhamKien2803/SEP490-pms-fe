@@ -250,6 +250,7 @@ function SchedulesManagement() {
     const fetchClassList = useCallback(async () => {
         try {
             const res = await scheduleApis.getClassListByActiveSchoolYear();
+            console.log("🚀 ~ SchedulesManagement ~ res:", res)
             setClasses(res);
             if (!id) {
                 setSelectedClassId(res?.[0]?._id);
@@ -560,18 +561,29 @@ function SchedulesManagement() {
                     <Col>
                         <Space wrap>
                             <Select
-                                style={{ width: 150 }}
+                                style={{ width: 240, fontSize: 16 }}
+                                dropdownStyle={{ fontSize: 14, lineHeight: "28px" }}
                                 placeholder="Chọn lớp"
                                 value={selectedClassId}
                                 onChange={setSelectedClassId}
                                 disabled={loading || !!id}
+                                optionLabelProp="label"
                             >
                                 {classes.map(cls => (
-                                    <Option key={cls._id} value={cls._id}>{cls.className}</Option>
+                                    <Option
+                                        key={cls._id}
+                                        value={cls._id}
+                                        label={`${cls.className} - ${cls.age} tuổi`}
+                                    >
+                                        <div style={{ fontSize: 14, whiteSpace: "normal" }}>
+                                            {`${cls.className} - ${cls.age} tuổi`}
+                                        </div>
+                                    </Option>
                                 ))}
                             </Select>
+
                             <Select
-                                style={{ width: 120 }} // Giữ lại
+                                style={{ width: 120 }}
                                 placeholder="Chọn tháng"
                                 value={selectedMonth}
                                 onChange={setSelectedMonth}

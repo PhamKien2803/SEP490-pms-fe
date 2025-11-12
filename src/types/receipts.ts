@@ -35,6 +35,9 @@ export interface ReceiptDetailResponse {
     totalAmount: number;
     state: string;
     revenueList: RevenueInReceipt[];
+    disabledMonth?: boolean;
+    isAdmissionFee?: boolean;
+    isEnroll?: boolean;
 }
 
 
@@ -47,6 +50,8 @@ export interface CreateOrUpdateReceiptPayload {
     schoolYear: string;
     month: number;
     totalAmount: number;
+    isAdmissionFee?: boolean;
+    isEnroll?: boolean;
     createdBy?: string;
     updatedBy?: string;
 }
