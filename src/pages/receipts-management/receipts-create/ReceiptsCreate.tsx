@@ -10,6 +10,7 @@ import {
     Row,
     Col,
     Table,
+    Checkbox,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -36,6 +37,7 @@ function ReceiptsCreate() {
     const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
     const [revenues, setRevenues] = useState<RevenueForReceiptItem[]>([]);
     const [unsavedChanges, setUnsavedChanges] = useState(false);
+    const [isAdmissionFee, setIsAdmissionFee] = useState(false);
 
     const fetchInitialData = async () => {
         try {
@@ -63,8 +65,9 @@ function ReceiptsCreate() {
         const payload: CreateOrUpdateReceiptPayload = {
             receiptName: values.receiptName,
             schoolYear: values.schoolYear,
-            month: values.month,
+            month: isAdmissionFee ? undefined : values.month,
             revenueList: values.revenueList,
+            isEnroll: values.isEnroll,
             totalAmount: values.revenueList.reduce(
                 (sum: number, item: any) => sum + item.amount,
                 0
@@ -119,14 +122,22 @@ function ReceiptsCreate() {
                         <Form.Item
                             label="Tháng"
                             name="month"
-                            rules={[{ required: true, message: "Vui lòng chọn tháng" }]}
+                            rules={
+                                isAdmissionFee
+                                    ? []
+                                    : [{ required: true, message: "Vui lòng chọn tháng" }]
+                            }
                         >
-                            <Select placeholder="Chọn tháng" onChange={(value) => {
-                                const currentName = form.getFieldValue("receiptName");
-                                if (!currentName || currentName.startsWith("Học phí tháng")) {
-                                    form.setFieldsValue({ receiptName: `Học phí tháng ${value}` });
-                                }
-                            }}>
+                            <Select
+                                placeholder="Chọn tháng"
+                                disabled={isAdmissionFee}
+                                onChange={(value) => {
+                                    const currentName = form.getFieldValue("receiptName");
+                                    if (!currentName || currentName.startsWith("Học phí tháng")) {
+                                        form.setFieldsValue({ receiptName: `Học phí tháng ${value}` });
+                                    }
+                                }}
+                            >
                                 {Array.from({ length: 12 }, (_, i) => (
                                     <Option key={i + 1} value={i + 1}>
                                         Tháng {i + 1}
@@ -135,6 +146,7 @@ function ReceiptsCreate() {
                             </Select>
                         </Form.Item>
                     </Col>
+
 
                     <Col span={12}>
                         <Form.Item
@@ -160,6 +172,39 @@ function ReceiptsCreate() {
                                 ))}
                             </Select>
                         </Form.Item>
+                    </Col>
+                </Row>
+
+                <Row gutter={16}>
+                    <Col span={6}>
+                        <Form.Item name="isAdmissionFee" valuePropName="checked">
+                            <Checkbox
+                                onChange={(e) => {
+                                    const checked = e.target.checked;
+                                    setIsAdmissionFee(checked);
+
+                                    if (checked) {
+                                        form.setFieldsValue({
+                                            receiptName: "Học phí nhập học",
+                                            month: undefined,
+                                            isEnroll: true,
+                                        });
+                                    } else {
+                                        form.setFieldsValue({
+                                            isEnroll: false,
+                                        });
+                                    }
+                                }}
+                            >
+                                Đây là phí nhập học (Tự động áp dụng cho học sinh mới)
+                            </Checkbox>
+                        </Form.Item>
+
+                        <Form.Item name="isEnroll" noStyle>
+                            <Input type="hidden" />
+                        </Form.Item>
+
+
                     </Col>
                 </Row>
 

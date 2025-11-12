@@ -22,6 +22,7 @@ export interface TuitionListResponse {
 }
 
 export interface TuitionDetailItem {
+    enrollementId: string;
     tuitionId: string;
     tuitionName: string;
     totalAmount: number;
@@ -50,6 +51,7 @@ export interface TuitionDetailResponse {
 }
 
 export interface ConfirmTuitionPayload {
+    enrollementId: string;
     parentId: string;
     totalAmount: number;
 }

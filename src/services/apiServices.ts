@@ -47,6 +47,7 @@ import {
   RegisterEnrollmentDto,
   RejectEnrollmentDto,
   UpdateEnrollmentDto,
+  UploadImageResponse,
   UploadPDFResponse,
 } from "../types/enrollment";
 import {
@@ -497,6 +498,26 @@ export const enrollmentApis = {
 
   approveAllEnrollments: async (body: { ids: string[] }): Promise<void> => {
     await axiosAuth.post(apiEndPoint.APPROVE_ALL_ENROLLMENT, body);
+  },
+
+  confirmEnrollmentPayment: async (id: string): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.PAYMENT_ENROLLMENT_CONFIRM(id));
+  },
+
+  uploadEnrollmentImage: async (file: File): Promise<UploadImageResponse> => {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const response = await axiosAuth.post<UploadImageResponse>(
+      apiEndPoint.UPLOAD_IMAGE,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
   },
 };
 

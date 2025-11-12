@@ -1,20 +1,32 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Form, Input, Button, Space, Card, Select, DatePicker, Row, Col, Tooltip, Spin, Flex, Upload, Popconfirm, Modal, Typography } from 'antd';
-import { ArrowLeftOutlined, CheckCircleOutlined, CloseCircleOutlined, UploadOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
+import {
+    Form, Input, Button, Space, Card, Select, DatePicker, Row, Col, Tooltip,
+    Spin, Flex, Upload, Popconfirm, Modal, Typography, Tag, Tabs
+} from 'antd';
+import {
+    ArrowLeftOutlined, CheckCircleOutlined, CloseCircleOutlined, UploadOutlined,
+    EditOutlined, SaveOutlined, ClockCircleOutlined, DollarOutlined, StopOutlined,
+    QuestionCircleOutlined,
+    TeamOutlined, SolutionOutlined, FileAddOutlined, PlusOutlined
+} from '@ant-design/icons';
 import type { RcFile, UploadFile } from 'antd/es/upload/interface';
 import { useCurrentUser } from '../../../hooks/useCurrentUser';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { enrollmentApis } from '../../../services/apiServices';
-import { ApproveEnrollmentDto, EnrollmentListItem } from '../../../types/enrollment';
+import { EnrollmentListItem } from '../../../types/enrollment';
 import dayjs from 'dayjs';
 import TextArea from 'antd/es/input/TextArea';
 import { constants } from '../../../constants';
 import { usePageTitle } from '../../../hooks/usePageTitle';
 import { ETHNIC_OPTIONS } from '../../../components/hard-code-action';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 const { Option } = Select;
+const { TabPane } = Tabs;
+
+const THEME_COLOR = "black";
+const BACKGROUND_GREY = "#f0f2f5";
 
 const EnrollmentEdit: React.FC = () => {
     usePageTitle('Chỉnh sửa thông tin - Cá Heo Xanh');
@@ -38,6 +50,8 @@ const EnrollmentEdit: React.FC = () => {
     const [healthCertId, setHealthCertId] = useState<string | null>(null);
     const [birthCertFile, setBirthCertFile] = useState<UploadFile[]>([]);
     const [healthCertFile, setHealthCertFile] = useState<UploadFile[]>([]);
+    const [designImageFile, setDesignImageFile] = useState<UploadFile[]>([]);
+    const [studentImageId, setStudentImageId] = useState<string | null>(null);
 
     const phoneValidationRule = useMemo(() => ({
         pattern: /^\d{10}$/,
@@ -54,7 +68,6 @@ const EnrollmentEdit: React.FC = () => {
         message: 'Chỉ được nhập chữ cái và dấu cách!',
     };
 
-
     const fetchData = useCallback(async () => {
         if (!id) {
             toast.error("URL không hợp lệ, thiếu ID của đơn.");
@@ -69,6 +82,7 @@ const EnrollmentEdit: React.FC = () => {
                 ...data,
                 studentDob: data.studentDob ? dayjs(data.studentDob) : null,
             });
+
             if (data.birthCertFiles) {
                 setBirthCertId(data.birthCertId);
                 setBirthCertFile([{ uid: data.birthCertFiles._id, name: `${data.birthCertFiles.filename} (tải lên lúc ${dayjs(data.birthCertFiles.uploadDate).format('DD/MM/YYYY')})`, status: 'done', url: data.birthCertFiles._id }]);
@@ -80,6 +94,18 @@ const EnrollmentEdit: React.FC = () => {
                 setHealthCertFile([{ uid: data.healthCertFiles._id, name: `${data.healthCertFiles.filename} (tải lên lúc ${dayjs(data.healthCertFiles.uploadDate).format('DD/MM/YYYY')})`, status: 'done', url: data.healthCertFiles._id }]);
             } else {
                 setHealthCertFile([]);
+            }
+
+            if (data.imageStudent) {
+                setStudentImageId(data.imageStudent);
+                setDesignImageFile([
+                    {
+                        uid: data.imageStudent,
+                        name: 'Ảnh học sinh',
+                        url: `${constants.APP_PREFIX}/files/${data.imageStudent}`,
+                        status: 'done',
+                    },
+                ]);
             }
         } catch (error) {
             typeof error === "string" ? toast.info(error) : toast.error('Không thể tải chi tiết đơn đăng ký.');
@@ -98,7 +124,7 @@ const EnrollmentEdit: React.FC = () => {
         try {
             const values = await form.validateFields();
             setIsUpdating(true);
-            const payload = { ...values, _id: id, studentDob: dayjs(values.studentDob).toISOString(), birthCertId, healthCertId };
+            const payload = { ...values, _id: id, studentDob: dayjs(values.studentDob).toISOString(), birthCertId, healthCertId, imageStudent: studentImageId };
             await enrollmentApis.updateEnrollment(id, payload);
             toast.success('Cập nhật thông tin thành công!');
             setIsEditing(false);
@@ -108,7 +134,7 @@ const EnrollmentEdit: React.FC = () => {
         } finally {
             setIsUpdating(false);
         }
-    }, [id, form, birthCertId, healthCertId, fetchData]);
+    }, [id, form, birthCertId, healthCertId, studentImageId, fetchData]);
 
     const handleViewPDF = useCallback(async (fileId: string) => {
         try {
@@ -124,22 +150,31 @@ const EnrollmentEdit: React.FC = () => {
     const handleApprove = useCallback(async () => {
         if (!id) return;
         if (!birthCertId || !healthCertId) {
-            toast.warn('Vui lòng tải lên đầy đủ Giấy khai sinh và Giấy khám sức khỏe.');
+            toast.warn('Vui lòng tải đầy đủ Giấy khai sinh và Giấy khám sức khỏe.');
             return;
         }
+
         try {
             const values = await form.validateFields();
             setIsApproving(true);
-            const payload = { _id: id, ...values, studentDob: dayjs(values.studentDob).toISOString(), birthCertId, healthCertId, approvedBy: user.email };
-            await enrollmentApis.approveEnrollment(payload as ApproveEnrollmentDto);
-            toast.success('Duyệt đơn đăng ký thành công!');
-            navigate(`${constants.APP_PREFIX}/enrollments`);
-        } catch (formError) {
-            typeof formError === "string" ? toast.info(formError) : toast.error('Dữ liệu chưa hợp lệ để duyệt. Vui lòng kiểm tra lại.');
+            const payload = {
+                _id: id,
+                ...values,
+                studentDob: dayjs(values.studentDob).toISOString(),
+                birthCertId,
+                healthCertId,
+                imageStudent: studentImageId,
+                approvedBy: user.email,
+            };
+            await enrollmentApis.approveEnrollment(payload);
+            toast.success('Đã duyệt đơn, chuyển sang trạng thái chờ thanh toán!');
+            fetchData();
+        } catch (err) {
+            typeof err === "string" ? toast.info(err) : toast.error('Duyệt đơn thất bại. Vui lòng kiểm tra dữ liệu.');
         } finally {
             setIsApproving(false);
         }
-    }, [id, birthCertId, healthCertId, form, user.email, navigate]);
+    }, [id, birthCertId, healthCertId, studentImageId, form, user.email, fetchData]);
 
     const handleReject = useCallback(async () => {
         if (!id || !rejectReason.trim()) {
@@ -176,6 +211,20 @@ const EnrollmentEdit: React.FC = () => {
                 setHealthCertId(null);
                 setHealthCertFile([]);
             }
+            if (enrollmentData.imageStudent) {
+                setStudentImageId(enrollmentData.imageStudent);
+                setDesignImageFile([
+                    {
+                        uid: enrollmentData.imageStudent,
+                        name: 'Ảnh học sinh',
+                        url: `${constants.APP_PREFIX}/files/${enrollmentData.imageStudent}`,
+                        status: 'done',
+                    },
+                ]);
+            } else {
+                setStudentImageId(null);
+                setDesignImageFile([]);
+            }
         }
         setIsEditing(false);
     }, [enrollmentData, form]);
@@ -188,31 +237,80 @@ const EnrollmentEdit: React.FC = () => {
         }
     }, [isEditing, navigate]);
 
-    const handleUpload = useCallback(async (file: File, type: 'birth' | 'health') => {
+    const beforeUploadPDF = (file: RcFile) => {
+        const isPdf = file.type === 'application/pdf';
+        if (!isPdf) {
+            toast.error('Bạn chỉ có thể tải lên file có định dạng .pdf!');
+        }
+        return isPdf || Upload.LIST_IGNORE;
+    };
+
+    const beforeUploadImage = (file: RcFile) => {
+        const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+        if (!isJpgOrPng) {
+            toast.error('Bạn chỉ có thể tải lên file JPG/PNG!');
+        }
+        return isJpgOrPng || Upload.LIST_IGNORE;
+    };
+
+    const customRequestPDF = async (options: any, type: 'birth' | 'health') => {
+        const { file, onSuccess, onError } = options;
         try {
-            const response = await enrollmentApis.uploadPDF(file);
-            const newFile = { uid: response.fileId, name: file.name, status: 'done' as const, url: response.fileId };
+            const response = await enrollmentApis.uploadPDF(file as File);
             if (type === 'birth') {
                 setBirthCertId(response.fileId);
-                setBirthCertFile([newFile]);
             } else {
                 setHealthCertId(response.fileId);
-                setHealthCertFile([newFile]);
             }
             toast.success(`Tải lên ${type === 'birth' ? 'giấy khai sinh' : 'giấy khám sức khỏe'} thành công!`);
+            if (onSuccess) onSuccess(response);
         } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error('Tải file thất bại. Vui lòng thử lại!');
+            toast.error('Tải file thất bại.');
+            if (onError) onError(error);
         }
-    }, []);
+    };
 
-    const beforeUploadPDF = useCallback((file: RcFile, type: 'birth' | 'health') => {
-        if (file.type !== 'application/pdf') {
-            toast.error('Bạn chỉ có thể tải lên file có định dạng .pdf!');
-            return false;
+    const customRequestImage = async (options: any) => {
+        const { file, onSuccess, onError } = options;
+        try {
+            const response = await enrollmentApis.uploadEnrollmentImage(file as File);
+            setStudentImageId(response.image);
+            toast.success("Tải ảnh học sinh thành công!");
+            if (onSuccess) onSuccess(response);
+        } catch (err) {
+            toast.error("Tải ảnh thất bại!");
+            if (onError) onError(err);
         }
-        handleUpload(file, type);
-        return false;
-    }, [handleUpload]);
+    };
+
+    const onFileChange = (info: any, type: 'birth' | 'health' | 'image') => {
+        let fileList = [...info.fileList];
+        fileList = fileList.slice(-1);
+
+        fileList = fileList.map(file => {
+            if (file.response) {
+                file.url = type === 'image' ? URL.createObjectURL(file.originFileObj as RcFile) : file.response.fileId;
+            }
+            return file;
+        });
+
+        if (type === 'birth') setBirthCertFile(fileList);
+        else if (type === 'health') setHealthCertFile(fileList);
+        else setDesignImageFile(fileList);
+    };
+
+    const onFileRemove = (type: 'birth' | 'health' | 'image') => {
+        if (type === 'birth') {
+            setBirthCertId(null);
+            setBirthCertFile([]);
+        } else if (type === 'health') {
+            setHealthCertId(null);
+            setHealthCertFile([]);
+        } else {
+            setStudentImageId(null);
+            setDesignImageFile([]);
+        }
+    };
 
     const allowOnlyNumbers = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
         if (!/[0-9]/.test(event.key) && !['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete'].includes(event.key) && !event.ctrlKey) {
@@ -220,171 +318,332 @@ const EnrollmentEdit: React.FC = () => {
         }
     }, []);
 
+    const getTagProps = (state?: string): { color: string; icon: React.ReactNode } => {
+        switch (state) {
+            case "Chờ xử lý":
+                return { color: "default", icon: <ClockCircleOutlined /> };
+            case "Chờ thanh toán":
+                return { color: "gold", icon: <DollarOutlined /> };
+            case "Chờ BGH phê duyệt":
+                return { color: "blue", icon: <ClockCircleOutlined /> };
+            case "Chưa đủ điều kiện nhập học":
+                return { color: "red", icon: <StopOutlined /> };
+            case "Từ chối":
+                return { color: "volcano", icon: <CloseCircleOutlined /> };
+            case "Hoàn thành":
+                return { color: "green", icon: <CheckCircleOutlined /> };
+            default:
+                return { color: "default", icon: <QuestionCircleOutlined /> };
+        }
+    };
+
     if (pageLoading) {
         return <Flex align="center" justify="center" style={{ minHeight: 'calc(100vh - 150px)' }}><Spin size="large" /></Flex>;
     }
 
     return (
-        <div style={{ padding: '24px', background: '#f0f2f5' }}>
-            <Card bordered={false}>
-                <Space align="center" style={{ marginBottom: '24px' }}>
-                    <Tooltip title="Quay lại">
-                        <Button shape="circle" icon={<ArrowLeftOutlined />} onClick={handleBackClick} />
-                    </Tooltip>
-                    <Title level={2} style={{ margin: 0 }}>
-                        {isEditing ? 'Chỉnh sửa' : 'Chi tiết'} phiếu đăng ký: {enrollmentData?.enrollmentCode}
-                    </Title>
-                </Space>
+        <div style={{ padding: '24px', background: BACKGROUND_GREY }}>
+            <Row justify="space-between" align="middle" style={{ marginBottom: '24px' }}>
+                <Col>
+                    <Space align="center">
+                        <Tooltip title="Quay lại">
+                            <Button shape="circle" icon={<ArrowLeftOutlined />} onClick={handleBackClick} />
+                        </Tooltip>
+                        <Title level={2} style={{ margin: 0, color: THEME_COLOR }}>
+                            {isEditing ? 'Chỉnh sửa' : 'Chi tiết'} phiếu đăng ký
+                        </Title>
+                        <Title level={4} style={{ margin: 0, color: "#595959" }}>
+                            ({enrollmentData?.enrollmentCode})
+                        </Title>
+                        <Tag
+                            color={getTagProps(enrollmentData?.state).color}
+                            icon={getTagProps(enrollmentData?.state).icon}
+                            style={{ fontSize: 16, padding: "4px 12px", height: "auto", marginLeft: 8 }}
+                        >
+                            {enrollmentData?.state || "Không rõ"}
+                        </Tag>
+                    </Space>
+                </Col>
+                <Col>
+                    {isEditing ? (
+                        <Space size="middle">
+                            <Button onClick={() => setIsCancelConfirmVisible(true)}>Hủy</Button>
+                            <Button
+                                type="primary"
+                                icon={<SaveOutlined />}
+                                loading={isUpdating}
+                                onClick={handleUpdate}
+                            >
+                                Lưu thay đổi
+                            </Button>
+                        </Space>
+                    ) : (
+                        <Space size="middle">
+                            {enrollmentData?.state === 'Chờ xử lý' && (
+                                <>
+                                    <Button danger icon={<CloseCircleOutlined />} onClick={() => setIsRejectModalVisible(true)}>Từ chối</Button>
+                                    <Popconfirm
+                                        title="Xác nhận duyệt đơn?"
+                                        description="Hành động này sẽ duyệt đơn đăng ký. Bạn chắc chắn chứ?"
+                                        onConfirm={handleApprove}
+                                        okText="Đồng ý"
+                                        cancelText="Không"
+                                    >
+                                        <Button type="primary" icon={<CheckCircleOutlined />} loading={isApproving}>Duyệt đơn</Button>
+                                    </Popconfirm>
+                                </>
+                            )}
+                            {enrollmentData?.state === 'Chờ thanh toán' &&
+                                enrollmentData?.statePayment === 'Tiền mặt' && (
+                                    <Popconfirm
+                                        title="Xác nhận đã thanh toán?"
+                                        description="Hành động này sẽ chuyển sang trạng thái chờ BGH phê duyệt."
+                                        onConfirm={async () => {
+                                            try {
+                                                await enrollmentApis.confirmEnrollmentPayment(enrollmentData._id);
+                                                toast.success('Xác nhận thanh toán thành công!');
+                                                fetchData();
+                                            } catch (error) {
+                                                toast.error('Xác nhận thất bại!');
+                                            }
+                                        }}
+                                        okText="Xác nhận"
+                                        cancelText="Hủy"
+                                    >
+                                        <Button type="primary" icon={<CheckCircleOutlined />} danger>
+                                            Đã thanh toán
+                                        </Button>
+                                    </Popconfirm>
+                                )}
+                            {enrollmentData?.state !== 'Chờ BGH phê duyệt' && enrollmentData?.state !== 'Chưa đủ điều kiện nhập học' && enrollmentData?.state !== 'Hoàn thành' && (
+                                <Button icon={<EditOutlined />} onClick={() => setIsEditing(true)}>Chỉnh sửa thông tin</Button>
+                            )}
+                        </Space>
+                    )}
+                </Col>
+            </Row>
 
-                <Form form={form} layout="vertical">
-                    <Row gutter={32}>
-                        <Col xs={24} md={8}>
-                            <Title level={4}>Thông tin học sinh</Title>
-                            <Form.Item name="studentName" label="Họ và tên" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }, nameValidationRule]}>
-                                <Input disabled={!isEditing} />
-                            </Form.Item>
-                            <Form.Item name="studentDob" label="Ngày sinh" rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}>
-                                <DatePicker onChange={(date) => {
-                                    form.setFieldValue("studentDob", date);
-
-                                    if (date) {
-                                        const today = dayjs();
-                                        const age = today.diff(date, "year");
-
-                                        if (date.isAfter(today, "day")) {
-                                            setDobError("Ngày sinh không được trong tương lai!");
-                                            setStudentAge(null);
-                                        } else if (age < 1) {
-                                            setDobError("Học sinh phải đủ ít nhất 1 tuổi!");
-                                            setStudentAge(null);
-                                        } else if (age > 5) {
-                                            setDobError("Học sinh không được quá 5 tuổi!");
-                                            setStudentAge(null);
-                                        } else {
-                                            setDobError(null);
-                                            setStudentAge(age);
-                                        }
-                                    } else {
-                                        setStudentAge(null);
-                                        setDobError(null);
-                                    }
-                                }} style={{ width: '100%' }} format="DD/MM/YYYY" disabled={!isEditing} />
+            <Card bordered={false} style={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)" }}>
+                <Form form={form} layout="vertical" disabled={!isEditing}>
+                    <Card
+                        type="inner"
+                        title={
+                            <Title level={4} style={{ margin: 0, color: THEME_COLOR }}>
+                                <SolutionOutlined style={{ marginRight: 8 }} />
+                                Thông tin học sinh
+                            </Title>
+                        }
+                    >
+                        <Row gutter={32}>
+                            <Col xs={24} md={8}>
+                                <Form.Item name="studentName" label="Họ và tên" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }, nameValidationRule]}>
+                                    <Input />
+                                </Form.Item>
+                                <Form.Item name="studentDob" label="Ngày sinh" rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}>
+                                    <DatePicker
+                                        onChange={(date) => {
+                                            form.setFieldValue("studentDob", date);
+                                            if (date) {
+                                                const today = dayjs();
+                                                const age = today.diff(date, "year");
+                                                if (date.isAfter(today, "day")) {
+                                                    setDobError("Ngày sinh không được trong tương lai!");
+                                                    setStudentAge(null);
+                                                } else if (age < 1) {
+                                                    setDobError("Học sinh phải đủ ít nhất 1 tuổi!");
+                                                    setStudentAge(null);
+                                                } else if (age > 5) {
+                                                    setDobError("Học sinh không được quá 5 tuổi!");
+                                                    setStudentAge(null);
+                                                } else {
+                                                    setDobError(null);
+                                                    setStudentAge(age);
+                                                }
+                                            } else {
+                                                setStudentAge(null);
+                                                setDobError(null);
+                                            }
+                                        }}
+                                        style={{ width: '100%' }}
+                                        format="DD/MM/YYYY"
+                                    />
+                                </Form.Item>
                                 {studentAge !== null && !dobError && (
-                                    <Typography.Text type="secondary">→ {studentAge} tuổi</Typography.Text>
+                                    <Text type="secondary" style={{ marginTop: -12, display: 'block' }}>→ {studentAge} tuổi</Text>
                                 )}
-                                {dobError && <Typography.Text type="danger">{dobError}</Typography.Text>}
-                            </Form.Item>
-                            <Form.Item name="studentIdCard" label="CCCD/ Mã định danh" rules={[{ required: true, message: 'Vui lòng nhập mã định danh!' }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} disabled={!isEditing} /></Form.Item>
-                            <Form.Item name="address" label="Địa chỉ thường trú" rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}><Input.TextArea rows={3} disabled={!isEditing} /></Form.Item>
-                            <Form.Item name="studentGender" label="Giới tính" rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}>
-                                <Select disabled={!isEditing}>
-                                    <Option value="Nam">Nam</Option>
-                                    <Option value="Nữ">Nữ</Option>
-                                    <Option value="Khác">Khác</Option>
-                                </Select>
-                            </Form.Item>
-                            <Form.Item
-                                name="studentReligion"
-                                label="Tôn giáo"
-                                rules={[{ required: true, message: 'Vui lòng chọn!' }]}
-                            >
-                                <Select disabled={!isEditing}>
-                                    <Option value="Có">Có</Option>
-                                    <Option value="Không">Không</Option>
-                                </Select>
-                            </Form.Item>
+                                {dobError && <Text type="danger" style={{ marginTop: -12, display: 'block' }}>{dobError}</Text>}
+                            </Col>
+                            <Col xs={24} md={8}>
+                                <Form.Item name="studentIdCard" label="CCCD/ Mã định danh" rules={[{ required: true, message: 'Vui lòng nhập mã định danh!' }, idCardValidationRule]}>
+                                    <Input onKeyPress={allowOnlyNumbers} />
+                                </Form.Item>
+                                <Form.Item name="studentGender" label="Giới tính" rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}>
+                                    <Select>
+                                        <Option value="Nam">Nam</Option>
+                                        <Option value="Nữ">Nữ</Option>
+                                        <Option value="Khác">Khác</Option>
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                            <Col xs={24} md={8}>
+                                <Form.Item name="studentNation" label="Dân tộc" rules={[{ required: true, message: 'Vui lòng chọn dân tộc!' }]}>
+                                    <Select showSearch optionFilterProp="children">
+                                        {ETHNIC_OPTIONS.map((ethnic) => (
+                                            <Option key={ethnic} value={ethnic}>{ethnic}</Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
+                                <Form.Item name="studentReligion" label="Tôn giáo" rules={[{ required: true, message: 'Vui lòng chọn!' }]}>
+                                    <Select>
+                                        <Option value="Có">Có</Option>
+                                        <Option value="Không">Không</Option>
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                            <Col span={24}>
+                                <Form.Item name="address" label="Địa chỉ thường trú" rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}>
+                                    <Input.TextArea rows={2} />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                    </Card>
 
-                            <Form.Item
-                                name="studentNation"
-                                label="Dân tộc"
-                                rules={[{ required: true, message: 'Vui lòng chọn dân tộc!' }]}
-                            >
-                                <Select showSearch optionFilterProp="children" disabled={!isEditing}>
-                                    {ETHNIC_OPTIONS.map((ethnic) => (
-                                        <Option key={ethnic} value={ethnic}>{ethnic}</Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
+                    <Card
+                        type="inner"
+                        title={
+                            <Title level={4} style={{ margin: 0, color: THEME_COLOR, marginTop: 24 }}>
+                                <TeamOutlined style={{ marginRight: 8 }} />
+                                Thông tin phụ huynh
+                            </Title>
+                        }
+                    >
+                        <Tabs defaultActiveKey="father">
+                            <TabPane tab="Thông tin Cha" key="father">
+                                <Row gutter={32}>
+                                    <Col xs={24} md={8}>
+                                        <Form.Item name="fatherName" label="Họ và tên Cha" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }, nameValidationRule]}><Input /></Form.Item>
+                                    </Col>
+                                    <Col xs={24} md={8}>
+                                        <Form.Item name="fatherJob" label="Nghề nghiệp" rules={[{ required: true, message: 'Vui lòng nhập nghề nghiệp!' }, nameValidationRule]}><Input /></Form.Item>
+                                    </Col>
+                                    <Col xs={24} md={8}>
+                                        <Form.Item name="fatherPhoneNumber" label="Số điện thoại Cha" rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} /></Form.Item>
+                                    </Col>
+                                    <Col xs={24} md={8}>
+                                        <Form.Item name="fatherIdCard" label="CCCD Cha" rules={[{ required: true, message: 'Vui lòng nhập CCCD!' }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} /></Form.Item>
+                                    </Col>
+                                    <Col xs={24} md={8}>
+                                        <Form.Item name="fatherEmail" label="Email Cha" rules={[{ required: true, message: 'Vui lòng nhập email!' }, { type: 'email', message: 'Email không hợp lệ!' }]}><Input /></Form.Item>
+                                    </Col>
+                                </Row>
+                            </TabPane>
+                            <TabPane tab="Thông tin Mẹ" key="mother">
+                                <Row gutter={32}>
+                                    <Col xs={24} md={8}>
+                                        <Form.Item name="motherName" label="Họ và tên Mẹ" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }, nameValidationRule]}><Input /></Form.Item>
+                                    </Col>
+                                    <Col xs={24} md={8}>
+                                        <Form.Item name="motherJob" label="Nghề nghiệp" rules={[{ required: true, message: 'Vui lòng nhập nghề nghiệp!' }, nameValidationRule]}><Input /></Form.Item>
+                                    </Col>
+                                    <Col xs={24} md={8}>
+                                        <Form.Item name="motherPhoneNumber" label="Số điện thoại Mẹ" rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} /></Form.Item>
+                                    </Col>
+                                    <Col xs={24} md={8}>
+                                        <Form.Item name="motherIdCard" label="CCCD Mẹ" rules={[{ required: true, message: 'Vui lòng nhập CCCD!' }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} /></Form.Item>
+                                    </Col>
+                                    <Col xs={24} md={8}>
+                                        <Form.Item name="motherEmail" label="Email Mẹ" rules={[{ required: true, message: 'Vui lòng nhập email!' }, { type: 'email', message: 'Email không hợp lệ!' }]}><Input /></Form.Item>
+                                    </Col>
+                                </Row>
+                            </TabPane>
+                        </Tabs>
+                    </Card>
 
-                        </Col>
-                        <Col xs={24} md={8}>
-                            <Title level={4}>Thông tin cha</Title>
-                            <Form.Item name="fatherName" label="Họ và tên Cha" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }, nameValidationRule]}><Input disabled={!isEditing} /></Form.Item>
-                            <Form.Item name="fatherJob" label="Nghề nghiệp" rules={[{ required: true, message: 'Vui lòng nhập nghề nghiệp!' }, nameValidationRule]}><Input disabled={!isEditing} /></Form.Item>
-                            <Form.Item name="fatherPhoneNumber" label="Số điện thoại Cha" rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} disabled={!isEditing} /></Form.Item>
-                            <Form.Item name="fatherIdCard" label="CCCD Cha" rules={[{ required: true, message: 'Vui lòng nhập CCCD!' }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} disabled={!isEditing} /></Form.Item>
-                            <Form.Item name="fatherEmail" label="Email Cha" rules={[{ required: true, message: 'Vui lòng nhập email!' }, { type: 'email', message: 'Email không hợp lệ!' }]}><Input disabled={!isEditing} /></Form.Item>
-                        </Col>
-                        <Col xs={24} md={8}>
-                            <Title level={4}>Thông tin mẹ</Title>
-                            <Form.Item name="motherName" label="Họ và tên Mẹ" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }, nameValidationRule]}><Input disabled={!isEditing} /></Form.Item>
-                            <Form.Item name="motherJob" label="Nghề nghiệp" rules={[{ required: true, message: 'Vui lòng nhập nghề nghiệp!' }, nameValidationRule]}><Input disabled={!isEditing} /></Form.Item>
-                            <Form.Item name="motherPhoneNumber" label="Số điện thoại Mẹ" rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} disabled={!isEditing} /></Form.Item>
-                            <Form.Item name="motherIdCard" label="CCCD Mẹ" rules={[{ required: true, message: 'Vui lòng nhập CCCD!' }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} disabled={!isEditing} /></Form.Item>
-                            <Form.Item name="motherEmail" label="Email Mẹ" rules={[{ required: true, message: 'Vui lòng nhập email!' }, { type: 'email', message: 'Email không hợp lệ!' }]}><Input disabled={!isEditing} /></Form.Item>
-                        </Col>
-                    </Row>
-                    <Title level={4} style={{ marginTop: '24px' }}>Tài liệu đính kèm</Title>
-                    <Row gutter={32}>
-                        <Col xs={24} md={12}>
-                            <Form.Item label="Giấy khai sinh (PDF)">
-                                <Upload
-                                    disabled={!isEditing}
-                                    fileList={birthCertFile}
-                                    beforeUpload={(file) => beforeUploadPDF(file, 'birth')}
-                                    onRemove={() => { setBirthCertId(null); setBirthCertFile([]); }}
-                                    onPreview={(file) => { if (file.url) handleViewPDF(file.url); }}
-                                    maxCount={1}
+                    <Card
+                        type="inner"
+                        title={
+                            <Title level={4} style={{ margin: 0, color: THEME_COLOR, marginTop: 24 }}>
+                                <FileAddOutlined style={{ marginRight: 8 }} />
+                                Tài liệu đính kèm & Thanh toán
+                            </Title>
+                        }
+                    >
+                        <Row gutter={32}>
+                            <Col xs={24} md={8}>
+                                <Form.Item label="Ảnh học sinh (PNG/JPG)" required>
+                                    <Upload
+                                        disabled={!isEditing}
+                                        listType="picture-card"
+                                        fileList={designImageFile}
+                                        beforeUpload={beforeUploadImage}
+                                        customRequest={customRequestImage}
+                                        onChange={(info) => onFileChange(info, 'image')}
+                                        onRemove={() => onFileRemove('image')}
+                                        onPreview={(file) => {
+                                            Modal.info({
+                                                title: file.name,
+                                                content: <img alt="preview" style={{ width: '100%' }} src={file.url || file.thumbUrl} />,
+                                                maskClosable: true,
+                                            });
+                                        }}
+                                    >
+                                        {designImageFile.length < 1 && (
+                                            <div>
+                                                <PlusOutlined />
+                                                <div style={{ marginTop: 8 }}>Tải ảnh lên</div>
+                                            </div>
+                                        )}
+                                    </Upload>
+                                </Form.Item>
+                            </Col>
+                            <Col xs={24} md={8}>
+                                <Form.Item label="Giấy khai sinh (PDF)" required>
+                                    <Upload
+                                        disabled={!isEditing}
+                                        fileList={birthCertFile}
+                                        beforeUpload={beforeUploadPDF}
+                                        customRequest={(options) => customRequestPDF(options, 'birth')}
+                                        onChange={(info) => onFileChange(info, 'birth')}
+                                        onRemove={() => onFileRemove('birth')}
+                                        onPreview={(file) => { if (file.url) handleViewPDF(file.url); }}
+                                        maxCount={1}
+                                    >
+                                        <Button icon={<UploadOutlined />} disabled={!isEditing}>
+                                            {birthCertFile.length > 0 ? "Thay đổi file" : "Tải lên file PDF"}
+                                        </Button>
+                                    </Upload>
+                                </Form.Item>
+                                <Form.Item label="Giấy khám sức khỏe (PDF)" required>
+                                    <Upload
+                                        disabled={!isEditing}
+                                        fileList={healthCertFile}
+                                        beforeUpload={beforeUploadPDF}
+                                        customRequest={(options) => customRequestPDF(options, 'health')}
+                                        onChange={(info) => onFileChange(info, 'health')}
+                                        onRemove={() => onFileRemove('health')}
+                                        onPreview={(file) => { if (file.url) handleViewPDF(file.url); }}
+                                        maxCount={1}
+                                    >
+                                        <Button icon={<UploadOutlined />} disabled={!isEditing}>
+                                            {healthCertFile.length > 0 ? "Thay đổi file" : "Tải lên file PDF"}
+                                        </Button>
+                                    </Upload>
+                                </Form.Item>
+                            </Col>
+                            <Col xs={24} md={8}>
+                                <Form.Item
+                                    name="statePayment"
+                                    label="Phương thức thanh toán"
+                                    rules={[{ required: true, message: "Vui lòng chọn trạng thái thanh toán!" }]}
                                 >
-                                    {birthCertFile.length < 1 && <Button icon={<UploadOutlined />} disabled={!isEditing}>Tải lên file mới</Button>}
-                                </Upload>
-                            </Form.Item>
-                        </Col>
-                        <Col xs={24} md={12}>
-                            <Form.Item label="Giấy khám sức khỏe (PDF)">
-                                <Upload
-                                    disabled={!isEditing}
-                                    fileList={healthCertFile}
-                                    beforeUpload={(file) => beforeUploadPDF(file, 'health')}
-                                    onRemove={() => { setHealthCertId(null); setHealthCertFile([]); }}
-                                    onPreview={(file) => { if (file.url) handleViewPDF(file.url); }}
-                                    maxCount={1}
-                                >
-                                    {healthCertFile.length < 1 && <Button icon={<UploadOutlined />} disabled={!isEditing}>Tải lên file mới</Button>}
-                                </Upload>
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                    <Row justify="end" style={{ marginTop: '32px' }}>
-                        {isEditing ? (
-                            <Space size="middle">
-                                <Button onClick={() => setIsCancelConfirmVisible(true)}>Hủy</Button>
-                                <Button type="primary" icon={<SaveOutlined />} loading={isUpdating} onClick={handleUpdate}>
-                                    Lưu thay đổi
-                                </Button>
-                            </Space>
-                        ) : (
-                            <Space size="middle">
-                                {enrollmentData?.state === 'Chờ xử lý' && (
-                                    <>
-                                        <Button danger icon={<CloseCircleOutlined />} onClick={() => setIsRejectModalVisible(true)}>Từ chối</Button>
-                                        <Popconfirm
-                                            title="Xác nhận duyệt đơn?"
-                                            description="Hành động này sẽ duyệt đơn đăng ký. Bạn chắc chắn chứ?"
-                                            onConfirm={handleApprove}
-                                            okText="Đồng ý"
-                                            cancelText="Không"
-                                        >
-                                            <Button type="primary" icon={<CheckCircleOutlined />} loading={isApproving}>Duyệt đơn</Button>
-                                        </Popconfirm>
-                                    </>
-                                )}
-                                {enrollmentData?.state !== 'Chờ BGH phê duyệt' && enrollmentData?.state !== 'Chưa đủ điều kiện nhập học' && enrollmentData?.state !== 'Hoàn thành' && (
-                                    <Button icon={<EditOutlined />} onClick={() => setIsEditing(true)}>Chỉnh sửa thông tin</Button>
-                                )}
-                            </Space>
-                        )}
-                    </Row>
+                                    <Select placeholder="Chọn phương thức">
+                                        <Option value="Chuyển khoản">Chuyển khoản</Option>
+                                        <Option value="Tiền mặt">Tiền mặt</Option>
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                    </Card>
                 </Form>
             </Card>
 

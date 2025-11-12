@@ -54,6 +54,7 @@ function TuitionDetails() {
     const { canApprove } = usePagePermission();
     const [details, setDetails] = useState<TuitionDetailItem[]>([]);
     const [totalAmount, setTotalAmount] = useState<number>(0);
+    const [enrollmentId, setEnrollmentId] = useState<string>("");
     const [loading, setLoading] = useState(true);
     const [confirmLoading, setConfirmLoading] = useState(false);
 
@@ -70,6 +71,7 @@ function TuitionDetails() {
                 const response = await tuitionApis.getTuitionDetail(parentId);
                 setDetails(response.data);
                 setTotalAmount(response.totalAmount);
+                setEnrollmentId(response.data[0]?.enrollementId || "");
             } catch (error) {
                 typeof error === "string" ? toast.info(error) : toast.error("Không thể tải chi tiết học phí");
             } finally {
@@ -86,6 +88,7 @@ function TuitionDetails() {
         setConfirmLoading(true);
         try {
             const payload = {
+                enrollementId: enrollmentId,
                 parentId: parentId,
                 totalAmount: totalAmount,
             };

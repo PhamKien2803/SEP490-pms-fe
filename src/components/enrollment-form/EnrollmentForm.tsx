@@ -101,15 +101,14 @@ const EnrollmentForm: React.FC = () => {
         message: 'CCCD phải có đúng 12 chữ số!',
     };
 
-    const allowOnlyNumbers = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (!/[0-9]/.test(event.key) && !['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete'].includes(event.key) && !event.ctrlKey) {
-            event.preventDefault();
-        }
+    const noSpecialCharactersRule = {
+        pattern: /^[a-zA-ZÀ-ỹà-ỹ\s]+$/,
+        message: "Không được nhập số hoặc ký tự đặc biệt!",
     };
 
-    const blockSpecialCharactersAndNumbers = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        const regex = /^[a-zA-ZÀ-ỹà-ỹ\s]*$/;
-        if (!regex.test(event.key)) {
+
+    const allowOnlyNumbers = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (!/[0-9]/.test(event.key) && !['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete'].includes(event.key) && !event.ctrlKey) {
             event.preventDefault();
         }
     };
@@ -147,7 +146,7 @@ const EnrollmentForm: React.FC = () => {
 
                     <Divider orientation="left"><UserOutlined /> Thông tin học sinh</Divider>
                     <Row gutter={24}>
-                        <Col xs={24} sm={12}><Form.Item name="studentName" label="Họ và tên" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}><Input onKeyPress={blockSpecialCharactersAndNumbers}
+                        <Col xs={24} sm={12}><Form.Item name="studentName" label="Họ và tên" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }, noSpecialCharactersRule]}><Input
                             onPaste={handlePasteName} prefix={<UserOutlined />} placeholder="Nguyễn Văn A" /></Form.Item></Col>
                         <Col xs={24} sm={12}>
                             <Form.Item
@@ -261,7 +260,7 @@ const EnrollmentForm: React.FC = () => {
                     <Row gutter={24}>
                         {!isExistingParent && (
                             <>
-                                <Col xs={24} sm={12}><Form.Item name="fatherName" label="Họ và tên Cha" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}><Input onKeyPress={blockSpecialCharactersAndNumbers}
+                                <Col xs={24} sm={12}><Form.Item name="fatherName" label="Họ và tên Cha" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }, noSpecialCharactersRule]}><Input
                                     onPaste={handlePasteName} placeholder="Nguyễn Văn B" /></Form.Item></Col>
                                 <Col xs={24} sm={12}><Form.Item name="fatherJob" label="Nghề nghiệp" rules={[{ required: true }]}><Input placeholder="Kỹ sư" /></Form.Item></Col>
                                 <Col xs={24} sm={12}><Form.Item name="fatherPhoneNumber" label="Số điện thoại Cha" rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<PhoneOutlined />} placeholder="09xxxxxxxx" /></Form.Item></Col>
@@ -275,7 +274,7 @@ const EnrollmentForm: React.FC = () => {
                     <Row gutter={24}>
                         {!isExistingParent && (
                             <>
-                                <Col xs={24} sm={12}><Form.Item name="motherName" label="Họ và tên Mẹ" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}><Input onKeyPress={blockSpecialCharactersAndNumbers}
+                                <Col xs={24} sm={12}><Form.Item name="motherName" label="Họ và tên Mẹ" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }, noSpecialCharactersRule]}><Input
                                     onPaste={handlePasteName} placeholder="Lê Thị C" /></Form.Item></Col>
                                 <Col xs={24} sm={12}><Form.Item name="motherJob" label="Nghề nghiệp" rules={[{ required: true }]}><Input placeholder="Giáo viên" /></Form.Item></Col>
                                 <Col xs={24} sm={12}><Form.Item name="motherPhoneNumber" label="Số điện thoại Mẹ" rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<PhoneOutlined />} placeholder="09xxxxxxxx" /></Form.Item></Col>
