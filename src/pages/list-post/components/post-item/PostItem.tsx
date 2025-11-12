@@ -59,8 +59,9 @@ const PostItem: React.FC<PostItemProps> = ({
           src={file.fileUrl}
           style={{
             width: "100%",
-            height: 400,
-            objectFit: "contain",
+            height: "auto",
+            minHeight: "400px",
+            objectFit: "cover",
             backgroundColor: "#000",
           }}
           preview={{ mask: <span></span> }}
