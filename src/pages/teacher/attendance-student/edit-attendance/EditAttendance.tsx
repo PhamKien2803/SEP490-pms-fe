@@ -62,8 +62,6 @@ function EditAttendance() {
     const [isSaving, setIsSaving] = useState(false);
     const [generalNote, setGeneralNote] = useState<string>('');
     const [isEditLocked, setIsEditLocked] = useState(false);
-
-    // State mới để quản lý việc sửa giờ đón
     const [editingTimeStudentId, setEditingTimeStudentId] = useState<string | null>(null);
 
 
@@ -265,9 +263,12 @@ function EditAttendance() {
                                             <Col xs={24} sm={8} md={6}>
                                                 <Space>
                                                     <Avatar
-                                                        style={{ backgroundColor: '#87d068' }}
-                                                        icon={<UserOutlined />}
+                                                        size={48}
+                                                        src={item.student.imageStudent}
+                                                        icon={!item.student.imageStudent && <UserOutlined />}
+                                                        style={{ backgroundColor: '#f0f0f0' }}
                                                     />
+
                                                     <div>
                                                         <Text strong style={{ fontSize: '15px' }}>
                                                             {item.student.fullName}

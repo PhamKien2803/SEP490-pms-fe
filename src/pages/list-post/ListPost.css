@@ -1,0 +1,64 @@
+.list-post-container {
+  padding: 24px 0;
+  background-color: #f0f2f5; /* Màu nền xám nhạt của Facebook */
+  min-height: 100vh;
+}
+
+/* --- Thẻ tạo bài đăng --- */
+.create-post-card {
+  margin-bottom: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Shadow nhẹ nhàng hơn */
+}
+
+/* Ghi đè padding mặc định của AntD */
+.create-post-card .ant-card-body {
+  padding: 16px 20px !important;
+}
+
+.create-post-card-top {
+  display: flex;
+  align-items: center;
+}
+
+.create-post-input-btn {
+  background-color: #f0f2f5;
+  border-color: #e0e0e0;
+  color: #606060;
+  font-weight: normal;
+  border-radius: 20px;
+  text-align: left;
+  padding-left: 20px;
+}
+
+.create-post-input-btn:hover {
+  background-color: #e4e6e9;
+  border-color: #d1d1d1;
+  color: #333;
+}
+
+.create-post-divider {
+  margin: 12px 0;
+}
+
+/* --- Danh sách bài đăng --- */
+.post-list .ant-list-item {
+  /* Xóa border và padding mặc định của List.Item */
+  border-bottom: none !important;
+  padding: 0 !important;
+  margin-bottom: 16px; /* Khoảng cách giữa các PostItem */
+}
+
+/* --- Trạng thái Loading và Rỗng --- */
+.loading-container {
+  text-align: center;
+  padding: 50px;
+}
+
+.empty-container {
+  text-align: center;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background-color: #fff;
+}

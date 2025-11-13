@@ -48,16 +48,14 @@ import { useNavigate } from 'react-router-dom';
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
-interface IStudentInfo {
-    _id: string;
-    fullName: string;
-}
+
 interface ITeacherData {
     classes: (IClassInfo & { students: IStudentInfo[] })[];
 }
 
 import { BEHAVIOR_OPTIONS, EATING_OPTIONS, EMOTION_OPTIONS, FOCUS_OPTIONS, GOOD_FEEDBACK_TEMPLATE, HANDWASH_OPTIONS, INTERACTION_OPTIONS, PARTICIPATION_OPTIONS, SLEEP_DURATION_OPTIONS, SLEEP_QUALITY_OPTIONS, TOILET_OPTIONS } from '../../../../components/hard-code-action';
 import { usePageTitle } from '../../../../hooks/usePageTitle';
+import { IStudentInfo } from '../../../../types/parent';
 
 function TakeFeedback() {
     usePageTitle('Tạo phản hồi học sinh - Cá Heo Xanh');
@@ -391,7 +389,12 @@ function TakeFeedback() {
                                                 ),
                                             ]}
                                         >
-                                            <List.Item.Meta avatar={<Avatar icon={<UserOutlined />} />} title={<Text strong>{student.fullName}</Text>} />
+                                            <List.Item.Meta avatar={<Avatar
+                                                size={48}
+                                                src={student.imageStudent}
+                                                icon={!student.imageStudent && <UserOutlined />}
+                                                style={{ backgroundColor: '#f0f0f0' }}
+                                            />} title={<Text strong>{student.fullName}</Text>} />
                                         </List.Item>
                                     );
                                 }}

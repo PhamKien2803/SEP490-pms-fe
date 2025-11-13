@@ -105,10 +105,15 @@ function StudentDetailModal({ studentId, open, onClose }: Props) {
                     <Col>
                         <Avatar
                             size={64}
-                            style={{ backgroundColor: token.colorPrimary, color: '#fff' }}
+                            src={student?.imageStudent}
+                            style={{
+                                backgroundColor: token.colorPrimary,
+                                color: '#fff',
+                            }}
                         >
-                            {getAvatarLetter(student.fullName)}
+                            {!student?.imageStudent && getAvatarLetter(student.fullName)}
                         </Avatar>
+
                     </Col>
                     <Col flex="auto">
                         <Title level={4} style={{ margin: 0 }}>{student.fullName}</Title>

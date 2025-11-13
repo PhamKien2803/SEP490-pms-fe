@@ -35,6 +35,7 @@ import {
   IngredientParam,
   AICalculateResponse,
 } from "../../../types/food-management";
+import { noSpecialCharactersandNumberRule } from "../../../utils/format";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -47,8 +48,8 @@ const AGE_GROUPS = [
 const formatNutrient = (value: number | undefined) =>
   value !== undefined && value !== null
     ? Number(value)
-        .toFixed(2)
-        .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+      .toFixed(2)
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
     : "";
 
 const CreateFoodPage: React.FC = () => {
@@ -365,7 +366,7 @@ const CreateFoodPage: React.FC = () => {
                 label="Tên Món Ăn"
                 name="foodName"
                 rules={[
-                  { required: true, message: "Vui lòng nhập tên món ăn" },
+                  { required: true, message: "Vui lòng nhập tên món ăn" }, noSpecialCharactersandNumberRule
                 ]}
               >
                 <Input
@@ -449,9 +450,8 @@ const CreateFoodPage: React.FC = () => {
                         size="small"
                         style={{
                           marginBottom: 16,
-                          borderLeft: `5px solid ${
-                            hasCalculatedCalories ? "#1890ff" : "#d9d9d9"
-                          }`,
+                          borderLeft: `5px solid ${hasCalculatedCalories ? "#1890ff" : "#d9d9d9"
+                            }`,
                         }}
                         extra={
                           <Tooltip title="Xóa nguyên liệu">
@@ -460,8 +460,8 @@ const CreateFoodPage: React.FC = () => {
                               onClick={() => remove(field.name)}
                               disabled={Boolean(
                                 fields.length === 1 ||
-                                  isAILoading ||
-                                  hasCalculatedCalories
+                                isAILoading ||
+                                hasCalculatedCalories
                               )}
                             />
                           </Tooltip>
@@ -473,7 +473,7 @@ const CreateFoodPage: React.FC = () => {
                               {...field}
                               label="Tên nguyên liệu"
                               name={[field.name, "name"]}
-                              rules={[{ required: true, message: "Tên" }]}
+                              rules={[{ required: true, message: "Tên" }, noSpecialCharactersandNumberRule]}
                             >
                               <Input placeholder="Tên nguyên liệu" />
                             </Form.Item>
@@ -494,6 +494,7 @@ const CreateFoodPage: React.FC = () => {
                               }
                             >
                               <InputNumber
+                                type="number"
                                 min={1}
                                 placeholder="KL"
                                 style={{ width: "100%" }}
@@ -559,8 +560,8 @@ const CreateFoodPage: React.FC = () => {
                                 parser={(value) =>
                                   value
                                     ? value
-                                        .replace(/[^\d.,-]/g, "")
-                                        .replace(/,/g, "")
+                                      .replace(/[^\d.,-]/g, "")
+                                      .replace(/,/g, "")
                                     : ""
                                 }
                               />

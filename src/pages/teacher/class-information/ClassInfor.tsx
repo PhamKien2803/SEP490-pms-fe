@@ -53,14 +53,22 @@ function ClassInfor() {
             key: 'fullName',
             ellipsis: true,
             fixed: 'left',
-            render: (fullName: string) => (
+            render: (_: string, record: IStudent) => (
                 <Space>
-                    <Avatar size="small" style={{ backgroundColor: token.colorPrimary, color: '#fff' }}>
-                        {getAvatarLetter(fullName)}
-                    </Avatar>
-                    <Text>{fullName}</Text>
+                    {record.imageStudent ? (
+                        <Avatar size="small" src={record.imageStudent} />
+                    ) : (
+                        <Avatar
+                            size="small"
+                            style={{ backgroundColor: token.colorPrimary, color: '#fff' }}
+                            icon={<UserOutlined />}
+                        >
+                            {getAvatarLetter(record.fullName)}
+                        </Avatar>
+                    )}
+                    <Text>{record.fullName}</Text>
                 </Space>
-            )
+            ),
         },
         {
             title: 'Ngày sinh',

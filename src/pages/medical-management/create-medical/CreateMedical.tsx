@@ -166,17 +166,20 @@ const CreateMedical: React.FC = () => {
           page: 1,
           limit: 100,
         });
+
         if (response.data && response.data.length > 0) {
           const sorted = [...response.data].sort((a, b) => {
             const startA = parseInt(a.schoolYear.split("-")[0]);
             const startB = parseInt(b.schoolYear.split("-")[0]);
-            return startB - startA;
+            return startB - startA; // Mới nhất lên đầu
           });
 
           const latestYear = sorted[0];
 
           setSchoolYears(sorted);
           setSelectedSchoolYear(latestYear.schoolYear);
+          form.setFieldsValue({ schoolYear: latestYear.schoolYear });
+          fetchClasses(latestYear.schoolYear);
         }
       } catch (error) {
         typeof error === "string"
@@ -186,7 +189,8 @@ const CreateMedical: React.FC = () => {
     };
 
     fetchSchoolYears();
-  }, []);
+  }, [form, fetchClasses]);
+
 
   const fetchStudentsForClass = useCallback(
     async (classId: string) => {
@@ -377,7 +381,7 @@ const CreateMedical: React.FC = () => {
               <Form.Item
                 label={
                   <Space>
-                    <UserOutlined /> Chọn Lớp Học
+                    <UserOutlined /> Chọn năm học
                   </Space>
                 }
                 name="schoolYear"
@@ -476,18 +480,22 @@ const CreateMedical: React.FC = () => {
             </Col>
             <Col xs={24} md={12}>
               <Form.Item
-                label={
+                label={(
                   <Space>
                     <CheckCircleOutlined /> Trạng Thái Hồ sơ
                   </Space>
-                }
+                )}
                 name={["conclusion", "healthStatus"]}
-                rules={[
-                  { required: true, message: "Vui lòng nhập Trạng thái" },
-                ]}
+                rules={[{ required: true, message: "Vui lòng chọn Trạng thái" }]}
               >
-                <Input placeholder="Ví dụ: Bình thường, Cần theo dõi,..." />
+                <Select placeholder="Chọn trạng thái sức khỏe" allowClear>
+                  <Select.Option value="Bình thường">Bình thường</Select.Option>
+                  <Select.Option value="Cần theo dõi">Cần theo dõi</Select.Option>
+                  <Select.Option value="Khám lại">Khám lại</Select.Option>
+                  <Select.Option value="Nguy cơ cao">Nguy cơ cao</Select.Option>
+                </Select>
               </Form.Item>
+
             </Col>
             <Col
               xs={24}

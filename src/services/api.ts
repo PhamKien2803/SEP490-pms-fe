@@ -18,6 +18,7 @@ export const apiEndPoint = {
   GET_LIST_FUNCTION: "/roles/listFunction",
   GET_LIST_MODULE: "/roles/listModule",
   GET_LIST_STUDENT: "/students/list",
+  GET_STUDENT_BY_ID: (id: string) => `/students/getById/${id}`,
   GET_LIST_STAFF: "/staffs/list",
   CREATE_STUDENT: "/students/create",
   CREATE_STAFF: "/staffs/create",
@@ -190,7 +191,6 @@ export const apiEndPoint = {
     `/guardians/listByStudent/${studentId}`,
   GET_LIST_GUARDIAN_BY_PARENT: (parentId: string) =>
     `/guardians/listByParent/${parentId}`,
-
   CREATE_NEW_POST: "/posts/create",
   UPLOAD_ALBUM: (postId: string) => `/post-files/${postId}/upload`,
   GET_CLASS_OF_TEACHER: (teacherId: string) =>

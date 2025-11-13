@@ -36,6 +36,7 @@ import {
   UpdateFoodParams,
 } from "../../../types/food-management";
 import { foodApis } from "../../../services/apiServices";
+import { noSpecialCharactersandNumberRule } from "../../../utils/format";
 const { Title, Text } = Typography;
 const { Option } = Select;
 
@@ -64,9 +65,9 @@ const UpdateFoodPage: React.FC = () => {
     foodDetailFromState || null
   );
   const handleConfirmCancel = () => {
-      setIsCancelConfirmVisible(false);
-      navigate(`${constants.APP_PREFIX}/foods`);
-    };
+    setIsCancelConfirmVisible(false);
+    navigate(`${constants.APP_PREFIX}/foods`);
+  };
   const [loading, setLoading] = useState(!foodDetailFromState);
   const [form] = Form.useForm<UpdateFoodFormValues>();
 
@@ -316,7 +317,7 @@ const UpdateFoodPage: React.FC = () => {
                 name="foodName"
                 label={<Text strong>Tên Món Ăn</Text>}
                 rules={[
-                  { required: true, message: "Vui lòng nhập tên món ăn!" },
+                  { required: true, message: "Vui lòng nhập tên món ăn!" }, noSpecialCharactersandNumberRule
                 ]}
               >
                 <Input
@@ -445,7 +446,7 @@ const UpdateFoodPage: React.FC = () => {
                               {
                                 required: true,
                                 message: "Vui lòng nhập tên NL",
-                              },
+                              }, noSpecialCharactersandNumberRule
                             ]}
                           >
                             <Input placeholder="Tên nguyên liệu" />
@@ -460,6 +461,7 @@ const UpdateFoodPage: React.FC = () => {
                             rules={[{ required: true, message: "KL" }]}
                           >
                             <InputNumber
+                              type="number"
                               placeholder="KL"
                               min={0}
                               style={{ width: "100%" }}
