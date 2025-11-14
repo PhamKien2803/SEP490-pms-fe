@@ -1,12 +1,54 @@
-import { useState } from "react";
-import { List, Typography, Spin, Row, Col, Button, Modal, Card } from "antd";
+import { useState, useMemo } from "react";
+import {
+  List,
+  Typography,
+  Spin,
+  Row,
+  Col,
+  Button,
+  Modal,
+  Card,
+  Avatar,
+  Divider,
+} from "antd";
+import { PictureOutlined, FileAddOutlined } from "@ant-design/icons";
 import PostItem from "./components/post-item/PostItem";
 import { Post } from "../../types/post";
 import CreatePost from "./create-post/CreatePost";
 import EditPost from "./update-post/UpdatePost";
 import { usePagePermission } from "../../hooks/usePagePermission";
+import "./ListPost.css"; // 👈 Nhập file CSS
 
-const { Title, Text } = Typography;
+const { Title, Text, Link } = Typography;
+
+// (Hàm formatTimeAgo giữ nguyên, không thay đổi)
+const formatTimeAgo = (dateString: string | Date): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  let interval = seconds / 31536000;
+  if (interval > 1) {
+    return `${Math.floor(interval)} năm trước`;
+  }
+  interval = seconds / 2592000;
+  if (interval > 1) {
+    return `${Math.floor(interval)} tháng trước`;
+  }
+  interval = seconds / 86400;
+  if (interval > 1) {
+    return `${Math.floor(interval)} ngày trước`;
+  }
+  interval = seconds / 3600;
+  if (interval > 1) {
+    return `${Math.floor(interval)} giờ trước`;
+  }
+  interval = seconds / 60;
+  if (interval > 1) {
+    return `${Math.floor(interval)} phút trước`;
+  }
+  return "Vừa xong";
+};
 
 interface ListPostProps {
   dataPosts: Post[];
@@ -14,158 +56,196 @@ interface ListPostProps {
   loading: boolean;
 }
 
+type ModalState =
+  | { mode: "closed" }
+  | { mode: "create" }
+  | { mode: "edit"; post: Post };
+
 const ListPost = (props: ListPostProps) => {
   const { dataPosts, loading, fetchApi } = props;
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingPost, setEditingPost] = useState<Post | null>(null);
   const { canCreate } = usePagePermission();
 
-  const handlePostCreated = () => {
-    setIsModalVisible(false);
+  const [modalState, setModalState] = useState<ModalState>({ mode: "closed" });
+
+  const recentPosts = useMemo(() => {
+    return dataPosts.slice(0, 5);
+  }, [dataPosts]);
+
+  const handleSuccess = () => {
+    setModalState({ mode: "closed" });
     fetchApi();
   };
 
-  const handleEditPost = (postToEdit: Post) => {
-    setEditingPost(postToEdit);
+  const showCreateModal = () => {
+    setModalState({ mode: "create" });
   };
 
-  const handleEditCompleted = () => {
-    setEditingPost(null);
-    fetchApi();
-  };
-
-  const showModal = () => {
-    setIsModalVisible(true);
+  const showEditModal = (postToEdit: Post) => {
+    setModalState({ mode: "edit", post: postToEdit });
   };
 
   const handleCancel = () => {
-    setIsModalVisible(false);
+    setModalState({ mode: "closed" });
   };
 
-  if (editingPost) {
-    return (
-      <EditPost
-        post={editingPost}
-        onEditSuccess={handleEditCompleted}
-        onCancel={handleEditCompleted}
+  const renderCreatePostCard = () => (
+    <Card className="list-post__create-card">
+      <div className="list-post__create-top">
+        <Avatar size="large" className="list-post__create-avatar">
+          GV
+        </Avatar>
+        <Button
+          type="default"
+          onClick={showCreateModal}
+          block
+          size="large"
+          className="list-post__create-input"
+        >
+          Bạn muốn chia sẻ điều gì hôm nay?
+        </Button>
+      </div>
+      <Divider className="list-post__create-divider" />
+      <Row gutter={16} className="list-post__create-actions">
+        <Col span={12}>
+          <Button
+            icon={<PictureOutlined />}
+            block
+            size="middle"
+            onClick={showCreateModal}
+            className="list-post__action-btn list-post__action-btn--photo"
+            type="text" // 👈 Thay đổi để thân thiện hơn
+          >
+            Ảnh/Video
+          </Button>
+        </Col>
+        <Col span={12}>
+          <Button
+            icon={<FileAddOutlined />}
+            block
+            size="middle"
+            onClick={showCreateModal}
+            className="list-post__action-btn list-post__action-btn--file"
+            type="text" // 👈 Thay đổi để thân thiện hơn
+          >
+            Tài liệu
+          </Button>
+        </Col>
+      </Row>
+    </Card>
+  );
+
+  const renderRecentPosts = () => (
+    <Card
+      title={<Title level={5}>Bài viết gần đây</Title>}
+      bordered={false}
+      className="list-post__recent-card"
+    >
+      <List
+        dataSource={recentPosts}
+        loading={loading}
+        itemLayout="horizontal"
+        renderItem={(post) => (
+          <List.Item className="list-post__recent-item">
+            <List.Item.Meta
+              avatar={
+                <Avatar
+                  shape="square"
+                  size={64}
+                  src={"/default-post-image.png"}
+                  className="list-post__recent-avatar"
+                />
+              }
+              title={
+                <Link href="#" className="list-post__recent-title">
+                  {post.title || "Bài viết không có tiêu đề"}
+                </Link>
+              }
+              description={
+                <Text type="secondary" className="list-post__recent-meta">
+                  <strong style={{ color: "#555" }}>{"Ban biên tập"}</strong>
+                  {" • "}
+                  {formatTimeAgo(post.createdAt)}
+                </Text>
+              }
+            />
+          </List.Item>
+        )}
       />
-    );
-  }
+    </Card>
+  );
+
+  const renderLoading = () => (
+    <div className="list-post__loading">
+      <Spin size="large" />
+      <Text type="secondary" style={{ display: "block", marginTop: 10 }}>
+        Đang tải bài viết...
+      </Text>
+    </div>
+  );
+
+  const renderEmpty = () => (
+    <Card className="list-post__empty">
+      <Title level={5} type="secondary">
+        Chưa có bài viết nào được đăng.
+      </Title>
+    </Card>
+  );
 
   return (
-    <div
-      style={{
-        padding: "24px 0",
-        backgroundColor: "#f0f2f5",
-        minHeight: "100vh",
-      }}
-    >
-      <Row justify="center">
-        <Col xs={24} sm={22} md={20} lg={20} xl={20}>
-          {canCreate && (
-            <Card
-              style={{
-                marginBottom: 24,
-                borderRadius: 12,
-                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-              }}
-            >
-              <Row align="middle" gutter={16}>
-                <Col flex="40px">
-                  <span
-                    style={{
-                      display: "inline-block",
-                      width: 40,
-                      height: 40,
-                      borderRadius: "50%",
-                      backgroundColor: "#1890ff",
-                      textAlign: "center",
-                      lineHeight: "40px",
-                      color: "#fff",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    GV
-                  </span>
-                </Col>
-                <Col flex="auto">
-                  <Button
-                    type="default"
-                    onClick={showModal}
-                    block
-                    size="large"
-                    style={{
-                      backgroundColor: "#f0f2f5",
-                      borderColor: "#e0e0e0",
-                      color: "#606060",
-                      fontWeight: "normal",
-                      borderRadius: 20,
-                      textAlign: "left",
-                      paddingLeft: 20,
-                    }}
-                  >
-                    <span style={{ textAlign: "left", width: "100%" }}>
-                      Bạn muốn chia sẻ điều gì hôm nay?
-                    </span>
-                  </Button>
-                </Col>
-              </Row>
-            </Card>
-          )}
+    <div className="list-post__container">
+      <Row justify="center" gutter={[24, 24]}>
+        {/* Cột chính (Nội dung) */}
+        <Col xs={24} md={24} lg={16} xl={15}>
+          {canCreate && renderCreatePostCard()}
+
           {loading ? (
-            <div style={{ textAlign: "center", padding: "50px" }}>
-              <Spin size="large" />
-              <Text
-                type="secondary"
-                style={{ display: "block", marginTop: 10 }}
-              >
-                Đang tải bài viết...
-              </Text>
-            </div>
+            renderLoading()
           ) : dataPosts.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "50px",
-                backgroundColor: "#fff",
-                borderRadius: 12,
-                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-              }}
-            >
-              <Title level={5} type="secondary">
-                Chưa có bài viết nào được đăng.
-              </Title>
-            </div>
+            renderEmpty()
           ) : (
             <List
-              itemLayout="vertical"
+              grid={{ gutter: 16, column: 1 }}
               dataSource={dataPosts}
+              className="list-post__feed"
               renderItem={(post) => (
-                <PostItem
-                  key={post.postId}
-                  post={post}
-                  onEdit={handleEditPost}
-                  onDeleteSuccess={fetchApi}
-                />
+                <List.Item className="list-post__feed-item">
+                  <PostItem
+                    key={post.postId}
+                    post={post}
+                    onEdit={() => showEditModal(post)}
+                    onDeleteSuccess={fetchApi}
+                  />
+                </List.Item>
               )}
-              style={{ paddingBottom: 24 }}
             />
           )}
         </Col>
+
+        {/* Cột phụ (Sidebar) */}
+        <Col xs={0} md={0} lg={8} xl={9}>
+          {renderRecentPosts()}
+        </Col>
       </Row>
 
+      {/* Modal (Giữ nguyên) */}
       <Modal
-        title="Tạo Bài Viết Mới"
-        visible={isModalVisible}
+        title={
+          modalState.mode === "create" ? "Tạo Bài Viết Mới" : "Chỉnh Sửa Bài Viết"
+        }
+        visible={modalState.mode !== "closed"}
         onCancel={handleCancel}
         footer={null}
         destroyOnClose={true}
         width={600}
         bodyStyle={{ padding: "10px 0 0 0" }}
       >
-        {canCreate && (
-          <CreatePost
-            onPostSuccess={handlePostCreated}
+        {modalState.mode === "create" && canCreate && (
+          <CreatePost onPostSuccess={handleSuccess} onCancel={handleCancel} />
+        )}
+        {modalState.mode === "edit" && (
+          <EditPost
+            post={modalState.post}
+            onEditSuccess={handleSuccess}
             onCancel={handleCancel}
           />
         )}

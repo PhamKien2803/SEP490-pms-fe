@@ -59,6 +59,8 @@ export interface EnrollmentListItem {
     healthCertId: string;
     birthCertFiles: EnrollmentFile;
     healthCertFiles: EnrollmentFile;
+    createdBy: string;
+    updatedBy: string
 }
 
 export interface EnrollmentsListResponse {

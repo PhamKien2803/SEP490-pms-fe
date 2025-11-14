@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Form, Input, Button, Space, Card, Select, DatePicker, Row, Col, Tooltip,
     Spin, Flex, Upload, Popconfirm, Modal, Typography, Tag, Tabs
@@ -20,6 +20,8 @@ import TextArea from 'antd/es/input/TextArea';
 import { constants } from '../../../constants';
 import { usePageTitle } from '../../../hooks/usePageTitle';
 import { ETHNIC_OPTIONS } from '../../../components/hard-code-action';
+import { useValidationRules } from '../../../utils/format';
+import { beforeUploadImage, beforeUploadPDF } from '../../../utils/upload';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -52,21 +54,8 @@ const EnrollmentEdit: React.FC = () => {
     const [healthCertFile, setHealthCertFile] = useState<UploadFile[]>([]);
     const [designImageFile, setDesignImageFile] = useState<UploadFile[]>([]);
     const [studentImageId, setStudentImageId] = useState<string | null>(null);
+    const { phoneValidationRule, idCardValidationRule, nameValidationRule } = useValidationRules();
 
-    const phoneValidationRule = useMemo(() => ({
-        pattern: /^\d{10}$/,
-        message: 'Số điện thoại phải có đúng 10 chữ số!',
-    }), []);
-
-    const idCardValidationRule = useMemo(() => ({
-        pattern: /^\d{12}$/,
-        message: 'CCCD phải có đúng 12 chữ số!',
-    }), []);
-
-    const nameValidationRule = {
-        pattern: /^[\p{L} ]+$/u,
-        message: 'Chỉ được nhập chữ cái và dấu cách!',
-    };
 
     const fetchData = useCallback(async () => {
         if (!id) {
@@ -102,7 +91,7 @@ const EnrollmentEdit: React.FC = () => {
                     {
                         uid: data.imageStudent,
                         name: 'Ảnh học sinh',
-                        url: `${constants.APP_PREFIX}/files/${data.imageStudent}`,
+                        url: data.imageStudent,
                         status: 'done',
                     },
                 ]);
@@ -217,7 +206,7 @@ const EnrollmentEdit: React.FC = () => {
                     {
                         uid: enrollmentData.imageStudent,
                         name: 'Ảnh học sinh',
-                        url: `${constants.APP_PREFIX}/files/${enrollmentData.imageStudent}`,
+                        url: enrollmentData.imageStudent,
                         status: 'done',
                     },
                 ]);
@@ -237,21 +226,6 @@ const EnrollmentEdit: React.FC = () => {
         }
     }, [isEditing, navigate]);
 
-    const beforeUploadPDF = (file: RcFile) => {
-        const isPdf = file.type === 'application/pdf';
-        if (!isPdf) {
-            toast.error('Bạn chỉ có thể tải lên file có định dạng .pdf!');
-        }
-        return isPdf || Upload.LIST_IGNORE;
-    };
-
-    const beforeUploadImage = (file: RcFile) => {
-        const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
-        if (!isJpgOrPng) {
-            toast.error('Bạn chỉ có thể tải lên file JPG/PNG!');
-        }
-        return isJpgOrPng || Upload.LIST_IGNORE;
-    };
 
     const customRequestPDF = async (options: any, type: 'birth' | 'health') => {
         const { file, onSuccess, onError } = options;
@@ -274,14 +248,29 @@ const EnrollmentEdit: React.FC = () => {
         const { file, onSuccess, onError } = options;
         try {
             const response = await enrollmentApis.uploadEnrollmentImage(file as File);
-            setStudentImageId(response.url || null);
-            toast.success("Tải ảnh học sinh thành công!");
-            if (onSuccess) onSuccess(response);
+
+            const url = response.url;
+            if (url) {
+                setStudentImageId(url);
+                setDesignImageFile([
+                    {
+                        uid: String(Date.now()),
+                        name: (file as File).name,
+                        status: "done",
+                        url: url,
+                    },
+                ]);
+                toast.success("Tải ảnh học sinh thành công!");
+                if (onSuccess) onSuccess(response);
+            } else {
+                throw new Error("Không nhận được URL từ server");
+            }
         } catch (err) {
             toast.error("Tải ảnh thất bại!");
-            if (onError) onError(err);
+            if (onError) onError(err as Error);
         }
     };
+
 
     const onFileChange = (info: any, type: 'birth' | 'health' | 'image') => {
         let fileList = [...info.fileList];
@@ -569,33 +558,50 @@ const EnrollmentEdit: React.FC = () => {
                         }
                     >
                         <Row gutter={32}>
-                            <Col xs={24} md={8}>
-                                <Form.Item label="Ảnh học sinh (PNG/JPG)" required>
+                            <Col xs={24} md={8} style={{ display: "flex", justifyContent: "center" }}>
+                                <Form.Item
+                                    label="Ảnh học sinh (PNG/JPG)"
+                                    required
+                                    style={{ width: "100%" }}
+                                >
                                     <Upload
                                         disabled={!isEditing}
                                         listType="picture-card"
                                         fileList={designImageFile}
                                         beforeUpload={beforeUploadImage}
                                         customRequest={customRequestImage}
-                                        onChange={(info) => onFileChange(info, 'image')}
-                                        onRemove={() => onFileRemove('image')}
+                                        onChange={(info) => onFileChange(info, "image")}
+                                        onRemove={() => onFileRemove("image")}
                                         onPreview={(file) => {
-                                            Modal.info({
-                                                title: file.name,
-                                                content: <img alt="preview" style={{ width: '100%' }} src={file.url || file.thumbUrl} />,
-                                                maskClosable: true,
-                                            });
+                                            let previewUrl = file.url;
+
+                                            if (previewUrl && !previewUrl.startsWith("http")) {
+                                                previewUrl = `${constants.APP_PREFIX}/files/${previewUrl}`;
+                                            }
+
+                                            if (!previewUrl && file.thumbUrl) {
+                                                previewUrl = file.thumbUrl;
+                                            }
+
+                                            if (!previewUrl) {
+                                                toast.info("Không tìm thấy ảnh để mở!");
+                                                return;
+                                            }
+                                            window.open(previewUrl, "_blank");
                                         }}
+                                        maxCount={1}
+                                        style={{ width: 200, height: 200 }}
                                     >
                                         {designImageFile.length < 1 && (
-                                            <div>
-                                                <PlusOutlined />
+                                            <div style={{ padding: 10 }}>
+                                                <PlusOutlined style={{ fontSize: 24 }} />
                                                 <div style={{ marginTop: 8 }}>Tải ảnh lên</div>
                                             </div>
                                         )}
                                     </Upload>
                                 </Form.Item>
                             </Col>
+
                             <Col xs={24} md={8}>
                                 <Form.Item label="Giấy khai sinh (PDF)" required>
                                     <Upload

@@ -379,9 +379,12 @@ function TakeAttendance() {
                                                     <Col xs={24} sm={8} md={6}>
                                                         <Space>
                                                             <Avatar
-                                                                style={{ backgroundColor: '#87d068' }}
-                                                                icon={<UserOutlined />}
+                                                                size={48}
+                                                                src={student.imageStudent}
+                                                                icon={!student.imageStudent && <UserOutlined />}
+                                                                style={{ backgroundColor: '#f0f0f0' }}
                                                             />
+
                                                             <div>
                                                                 <Text strong>{student.fullName}</Text>
                                                                 <Text type="secondary" style={{ display: 'block' }}>

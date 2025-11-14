@@ -29,12 +29,13 @@ export interface FeedbackParams {
   studentId: string;
   date: string;
 }
-interface IStudentInfo {
+export interface IStudentInfo {
   _id: string;
   studentCode: string;
   fullName: string;
   dob: string;
   gender: string;
+  imageStudent: string;
 }
 
 interface IClassInfo {

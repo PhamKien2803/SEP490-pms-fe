@@ -93,7 +93,10 @@ import DocumentEdit from "../../pages/document-management/document-edit/Document
 import ServicesReport from "../../pages/services-reports/ServicesReport";
 import HomeNews from "../../pages/home-news/HomeNews";
 import TeacherNews from "../../pages/home-news/home-news-teacher/TeacherNews";
-import ParentNews from "../../pages/home-news/home-news-parent/ParentNews";
+// import ParentNews from "../../pages/home-news/home-news-parent/ParentNews";
+import StudentCreate from "../../modal/student/create-student/StudentCreate";
+import StudentDetail from "../../modal/student/view-student/StudentDetail";
+import StudentEdit from "../../modal/student/update-student/StudentEdit";
 
 export const routes: RouteObject[] = [
   {
@@ -179,6 +182,18 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <StudentManagement />,
+              },
+              {
+                path: "create",
+                element: <StudentCreate />,
+              },
+              {
+                path: "detail/:id",
+                element: <StudentDetail />,
+              },
+              {
+                path: "edit/:id",
+                element: <StudentEdit />,
               },
             ],
           },
@@ -423,7 +438,7 @@ export const routes: RouteObject[] = [
               {
                 path: "students/detail/:id",
                 element: <StudentDetails />,
-              },
+              }
             ],
           },
           {
@@ -947,21 +962,21 @@ export const routes: RouteObject[] = [
               },
             ],
           },
-                    {
-            path: "dashboard-posts",
-            element: (
-              <PrivateRoute
-                requireFunction={`${constants.APP_PREFIX}/dashboard-posts`}
-                requireAction="view"
-              />
-            ),
-            children: [
-              {
-                index: true,
-                element: <ParentNews />,
-              },
-            ],
-          },
+          // {
+          //   path: "dashboard-posts",
+          //   element: (
+          //     <PrivateRoute
+          //       requireFunction={`${constants.APP_PREFIX}/dashboard-posts`}
+          //       requireAction="view"
+          //     />
+          //   ),
+          //   children: [
+          //     {
+          //       index: true,
+          //       element: <ParentNews />,
+          //     },
+          //   ],
+          // },
         ],
       },
     ],

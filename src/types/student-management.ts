@@ -17,6 +17,33 @@ export interface StudentRecord {
   updatedAt?: string;
   birthCertId: string;
   healthCertId: string;
+  imageStudent: string;
+}
+
+export interface StudentDetailResponses {
+  student: StudentRecord;
+  parents: {
+    father: {
+      _id: string;
+      parentCode: string;
+      fullName: string;
+      phoneNumber: string;
+      email: string;
+      IDCard: string;
+      gender: string;
+      job: string;
+    };
+    mother: {
+      _id: string;
+      parentCode: string;
+      fullName: string;
+      phoneNumber: string;
+      email: string;
+      IDCard: string;
+      gender: string;
+      job: string;
+    };
+  };
 }
 
 export interface PaginationInfo {
@@ -41,6 +68,7 @@ export interface CreateUserData {
   religion: string;
   createdBy?: string;
   updatedBy?: string;
+  imageStudent: string;
 }
 
 export type UpdateUserData = CreateUserData

@@ -1,4 +1,4 @@
-import { Select, Typography, Row, Col, Divider } from "antd";
+import { Select, Typography, Row, Col } from "antd";
 const { Option } = Select;
 const { Title, Text } = Typography;
 

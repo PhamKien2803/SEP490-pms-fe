@@ -25,6 +25,7 @@ import {
 } from "../types/role";
 import {
   CreateUserData,
+  StudentDetailResponses,
   StudentRecord,
   StudentResponse,
   UpdateUserData,
@@ -402,6 +403,13 @@ export const studentApis = {
 
   deleteStudent: async (id: string): Promise<void> => {
     await axiosAuth.post(apiEndPoint.DELETE_STUDENT(id));
+  },
+
+  getStudentById: async (id: string): Promise<StudentDetailResponses> => {
+    const response = await axiosAuth.get<StudentDetailResponses>(
+      apiEndPoint.GET_STUDENT_BY_ID(id)
+    );
+    return response.data;
   },
 };
 
@@ -930,6 +938,17 @@ export const topicApis = {
 };
 
 export const teacherApis = {
+
+  getPDFById: async (id: string): Promise<ArrayBuffer> => {
+    const response = await axiosAuth.get<ArrayBuffer>(
+      apiEndPoint.GET_PDF_BY_IDS(id),
+      {
+        responseType: "arraybuffer",
+      }
+    );
+    return response.data;
+  },
+
   getClassAndStudentByTeacher: async (
     teacherId: string,
     schoolYearId: string
