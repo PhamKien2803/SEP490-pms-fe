@@ -35,6 +35,7 @@ export const apiEndPoint = {
   GET_ENROLLMENT_BY_ID: (id: string) => `/enrollments/getById/${id}`,
   UPLOAD_PDF: "/enrollments/uploadPDF",
   GET_PDF_BY_ID: (id: string) => `/enrollments/pdf/${id}`,
+  GET_PDF_BY_IDS: (id: string) => `/teachers/pdf/${id}`,
   APPROVE_ENROLLMENT: "/enrollments/aprrovedEnroll",
   UPDATE_ENROLLMENT: (id: string) => `/enrollments/update/${id}`,
   REJECT_ENROLLMENT: (id: string) => `/enrollments/rejectEnroll/${id}`,
@@ -192,13 +193,13 @@ export const apiEndPoint = {
   GET_LIST_GUARDIAN_BY_PARENT: (parentId: string) =>
     `/guardians/listByParent/${parentId}`,
   CREATE_NEW_POST: "/posts/create",
-  UPLOAD_ALBUM: (postId: string) => `/post-files/${postId}/upload`,
+  UPLOAD_ALBUM: (postId: string) => `/posts/${postId}/upload`,
   GET_CLASS_OF_TEACHER: (teacherId: string) =>
-    `/post-files/getClassByTeacher/${teacherId}`,
+    `/posts/getClassByTeacher/${teacherId}`,
   GET_LIST_POST: (teacherId: string) =>
-    `/post-files/getPostFileByTeacher/${teacherId}`,
+    `/posts/getPostFileByTeacher/${teacherId}`,
   DELETE_POST: (postId: string) => `/posts/delete/${postId}`,
-  DELETE_IMAGE: (imageId: string) => `/post-files/${imageId}/delete`,
+  DELETE_IMAGE: (imageId: string) => `/posts/${imageId}/delete`,
   UPDATE_POST: (postId: string) => `/posts/update/${postId}`,
   GET_LIST_POST_BY_STUDENT: (studentId: string) =>
     `/dashboard-posts/getPostFileByStudent/${studentId}`,

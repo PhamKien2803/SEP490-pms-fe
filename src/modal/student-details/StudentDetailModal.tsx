@@ -8,7 +8,7 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { toast } from 'react-toastify';
-import { teacherApis, enrollmentApis } from '../../services/apiServices';
+import { teacherApis } from '../../services/apiServices';
 import { StudentDetailResponse } from '../../types/teacher';
 
 const { Title, Text } = Typography;
@@ -27,7 +27,7 @@ function StudentDetailModal({ studentId, open, onClose }: Props) {
     const { token } = useToken();
     const handleViewPDF = useCallback(async (fileId: string) => {
         try {
-            const arrayBuffer = await enrollmentApis.getPDFById(fileId);
+            const arrayBuffer = await teacherApis.getPDFById(fileId);
             const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
             const fileURL = URL.createObjectURL(blob);
             window.open(fileURL, '_blank');

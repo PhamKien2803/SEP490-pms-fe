@@ -938,6 +938,17 @@ export const topicApis = {
 };
 
 export const teacherApis = {
+
+  getPDFById: async (id: string): Promise<ArrayBuffer> => {
+    const response = await axiosAuth.get<ArrayBuffer>(
+      apiEndPoint.GET_PDF_BY_IDS(id),
+      {
+        responseType: "arraybuffer",
+      }
+    );
+    return response.data;
+  },
+
   getClassAndStudentByTeacher: async (
     teacherId: string,
     schoolYearId: string
