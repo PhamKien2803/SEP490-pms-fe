@@ -131,11 +131,136 @@ const MealEditor: React.FC<MealEditorProps> = ({
     };
   }, [searchText, currentAgeGroupLabel, fetchFoodList]);
 
+  // const handleFoodSelect = (
+  //   foodId: string | undefined,
+  //   foodFieldIndex: number,
+  //   mealFieldIndex: number
+  // ) => {
+  //   const selectedFood = foodOptions.find((food) => food._id === foodId);
+
+  //   if (selectedFood) {
+  //     const nutrientSums = selectedFood.ingredients.reduce(
+  //       (acc, item) => {
+  //         acc.weight += item.gram || 0;
+  //         acc.calo += item.calories || 0;
+  //         acc.protein += item.protein || 0;
+  //         acc.lipid += item.lipid || 0;
+  //         acc.carb += item.carb || 0;
+  //         return acc;
+  //       },
+  //       { weight: 0, calo: 0, protein: 0, lipid: 0, carb: 0 }
+  //     );
+
+  //     const safeValue = (val: number) => Math.max(0, val);
+
+  //     form.setFieldsValue({
+  //       days: {
+  //         [dayIndex]: {
+  //           meals: {
+  //             [mealFieldIndex]: {
+  //               foods: {
+  //                 [foodFieldIndex]: {
+  //                   name: selectedFood.foodName,
+  //                   weight: safeValue(nutrientSums.weight),
+  //                   calo: safeValue(nutrientSums.calo),
+  //                   protein: safeValue(nutrientSums.protein),
+  //                   lipid: safeValue(nutrientSums.lipid),
+  //                   carb: safeValue(nutrientSums.carb),
+  //                 },
+  //               },
+  //             },
+  //           },
+  //         },
+  //       },
+  //     });
+  //   } else {
+  //     form.setFieldsValue({
+  //       days: {
+  //         [dayIndex]: {
+  //           meals: {
+  //             [mealFieldIndex]: {
+  //               foods: {
+  //                 [foodFieldIndex]: {
+  //                   name: "",
+  //                   weight: undefined,
+  //                   calo: undefined,
+  //                   protein: undefined,
+  //                   lipid: undefined,
+  //                   carb: undefined,
+  //                 },
+  //               },
+  //             },
+  //           },
+  //         },
+  //       },
+  //     });
+  //   }
+  // };
+
   const handleFoodSelect = (
     foodId: string | undefined,
     foodFieldIndex: number,
     mealFieldIndex: number
   ) => {
+    const allValues = form.getFieldsValue();
+    const selectedDay = allValues.days?.[dayIndex];
+
+    if (!selectedDay) return;
+
+    const selectedMeal = selectedDay.meals?.[mealFieldIndex];
+    const selectedFoods = selectedMeal?.foods || [];
+
+    // Check trùng trong cùng bữa
+
+    const duplicateInSameMeal = selectedFoods.some(
+      (food: any, idx: number) =>
+        idx !== foodFieldIndex && food.foodId === foodId
+    );
+
+    if (duplicateInSameMeal) {
+      toast.warning("Món ăn đã được chọn trong bữa này. Vui lòng chọn món khác.");
+      return;
+    }
+
+    //Check trùng giữa các bữa
+
+    const allMeals = selectedDay.meals || [];
+    const duplicateInOtherMeal = allMeals.some((meal: any, idx: number) => {
+      if (idx === mealFieldIndex) return false;
+      return meal.foods?.some((f: any) => f.foodId === foodId);
+    });
+
+    if (duplicateInOtherMeal) {
+      toast.warning("Món ăn này đã được chọn ở bữa khác trong cùng ngày.");
+      return;
+    }
+
+    if (!foodId) {
+      form.setFieldsValue({
+        days: {
+          [dayIndex]: {
+            meals: {
+              [mealFieldIndex]: {
+                foods: {
+                  [foodFieldIndex]: {
+                    foodId: undefined,
+                    name: "",
+                    weight: undefined,
+                    calo: undefined,
+                    protein: undefined,
+                    lipid: undefined,
+                    carb: undefined,
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      return;
+    }
+
+
     const selectedFood = foodOptions.find((food) => food._id === foodId);
 
     if (selectedFood) {
@@ -160,6 +285,7 @@ const MealEditor: React.FC<MealEditorProps> = ({
               [mealFieldIndex]: {
                 foods: {
                   [foodFieldIndex]: {
+                    foodId,
                     name: selectedFood.foodName,
                     weight: safeValue(nutrientSums.weight),
                     calo: safeValue(nutrientSums.calo),
@@ -173,29 +299,9 @@ const MealEditor: React.FC<MealEditorProps> = ({
           },
         },
       });
-    } else {
-      form.setFieldsValue({
-        days: {
-          [dayIndex]: {
-            meals: {
-              [mealFieldIndex]: {
-                foods: {
-                  [foodFieldIndex]: {
-                    name: "",
-                    weight: undefined,
-                    calo: undefined,
-                    protein: undefined,
-                    lipid: undefined,
-                    carb: undefined,
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
     }
   };
+
 
   const NutrientDisplay = ({
     name,
@@ -661,27 +767,136 @@ const CreateMenu: React.FC = () => {
       ),
     }));
   }, [currentWeekDays, form, currentAgeGroupValue, currentAgeGroupLabel]);
-  const validateWeekRange = (name: any, value: [Dayjs | null, Dayjs | null] | null) => {
-    console.log(name);
-    if (!value) {
-      return Promise.resolve();
-    }
+
+  // const validateWeekRange = (name: any, value: [Dayjs | null, Dayjs | null] | null) => {
+  //   console.log(name);
+  //   if (!value) {
+  //     return Promise.resolve();
+  //   }
+  //   const [start, end] = value;
+
+  //   if (!start || !end) {
+  //     return Promise.resolve();
+  //   }
+
+  //   const diffInDays = end.diff(start, 'day');
+
+  //   if (diffInDays < 6) {
+  //     return Promise.reject(
+  //       new Error("Khoảng thời gian tối thiểu phải là 7 ngày.")
+  //     );
+  //   }
+
+  //   return Promise.resolve();
+  // };
+
+  //tạo bắt đầu từ thứ 2
+  const validateWeekRange = (_: any, value: [Dayjs | null, Dayjs | null] | null) => {
+    if (!value) return Promise.resolve();
     const [start, end] = value;
 
-    if (!start || !end) {
-      return Promise.resolve();
+    if (!start || !end) return Promise.resolve();
+
+    const isMonday = start.day() === 1;
+    const diffInDays = end.diff(start, "day");
+
+    if (!isMonday) {
+      return Promise.reject(new Error("Tuần phải bắt đầu từ Thứ Hai."));
     }
 
-    const diffInDays = end.diff(start, 'day');
-
-    if (diffInDays < 6) {
-      return Promise.reject(
-        new Error("Khoảng thời gian tối thiểu phải là 7 ngày.")
-      );
+    if (diffInDays !== 6) {
+      return Promise.reject(new Error("Khoảng thời gian phải là đúng 7 ngày (Thứ Hai đến Chủ Nhật)."));
     }
 
     return Promise.resolve();
   };
+
+  const handleSuggestMenu = async () => {
+    try {
+      if (!currentAgeGroupLabel) {
+        toast.warn("Vui lòng chọn nhóm tuổi trước khi gợi ý.");
+        return;
+      }
+
+      const params: ListFoodParams = {
+        page: 1,
+        limit: 999,
+        ageGroup: currentAgeGroupLabel,
+      };
+
+      const res = await menuApis.getListFood(params);
+      const foodList: FoodRecord[] = res.data || [];
+
+      if (foodList.length === 0) {
+        toast.warn("Không có món ăn nào để gợi ý.");
+        return;
+      }
+
+      const shuffledFoods = [...foodList].sort(() => Math.random() - 0.5);
+
+      const newDays = currentWeekDays.map((day) => {
+        const usedFoodsInDay = new Set<string>();
+
+        const meals = MEAL_TYPES.map((meal) => {
+          // Ưu tiên chọn món chưa dùng trong ngày
+          let selectedFood = shuffledFoods.find(
+            (f) => !usedFoodsInDay.has(f._id)
+          );
+
+          // Nếu hết món chưa dùng, lấy random từ toàn bộ danh sách
+          if (!selectedFood) {
+            selectedFood = shuffledFoods[Math.floor(Math.random() * shuffledFoods.length)];
+          }
+
+          // Đánh dấu đã dùng
+          usedFoodsInDay.add(selectedFood._id);
+
+          // Tính dinh dưỡng an toàn
+          const nutrient = (selectedFood.ingredients || []).reduce(
+            (acc, ing) => {
+              acc.weight += ing.gram || 0;
+              acc.calo += ing.calories || 0;
+              acc.protein += ing.protein || 0;
+              acc.lipid += ing.lipid || 0;
+              acc.carb += ing.carb || 0;
+              return acc;
+            },
+            { weight: 0, calo: 0, protein: 0, lipid: 0, carb: 0 }
+          );
+
+          return {
+            mealType: meal.value,
+            foods: [
+              {
+                foodId: selectedFood._id,
+                name: selectedFood.foodName,
+                weight: nutrient.weight || 0,
+                calo: nutrient.calo || 0,
+                protein: nutrient.protein || 0,
+                lipid: nutrient.lipid || 0,
+                carb: nutrient.carb || 0,
+              },
+            ],
+          };
+        });
+
+        return {
+          date: day.toISOString(),
+          meals,
+        };
+      });
+
+      form.setFieldsValue({ days: newDays });
+      toast.success("Đã gợi ý thực đơn tuần!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Gợi ý món ăn thất bại.");
+    }
+  };
+
+
+
+
   return (
     <div style={{ padding: "16px 24px" }}>
       <Form
@@ -782,6 +997,16 @@ const CreateMenu: React.FC = () => {
               >
                 Chi tiết Món ăn trong tuần
               </Title>
+              <Button
+                icon={<BulbOutlined />}
+                type="dashed"
+                style={{ marginTop: 12, marginBottom: 12 }}
+                onClick={handleSuggestMenu}
+                disabled={!currentAgeGroupLabel || currentWeekDays.length === 0}
+              >
+                Gợi ý Thực đơn Tự động
+              </Button>
+
               {currentWeekDays.length === 0 ? (
                 <div
                   style={{

@@ -36,6 +36,8 @@ import {
   AICalculateResponse,
 } from "../../../types/food-management";
 import { noSpecialCharactersandNumberRule } from "../../../utils/format";
+import { useCurrentUser } from "../../../hooks/useCurrentUser";
+import CaloAICalculating from "../../../components/CaloAl/CaloAICalculating";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -57,7 +59,7 @@ const CreateFoodPage: React.FC = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [isAILoading, setIsAILoading] = useState(false);
-
+  const user = useCurrentUser();
   const [createdFood, setCreatedFood] = useState<FoodRecord | null>(null);
 
   const hasFoodId = !!createdFood?._id;
@@ -187,7 +189,7 @@ const CreateFoodPage: React.FC = () => {
       totalLipid: 0,
       totalCarb: 0,
       ingredients: cleanedIngredients,
-      createdBy: "Current_User",
+      createdBy: user.email,
       active: true,
     };
 
@@ -241,17 +243,18 @@ const CreateFoodPage: React.FC = () => {
     </Form.Item>
   );
 
-  if (loading || isAILoading) {
+  if (loading) {
     return (
-      <Flex
-        align="center"
-        justify="center"
-        style={{ minHeight: "calc(100vh - 150px)" }}
-      >
+      <Flex align="center" justify="center" style={{ minHeight: "calc(100vh - 150px)" }}>
         <Spin size="large" />
       </Flex>
     );
   }
+
+  if (isAILoading) {
+    return <CaloAICalculating />;
+  }
+
 
   return (
     <div style={{ padding: "16px 24px" }}>
