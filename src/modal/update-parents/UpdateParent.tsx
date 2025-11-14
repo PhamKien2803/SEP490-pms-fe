@@ -4,6 +4,7 @@ import { UpdateParentDto, Parent } from '../../types/auth';
 import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 import { Dayjs } from "dayjs";
+import { noSpecialCharactersandNumberRule } from '../../utils/format';
 
 export interface UpdateParentFormValues {
     fullName?: string;
@@ -98,7 +99,7 @@ const UpdateParent: React.FC<UpdateParentProps> = ({ open, loading, initialData,
                             <Form.Item
                                 name="fullName"
                                 label="Họ và tên"
-                                rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}
+                                rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }, noSpecialCharactersandNumberRule]}
                             >
                                 <Input placeholder="Nguyễn Văn A" />
                             </Form.Item>
@@ -137,7 +138,7 @@ const UpdateParent: React.FC<UpdateParentProps> = ({ open, loading, initialData,
                                 label="Số điện thoại"
                                 rules={[{ pattern: /^[0-9]{9,11}$/, message: 'Số điện thoại phải từ 9-11 chữ số!' }]}
                             >
-                                <Input placeholder="0912345678" />
+                                <Input type='number' placeholder="0912345678" />
                             </Form.Item>
 
                             <Form.Item

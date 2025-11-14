@@ -95,7 +95,7 @@ function CreateClass() {
         setIsSubmitting(true);
         const payload: CreateClassDto = {
             className: values.className,
-            age: String(values.age),
+            age: values.age !== undefined ? String(values.age) : '',
             room: values.room,
             teachers: values.teachers || [],
             students: students.map(s => s._id),
@@ -129,9 +129,6 @@ function CreateClass() {
     if (loading) {
         return <Flex align="center" justify="center" style={{ minHeight: '400px' }}><Spin size="large" /></Flex>;
     }
-    // if (error) {
-    //     return <Alert message="Lỗi" description={error} type="error" showIcon />;
-    // }
 
     return (
         <div style={{ padding: '24px', background: '#f0f2f5' }}>

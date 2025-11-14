@@ -18,6 +18,7 @@ export interface IStudent {
   healthCertFile: IFileInfo | null;
   birthCertFile: IFileInfo | null;
   guardianToday?: IGuardian | null;
+  imageStudent: string;
 }
 
 export interface IRoomFacility {
@@ -199,6 +200,7 @@ export interface IAttendanceDetailResponse {
       gender: string;
       address: string;
       classGroup?: string;
+      imageStudent: string;
     };
     status: string;
     note?: string;
@@ -222,6 +224,7 @@ export interface IAttendanceDetailResponse {
   };
   generalNote?: string;
   takenAt: string;
+
 }
 
 
@@ -266,6 +269,7 @@ export interface StudentDetailResponse {
     uploadDate: string;
     filename: string;
   };
+  imageStudent: string;
 }
 
 // ==============================FEEDBACK======================
@@ -371,6 +375,7 @@ export interface IPopulatedStudent {
   gender: string;
   address: string;
   healthCertId: string;
+  imageStudent: string;
 }
 
 /**

@@ -191,14 +191,30 @@ const MedicalManagement: React.FC = () => {
                 key: "healthStatus",
                 width: 150,
                 className: "ant-table-header-nowrap",
-                render: (status: string) => (
-                    <Tag
-                        color="default"
-                        style={{ whiteSpace: "nowrap" }}
-                    >
-                        {status}
-                    </Tag>
-                ),
+                render: (status: string) => {
+                    let color = "default";
+                    switch (status) {
+                        case "Bình thường":
+                            color = "green";
+                            break;
+                        case "Cần theo dõi":
+                            color = "orange";
+                            break;
+                        case "Khám lại":
+                            color = "volcano";
+                            break;
+                        case "Nguy cơ cao":
+                            color = "red";
+                            break;
+                        default:
+                            color = "default";
+                    }
+                    return (
+                        <Tag color={color} style={{ whiteSpace: "nowrap" }}>
+                            {status}
+                        </Tag>
+                    );
+                }
             },
             {
                 title: "Hành động",

@@ -157,7 +157,12 @@ function AttendanceDetails() {
                                     {/* Col 1: Student Info */}
                                     <Col xs={24} sm={24} md={8} lg={7}>
                                         <Space>
-                                            <Avatar size="large" icon={<UserOutlined />} />
+                                            <Avatar
+                                                size={48}
+                                                src={item.student.imageStudent}
+                                                icon={!item.student.imageStudent && <UserOutlined />}
+                                                style={{ backgroundColor: '#f0f0f0' }}
+                                            />
                                             <div>
                                                 <Text strong style={{ fontSize: 16 }}>
                                                     {item.student.fullName}

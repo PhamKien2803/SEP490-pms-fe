@@ -18,6 +18,7 @@ export const apiEndPoint = {
   GET_LIST_FUNCTION: "/roles/listFunction",
   GET_LIST_MODULE: "/roles/listModule",
   GET_LIST_STUDENT: "/students/list",
+  GET_STUDENT_BY_ID: (id: string) => `/students/getById/${id}`,
   GET_LIST_STAFF: "/staffs/list",
   CREATE_STUDENT: "/students/create",
   CREATE_STAFF: "/staffs/create",
@@ -34,6 +35,7 @@ export const apiEndPoint = {
   GET_ENROLLMENT_BY_ID: (id: string) => `/enrollments/getById/${id}`,
   UPLOAD_PDF: "/enrollments/uploadPDF",
   GET_PDF_BY_ID: (id: string) => `/enrollments/pdf/${id}`,
+  GET_PDF_BY_IDS: (id: string) => `/teachers/pdf/${id}`,
   APPROVE_ENROLLMENT: "/enrollments/aprrovedEnroll",
   UPDATE_ENROLLMENT: (id: string) => `/enrollments/update/${id}`,
   REJECT_ENROLLMENT: (id: string) => `/enrollments/rejectEnroll/${id}`,
@@ -149,7 +151,8 @@ export const apiEndPoint = {
   GET_TUITION_LIST: "/tuition-manage/list",
   GET_DETAILS_TUITION: (parentid: string) => `/tuitions/detail/${parentid}`,
   CONFIRM_TUITION: "/tuitions/confirm/",
-  CHECK_STATUS_TUITION: (orderCode: string) => `/tuitions/check-status/${orderCode}`,
+  CHECK_STATUS_TUITION: (orderCode: string) =>
+    `/tuitions/check-status/${orderCode}`,
   GET_LIST_HISTORY_FEE: "/tuitions/historyFees",
   GET_DETAIL_BALANCES: "/balances/detail",
   GET_LIST_DOCUMENT: "/documents/list",
@@ -159,6 +162,8 @@ export const apiEndPoint = {
   DELETE_DOCUMENT: (id: string) => `/documents/delete/${id}`,
   CONFIRM_DOCUMENT: (id: string) => `/documents/confirmPayment/${id}`,
   GET_REPORT_SERVICES: "/manage-services/reports",
+  PAYMENT_ENROLLMENT_CONFIRM: (id: string) => `/enrollments/payment-enroll/${id}`,
+  UPLOAD_IMAGE: "/enrollments/uploadImage",
   GET_LIST_MEDICAL: "/medicals/list",
   GET_MEDICAL_BY_ID: (id: string) => `/medicals/getById/${id}`,
   CREATE_MEDICAL: "/medicals/create",
@@ -183,8 +188,21 @@ export const apiEndPoint = {
   UPDATE_GUARDIAN: (id: string) => `/guardians/update/${id}`,
   DELETE_GUARDIAN: (id: string) => `/guardians/delete/${id}`,
   GET_GUARDIAN_BY_ID: (id: string) => `/guardians/getById/${id}`,
-  GET_LIST_GUARDIAN_BY_STUDENT: (studentId: string) => `/guardians/listByStudent/${studentId}`,
-  GET_LIST_GUARDIAN_BY_PARENT: (parentId: string) => `/guardians/listByParent/${parentId}`,
+  GET_LIST_GUARDIAN_BY_STUDENT: (studentId: string) =>
+    `/guardians/listByStudent/${studentId}`,
+  GET_LIST_GUARDIAN_BY_PARENT: (parentId: string) =>
+    `/guardians/listByParent/${parentId}`,
+  CREATE_NEW_POST: "/posts/create",
+  UPLOAD_ALBUM: (postId: string) => `/posts/${postId}/upload`,
+  GET_CLASS_OF_TEACHER: (teacherId: string) =>
+    `/posts/getClassByTeacher/${teacherId}`,
+  GET_LIST_POST: (teacherId: string) =>
+    `/posts/getPostFileByTeacher/${teacherId}`,
+  DELETE_POST: (postId: string) => `/posts/delete/${postId}`,
+  DELETE_IMAGE: (imageId: string) => `/posts/${imageId}/delete`,
+  UPDATE_POST: (postId: string) => `/posts/update/${postId}`,
+  GET_LIST_POST_BY_STUDENT: (studentId: string) =>
+    `/dashboard-posts/getPostFileByStudent/${studentId}`,
 };
 
 export const apiConfig = {

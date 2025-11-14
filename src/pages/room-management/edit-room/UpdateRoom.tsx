@@ -44,6 +44,7 @@ import {
 } from "../../../types/room-management";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { useCurrentUser } from "../../../hooks/useCurrentUser";
+import { noSpecialCharactersandNumberRule, noSpecialCharactersRule } from "../../../utils/format";
 
 const { Title, Text } = Typography;
 const { Item } = Descriptions;
@@ -147,7 +148,7 @@ const FacilityInputRow: React.FC<{
               <TagOutlined /> Tên thiết bị
             </Space>
           }
-          rules={[{ required: true, message: "Nhập tên thiết bị" }]}
+          rules={[{ required: true, message: "Nhập tên thiết bị" }, noSpecialCharactersandNumberRule]}
         >
           <Input
             placeholder="Ví dụ: Bàn học trẻ em"
@@ -166,7 +167,7 @@ const FacilityInputRow: React.FC<{
               <ToolOutlined /> Loại
             </Space>
           }
-          rules={[{ required: true, message: "Nhập loại thiết bị" }]}
+          rules={[{ required: true, message: "Nhập loại thiết bị" }, noSpecialCharactersandNumberRule]}
         >
           <Input
             placeholder="Ví dụ: Nội thất"
@@ -184,6 +185,7 @@ const FacilityInputRow: React.FC<{
           rules={[{ required: true, message: "Nhập SL" }]}
         >
           <InputNumber
+            type="number"
             min={1}
             style={{ width: "100%" }}
             placeholder="10"
@@ -206,6 +208,7 @@ const FacilityInputRow: React.FC<{
           validateTrigger={["onChange", "onBlur"]}
         >
           <InputNumber
+            type="number"
             min={0}
             max={maxDefectWhileEditingMissing}
             style={{ width: "100%" }}
@@ -229,6 +232,7 @@ const FacilityInputRow: React.FC<{
           validateTrigger={["onChange", "onBlur"]}
         >
           <InputNumber
+            type="number"
             min={0}
             max={maxMissing}
             style={{ width: "100%" }}
@@ -690,7 +694,7 @@ const UpdateRoom: React.FC = () => {
                   </Space>
                 }
                 name="roomName"
-                rules={[{ required: true, message: "Vui lòng nhập tên phòng" }]}
+                rules={[{ required: true, message: "Vui lòng nhập tên phòng" }, noSpecialCharactersRule]}
               >
                 <Input disabled={!isEditing || !isRoomInfoEditable} />
               </Form.Item>
@@ -704,7 +708,7 @@ const UpdateRoom: React.FC = () => {
                 }
                 name="roomType"
                 rules={[
-                  { required: true, message: "Vui lòng nhập loại phòng" },
+                  { required: true, message: "Vui lòng nhập loại phòng" }, noSpecialCharactersRule,
                 ]}
               >
                 <Input disabled={!isEditing || !isRoomInfoEditable} />
@@ -721,6 +725,7 @@ const UpdateRoom: React.FC = () => {
                 rules={[{ required: true, message: "Vui lòng nhập sức chứa" }]}
               >
                 <InputNumber
+                  type="number"
                   min={1}
                   style={{ width: "100%" }}
                   disabled={!isEditing || !isRoomInfoEditable}

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, Form, Input, Button, DatePicker, Select, Row, Col } from "antd";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
+import { noSpecialCharactersandNumberRule } from "../../utils/format";
 
 export interface CreateParentFormDto {
   fullName: string;
@@ -102,7 +103,7 @@ const CreateParent: React.FC<CreateParentProps> = ({
                 rules={[
                   { required: true, message: "Vui lòng nhập họ và tên!" },
                   { min: 2, message: "Tên phải có ít nhất 2 ký tự!" },
-                  { max: 100, message: "Tên phải ít hơn 100 ký tự!" },
+                  { max: 100, message: "Tên phải ít hơn 100 ký tự!" }, noSpecialCharactersandNumberRule,
                 ]}
               >
                 <Input placeholder="Ví dụ: Nguyễn Văn A" />
@@ -148,7 +149,7 @@ const CreateParent: React.FC<CreateParentProps> = ({
                   },
                 ]}
               >
-                <Input placeholder="Nhập 9 hoặc 12 số" />
+                <Input type="number" placeholder="Nhập 9 hoặc 12 số" />
               </Form.Item>
 
               <Form.Item
@@ -161,7 +162,7 @@ const CreateParent: React.FC<CreateParentProps> = ({
                   },
                 ]}
               >
-                <Input placeholder="Ví dụ: 0987654321" />
+                <Input type="number" placeholder="Ví dụ: 0987654321" />
               </Form.Item>
 
               <Form.Item

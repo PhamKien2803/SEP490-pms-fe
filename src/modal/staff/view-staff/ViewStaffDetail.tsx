@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, Descriptions, Divider, Tag } from "antd";
+import { Modal, Descriptions, Divider, Tag, Row, Col } from "antd";
 import { StaffRecord } from "../../../types/staff-management";
 import dayjs from "dayjs";
 
@@ -23,7 +23,7 @@ const ViewStaffDetails: React.FC<ViewStaffDetailsProps> = ({
         return dayjs(dateString).format("DD/MM/YYYY");
     };
 
-    const labelStyle = { width: '120px' }; 
+    const labelStyle = { width: '120px' };
 
     return (
         <Modal
@@ -31,74 +31,67 @@ const ViewStaffDetails: React.FC<ViewStaffDetailsProps> = ({
             open={open}
             onCancel={onClose}
             footer={null}
-            width={800}
+            width={1000}
             centered={true}
-            bodyStyle={{ maxHeight: '75vh', overflowY: 'auto' }}
         >
-            <Divider orientation="left" plain>
-                Thông tin cá nhân
-            </Divider>
-            <Descriptions bordered layout="horizontal" column={2}>
-                
-                {/* 1. Mã nhân viên & Họ và tên */}
-                <Descriptions.Item label="Mã nhân viên" labelStyle={labelStyle}>
-                    <Tag color="blue">{staffData.staffCode}</Tag>
-                </Descriptions.Item>
-                <Descriptions.Item label="Họ và tên" labelStyle={labelStyle}>
-                    {staffData.fullName}
-                </Descriptions.Item>
-
-                {/* 2. Giới tính & Ngày sinh */}
-                <Descriptions.Item label="Giới tính" labelStyle={labelStyle}>
-                    {staffData.gender}
-                </Descriptions.Item>
-                <Descriptions.Item label="Ngày sinh" labelStyle={labelStyle}>
-                    {formatDate(dayjs(staffData.dob).format("YYYY-MM-DD"))}
-                </Descriptions.Item>
-
-                {/* 3. SĐT & Email */}
-                <Descriptions.Item label="SĐT" labelStyle={labelStyle}>
-                    {staffData.phoneNumber}
-                </Descriptions.Item>
-                <Descriptions.Item label="Email" labelStyle={labelStyle}>
-                    {staffData.email}
-                </Descriptions.Item>
-
-                {/* 4. CMND/CCCD & Quốc tịch */}
-                <Descriptions.Item label="CMND/CCCD" labelStyle={labelStyle}>
-                    {staffData.IDCard}
-                </Descriptions.Item>
-                <Descriptions.Item label="Quốc tịch" labelStyle={labelStyle}>
-                    {staffData.nation}
-                </Descriptions.Item>
-
-                {/* 5. Tôn giáo & Địa chỉ */}
-                <Descriptions.Item label="Tôn giáo" labelStyle={labelStyle}>
-                    {staffData.religion || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Địa chỉ" span={2}> 
-                    {staffData.address}
-                </Descriptions.Item>
-            </Descriptions>
-
-            <Divider orientation="left" plain style={{ marginTop: 32 }}>
-                    Thông tin hệ thống
-                  </Divider>
-                  <Descriptions bordered layout="horizontal" column={2}>
-                    <Descriptions.Item label="Người tạo">
-                      {staffData.createdBy}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Ngày tạo">
-                      {formatDate(staffData.createdAt)}
-                    </Descriptions.Item>
-            
-                    <Descriptions.Item label="Cập nhật lần cuối bởi">
-                      {staffData.updatedBy || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Ngày cập nhật">
-                      {formatDate(staffData.updatedAt)}
-                    </Descriptions.Item>
-                  </Descriptions>
+            <Row gutter={24}>
+                <Col span={16}>
+                    <Divider orientation="left" plain>
+                        Thông tin cá nhân
+                    </Divider>
+                    <Descriptions bordered layout="horizontal" column={2}>
+                        <Descriptions.Item label="Mã nhân viên" labelStyle={labelStyle}>
+                            <Tag color="blue">{staffData.staffCode}</Tag>
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Họ và tên" labelStyle={labelStyle}>
+                            {staffData.fullName}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Giới tính" labelStyle={labelStyle}>
+                            {staffData.gender}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Ngày sinh" labelStyle={labelStyle}>
+                            {formatDate(dayjs(staffData.dob).format("YYYY-MM-DD"))}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="SĐT" labelStyle={labelStyle}>
+                            {staffData.phoneNumber}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Email" labelStyle={labelStyle}>
+                            {staffData.email}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="CMND/CCCD" labelStyle={labelStyle}>
+                            {staffData.IDCard}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Dân tộc" labelStyle={labelStyle}>
+                            {staffData.nation}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Tôn giáo" labelStyle={labelStyle}>
+                            {staffData.religion || "-"}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Địa chỉ" span={2}>
+                            {staffData.address}
+                        </Descriptions.Item>
+                    </Descriptions>
+                </Col>
+                <Col span={8}>
+                    <Divider orientation="left" plain>
+                        Thông tin hệ thống
+                    </Divider>
+                    <Descriptions bordered layout="horizontal" column={1}>
+                        <Descriptions.Item label="Người tạo" labelStyle={labelStyle}>
+                            {staffData.createdBy}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Ngày tạo" labelStyle={labelStyle}>
+                            {formatDate(staffData.createdAt)}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Cập nhật bởi" labelStyle={labelStyle}>
+                            {staffData.updatedBy || "-"}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Ngày cập nhật" labelStyle={labelStyle}>
+                            {formatDate(staffData.updatedAt)}
+                        </Descriptions.Item>
+                    </Descriptions>
+                </Col>
+            </Row>
         </Modal>
     );
 };

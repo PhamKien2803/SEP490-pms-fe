@@ -54,7 +54,6 @@ const RoomManagement: React.FC = () => {
   const [dataRooms, setDataRooms] = useState<RoomRecord[]>([]);
   const [searchKeyword, setSearchKeyword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);

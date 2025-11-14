@@ -62,10 +62,9 @@ const TimeTable = () => {
     const [currentWeek, setCurrentWeek] = useState(1);
     const [loading, setLoading] = useState(false);
     const [selectedYear, setSelectedYear] = useState<string>();
-    const [schoolYears, setSchoolYears] = useState<{ schoolYear: string }[]>([]);
+    const [schoolYears, setSchoolYears] = useState<{ schoolYear: string, startDate: string }[]>([]);
     const [timetableData, setTimetableData] = useState<IGetTimetableTeacherResponse | null>(null);
     const [viewMode, setViewMode] = useState<'week' | 'day'>('week');
-
 
     useEffect(() => {
         teacherApis.getSchoolYearList({ page: 0, limit: 10 }).then((res) => {
@@ -74,6 +73,43 @@ const TimeTable = () => {
             if (sorted.length > 0) setSelectedYear(sorted[0].schoolYear);
         });
     }, []);
+
+    const totalWeeksInMonth = useMemo(() => {
+        if (!selectedYear || !schoolYears.length || !currentMonth) return [];
+
+        const selectedSchoolYearData = schoolYears.find(y => y.schoolYear === selectedYear);
+        if (!selectedSchoolYearData) return [];
+
+        const schoolStartDate = dayjs(selectedSchoolYearData.startDate);
+        const schoolStartMonth = schoolStartDate.month() + 1;
+        const schoolStartYear = schoolStartDate.year();
+
+        const year = currentMonth >= schoolStartMonth
+            ? schoolStartYear
+            : schoolStartYear + 1;
+
+        const firstDayOfMonth = dayjs(`${year}-${currentMonth}-01`);
+        const lastDayOfMonth = firstDayOfMonth.endOf('month');
+
+        let cursor;
+        const dayOfWeek = firstDayOfMonth.day();
+        if (dayOfWeek === 0) {
+            cursor = firstDayOfMonth.subtract(6, 'day');
+        } else {
+            cursor = firstDayOfMonth.subtract(dayOfWeek - 1, 'day');
+        }
+
+        const weeks: { start: dayjs.Dayjs; end: dayjs.Dayjs }[] = [];
+
+        while (cursor.isBefore(lastDayOfMonth) || cursor.isSame(lastDayOfMonth, 'day')) {
+            const weekStart = cursor;
+            const weekEnd = cursor.add(6, 'day');
+            weeks.push({ start: weekStart, end: weekEnd });
+            cursor = cursor.add(7, 'day');
+        }
+
+        return weeks;
+    }, [currentMonth, selectedYear, schoolYears]);
 
     useEffect(() => {
         if (!teacherId || !selectedYear) return;
@@ -87,10 +123,26 @@ const TimeTable = () => {
                 });
                 setTimetableData(res);
                 const today = dayjs();
-                const index = totalWeeksInMonth.findIndex(
-                    (week) => today.isBetween(week.start, week.end, 'day', '[]')
-                );
-                setCurrentWeek(index >= 0 ? index + 1 : 1);
+
+                const selectedSchoolYearData = schoolYears.find(y => y.schoolYear === selectedYear);
+                if (!selectedSchoolYearData) {
+                    setCurrentWeek(1);
+                    return;
+                }
+                const schoolStartDate = dayjs(selectedSchoolYearData.startDate);
+                const schoolStartMonth = schoolStartDate.month() + 1;
+                const schoolStartYear = schoolStartDate.year();
+                const year = currentMonth >= schoolStartMonth ? schoolStartYear : schoolStartYear + 1;
+
+                if (currentMonth === today.month() + 1 && year === today.year()) {
+                    const index = totalWeeksInMonth.findIndex(
+                        (week) => today.isBetween(week.start, week.end, 'day', '[]')
+                    );
+                    setCurrentWeek(index >= 0 ? index + 1 : 1);
+                } else {
+                    setCurrentWeek(1);
+                }
+
             } catch (err) {
                 console.error(err);
                 setTimetableData(null);
@@ -99,25 +151,7 @@ const TimeTable = () => {
             }
         };
         fetch();
-    }, [teacherId, selectedYear, currentMonth]);
-
-    const totalWeeksInMonth = useMemo(() => {
-        const year = dayjs().year();
-        const firstDayOfMonth = dayjs(`${year}-${currentMonth}-01`);
-        const lastDayOfMonth = firstDayOfMonth.endOf('month');
-        const weeks: { start: dayjs.Dayjs; end: dayjs.Dayjs }[] = [];
-
-        let cursor = firstDayOfMonth.startOf('week').add(1, 'day'); // bắt đầu từ thứ 2
-
-        while (cursor.isBefore(lastDayOfMonth) || cursor.isSame(lastDayOfMonth, 'day')) {
-            const weekStart = cursor;
-            let weekEnd = weekStart.add(6, 'day');
-            if (weekEnd.isAfter(lastDayOfMonth, 'day')) weekEnd = lastDayOfMonth;
-            weeks.push({ start: weekStart, end: weekEnd });
-            cursor = weekStart.add(7, 'day');
-        }
-        return weeks;
-    }, [currentMonth]);
+    }, [teacherId, selectedYear, currentMonth, schoolYears, totalWeeksInMonth]);
 
     const handleWeekChange = (direction: 'prev' | 'next') => {
         if (direction === 'prev' && currentWeek > 1) {
@@ -210,7 +244,7 @@ const TimeTable = () => {
                         const nextDay = getDaysOfWeek[j];
                         const isHoliday = nextDay.activities.length === 0;
 
-                        if (isHoliday) break; // nếu là ngày nghỉ, ngắt gộp
+                        if (isHoliday) break;
 
                         const nextActivity = nextDay.activities.find(
                             (a) => a.startTime === activity.startTime
@@ -226,7 +260,6 @@ const TimeTable = () => {
                         }
                     }
 
-                    // nếu không phải ô đầu tiên trong nhóm thì ẩn
                     if (!isFirstFixed) {
                         return { children: null, props: { colSpan: 0 } };
                     }
@@ -241,7 +274,6 @@ const TimeTable = () => {
                     };
                 }
 
-                //Hoạt động bình thường hoặc sự kiện thì hiển thị như cũ
                 return {
                     children: (
                         <div style={{ textAlign: 'center' }}>
@@ -333,7 +365,7 @@ const TimeTable = () => {
                                         ? `${totalWeeksInMonth[currentWeek - 1].start.format('DD/MM')} - ${totalWeeksInMonth[currentWeek - 1].end.format('DD/MM')} (Tuần ${currentWeek})`
                                         : `Tuần ${currentWeek}`}
                                 </Button>
-                                <Button icon={<RightOutlined />} onClick={() => handleWeekChange('next')} />
+                                <Button icon={<RightOutlined />} onClick={() => handleWeekChange('next')} disabled={currentWeek >= totalWeeksInMonth.length} />
                             </Space.Compact>
                         </Space>
                     </Col>
@@ -342,7 +374,7 @@ const TimeTable = () => {
             style={{ margin: 16 }}
         >
             <Spin spinning={loading}>
-                {!getDaysOfWeek.length ? (
+                {!getDaysOfWeek.length && !loading ? (
                     <Empty description="Không có dữ liệu thời khóa biểu" />
                 ) : viewMode === 'week' ? (
                     <div

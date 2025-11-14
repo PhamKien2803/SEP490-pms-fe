@@ -91,6 +91,12 @@ import DocumentList from "../../pages/document-management/DocumentList";
 import DocumentCreate from "../../pages/document-management/document-create/DocumentCreate";
 import DocumentEdit from "../../pages/document-management/document-edit/DocumentEdit";
 import ServicesReport from "../../pages/services-reports/ServicesReport";
+import HomeNews from "../../pages/home-news/HomeNews";
+import TeacherNews from "../../pages/home-news/home-news-teacher/TeacherNews";
+// import ParentNews from "../../pages/home-news/home-news-parent/ParentNews";
+import StudentCreate from "../../modal/student/create-student/StudentCreate";
+import StudentDetail from "../../modal/student/view-student/StudentDetail";
+import StudentEdit from "../../modal/student/update-student/StudentEdit";
 
 export const routes: RouteObject[] = [
   {
@@ -109,7 +115,7 @@ export const routes: RouteObject[] = [
         children: [
           {
             index: true,
-            element: <div>Trang chủ PMS</div>,
+            element: <HomeNews />,
           },
           {
             path: "accounts",
@@ -176,6 +182,18 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <StudentManagement />,
+              },
+              {
+                path: "create",
+                element: <StudentCreate />,
+              },
+              {
+                path: "detail/:id",
+                element: <StudentDetail />,
+              },
+              {
+                path: "edit/:id",
+                element: <StudentEdit />,
               },
             ],
           },
@@ -420,7 +438,7 @@ export const routes: RouteObject[] = [
               {
                 path: "students/detail/:id",
                 element: <StudentDetails />,
-              },
+              }
             ],
           },
           {
@@ -519,7 +537,7 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <TuitionList />,
-              }
+              },
             ],
           },
           {
@@ -553,7 +571,7 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <HistoryFee />,
-              }
+              },
             ],
           },
           {
@@ -568,7 +586,7 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <BalancesDetails />,
-              }
+              },
             ],
           },
           {
@@ -606,7 +624,7 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <ServicesReport />,
-              }
+              },
             ],
           },
           {
@@ -929,6 +947,36 @@ export const routes: RouteObject[] = [
               },
             ],
           },
+          {
+            path: "posts",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/posts`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <TeacherNews />,
+              },
+            ],
+          },
+          // {
+          //   path: "dashboard-posts",
+          //   element: (
+          //     <PrivateRoute
+          //       requireFunction={`${constants.APP_PREFIX}/dashboard-posts`}
+          //       requireAction="view"
+          //     />
+          //   ),
+          //   children: [
+          //     {
+          //       index: true,
+          //       element: <ParentNews />,
+          //     },
+          //   ],
+          // },
         ],
       },
     ],

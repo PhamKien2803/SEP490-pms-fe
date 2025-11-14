@@ -31,9 +31,9 @@ import { constants } from "../../../constants";
 import { roomApis } from "../../../services/apiServices";
 import { CreateRoomData, RoomFacility } from "../../../types/room-management";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { noSpecialCharactersRule, noSpecialCharactersandNumberRule } from "../../../utils/format";
 
 const { Title } = Typography;
-
 const FacilityInputRow: React.FC<{
     field: any;
     remove: (index: number) => void;
@@ -61,7 +61,7 @@ const FacilityInputRow: React.FC<{
                             <TagOutlined /> Tên thiết bị
                         </Space>
                     }
-                    rules={[{ required: true, message: "Nhập tên thiết bị" }]}
+                    rules={[{ required: true, message: "Nhập tên thiết bị" }, noSpecialCharactersandNumberRule]}
                 >
                     <Input placeholder="Ví dụ: Bàn học trẻ em" />
                 </Form.Item>
@@ -77,7 +77,7 @@ const FacilityInputRow: React.FC<{
                             <ToolOutlined /> Loại
                         </Space>
                     }
-                    rules={[{ required: true, message: "Nhập loại thiết bị" }]}
+                    rules={[{ required: true, message: "Nhập loại thiết bị" }, noSpecialCharactersandNumberRule]}
                 >
                     <Input placeholder="Ví dụ: Nội thất, Thiết bị điện tử" />
                 </Form.Item>
@@ -91,7 +91,7 @@ const FacilityInputRow: React.FC<{
                     label="Tổng Số Lượng"
                     rules={[{ required: true, message: "Nhập SL" }]}
                 >
-                    <InputNumber min={1} style={{ width: "100%" }} placeholder="10" />
+                    <InputNumber type="number" min={1} style={{ width: "100%" }} placeholder="10" />
                 </Form.Item>
             </Col>
 
@@ -180,8 +180,8 @@ const CreateRoom: React.FC = () => {
                 facilities: cleanedFacilities,
                 state: DEFAULT_STATE,
                 notes: values.notes || "",
-                createdBy: values.createdBy || "System",
-                updatedBy: values.updatedBy || "System",
+                createdBy: values.createdBy || "Admin",
+                updatedBy: values.updatedBy || "Admin",
             };
 
             await roomApis.createRoom(payload);
@@ -247,7 +247,7 @@ const CreateRoom: React.FC = () => {
                                     </Space>
                                 }
                                 name="roomName"
-                                rules={[{ required: true, message: "Vui lòng nhập tên phòng" }]}
+                                rules={[{ required: true, message: "Vui lòng nhập tên phòng" }, noSpecialCharactersRule]}
                             >
                                 <Input placeholder="Ví dụ: Phòng A1, Phòng Thể chất" />
                             </Form.Item>
@@ -261,7 +261,7 @@ const CreateRoom: React.FC = () => {
                                 }
                                 name="roomType"
                                 rules={[
-                                    { required: true, message: "Vui lòng nhập loại phòng" },
+                                    { required: true, message: "Vui lòng nhập loại phòng" }, noSpecialCharactersRule
                                 ]}
                             >
                                 <Input placeholder="Ví dụ: Phòng học, Phòng chức năng" />
@@ -278,6 +278,7 @@ const CreateRoom: React.FC = () => {
                                 rules={[{ required: true, message: "Vui lòng nhập sức chứa" }]}
                             >
                                 <InputNumber
+                                    type="number"
                                     min={1}
                                     style={{ width: "100%" }}
                                     placeholder="25"

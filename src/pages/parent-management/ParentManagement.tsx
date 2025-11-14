@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
     Table,
@@ -57,7 +56,6 @@ const ParentManagement: React.FC = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
-
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [viewingParent, setViewingParent] = useState<Parent | null>(null);
 
@@ -74,7 +72,7 @@ const ParentManagement: React.FC = () => {
                     pageSize: response.page.limit,
                 }));
             } catch (error) {
-                // typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách phụ huynh.');
+                setParents([]); // Tối ưu: Clear data cũ nếu có lỗi
                 typeof error === "string" ? toast.info(error) : toast.info('Hiện tại không có phụ huynh nào trong hệ thống.');
             } finally {
                 setLoading(false);
@@ -85,10 +83,8 @@ const ParentManagement: React.FC = () => {
 
     useEffect(() => {
         fetchParents({ page: pagination.current!, limit: pagination.pageSize! });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pagination.current, pagination.pageSize]);
+    }, [fetchParents, pagination.current, pagination.pageSize]);
 
-    // Search filter
     const filteredParents = useMemo(() => {
         const keyword = searchKeyword.trim().toLowerCase();
         if (!keyword) return parents;
@@ -101,7 +97,6 @@ const ParentManagement: React.FC = () => {
         );
     }, [parents, searchKeyword]);
 
-    // Table pagination
     const handleTableChange = useCallback(
         (newPagination: TablePaginationConfig) => {
             setPagination((prev) => ({
@@ -113,12 +108,9 @@ const ParentManagement: React.FC = () => {
         []
     );
 
-    // Create
-    const handleCreateParent = async (values: CreateParentDto) => {
+    const handleCreateParent = useCallback(async (values: CreateParentDto) => {
         if (!user) {
-            toast.error(
-                "Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại."
-            );
+            toast.error("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
             return;
         }
         setIsSubmitting(true);
@@ -137,15 +129,14 @@ const ParentManagement: React.FC = () => {
         } finally {
             setIsSubmitting(false);
         }
-    };
+    }, [user, fetchParents, pagination.current, pagination.pageSize]);
 
-    // Update
-    const handleOpenUpdateModal = (record: Parent) => {
+    const handleOpenUpdateModal = useCallback((record: Parent) => {
         setEditingParent(record);
         setIsUpdateModalOpen(true);
-    };
+    }, []);
 
-    const handleUpdateParent = async (values: UpdateParentDto) => {
+    const handleUpdateParent = useCallback(async (values: UpdateParentDto) => {
         if (!editingParent || !user) {
             toast.error("Thiếu thông tin cần thiết để cập nhật.");
             return;
@@ -165,15 +156,14 @@ const ParentManagement: React.FC = () => {
         } finally {
             setIsUpdating(false);
         }
-    };
+    }, [editingParent, user, fetchParents, pagination.current, pagination.pageSize]);
 
-    // Delete
-    const handleOpenDeleteModal = (id: string) => {
+    const handleOpenDeleteModal = useCallback((id: string) => {
         setDeletingId(id);
         setIsDeleteModalOpen(true);
-    };
+    }, []);
 
-    const handleConfirmDelete = async () => {
+    const handleConfirmDelete = useCallback(async () => {
         if (!deletingId) return;
         setIsDeleting(true);
         try {
@@ -195,13 +185,15 @@ const ParentManagement: React.FC = () => {
             setIsDeleting(false);
             setDeletingId(null);
         }
-    };
+    }, [deletingId, parents.length, pagination.current, pagination.pageSize, fetchParents]);
 
-    const handleOpenViewModal = (record: Parent) => {
+    // Tối ưu: Gói hàm trong useCallback
+    const handleOpenViewModal = useCallback((record: Parent) => {
         setViewingParent(record);
         setIsViewModalOpen(true);
-    };
+    }, []);
 
+    // Tối ưu: Sửa mảng phụ thuộc cho useMemo
     const columns: ColumnsType<Parent> = useMemo(
         () => [
             {
@@ -271,9 +263,16 @@ const ParentManagement: React.FC = () => {
                     </Space>
                 ),
             },
-        ], [canUpdate, canDelete]
+        ],
+        [canUpdate, canDelete, pagination.current, pagination.pageSize, handleOpenViewModal, handleOpenUpdateModal, handleOpenDeleteModal]
     );
 
+    // Tối ưu: Gói hàm reload trong useCallback
+    const handleReload = useCallback(() => {
+        fetchParents({ page: pagination.current!, limit: pagination.pageSize! });
+    }, [fetchParents, pagination.current, pagination.pageSize]);
+
+    // Tối ưu: Sửa mảng phụ thuộc cho useMemo
     const cardHeader = useMemo(
         () => (
             <Row justify="space-between" align="middle">
@@ -285,9 +284,11 @@ const ParentManagement: React.FC = () => {
                 <Col>
                     <Space>
                         <Tooltip title="Làm mới danh sách">
-                            <Button icon={<ReloadOutlined />}
-                                onClick={() => fetchParents({ page: pagination.current!, limit: pagination.pageSize! })}
-                                loading={loading}></Button>
+                            <Button
+                                icon={<ReloadOutlined />}
+                                onClick={handleReload} // Sử dụng hàm đã gói
+                                loading={loading}
+                            />
                         </Tooltip>
                         <Input.Search
                             placeholder="Tìm kiếm phụ huynh..."
@@ -305,11 +306,13 @@ const ParentManagement: React.FC = () => {
                 </Col>
             </Row>
         ),
-        [searchKeyword, canCreate]
+        [searchKeyword, canCreate, loading, handleReload] // Thêm loading và handleReload
     );
 
-    const initialUpdateData = editingParent
-        ? {
+    // Tối ưu: Gói initialUpdateData trong useMemo
+    const initialUpdateData = useMemo(() => {
+        if (!editingParent) return null;
+        return {
             _id: editingParent._id,
             parentCode: editingParent.parentCode,
             fullName: editingParent.fullName,
@@ -326,8 +329,14 @@ const ParentManagement: React.FC = () => {
             createdBy: editingParent.createdBy,
             createdAt: editingParent.createdAt,
             updatedAt: editingParent.updatedAt,
-        }
-        : null;
+        };
+    }, [editingParent, user]);
+
+    // Tối ưu: Gói các hàm onClose vào useCallback để tránh re-render modal
+    const handleCloseCreateModal = useCallback(() => setIsModalOpen(false), []);
+    const handleCloseUpdateModal = useCallback(() => setIsUpdateModalOpen(false), []);
+    const handleCloseDeleteModal = useCallback(() => setIsDeleteModalOpen(false), []);
+    const handleCloseViewModal = useCallback(() => setIsViewModalOpen(false), []);
 
     return (
         <div style={{ padding: "22px" }}>
@@ -350,7 +359,7 @@ const ParentManagement: React.FC = () => {
             <CreateParent
                 open={isModalOpen}
                 loading={isSubmitting}
-                onClose={() => setIsModalOpen(false)}
+                onClose={handleCloseCreateModal}
                 onSubmit={handleCreateParent}
             />
 
@@ -358,20 +367,20 @@ const ParentManagement: React.FC = () => {
                 open={isUpdateModalOpen}
                 loading={isUpdating}
                 initialData={initialUpdateData}
-                onClose={() => setIsUpdateModalOpen(false)}
+                onClose={handleCloseUpdateModal}
                 onSubmit={handleUpdateParent}
             />
 
             <DeleteModal
                 open={isDeleteModalOpen}
                 loading={isDeleting}
-                onClose={() => setIsDeleteModalOpen(false)}
+                onClose={handleCloseDeleteModal}
                 onConfirm={handleConfirmDelete}
             />
 
             <ViewParentDetails
                 open={isViewModalOpen}
-                onClose={() => setIsViewModalOpen(false)}
+                onClose={handleCloseViewModal}
                 parentData={viewingParent}
             />
         </div>

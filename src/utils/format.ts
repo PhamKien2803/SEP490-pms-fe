@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { ScheduleDay } from "../types/parent";
 
 export const formatCurrency = (amount: number): string => {
@@ -81,4 +82,40 @@ export const formatMinutesToTime = (minutes: number) => {
         .padStart(2, "0");
     const mins = (minutes % 60).toString().padStart(2, "0");
     return `${hours}:${mins}`;
+};
+
+export const useValidationRules = () => {
+    const phoneValidationRule = useMemo(() => ({
+        pattern: /^\d{10}$/,
+        message: 'Số điện thoại phải có đúng 10 chữ số!',
+    }), []);
+
+    const idCardValidationRule = useMemo(() => ({
+        pattern: /^\d{12}$/,
+        message: 'CCCD phải có đúng 12 chữ số!',
+    }), []);
+
+    const nameValidationRule = {
+        pattern: /^[\p{L} ]+$/u,
+        message: 'Chỉ được nhập chữ cái và dấu cách!',
+    };
+
+    return { phoneValidationRule, idCardValidationRule, nameValidationRule };
+};
+
+export const noSpecialCharactersandNumberRule = {
+    pattern: /^[a-zA-ZÀ-ỹà-ỹ\s]+$/,
+    message: "Không được nhập số hoặc ký tự đặc biệt!",
+};
+
+export const noSpecialCharactersRule = {
+    pattern: /^[\p{L}0-9\s]+$/u,
+    message: "Không được nhập ký tự đặc biệt!",
+};
+
+
+export const allowOnlyNumbers = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!/[0-9]/.test(event.key) && !['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete'].includes(event.key) && !event.ctrlKey) {
+        event.preventDefault();
+    }
 };

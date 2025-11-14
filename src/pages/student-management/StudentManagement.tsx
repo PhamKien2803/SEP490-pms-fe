@@ -19,34 +19,23 @@ import {
 } from "@ant-design/icons";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { studentApis } from "../../services/apiServices";
-import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { usePagePermission } from "../../hooks/usePagePermission";
 import { toast } from "react-toastify";
 import {
-  CreateUserData,
   StudentRecord,
-  UpdateUserData,
 } from "../../types/student-management";
-import CreateStudent from "../../modal/student/create-student/CreateStudent";
 import dayjs from "dayjs";
-import UpdateStudent from "../../modal/student/update-student/UpdateStudent";
 import ModalConfirm from "../../modal/common/ModalConfirm/ModalConfirm";
-import ViewStudentDetails from "../../modal/student/view-student/ViewStudentDetail";
 import { usePageTitle } from "../../hooks/usePageTitle";
+import { useNavigate } from "react-router-dom";
+import { constants } from "../../constants";
 
 const StudentManagement: React.FC = () => {
   usePageTitle('Quản lý học sinh - Cá Heo Xanh');
   const [dataStudents, setDataStudents] = useState<StudentRecord[]>([]);
   const [searchKeyword, setSearchKeyword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [viewingStudent, setViewingStudent] = useState<StudentRecord | null>(
-    null
-  );
-  const user = useCurrentUser();
-
   const { canCreate, canUpdate, canDelete } = usePagePermission();
-
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
     pageSize: 5,
@@ -56,17 +45,10 @@ const StudentManagement: React.FC = () => {
     position: ["bottomCenter"],
     showTotal: (total) => `Tổng số: ${total} bản ghi`,
   });
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [editingStudent, setEditingStudent] = useState<StudentRecord | null>(
-    null
-  );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const fetchListStudent = useCallback(
     async (params: { page: number; limit: number }) => {
@@ -119,59 +101,10 @@ const StudentManagement: React.FC = () => {
     []
   );
 
-  const handleCreateStudent = async (values: CreateUserData) => {
-    if (!user) {
-      toast.error(
-        "Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại."
-      );
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      const payload = { ...values, createdBy: user.email };
-      await studentApis.createStudent(payload);
-      toast.success("Tạo học sinh thành công!");
-      setIsModalOpen(false);
-      if (pagination.current !== 1) {
-        setPagination((prev) => ({ ...prev, current: 1 }));
-      } else {
-        fetchListStudent({ page: 1, limit: pagination.pageSize! });
-      }
-    } catch (error) {
-      toast.error(typeof error === "string" ? error : "Tạo học sinh thất bại.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
-  const handleOpenUpdateModal = (record: StudentRecord) => {
-    setEditingStudent(record);
-    setIsUpdateModalOpen(true);
-  };
 
-  const handleUpdateStudent = async (values: UpdateUserData) => {
-    if (!editingStudent || !user) {
-      toast.error("Thiếu thông tin cần thiết để cập nhật.");
-      return;
-    }
-    setIsUpdating(true);
-    try {
-      const payload = { ...values, updatedBy: user.email };
-      await studentApis.updateStudent(editingStudent._id, payload);
-      toast.success("Cập nhật học sinh thành công!");
-      setIsUpdateModalOpen(false);
-      fetchListStudent({
-        page: pagination.current!,
-        limit: pagination.pageSize!,
-      });
-    } catch (error) {
-      toast.error(
-        typeof error === "string" ? error : "Cập nhật học sinh thất bại."
-      );
-    } finally {
-      setIsUpdating(false);
-    }
-  };
+
+
 
   const handleOpenDeleteModal = (id: string) => {
     setDeletingId(id);
@@ -201,10 +134,7 @@ const StudentManagement: React.FC = () => {
     }
   };
 
-  const handleOpenViewModal = (record: StudentRecord) => {
-    setViewingStudent(record);
-    setIsViewModalOpen(true);
-  };
+
 
   const columns: ColumnsType<StudentRecord> = useMemo(
     () => [
@@ -279,7 +209,7 @@ const StudentManagement: React.FC = () => {
               <Button
                 type="text"
                 icon={<EyeOutlined style={{ color: "#52c41a" }} />}
-                onClick={() => handleOpenViewModal(record)}
+                onClick={() => navigate(`${constants.APP_PREFIX}/students/detail/${record._id}`)}
               />
             </Tooltip>
             <Tooltip title="Chỉnh sửa hồ sơ">
@@ -287,7 +217,7 @@ const StudentManagement: React.FC = () => {
                 <Button
                   type="text"
                   icon={<EditOutlined style={{ color: "#1890ff" }} />}
-                  onClick={() => handleOpenUpdateModal(record)}
+                  onClick={() => navigate(`${constants.APP_PREFIX}/students/edit/${record._id}`)}
                 />
               )}
             </Tooltip>
@@ -305,7 +235,7 @@ const StudentManagement: React.FC = () => {
         ),
       },
     ],
-    [canUpdate, canDelete, handleOpenUpdateModal, handleOpenDeleteModal]
+    [canUpdate, canDelete, handleOpenDeleteModal]
   );
 
   const cardHeader = useMemo(
@@ -343,7 +273,7 @@ const StudentManagement: React.FC = () => {
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => navigate(`${constants.APP_PREFIX}/students/create`)}
               >
                 Tạo mới
               </Button>
@@ -354,24 +284,6 @@ const StudentManagement: React.FC = () => {
     ),
     [searchKeyword, canCreate]
   );
-
-  const initialUpdateData = editingStudent
-    ? {
-      _id: editingStudent._id,
-      studentCode: editingStudent.studentCode,
-      fullName: editingStudent.fullName,
-      dob: editingStudent.dob,
-      idCard: editingStudent.idCard,
-      gender: editingStudent.gender,
-      address: editingStudent.address,
-      relationship: editingStudent.relationship,
-      nation: editingStudent.nation,
-      religion: editingStudent.religion,
-      active: editingStudent.active,
-      birthCertId: editingStudent.birthCertId,
-      healthCertId: editingStudent.healthCertId,
-    }
-    : null;
 
   return (
     <div style={{ padding: "22px" }}>
@@ -387,24 +299,8 @@ const StudentManagement: React.FC = () => {
           rowKey="_id"
           pagination={searchKeyword.trim() ? false : pagination}
           onChange={handleTableChange}
-        // scroll={{ x: 1300, y: 500 }}
         />
       </Card>
-
-      <CreateStudent
-        open={isModalOpen}
-        loading={isSubmitting}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleCreateStudent}
-      />
-
-      <UpdateStudent
-        open={isUpdateModalOpen}
-        loading={isUpdating}
-        initialData={initialUpdateData}
-        onClose={() => setIsUpdateModalOpen(false)}
-        onSubmit={handleUpdateStudent}
-      />
 
       <ModalConfirm
         open={isDeleteModalOpen}
@@ -413,11 +309,7 @@ const StudentManagement: React.FC = () => {
         onConfirm={handleConfirmDelete}
         title="Bạn có chắc chắn muốn xóa học sinh này không? Hành động này không thể hoàn tác."
       />
-      <ViewStudentDetails
-        open={isViewModalOpen}
-        onClose={() => setIsViewModalOpen(false)}
-        studentData={viewingStudent}
-      />
+
     </div>
   );
 };

@@ -121,15 +121,17 @@ function ReceiptsManagement() {
             dataIndex: "state",
             render: (state: string) => {
                 const stateMap: Record<string, { color: string; label: string }> = {
-                    CONFIRMED: { color: "green", label: "Đã xác nhận" },
-                    PENDING: { color: "blue", label: "Chờ xác nhận" },
+                    "Đã xác nhận": { color: "green", label: "Đã xác nhận" },
+                    "Chờ xác nhận": { color: "blue", label: "Chờ xác nhận" },
+                    "Đã thanh toán": { color: "purple", label: "Đã thanh toán" },
+                    "Chờ thanh toán": { color: "orange", label: "Chờ thanh toán" },
+                    "Đã huỷ": { color: "red", label: "Đã huỷ" },
                 };
 
                 const display = stateMap[state] || { color: "default", label: state };
 
                 return <Tag color={display.color}>{display.label}</Tag>;
             },
-
         },
         {
             title: "Hành động",

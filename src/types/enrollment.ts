@@ -49,6 +49,9 @@ export interface EnrollmentListItem {
     motherIdCard: string;
     motherJob: string;
     state: string;
+    statePayment: string;
+    imageStudent: string;
+    reason: string;
     active: boolean;
     createdAt: string;
     updatedAt: string;
@@ -56,6 +59,8 @@ export interface EnrollmentListItem {
     healthCertId: string;
     birthCertFiles: EnrollmentFile;
     healthCertFiles: EnrollmentFile;
+    createdBy: string;
+    updatedBy: string
 }
 
 export interface EnrollmentsListResponse {
@@ -101,6 +106,8 @@ export interface UpdateEnrollmentDto {
     motherIdCard: string;
     motherJob: string;
     state: string;
+    statePayment: string;
+    imageStudent: string;
     active: boolean;
     createdAt: string;
     updatedAt: string;
@@ -111,4 +118,10 @@ export interface UpdateEnrollmentDto {
 export interface RejectEnrollmentDto {
     _id: string;
     reason: string;
+}
+
+export interface UploadImageResponse {
+    filename: string;
+    url?: string;
+    image: string;
 }

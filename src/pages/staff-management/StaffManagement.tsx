@@ -102,6 +102,7 @@ const StaffManagement: React.FC = () => {
     );
   }, [dataStaff, searchKeyword]);
 
+
   const handleTableChange = useCallback(
     (newPagination: TablePaginationConfig) => {
       setPagination((prev) => ({
@@ -113,11 +114,9 @@ const StaffManagement: React.FC = () => {
     []
   );
 
-  const handleCreateStaff = async (values: CreateStaffData) => {
+  const handleCreateStaff = useCallback(async (values: CreateStaffData) => {
     if (!user) {
-      toast.error(
-        "Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại."
-      );
+      toast.error("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
       return;
     }
     setIsSubmitting(true);
@@ -126,26 +125,28 @@ const StaffManagement: React.FC = () => {
       await staffApis.createStaff(payload);
       toast.success("Tạo nhân viên thành công!");
       setIsModalOpen(false);
+
       if (pagination.current !== 1) {
         setPagination((prev) => ({ ...prev, current: 1 }));
       } else {
-        fetchListStaff({ page: 1, limit: pagination.pageSize! });
+        fetchListStaff({
+          page: 1,
+          limit: pagination.pageSize!,
+        });
       }
     } catch (error) {
-      toast.error(
-        typeof error === "string" ? error : "Tạo nhân viên thất bại."
-      );
+      toast.error(typeof error === "string" ? error : "Tạo nhân viên thất bại.");
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [user, fetchListStaff, pagination.current, pagination.pageSize]);
 
-  const handleOpenUpdateModal = (record: StaffRecord) => {
+  const handleOpenUpdateModal = useCallback((record: StaffRecord) => {
     setEditingStaff(record);
     setIsUpdateModalOpen(true);
-  };
+  }, []);
 
-  const handleUpdateStaff = async (values: UpdateStaffData) => {
+  const handleUpdateStaff = useCallback(async (values: UpdateStaffData) => {
     if (!editingStaff || !user) {
       toast.error("Thiếu thông tin cần thiết để cập nhật.");
       return;
@@ -161,26 +162,25 @@ const StaffManagement: React.FC = () => {
         limit: pagination.pageSize!,
       });
     } catch (error) {
-      toast.error(
-        typeof error === "string" ? error : "Cập nhật nhân viên thất bại."
-      );
+      toast.error(typeof error === "string" ? error : "Cập nhật nhân viên thất bại.");
     } finally {
       setIsUpdating(false);
     }
-  };
+  }, [editingStaff, user, fetchListStaff, pagination.current, pagination.pageSize]);
 
-  const handleOpenDeleteModal = (id: string) => {
+  const handleOpenDeleteModal = useCallback((id: string) => {
     setDeletingId(id);
     setIsDeleteModalOpen(true);
-  };
+  }, []);
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = useCallback(async () => {
     if (!deletingId) return;
     setIsDeleting(true);
     try {
       await staffApis.deleteStaff(deletingId);
       toast.success("Xóa nhân viên thành công!");
       setIsDeleteModalOpen(false);
+
       if (dataStaff.length === 1 && pagination.current! > 1) {
         setPagination((prev) => ({ ...prev, current: prev.current! - 1 }));
       } else {
@@ -195,12 +195,12 @@ const StaffManagement: React.FC = () => {
       setIsDeleting(false);
       setDeletingId(null);
     }
-  };
+  }, [deletingId, dataStaff.length, pagination.current, pagination.pageSize, fetchListStaff]);
 
-  const handleOpenViewModal = (record: StaffRecord) => {
+  const handleOpenViewModal = useCallback((record: StaffRecord) => {
     setViewingStaff(record);
     setIsViewModalOpen(true);
-  };
+  }, []);
 
   const columns: ColumnsType<StaffRecord> = useMemo(
     () => [
@@ -220,7 +220,7 @@ const StaffManagement: React.FC = () => {
         title: "Mã nhân viên",
         dataIndex: "staffCode",
         key: "staffCode",
-        width: 120, // Đặt width cụ thể
+        width: 120,
         className: 'ant-table-header-nowrap',
       },
       {
@@ -263,7 +263,7 @@ const StaffManagement: React.FC = () => {
         title: "Số điện thoại",
         dataIndex: "phoneNumber",
         key: "phoneNumber",
-        width: 120, // Đặt width cụ thể
+        width: 120,
         className: 'ant-table-header-nowrap',
         render: (phoneNumber: string) => phoneNumber,
       },
@@ -271,7 +271,7 @@ const StaffManagement: React.FC = () => {
         title: "Hành động",
         key: "action",
         align: "center",
-        width: 100, // Giảm width
+        width: 100,
         fixed: "right",
         className: 'ant-table-header-nowrap',
         render: (_: unknown, record: StaffRecord) => (
@@ -306,60 +306,59 @@ const StaffManagement: React.FC = () => {
         ),
       },
     ],
-    [canUpdate, canDelete, handleOpenUpdateModal, handleOpenDeleteModal, handleOpenViewModal]
+    [canUpdate, canDelete, handleOpenUpdateModal, handleOpenDeleteModal, handleOpenViewModal, pagination.current, pagination.pageSize]
   );
 
-  const cardHeader = useMemo(
-    () => (
-      <Row justify="space-between" align="middle">
-        <Col>
-          <Typography.Title level={3} style={{ margin: 0 }}>
-            Quản lý nhân viên
-          </Typography.Title>
-        </Col>
-        <Col>
-          <Space>
-            <Input.Search
-              placeholder="Mã NV hoặc Họ tên..."
-              style={{ width: 250 }}
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-              allowClear
+  const handleReload = useCallback(() => {
+    fetchListStaff({
+      page: pagination.current!,
+      limit: pagination.pageSize!,
+    });
+  }, [fetchListStaff, pagination.current, pagination.pageSize]);
+
+  const cardHeader = (
+    <Row justify="space-between" align="middle">
+      <Col>
+        <Typography.Title level={3} style={{ margin: 0 }}>
+          Quản lý nhân viên
+        </Typography.Title>
+      </Col>
+      <Col>
+        <Space>
+          <Input.Search
+            placeholder="Mã NV hoặc Họ tên..."
+            style={{ width: 250 }}
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            allowClear
+          />
+          <Tooltip title="Làm mới danh sách">
+            <Button
+              style={{ marginRight: 5 }}
+              icon={<ReloadOutlined />}
+              onClick={handleReload}
+              loading={loading}
             />
-            <Tooltip title="Làm mới danh sách">
-              <Button
-                style={{ marginRight: 5 }}
-                icon={<ReloadOutlined />}
-                onClick={() =>
-                  fetchListStaff({
-                    page: pagination.current!,
-                    limit: pagination.pageSize!,
-                  })
-                }
-                loading={loading}
-              >
-              </Button>
-            </Tooltip>
-            {canCreate && (
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => setIsModalOpen(true)}
-              >
-                Tạo mới
-              </Button>
-            )}
-          </Space>
-        </Col>
-      </Row>
-    ),
-    [searchKeyword, canCreate]
+          </Tooltip>
+          {canCreate && (
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setIsModalOpen(true)}
+            >
+              Tạo mới
+            </Button>
+          )}
+        </Space>
+      </Col>
+    </Row>
   );
 
-  const initialUpdateData: StaffRecord | null = editingStaff
-    ? {
-      _id: editingStaff?._id,
-      staffCode: editingStaff?.staffCode,
+  const initialUpdateData = useMemo(() => {
+    if (!editingStaff) return null;
+    return {
+      _id: editingStaff._id,
+      staffCode: editingStaff.staffCode,
       fullName: editingStaff.fullName,
       dob: editingStaff.dob ? dayjs(editingStaff.dob) : null,
       IDCard: editingStaff.IDCard,
@@ -371,8 +370,13 @@ const StaffManagement: React.FC = () => {
       nation: editingStaff.nation,
       religion: editingStaff.religion,
       active: editingStaff.active,
-    }
-    : null;
+    };
+  }, [editingStaff]);
+
+  const handleCloseCreateModal = useCallback(() => setIsModalOpen(false), []);
+  const handleCloseUpdateModal = useCallback(() => setIsUpdateModalOpen(false), []);
+  const handleCloseDeleteModal = useCallback(() => setIsDeleteModalOpen(false), []);
+  const handleCloseViewModal = useCallback(() => setIsViewModalOpen(false), []);
 
   return (
     <div style={{ padding: "22px" }}>
@@ -395,7 +399,7 @@ const StaffManagement: React.FC = () => {
       <CreateStaff
         open={isModalOpen}
         loading={isSubmitting}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseCreateModal}
         onSubmit={handleCreateStaff}
       />
 
@@ -403,20 +407,20 @@ const StaffManagement: React.FC = () => {
         open={isUpdateModalOpen}
         loading={isUpdating}
         initialData={initialUpdateData}
-        onClose={() => setIsUpdateModalOpen(false)}
+        onClose={handleCloseUpdateModal}
         onSubmit={handleUpdateStaff}
       />
 
       <ModalConfirm
         open={isDeleteModalOpen}
         loading={isDeleting}
-        onClose={() => setIsDeleteModalOpen(false)}
+        onClose={handleCloseDeleteModal}
         onConfirm={handleConfirmDelete}
         title="Bạn có chắc chắn muốn xóa nhân viên này không? Hành động này không thể hoàn tác."
       />
       <ViewStaffDetails
         open={isViewModalOpen}
-        onClose={() => setIsViewModalOpen(false)}
+        onClose={handleCloseViewModal}
         staffData={viewingStaff}
       />
     </div>

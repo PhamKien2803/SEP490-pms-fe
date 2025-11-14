@@ -153,6 +153,7 @@ export interface FixActivityResponseItem {
 
 export interface IClassBySchoolYearItem {
     _id: string;
+    age: string;
     classCode: string;
     className: string;
     schoolYear?: string;
