@@ -6,15 +6,11 @@ import {
   Upload,
   message,
   Typography,
-  Card,
   Row,
   Col,
-  Space,
 } from "antd";
 import {
   UploadOutlined,
-  EditOutlined,
-  ArrowLeftOutlined,
   VideoCameraOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
@@ -25,7 +21,7 @@ import { toast } from "react-toastify";
 import Image from "antd/lib/image";
 
 const { TextArea } = Input;
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const MAX_PHOTOS = 10;
 
@@ -59,12 +55,15 @@ const EditPost: React.FC<EditPostProps> = ({
     });
   }, [post, form]);
 
-  const handleUploadChange = ({
-    fileList: newFileList,
-  }: {
-    fileList: UploadFile[];
-  }) => {
-    const filteredFileList = newFileList.filter(
+  const normFile = (e: any) => {
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e && e.fileList;
+  };
+
+  const handleUploadChange = (info: { fileList: UploadFile[] }) => {
+    const filteredFileList = info.fileList.filter(
       (f) => f.status !== "removed" && f.status !== "error"
     );
 
@@ -73,10 +72,14 @@ const EditPost: React.FC<EditPostProps> = ({
       message.warning(
         `Tổng số ảnh/video (cũ và mới) không được vượt quá ${MAX_PHOTOS}.`
       );
-      setFileList(filteredFileList.slice(0, MAX_PHOTOS - existingMedia.length));
+      const remainingSlots = MAX_PHOTOS - existingMedia.length;
+      setFileList(
+        filteredFileList.slice(0, remainingSlots < 0 ? 0 : remainingSlots)
+      );
     } else {
       setFileList(filteredFileList);
     }
+    return filteredFileList;
   };
 
   const handleRemoveExistingMedia = async (mediaId: string) => {
@@ -97,7 +100,6 @@ const EditPost: React.FC<EditPostProps> = ({
 
   const onFinish = async (values: FormValues) => {
     const { title, content } = values;
-
     const newFilesToUpload = fileList
       .map((f) => f.originFileObj as File)
       .filter(Boolean);
@@ -107,7 +109,8 @@ const EditPost: React.FC<EditPostProps> = ({
       return;
     }
 
-    if (existingMedia.length + newFilesToUpload.length > MAX_PHOTOS) {
+    const currentTotalMedia = existingMedia.length + newFilesToUpload.length;
+    if (currentTotalMedia > MAX_PHOTOS) {
       toast.error(
         `Tổng số media không được vượt quá ${MAX_PHOTOS}. Vui lòng xóa bớt.`
       );
@@ -126,18 +129,19 @@ const EditPost: React.FC<EditPostProps> = ({
 
       await postApis.updatePost(post.postId, updateParams);
 
-      if (newFilesToUpload.length > 0) {
-        const key = "uploadKey";
-        message.loading({
-          content: `Cập nhật nội dung thành công, đang tải ${newFilesToUpload.length} ảnh/video mới...`,
-          key,
-          duration: 0,
-        });
+      const key = "updateKey";
+      message.loading({
+        content: `Đang cập nhật bài viết và tải ${newFilesToUpload.length} file...`,
+        key,
+        duration: 0,
+      });
 
+      if (newFilesToUpload.length > 0) {
         await postApis.uploadAlbum(post.postId, newFilesToUpload);
         message.destroy(key);
-        toast.success("Cập nhật bài viết và album ảnh thành công!");
+        toast.success("Cập nhật bài viết và album ảnh/video thành công!");
       } else {
+        message.destroy(key);
         toast.success("Cập nhật bài viết thành công!");
       }
 
@@ -145,6 +149,7 @@ const EditPost: React.FC<EditPostProps> = ({
       onEditSuccess();
     } catch (error: any) {
       console.error("Lỗi cập nhật bài viết:", error);
+      message.destroy("updateKey");
       toast.error(error?.message || "Đã xảy ra lỗi. Vui lòng thử lại");
     } finally {
       setIsLoading(false);
@@ -154,244 +159,210 @@ const EditPost: React.FC<EditPostProps> = ({
   const currentTotalMedia = existingMedia.length + fileList.length;
 
   return (
-    <div
-      style={{
-        padding: "24px 0",
-        backgroundColor: "#f0f2f5",
-        minHeight: "100vh",
-      }}
-    >
-      <Row justify="center">
-        <Col xs={24} sm={20} md={18} lg={12} xl={10}>
-          <Card
-            style={{
-              marginBottom: 24,
-              borderRadius: 12,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-              backgroundColor: "#fff",
-            }}
-          >
-            <Space
-              align="center"
-              style={{ width: "100%", justifyContent: "space-between" }}
-            >
-              <Button
-                type="text"
-                onClick={onCancel}
-                icon={<ArrowLeftOutlined />}
-                size="large"
-                style={{ fontWeight: "bold" }}
-              >
-                Quay lại
-              </Button>
-              <Title level={3} style={{ margin: 0, color: "#faad14" }}>
-                <EditOutlined style={{ marginRight: 8 }} /> Chỉnh Sửa
-              </Title>
-            </Space>
+    <div style={{ padding: "0 24px 24px 24px" }}>
+      <Text
+        type="secondary"
+        style={{
+          display: "block",
+          marginBottom: 15,
+          textAlign: "right",
+          fontSize: 13,
+        }}
+      >
+        Bài viết của: {post?.teacher?.fullName || "N/A"}
+      </Text>
+
+      <Form
+        form={form}
+        name="edit-post-form"
+        onFinish={onFinish}
+        layout="vertical"
+      >
+        <Form.Item
+          name="title"
+          label={<Text strong>Tiêu đề</Text>}
+          rules={[{ required: true, message: "Vui lòng nhập tiêu đề!" }]}
+        >
+          <Input
+            placeholder="Tiêu đề bài viết..."
+            disabled={isLoading}
+            size="large"
+            style={{ borderRadius: 6 }}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="content"
+          label={<Text strong>Nội dung</Text>}
+          rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]}
+          style={{ marginBottom: 16 }}
+        >
+          <TextArea
+            rows={6}
+            placeholder="Nội dung bài viết"
+            disabled={isLoading}
+            style={{ borderRadius: 6 }}
+          />
+        </Form.Item>
+
+        <Text
+          strong
+          style={{
+            display: "block",
+            fontSize: "16px",
+            marginBottom: 10,
+            marginTop: 10,
+          }}
+        >
+          Quản Lý Ảnh/Video ({currentTotalMedia}/{MAX_PHOTOS})
+        </Text>
+
+        {existingMedia.length > 0 && (
+          <div style={{ marginBottom: 20 }}>
             <Text
               type="secondary"
-              style={{ display: "block", textAlign: "right", marginTop: 5 }}
+              style={{
+                display: "block",
+                marginBottom: 10,
+                color: "#1890ff",
+              }}
             >
-              Bài viết của: {post?.teacher?.fullName}
+              Media đã có ({existingMedia.length}):
             </Text>
-          </Card>
-          <Card
-            style={{
-              padding: 24,
-              borderRadius: 12,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-            }}
-          >
-            <Form
-              form={form}
-              name="edit-post-form"
-              onFinish={onFinish}
-              layout="vertical"
-            >
-              <Form.Item
-                name="title"
-                label={<Text strong>Tiêu đề</Text>}
-                rules={[{ required: true, message: "Vui lòng nhập tiêu đề!" }]}
-              >
-                <Input
-                  placeholder="Tiêu đề bài viết..."
-                  disabled={isLoading}
-                  size="large"
-                  style={{ borderRadius: 6 }}
-                />
-              </Form.Item>
-
-              <Form.Item
-                name="content"
-                label={<Text strong>Nội dung</Text>}
-                rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]}
-              >
-                <TextArea
-                  rows={6}
-                  placeholder="Nội dung bài viết"
-                  disabled={isLoading}
-                  style={{ borderRadius: 6 }}
-                />
-              </Form.Item>
-
-              <Text
-                strong
-                style={{
-                  display: "block",
-                  fontSize: "18px",
-                  marginBottom: 10,
-                }}
-              >
-                Quản Lý Ảnh/Video ({currentTotalMedia}/{MAX_PHOTOS})
-              </Text>
-
-              {existingMedia.length > 0 && (
-                <div style={{ marginBottom: 20 }}>
-                  <Text
-                    type="secondary"
+            <Row gutter={[16, 16]}>
+              {existingMedia.map((file) => (
+                <Col key={file._id} xs={8} sm={6} md={4}>
+                  <div
                     style={{
-                      display: "block",
-                      marginBottom: 10,
-                      color: "#1890ff",
-                      marginTop: "5px",
+                      width: "100%",
+                      paddingTop: "100%",
+                      position: "relative",
+                      borderRadius: 8,
+                      border: "1px solid #d9d9d9",
+                      overflow: "hidden",
                     }}
                   >
-                    Media đã có ({existingMedia.length}):
-                  </Text>
-                  <Row gutter={[16, 16]}>
-                    {existingMedia.map((file) => (
-                      <Col key={file._id} xs={8} sm={6} md={4}>
-                        <div
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {file.fileType === "image" || file.fileUrl ? (
+                        <Image
+                          src={
+                            file.fileType === "image"
+                              ? file.fileUrl
+                              : file.fileUrl || file.fileUrl
+                          }
+                          alt="old media"
                           style={{
                             width: "100%",
-                            paddingTop: "100%",
-                            position: "relative",
-                            borderRadius: 8,
-                            border: "1px solid #d9d9d9",
-                            overflow: "hidden",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                          preview={false}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            backgroundColor: "#262626",
+                            height: "100%",
+                            width: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
                           }}
                         >
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: 0,
-                              left: 0,
-                              width: "100%",
-                              height: "100%",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
-                            {file.fileType === "image" ? (
-                              <Image
-                                src={file.fileUrl}
-                                alt="old media"
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  objectFit: "cover",
-                                }}
-                                preview={false}
-                              />
-                            ) : (
-                              <div
-                                style={{
-                                  backgroundColor: "#262626",
-                                  height: "100%",
-                                  width: "100%",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                }}
-                              >
-                                <VideoCameraOutlined
-                                  style={{ fontSize: 30, color: "#faad14" }}
-                                />
-                              </div>
-                            )}
-                            <Button
-                              icon={<DeleteOutlined />}
-                              danger
-                              type="primary"
-                              shape="circle"
-                              size="small"
-                              style={{
-                                position: "absolute",
-                                top: 5,
-                                right: 5,
-                                zIndex: 10,
-                                backgroundColor: "rgba(255, 0, 0, 0.7)",
-                                borderColor: "transparent",
-                              }}
-                              onClick={() =>
-                                handleRemoveExistingMedia(file._id)
-                              }
-                              disabled={isLoading}
-                            />
-                          </div>
+                          <VideoCameraOutlined
+                            style={{ fontSize: 30, color: "#faad14" }}
+                          />
                         </div>
-                      </Col>
-                    ))}
-                  </Row>
+                      )}
+
+                      <Button
+                        icon={<DeleteOutlined />}
+                        danger
+                        type="primary"
+                        shape="circle"
+                        size="small"
+                        style={{
+                          position: "absolute",
+                          top: 5,
+                          right: 5,
+                          zIndex: 10,
+                          backgroundColor: "rgba(255, 0, 0, 0.7)",
+                          borderColor: "transparent",
+                        }}
+                        onClick={() => handleRemoveExistingMedia(file._id)}
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
+                </Col>
+              ))}
+            </Row>
+          </div>
+        )}
+
+        <div style={{ marginTop: existingMedia.length > 0 ? 10 : 0 }}>
+          <Text strong style={{ display: "block", marginBottom: 10 }}>
+            Thêm Ảnh/Video Mới:
+          </Text>
+          <Form.Item
+            name="new_images"
+            valuePropName="fileList"
+            getValueFromEvent={normFile}
+            noStyle
+          >
+            <Upload
+              listType="picture-card"
+              multiple
+              accept="image/*,video/*"
+              beforeUpload={() => false}
+              fileList={fileList}
+              onChange={handleUploadChange}
+              maxCount={MAX_PHOTOS - existingMedia.length}
+              disabled={isLoading || currentTotalMedia >= MAX_PHOTOS}
+            >
+              {currentTotalMedia < MAX_PHOTOS && (
+                <div style={{ color: "#1890ff" }}>
+                  <UploadOutlined style={{ fontSize: 20 }} />
+                  <div style={{ marginTop: 8 }}>Tải lên</div>
                 </div>
               )}
+            </Upload>
+          </Form.Item>
+        </div>
 
-              <div style={{ marginTop: existingMedia.length > 0 ? 30 : 0 }}>
-                <Text strong style={{ display: "block", marginBottom: 10 }}>
-                  Thêm Ảnh/Video Mới:
-                </Text>
-                <Form.Item
-                  name="new_images"
-                  valuePropName="fileList"
-                  getValueFromEvent={handleUploadChange}
-                  noStyle
-                >
-                  <Upload
-                    listType="picture-card"
-                    multiple
-                    accept="image/*,video/*"
-                    beforeUpload={() => false}
-                    fileList={fileList}
-                    onChange={handleUploadChange}
-                    maxCount={MAX_PHOTOS - existingMedia.length}
-                    disabled={isLoading || currentTotalMedia >= MAX_PHOTOS}
-                  >
-                    {currentTotalMedia < MAX_PHOTOS && (
-                      <div style={{ color: "#1890ff" }}>
-                        <UploadOutlined style={{ fontSize: 20 }} />
-                        <div style={{ marginTop: 8 }}>Tải lên</div>
-                      </div>
-                    )}
-                  </Upload>
-                </Form.Item>
-              </div>
-
-              <Form.Item style={{ marginTop: 40, marginBottom: 0 }}>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  loading={isLoading}
-                  block
-                  size="large"
-                  style={{ fontWeight: "bold", borderRadius: 6 }}
-                >
-                  {isLoading ? "Đang Cập Nhật..." : "Lưu Thay Đổi"}
-                </Button>
-                <Button
-                  onClick={onCancel}
-                  block
-                  size="large"
-                  disabled={isLoading}
-                  style={{ marginTop: 10, borderRadius: 6 }}
-                >
-                  Hủy Bỏ
-                </Button>
-              </Form.Item>
-            </Form>
-          </Card>
-        </Col>
-      </Row>
+        <Form.Item style={{ marginTop: 30, marginBottom: 0 }}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={isLoading}
+            block
+            size="large"
+            style={{ fontWeight: "bold", borderRadius: 6 }}
+          >
+            {isLoading ? "Đang Cập Nhật..." : "Lưu Thay Đổi"}
+          </Button>
+          <Button
+            onClick={onCancel}
+            block
+            size="large"
+            disabled={isLoading}
+            style={{ marginTop: 10, borderRadius: 6 }}
+          >
+            Hủy Bỏ
+          </Button>
+        </Form.Item>
+      </Form>
     </div>
   );
 };
