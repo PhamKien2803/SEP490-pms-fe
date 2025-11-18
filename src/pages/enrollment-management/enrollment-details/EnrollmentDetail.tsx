@@ -203,6 +203,9 @@ const EnrollmentDetail: React.FC = () => {
                                     <Descriptions.Item label="Số điện thoại">
                                         {data.fatherPhoneNumber}
                                     </Descriptions.Item>
+                                    <Descriptions.Item label="Ngày sinh">
+                                        {data.fatherDob ? dayjs(data.fatherDob).format("DD/MM/YYYY") : "—"}
+                                    </Descriptions.Item>
                                     <Descriptions.Item label="Email">
                                         {data.fatherEmail}
                                     </Descriptions.Item>
@@ -229,6 +232,10 @@ const EnrollmentDetail: React.FC = () => {
                                     <Descriptions.Item label="Số điện thoại">
                                         {data.motherPhoneNumber}
                                     </Descriptions.Item>
+                                    <Descriptions.Item label="Ngày sinh">
+                                        {data.motherDob ? dayjs(data.motherDob).format("DD/MM/YYYY") : "—"}
+                                    </Descriptions.Item>
+
                                     <Descriptions.Item label="Email">
                                         {data.motherEmail}
                                     </Descriptions.Item>

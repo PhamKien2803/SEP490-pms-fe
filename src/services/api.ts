@@ -203,9 +203,11 @@ export const apiEndPoint = {
   UPDATE_POST: (postId: string) => `/posts/update/${postId}`,
   GET_LIST_POST_BY_STUDENT: (studentId: string) =>
     `/dashboard-posts/getPostFileByStudent/${studentId}`,
+  GET_PARENT_BY_ID: (id: string) => `/parents/getById/${id}`,
+  GET_ROOM_BY_TEACHER_ID: (id: string) => `/rooms/getByTeacher/${id}`
 };
 
 export const apiConfig = {
-  baseURL: import.meta.env.VITE_API_URL_PROD || "https://kingdergarten-api-gmena8b7cug2f4cr.southeastasia-01.azurewebsites.net/api/pms/",
-  // baseURL: import.meta.env.VITE_API_URL,
+  // baseURL: import.meta.env.VITE_API_URL_PROD || "https://kingdergarten-api-gmena8b7cug2f4cr.southeastasia-01.azurewebsites.net/api/pms/",
+  baseURL: import.meta.env.VITE_API_URL,
 };

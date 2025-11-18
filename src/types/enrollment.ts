@@ -11,11 +11,13 @@ export interface RegisterEnrollmentDto {
     fatherEmail: string;
     fatherIdCard: string;
     fatherJob: string;
+    fatherDob: string;
     motherName: string;
     motherPhoneNumber: string;
     motherEmail: string;
     motherIdCard: string;
     motherJob: string;
+    motherDob: string;
     isCheck: boolean;
 }
 
@@ -43,11 +45,13 @@ export interface EnrollmentListItem {
     fatherEmail: string;
     fatherIdCard: string;
     fatherJob: string;
+    fatherDob: string;
     motherName: string;
     motherPhoneNumber: string;
     motherEmail: string;
     motherIdCard: string;
     motherJob: string;
+    motherDob: string;
     state: string;
     statePayment: string;
     imageStudent: string;
@@ -100,11 +104,13 @@ export interface UpdateEnrollmentDto {
     fatherEmail: string;
     fatherIdCard: string;
     fatherJob: string;
+    fatherDob: string;
     motherName: string;
     motherPhoneNumber: string;
     motherEmail: string;
     motherIdCard: string;
     motherJob: string;
+    motherDob: string;
     state: string;
     statePayment: string;
     imageStudent: string;

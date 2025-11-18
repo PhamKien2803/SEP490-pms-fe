@@ -5,7 +5,7 @@ import { Post, PostsResponse } from "../../../types/post";
 import { postApis } from "../../../services/apiServices";
 import { toast } from "react-toastify";
 import { Divider, Typography } from "antd";
-import { ContainerOutlined } from "@ant-design/icons"; 
+import { ContainerOutlined } from "@ant-design/icons";
 const { Title } = Typography;
 
 function TeacherNews() {

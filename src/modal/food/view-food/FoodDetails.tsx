@@ -39,11 +39,11 @@ interface DetailItemProps {
 }
 
 const DetailItem: React.FC<DetailItemProps> = ({ icon, label, value, color, bgColor = '#f0f5ff' }) => (
-    <Card 
-        size="small" 
-        style={{ 
-            backgroundColor: bgColor, 
-            borderColor: color, 
+    <Card
+        size="small"
+        style={{
+            backgroundColor: bgColor,
+            borderColor: color,
             borderLeft: `5px solid ${color}`,
             transition: 'all 0.3s'
         }}
@@ -62,11 +62,9 @@ const DetailItem: React.FC<DetailItemProps> = ({ icon, label, value, color, bgCo
 const FoodDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const location = useLocation(); 
+    const location = useLocation();
 
     const foodDetailFromState = location.state?.foodDetail as FoodRecord | undefined;
-    console.log("foodDetailFromState",foodDetailFromState)
-    
     const [foodDetail, setFoodDetail] = useState<FoodRecord | null>(foodDetailFromState || null);
     const [loading, setLoading] = useState(!foodDetailFromState);
     const [showWarning, setShowWarning] = useState(false);
@@ -75,16 +73,16 @@ const FoodDetailPage: React.FC = () => {
         if (!foodDetail && id) {
             setShowWarning(true);
             setLoading(true);
-            
+
             setTimeout(() => {
                 setLoading(false);
-                setFoodDetail(null); 
+                setFoodDetail(null);
             }, 500);
 
         } else if (foodDetailFromState) {
             setLoading(false);
         }
-    }, [id, foodDetail, foodDetailFromState]); 
+    }, [id, foodDetail, foodDetailFromState]);
 
     const totalNutrients = useMemo(() => {
         if (!foodDetail || !foodDetail.ingredients) return { calories: 0, protein: 0, lipid: 0, carb: 0 };
@@ -96,14 +94,14 @@ const FoodDetailPage: React.FC = () => {
             return acc;
         }, { calories: 0, protein: 0, lipid: 0, carb: 0 });
     }, [foodDetail]);
-    
+
     const ingredientColumns = useMemo(() => ([
-        { 
-            title: "Tên Nguyên liệu", 
-            dataIndex: "name", 
-            key: "name", 
+        {
+            title: "Tên Nguyên liệu",
+            dataIndex: "name",
+            key: "name",
             width: 150,
-            render: (text: string) => <Text strong>{text}</Text> 
+            render: (text: string) => <Text strong>{text}</Text>
         },
         {
             title: "Khối lượng",
@@ -150,7 +148,7 @@ const FoodDetailPage: React.FC = () => {
             render: (text: number) => <Text strong style={{ color: '#52c41a' }}>{text?.toFixed(2)}</Text>,
         },
     ]), []);
-    
+
     if (loading) {
         return (
             <div
@@ -262,11 +260,11 @@ const FoodDetailPage: React.FC = () => {
                 style={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", marginBottom: 20 }}
             >
                 <Row gutter={[16, 16]} style={{ fontWeight: "bold", textAlign: 'center' }}>
-                    
+
                     {/* CALO (Điểm nhấn lớn) */}
                     <Col xs={24} sm={6}>
-                        <Card 
-                            size="small" 
+                        <Card
+                            size="small"
                             style={{ backgroundColor: '#fff2e8', border: '1px solid #ff7a45' }}
                             bodyStyle={{ padding: '12px' }}
                         >
@@ -334,22 +332,22 @@ const FoodDetailPage: React.FC = () => {
                             <Table.Summary.Cell index={0} colSpan={2}>
                                 <Text strong>TỔNG LƯỢNG DINH DƯỠNG CÁC NGUYÊN LIỆU</Text>
                             </Table.Summary.Cell>
-                            
+
                             {/* Tổng Calo */}
                             <Table.Summary.Cell index={2} align="right">
                                 <Text strong style={{ color: '#fa541c' }}>{totalNutrients.calories.toLocaleString('vi-VN', { maximumFractionDigits: 2 })}</Text>
                             </Table.Summary.Cell>
-                            
+
                             {/* Tổng Protein */}
                             <Table.Summary.Cell index={3} align="right">
                                 <Text strong style={{ color: '#722ed1' }}>{totalNutrients.protein.toLocaleString('vi-VN', { maximumFractionDigits: 2 })}</Text>
                             </Table.Summary.Cell>
-                            
+
                             {/* Tổng Lipid */}
                             <Table.Summary.Cell index={4} align="right">
                                 <Text strong style={{ color: '#faad14' }}>{totalNutrients.lipid.toLocaleString('vi-VN', { maximumFractionDigits: 2 })}</Text>
                             </Table.Summary.Cell>
-                            
+
                             {/* Tổng Carb */}
                             <Table.Summary.Cell index={5} align="right">
                                 <Text strong style={{ color: '#52c41a' }}>{totalNutrients.carb.toLocaleString('vi-VN', { maximumFractionDigits: 2 })}</Text>

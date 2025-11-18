@@ -32,6 +32,7 @@ import { constants } from "../../../constants";
 import { medicalApis } from "../../../services/apiServices";
 import { ComprehensiveExamination, HealthCertRecord, HealthCertUpdateData } from "../../../types/medical-management";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { noSpecialCharactersandNumberRule } from "../../../utils/format";
 
 const { Title, Text: TextAnt } = Typography;
 const { TextArea } = Input;
@@ -436,17 +437,18 @@ const UpdateMedical: React.FC = () => {
                     </Title>
                     <Row gutter={24}>
                         <Col xs={24} md={12}>
-                            <Form.Item label="Phát triển tinh thần" name={['comprehensiveExamination', 'mentalDevelopment']}>
+                            <Form.Item rules={[noSpecialCharactersandNumberRule]} label="Phát triển tinh thần" name={['comprehensiveExamination', 'mentalDevelopment']}>
                                 <Input disabled={!isEditing} placeholder="Ví dụ: Bình thường, Cần theo dõi..." />
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={12}>
-                            <Form.Item label="Phát triển vận động" name={['comprehensiveExamination', 'motorDevelopment']}>
+                            <Form.Item rules={[noSpecialCharactersandNumberRule]} label="Phát triển vận động" name={['comprehensiveExamination', 'motorDevelopment']}>
                                 <Input disabled={!isEditing} placeholder="Ví dụ: Bình thường, Hạn chế..." />
                             </Form.Item>
                         </Col>
                         <Col span={24}>
                             <Form.Item
+                                rules={[noSpecialCharactersandNumberRule]}
                                 label={<Space><WarningOutlined style={{ color: '#faad14' }} /> Các bệnh được phát hiện</Space>}
                                 name={['comprehensiveExamination', 'diseasesDetected']}
                                 tooltip="Nhập các bệnh, cách nhau bằng dấu phẩy (Ví dụ: Cận thị, Sâu răng)"
@@ -460,6 +462,7 @@ const UpdateMedical: React.FC = () => {
                         </Col>
                         <Col span={24}>
                             <Form.Item
+                                rules={[noSpecialCharactersandNumberRule]}
                                 label="Dấu hiệu bất thường khác"
                                 name={['comprehensiveExamination', 'abnormalSigns']}
                                 tooltip="Nhập các dấu hiệu, cách nhau bằng dấu phẩy"
@@ -473,6 +476,7 @@ const UpdateMedical: React.FC = () => {
                         </Col>
                         <Col span={24}>
                             <Form.Item
+                                rules={[noSpecialCharactersandNumberRule]}
                                 label="Nguy cơ bệnh tật"
                                 name={['comprehensiveExamination', 'diseaseRisk']}
                                 tooltip="Nhập các nguy cơ, cách nhau bằng dấu phẩy"

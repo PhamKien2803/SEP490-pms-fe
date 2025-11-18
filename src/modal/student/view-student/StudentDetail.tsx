@@ -134,6 +134,9 @@ const StudentDetail: React.FC = () => {
                 <Descriptions.Item label={`CCCD ${label}`}>
                     {parent?.IDCard || "Không có thông tin"}
                 </Descriptions.Item>
+                <Descriptions.Item label={`Ngày sinh ${label}`}>
+                    {formatDate(parent?.dob)}
+                </Descriptions.Item>
             </Descriptions>
         </>
     );

@@ -15,6 +15,8 @@ import {
     Upload,
     Tooltip,
     Space,
+    Tabs,
+    Descriptions,
 } from "antd";
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
@@ -23,6 +25,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import { useCurrentUser } from "../../../hooks/useCurrentUser";
 import { studentApis, enrollmentApis } from "../../../services/apiServices";
 import {
+    StudentDetailResponses,
     StudentRecord,
     UpdateUserData,
 } from "../../../types/student-management";
@@ -34,9 +37,14 @@ import {
     IdcardOutlined,
     SaveOutlined,
     PlusOutlined,
+    EditOutlined,
+    PhoneOutlined,
+    MailOutlined,
+    CalendarOutlined,
 } from "@ant-design/icons";
 import type { RcFile, UploadFile, UploadProps } from "antd/es/upload/interface";
 import { ETHNIC_OPTIONS } from "../../../components/hard-code-action";
+import { constants } from "../../../constants";
 
 dayjs.extend(customParseFormat);
 const { Option } = Select;
@@ -44,6 +52,16 @@ const { Title, Text } = Typography;
 
 const THEME_COLOR = "black";
 const BACKGROUND_GREY = "#f0f2f5";
+
+const ParentDescriptionItem: React.FC<{
+    icon: React.ReactNode;
+    label: string;
+    children: React.ReactNode;
+}> = ({ icon, label, children }) => (
+    <Descriptions.Item label={<Space>{icon}{label}</Space>}>
+        {children || <Text type="secondary">Chưa cập nhật</Text>}
+    </Descriptions.Item>
+);
 
 const StudentEdit: React.FC = () => {
     usePageTitle("Chỉnh sửa thông tin - Cá Heo Xanh");
@@ -58,15 +76,23 @@ const StudentEdit: React.FC = () => {
     const [imagePreview, setImagePreview] = useState<UploadFile[]>([]);
     const [studentAge, setStudentAge] = useState<number | null>(null);
     const [dobError, setDobError] = useState<string | null>(null);
+    const [parentInfo, setParentInfo] =
+        useState<StudentDetailResponses["parents"] | null>(null);
 
-    const idCardValidationRule = useMemo(() => ({
-        pattern: /^\d{12}$/,
-        message: 'CCCD phải có đúng 12 chữ số!',
-    }), []);
+    const formatDate = (date?: string) =>
+        date ? dayjs(date).format("DD/MM/YYYY") : "-";
+
+    const idCardValidationRule = useMemo(
+        () => ({
+            pattern: /^\d{12}$/,
+            message: "CCCD phải có đúng 12 chữ số!",
+        }),
+        []
+    );
 
     const nameValidationRule = {
         pattern: /^[\p{L} ]+$/u,
-        message: 'Chỉ được nhập chữ cái và dấu cách!',
+        message: "Chỉ được nhập chữ cái và dấu cách!",
     };
 
     const allowOnlyNumbers = useCallback(
@@ -90,7 +116,6 @@ const StudentEdit: React.FC = () => {
             try {
                 const res = await studentApis.getStudentById(id);
                 const student: StudentRecord = res.student;
-
                 form.setFieldsValue({
                     fullName: student.fullName,
                     dob: dayjs(student.dob),
@@ -100,7 +125,7 @@ const StudentEdit: React.FC = () => {
                     religion: student.religion,
                     address: student.address,
                 });
-
+                setParentInfo(res.parents);
                 if (student.imageStudent) {
                     setStudentImageId(student.imageStudent);
                     setImagePreview([
@@ -113,7 +138,9 @@ const StudentEdit: React.FC = () => {
                     ]);
                 }
             } catch (error) {
-                typeof error === "string" ? toast.info(error) : toast.error("Không thể tải dữ liệu học sinh.");
+                typeof error === "string"
+                    ? toast.info(error)
+                    : toast.error("Không thể tải dữ liệu học sinh.");
             } finally {
                 setLoading(false);
             }
@@ -149,8 +176,11 @@ const StudentEdit: React.FC = () => {
         try {
             await studentApis.updateStudent(id, payload);
             toast.success("Cập nhật học sinh thành công!");
+            navigate(-1);
         } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error("Cập nhật học sinh thất bại.");
+            typeof error === "string"
+                ? toast.info(error)
+                : toast.error("Cập nhật học sinh thất bại.");
         } finally {
             setSubmitting(false);
         }
@@ -195,17 +225,18 @@ const StudentEdit: React.FC = () => {
                 throw new Error("Server không trả về url!");
             }
         } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error("Tải ảnh thất bại!");
+            typeof error === "string"
+                ? toast.info(error)
+                : toast.error("Tải ảnh thất bại!");
             onError?.(error);
         }
     };
 
-
-    const onFileChange: UploadProps['onChange'] = (info) => {
+    const onFileChange: UploadProps["onChange"] = (info) => {
         let fileList = [...info.fileList];
         fileList = fileList.slice(-1);
 
-        fileList = fileList.map(file => {
+        fileList = fileList.map((file) => {
             if (file.response) {
                 file.url = URL.createObjectURL(file.originFileObj as RcFile);
             }
@@ -230,6 +261,319 @@ const StudentEdit: React.FC = () => {
             </Flex>
         );
     }
+
+    const studentFormTab = (
+        <Row gutter={24}>
+            <Col xs={24} lg={16}>
+                <Title level={4} style={{ margin: 0, color: THEME_COLOR, marginBottom: 24 }}>
+                    <SolutionOutlined style={{ marginRight: 8 }} />
+                    Thông tin cá nhân
+                </Title>
+                <Row gutter={24}>
+                    <Col xs={24} md={12}>
+                        <Form.Item
+                            name="fullName"
+                            label={<Text strong>Họ và Tên</Text>}
+                            rules={[
+                                { required: true, message: "Vui lòng nhập họ và tên!" },
+                                nameValidationRule,
+                            ]}
+                        >
+                            <Input prefix={<UserOutlined />} />
+                        </Form.Item>
+                    </Col>
+                    <Col xs={24} md={12}>
+                        <Form.Item
+                            name="dob"
+                            label={<Text strong>Ngày sinh</Text>}
+                            rules={[
+                                { required: true, message: "Vui lòng chọn ngày sinh!" },
+                            ]}
+                        >
+                            <DatePicker
+                                style={{ width: "100%" }}
+                                format="DD/MM/YYYY"
+                                onChange={(date) => {
+                                    form.setFieldValue("dob", date);
+                                    if (date) {
+                                        const today = dayjs();
+                                        const age = today.diff(date, "year");
+                                        if (date.isAfter(today, "day")) {
+                                            setDobError("Ngày sinh không được trong tương lai!");
+                                            setStudentAge(null);
+                                        } else if (age < 1) {
+                                            setDobError("Học sinh phải đủ ít nhất 1 tuổi!");
+                                            setStudentAge(null);
+                                        } else if (age > 5) {
+                                            setDobError("Học sinh không được quá 5 tuổi!");
+                                            setStudentAge(null);
+                                        } else {
+                                            setDobError(null);
+                                            setStudentAge(age);
+                                        }
+                                    } else {
+                                        setStudentAge(null);
+                                        setDobError(null);
+                                    }
+                                }}
+                                disabledDate={(current) =>
+                                    current && current.isAfter(dayjs().subtract(1, "year"), "day")
+                                }
+                            />
+                        </Form.Item>
+                        {studentAge !== null && !dobError && (
+                            <Text type="secondary" style={{ marginTop: -12, display: "block" }}>
+                                → {studentAge} tuổi
+                            </Text>
+                        )}
+                        {dobError && (
+                            <Text type="danger" style={{ marginTop: -12, display: "block" }}>
+                                {dobError}
+                            </Text>
+                        )}
+                    </Col>
+                    <Col xs={24} md={12}>
+                        <Form.Item
+                            name="idCard"
+                            label={<Text strong>CCCD/ Mã định danh</Text>}
+                            rules={[
+                                { required: true, message: "Vui lòng nhập số định danh!" },
+                                idCardValidationRule,
+                            ]}
+                        >
+                            <Input
+                                prefix={<IdcardOutlined />}
+                                onKeyPress={allowOnlyNumbers}
+                            />
+                        </Form.Item>
+                    </Col>
+                    <Col xs={24} md={12}>
+                        <Form.Item
+                            name="gender"
+                            label={<Text strong>Giới tính</Text>}
+                            rules={[
+                                { required: true, message: "Vui lòng chọn giới tính!" },
+                            ]}
+                        >
+                            <Select placeholder="Chọn giới tính">
+                                <Option value="Nam">Nam</Option>
+                                <Option value="Nữ">Nữ</Option>
+                                <Option value="Khác">Khác</Option>
+                            </Select>
+                        </Form.Item>
+                    </Col>
+                    <Col xs={24} md={12}>
+                        <Form.Item
+                            name="nation"
+                            label={<Text strong>Dân tộc</Text>}
+                            rules={[{ required: true, message: "Vui lòng chọn dân tộc!" }]}
+                        >
+                            <Select
+                                showSearch
+                                optionFilterProp="children"
+                                placeholder="Kinh/Tày/Thái..."
+                            >
+                                {ETHNIC_OPTIONS.map((ethnic) => (
+                                    <Option key={ethnic} value={ethnic}>
+                                        {ethnic}
+                                    </Option>
+                                ))}
+                            </Select>
+                        </Form.Item>
+                    </Col>
+                    <Col xs={24} md={12}>
+                        <Form.Item
+                            name="religion"
+                            label={<Text strong>Tôn giáo</Text>}
+                            rules={[{ required: true, message: "Vui lòng chọn tôn giáo!" }]}
+                        >
+                            <Select placeholder="Chọn tôn giáo">
+                                <Option value="Có">Có</Option>
+                                <Option value="Không">Không</Option>
+                            </Select>
+                        </Form.Item>
+                    </Col>
+                    <Col span={24}>
+                        <Form.Item
+                            name="address"
+                            label={<Text strong>Địa chỉ</Text>}
+                            rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
+                        >
+                            <Input.TextArea
+                                rows={2}
+                                placeholder="Số nhà, đường, quận/huyện, tỉnh/thành phố"
+                            />
+                        </Form.Item>
+                    </Col>
+                </Row>
+            </Col>
+
+            <Col xs={24} lg={8}>
+                <Title level={4} style={{ margin: 0, color: THEME_COLOR, marginBottom: 24 }}>
+                    <UserOutlined style={{ marginRight: 8 }} />
+                    Ảnh đại diện
+                </Title>
+                <Flex justify="center">
+                    <Form.Item name="imageStudent">
+                        <Upload
+                            listType="picture-card"
+                            fileList={imagePreview}
+                            beforeUpload={beforeUploadImage}
+                            customRequest={customRequestImage}
+                            onChange={onFileChange}
+                            onRemove={onFileRemove}
+                            accept="image/png,image/jpeg"
+                            onPreview={(file) => {
+                                Modal.info({
+                                    title: file.name,
+                                    content: (
+                                        <img
+                                            alt="preview"
+                                            style={{ width: "100%" }}
+                                            src={file.url || file.thumbUrl}
+                                        />
+                                    ),
+                                    maskClosable: true,
+                                });
+                            }}
+                        >
+                            {imagePreview.length < 1 && (
+                                <div>
+                                    <PlusOutlined />
+                                    <div style={{ marginTop: 8 }}>Tải ảnh lên</div>
+                                </div>
+                            )}
+                        </Upload>
+                    </Form.Item>
+                </Flex>
+            </Col>
+        </Row>
+    );
+
+    const parentInfoTab = (
+        <Row gutter={[24, 24]}>
+            <Col xs={24} lg={12}>
+                <Descriptions
+                    bordered
+                    column={3}
+                    layout="vertical"
+                    title={
+                        <Flex justify="space-between" align="center">
+                            <Text strong>Thông tin Cha</Text>
+                            {parentInfo?.father?._id ? (
+                                <Button
+                                    type="link"
+                                    onClick={() =>
+                                        navigate(`${constants.APP_PREFIX}/parents/edit/${parentInfo.father._id}`)
+                                    }
+                                    icon={<EditOutlined />}
+                                >
+                                    {parentInfo.father.fullName || "Chỉnh sửa"}
+                                </Button>
+                            ) : null}
+                        </Flex>
+                    }
+                >
+                    {parentInfo?.father ? (
+                        <>
+                            <ParentDescriptionItem icon={<PhoneOutlined />} label="SĐT">
+                                {parentInfo.father.phoneNumber}
+                            </ParentDescriptionItem>
+                            <ParentDescriptionItem icon={<MailOutlined />} label="Email">
+                                {parentInfo.father.email}
+                            </ParentDescriptionItem>
+                            <ParentDescriptionItem icon={<IdcardOutlined />} label="CCCD">
+                                {parentInfo.father.IDCard}
+                            </ParentDescriptionItem>
+                            <ParentDescriptionItem icon={<CalendarOutlined />} label="Ngày sinh">
+                                {formatDate(parentInfo.father.dob)}
+                            </ParentDescriptionItem>
+                            <ParentDescriptionItem icon={<SolutionOutlined />} label="Nghề nghiệp">
+                                {parentInfo.father.job}
+                            </ParentDescriptionItem>
+                        </>
+                    ) : (
+                        <Descriptions.Item span={3}>
+                            <Text type="secondary">Chưa có thông tin phụ huynh (Cha)</Text>
+                        </Descriptions.Item>
+                    )}
+                </Descriptions>
+            </Col>
+
+            <Col xs={24} lg={12}>
+                <Descriptions
+                    bordered
+                    column={3}
+                    layout="vertical"
+                    title={
+                        <Flex justify="space-between" align="center">
+                            <Text strong>Thông tin Mẹ</Text>
+                            {parentInfo?.mother?._id ? (
+                                <Button
+                                    type="link"
+                                    onClick={() =>
+                                        navigate(`${constants.APP_PREFIX}/parents/edit/${parentInfo.mother._id}`)
+                                    }
+                                    icon={<EditOutlined />}
+                                >
+                                    {parentInfo.mother.fullName || "Chỉnh sửa"}
+                                </Button>
+                            ) : null}
+                        </Flex>
+                    }
+                >
+                    {parentInfo?.mother ? (
+                        <>
+                            <ParentDescriptionItem icon={<PhoneOutlined />} label="SĐT">
+                                {parentInfo.mother.phoneNumber}
+                            </ParentDescriptionItem>
+                            <ParentDescriptionItem icon={<MailOutlined />} label="Email">
+                                {parentInfo.mother.email}
+                            </ParentDescriptionItem>
+                            <ParentDescriptionItem icon={<IdcardOutlined />} label="CCCD">
+                                {parentInfo.mother.IDCard}
+                            </ParentDescriptionItem>
+                            <ParentDescriptionItem icon={<CalendarOutlined />} label="Ngày sinh">
+                                {formatDate(parentInfo.mother.dob)}
+                            </ParentDescriptionItem>
+                            <ParentDescriptionItem icon={<SolutionOutlined />} label="Nghề nghiệp">
+                                {parentInfo.mother.job}
+                            </ParentDescriptionItem>
+                        </>
+                    ) : (
+                        <Descriptions.Item span={3}>
+                            <Text type="secondary">Chưa có thông tin phụ huynh (Mẹ)</Text>
+                        </Descriptions.Item>
+                    )}
+                </Descriptions>
+            </Col>
+        </Row>
+    );
+
+
+    const tabItems = [
+        {
+            label: (
+                <Space>
+                    <SolutionOutlined />
+                    Thông tin học sinh
+                </Space>
+            ),
+            key: "1",
+            children: studentFormTab,
+        },
+        {
+            label: (
+                <Space>
+                    <UserOutlined />
+                    Thông tin phụ huynh
+                </Space>
+            ),
+            key: "2",
+            children: parentInfoTab,
+            // disabled: !parentInfo,
+        },
+    ];
 
     return (
         <div style={{ padding: "24px", background: BACKGROUND_GREY }}>
@@ -278,197 +622,12 @@ const StudentEdit: React.FC = () => {
                     toast.error("Vui lòng điền đầy đủ thông tin bắt buộc!")
                 }
             >
-                <Row gutter={24}>
-                    <Col xs={24} lg={16}>
-                        <Card
-                            bordered={false}
-                            style={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)" }}
-                            title={
-                                <Title level={4} style={{ margin: 0, color: THEME_COLOR }}>
-                                    <SolutionOutlined style={{ marginRight: 8 }} />
-                                    Thông tin cá nhân
-                                </Title>
-                            }
-                        >
-                            <Row gutter={24}>
-                                <Col xs={24} md={12}>
-                                    <Form.Item
-                                        name="fullName"
-                                        label={<Text strong>Họ và Tên</Text>}
-                                        rules={[
-                                            { required: true, message: "Vui lòng nhập họ và tên!" },
-                                            nameValidationRule
-                                        ]}
-                                    >
-                                        <Input prefix={<UserOutlined />} />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24} md={12}>
-                                    <Form.Item
-                                        name="dob"
-                                        label={<Text strong>Ngày sinh</Text>}
-                                        rules={[
-                                            { required: true, message: "Vui lòng chọn ngày sinh!" },
-                                        ]}
-                                    >
-                                        <DatePicker
-                                            style={{ width: "100%" }}
-                                            format="DD/MM/YYYY"
-                                            onChange={(date) => {
-                                                form.setFieldValue("dob", date);
-                                                if (date) {
-                                                    const today = dayjs();
-                                                    const age = today.diff(date, "year");
-                                                    if (date.isAfter(today, "day")) {
-                                                        setDobError("Ngày sinh không được trong tương lai!");
-                                                        setStudentAge(null);
-                                                    } else if (age < 1) {
-                                                        setDobError("Học sinh phải đủ ít nhất 1 tuổi!");
-                                                        setStudentAge(null);
-                                                    } else if (age > 5) {
-                                                        setDobError("Học sinh không được quá 5 tuổi!");
-                                                        setStudentAge(null);
-                                                    } else {
-                                                        setDobError(null);
-                                                        setStudentAge(age);
-                                                    }
-                                                } else {
-                                                    setStudentAge(null);
-                                                    setDobError(null);
-                                                }
-                                            }}
-                                            disabledDate={(current) =>
-                                                current &&
-                                                current.isAfter(dayjs().subtract(1, "year"), "day")
-                                            }
-                                        />
-                                    </Form.Item>
-                                    {studentAge !== null && !dobError && (
-                                        <Text type="secondary" style={{ marginTop: -12, display: 'block' }}>→ {studentAge} tuổi</Text>
-                                    )}
-                                    {dobError && <Text type="danger" style={{ marginTop: -12, display: 'block' }}>{dobError}</Text>}
-                                </Col>
-                                <Col xs={24} md={12}>
-                                    <Form.Item
-                                        name="idCard"
-                                        label={<Text strong>CCCD/ Mã định danh</Text>}
-                                        rules={[
-                                            { required: true, message: "Vui lòng nhập số định danh!" },
-                                            idCardValidationRule,
-                                        ]}
-                                    >
-                                        <Input prefix={<IdcardOutlined />} onKeyPress={allowOnlyNumbers} />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24} md={12}>
-                                    <Form.Item
-                                        name="gender"
-                                        label={<Text strong>Giới tính</Text>}
-                                        rules={[
-                                            { required: true, message: "Vui lòng chọn giới tính!" },
-                                        ]}
-                                    >
-                                        <Select placeholder="Chọn giới tính">
-                                            <Option value="Nam">Nam</Option>
-                                            <Option value="Nữ">Nữ</Option>
-                                            <Option value="Khác">Khác</Option>
-                                        </Select>
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24} md={12}>
-                                    <Form.Item
-                                        name="nation"
-                                        label={<Text strong>Dân tộc</Text>}
-                                        rules={[
-                                            { required: true, message: "Vui lòng chọn dân tộc!" },
-                                        ]}
-                                    >
-                                        <Select showSearch optionFilterProp="children" placeholder="Kinh/Tày/Thái...">
-                                            {ETHNIC_OPTIONS.map((ethnic) => (
-                                                <Option key={ethnic} value={ethnic}>{ethnic}</Option>
-                                            ))}
-                                        </Select>
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24} md={12}>
-                                    <Form.Item
-                                        name="religion"
-                                        label={<Text strong>Tôn giáo</Text>}
-                                        rules={[
-                                            { required: true, message: "Vui lòng chọn tôn giáo!" },
-                                        ]}
-                                    >
-                                        <Select placeholder="Chọn tôn giáo">
-                                            <Option value="Có">Có</Option>
-                                            <Option value="Không">Không</Option>
-                                        </Select>
-                                    </Form.Item>
-                                </Col>
-                                <Col span={24}>
-                                    <Form.Item
-                                        name="address"
-                                        label={<Text strong>Địa chỉ</Text>}
-                                        rules={[
-                                            { required: true, message: "Vui lòng nhập địa chỉ!" },
-                                        ]}
-                                    >
-                                        <Input.TextArea
-                                            rows={2}
-                                            placeholder="Số nhà, đường, quận/huyện, tỉnh/thành phố"
-                                        />
-                                    </Form.Item>
-                                </Col>
-                            </Row>
-                        </Card>
-                    </Col>
-
-                    <Col xs={24} lg={8}>
-                        <Card
-                            bordered={false}
-                            style={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)" }}
-                            title={
-                                <Title level={4} style={{ margin: 0, color: THEME_COLOR }}>
-                                    <UserOutlined style={{ marginRight: 8 }} />
-                                    Ảnh đại diện
-                                </Title>
-                            }
-                        >
-                            <Flex justify="center">
-                                <Form.Item name="imageStudent">
-                                    <Upload
-                                        listType="picture-card"
-                                        fileList={imagePreview}
-                                        beforeUpload={beforeUploadImage}
-                                        customRequest={customRequestImage}
-                                        onChange={onFileChange}
-                                        onRemove={onFileRemove}
-                                        accept="image/png,image/jpeg"
-                                        onPreview={(file) => {
-                                            Modal.info({
-                                                title: file.name,
-                                                content: (
-                                                    <img
-                                                        alt="preview"
-                                                        style={{ width: "100%" }}
-                                                        src={file.url || file.thumbUrl}
-                                                    />
-                                                ),
-                                                maskClosable: true,
-                                            });
-                                        }}
-                                    >
-                                        {imagePreview.length < 1 && (
-                                            <div>
-                                                <PlusOutlined />
-                                                <div style={{ marginTop: 8 }}>Tải ảnh lên</div>
-                                            </div>
-                                        )}
-                                    </Upload>
-                                </Form.Item>
-                            </Flex>
-                        </Card>
-                    </Col>
-                </Row>
+                <Card
+                    bordered={false}
+                    style={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)" }}
+                >
+                    <Tabs defaultActiveKey="1" type="line" items={tabItems} />
+                </Card>
             </Form>
 
             <Modal
@@ -481,7 +640,7 @@ const StudentEdit: React.FC = () => {
                 okButtonProps={{ danger: true }}
             >
                 <p>
-                    Các thay đổi bạn đã chỉnh sẽ Tran <strong>không</strong> được lưu lại.
+                    Các thay đổi bạn đã chỉnh sẽ <strong>không</strong> được lưu lại.
                 </p>
             </Modal>
         </div>

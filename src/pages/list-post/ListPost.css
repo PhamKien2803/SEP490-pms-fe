@@ -1,12 +1,11 @@
-/* --- 🐬 Bảng màu chủ đề Dolphin Preschool 🐬 --- */
 :root {
-  --primary-color: #00b4d8; /* 🌊 Dolphin Blue (Màu chính) */
-  --primary-color-light: #caf0f8; /* 💧 Light Water (Màu nền nhạt) */
-  --page-bg: #f5fcff; /* ☁️ Sky Blue (Màu nền trang) */
-  --accent-color: #ff7f50; /* 🦀 Coral (Màu nhấn) */
-  --card-border-radius: 16px; /* Bo tròn mềm mại hơn */
-  --card-shadow: 0 4px 12px rgba(0, 180, 216, 0.15); /* Bóng đổ màu xanh */
-  --font-color: #03045e; /* 🖋️ Màu chữ xanh đậm (Deep Ocean) */
+  --primary-color: #00b4d8;
+  --primary-color-light: #caf0f8;
+  --page-bg: #f5fcff;
+  --accent-color: #ff7f50;
+  --card-border-radius: 16px;
+  --card-shadow: 0 4px 12px rgba(0, 180, 216, 0.15);
+  --font-color: #03045e;
 }
 
 /* --- Layout chung --- */
@@ -16,7 +15,6 @@
   min-height: 100vh;
 }
 
-/* --- 🌟 Thẻ tạo bài đăng (Quan trọng) 🌟 --- */
 .list-post__create-card {
   border-radius: var(--card-border-radius);
   box-shadow: var(--card-shadow);
@@ -26,7 +24,7 @@
   z-index: 10;
   margin-bottom: 24px;
   background-color: #fff;
-  overflow: hidden; /* 👈 Quan trọng để giữ sóng */
+  overflow: hidden;
 }
 
 .list-post__create-card .ant-card-body {
@@ -66,7 +64,6 @@
   color: var(--font-color);
 }
 
-/* --- 🌊 Biến Divider thành SÓNG 🌊 --- */
 .list-post__create-divider {
   border: none !important;
   height: 10px; /* Chiều cao gợn sóng */
@@ -75,7 +72,7 @@
     var(--page-bg) 50%,
     transparent 51%
   );
-  background-size: 20px 20px; /* Độ rộng của mỗi "vỏ sò" */
+  background-size: 20px 20px;
   background-repeat: repeat-x;
   opacity: 0.8;
   margin: 16px 0 12px 0;
@@ -150,6 +147,7 @@
   color: var(--font-color);
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -250,7 +250,6 @@ function SchedulesManagement() {
     const fetchClassList = useCallback(async () => {
         try {
             const res = await scheduleApis.getClassListByActiveSchoolYear();
-            console.log("🚀 ~ SchedulesManagement ~ res:", res)
             setClasses(res);
             if (!id) {
                 setSelectedClassId(res?.[0]?._id);

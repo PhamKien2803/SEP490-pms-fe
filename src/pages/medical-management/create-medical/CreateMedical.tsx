@@ -47,6 +47,7 @@ import {
 } from "../../../types/class";
 import { SchoolYearListItem } from "../../../types/schoolYear";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { noSpecialCharactersandNumberRule } from "../../../utils/format";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -471,7 +472,7 @@ const CreateMedical: React.FC = () => {
                       {studentLoading ? (
                         <Spin size="small" />
                       ) : (
-                        "Vui lòng chọn lớp"
+                        "Hiện lớp này chưa có học sinh"
                       )}
                     </Option>
                   )}
@@ -526,21 +527,29 @@ const CreateMedical: React.FC = () => {
               <Form.Item
                 label="Chiều Cao (cm)"
                 name={["physicalDevelopment", "height"]}
-                rules={[{ required: true, message: "Nhập chiều cao" }]}
+                rules={[
+                  { required: true, message: "Nhập chiều cao" },
+                ]}
               >
                 <InputNumber
+                  min={0}
                   formatter={(value) => `${value} cm`}
-                  parser={(value) =>
-                    value!
-                      .replace(" cm", "")
-                      .replace(/,/g, ".")
-                      .replace(/\s/g, "")
-                  }
+                  parser={(value) => {
+                    const parsed = parseFloat(
+                      (value || "")
+                        .replace("cm", "")
+                        .replace(",", ".")
+                        .replace(/\s/g, "")
+                    );
+                    return isNaN(parsed) ? 0 : (Math.max(parsed, 0) as 0);
+                  }}
+
                   style={{ width: "100%" }}
                   placeholder="Ví dụ: 98.5 hoặc 98,5"
                 />
               </Form.Item>
             </Col>
+
             <Col xs={24} md={6}>
               <Form.Item
                 label="Cân Nặng (kg)"
@@ -549,12 +558,15 @@ const CreateMedical: React.FC = () => {
               >
                 <InputNumber
                   formatter={(value) => `${value} kg`}
-                  parser={(value) =>
-                    value!
-                      .replace(" kg", "")
-                      .replace(/,/g, ".")
-                      .replace(/\s/g, "")
-                  }
+                  parser={(value) => {
+                    const parsed = parseFloat(
+                      (value || "")
+                        .replace("cm", "")
+                        .replace(",", ".")
+                        .replace(/\s/g, "")
+                    );
+                    return isNaN(parsed) ? 0 : (Math.max(parsed, 0) as 0);
+                  }}
                   style={{ width: "100%" }}
                   placeholder="Ví dụ: 14.2 hoặc 14,2"
                 />
@@ -598,6 +610,7 @@ const CreateMedical: React.FC = () => {
               <Form.Item
                 label="Phát Triển Tinh Thần"
                 name={["comprehensiveExamination", "mentalDevelopment"]}
+                rules={[noSpecialCharactersandNumberRule]}
               >
                 <Input.TextArea
                   rows={1}
@@ -609,6 +622,7 @@ const CreateMedical: React.FC = () => {
               <Form.Item
                 label="Phát Triển Vận Động"
                 name={["comprehensiveExamination", "motorDevelopment"]}
+                rules={[noSpecialCharactersandNumberRule]}
               >
                 <Input.TextArea
                   rows={1}
@@ -619,6 +633,7 @@ const CreateMedical: React.FC = () => {
 
             <Col xs={24} md={8}>
               <Form.Item
+                rules={[noSpecialCharactersandNumberRule]}
                 label={
                   <Space>
                     <MedicineBoxOutlined /> Bệnh Đã Phát Hiện
@@ -656,6 +671,7 @@ const CreateMedical: React.FC = () => {
 
             <Col xs={24} md={8}>
               <Form.Item
+                rules={[noSpecialCharactersandNumberRule]}
                 label={
                   <Space>
                     <WarningOutlined /> Dấu Hiệu Bất Thường
@@ -693,6 +709,7 @@ const CreateMedical: React.FC = () => {
 
             <Col xs={24} md={8}>
               <Form.Item
+                rules={[noSpecialCharactersandNumberRule]}
                 label={
                   <Space>
                     <WarningOutlined /> Nguy Cơ Bệnh

@@ -105,7 +105,7 @@ function EditSchoolyear() {
                 });
             })
             .catch(info => {
-                console.log('Validation Failed:', info);
+                toast.warn('Validation Failed:', info)
             });
     };
 
