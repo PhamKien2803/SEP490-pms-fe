@@ -10,6 +10,7 @@ import type {
   LoginResponse,
   Parent,
   ParentsResponse,
+  ParentStudent,
   UpdateFunctionDto,
   UpdateParentDto,
 } from "../types/auth";
@@ -313,6 +314,13 @@ export const parentsApis = {
 
   deleteParents: async (id: string): Promise<void> => {
     await axiosAuth.delete(apiEndPoint.DELETE_PARENT(id));
+  },
+
+  getParentById: async (id: string): Promise<ParentStudent> => {
+    const response = await axiosAuth.get<ParentStudent>(
+      apiEndPoint.GET_PARENT_BY_ID(id)
+    );
+    return response.data;
   },
 };
 export const rolesApis = {
@@ -1606,6 +1614,14 @@ export const roomApis = {
   deleteRoom: async (id: string): Promise<void> => {
     await axiosAuth.post(apiEndPoint.DELETE_ROOM(id));
   },
+
+  getRoomByTeacherId: async (id: string): Promise<RoomRecord> => {
+    const response = await axiosAuth.get<{ room: RoomRecord }>(
+      apiEndPoint.GET_ROOM_BY_TEACHER_ID(id)
+    );
+    return response.data.room;
+  },
+
 };
 
 export const medicalApis = {

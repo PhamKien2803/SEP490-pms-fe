@@ -139,6 +139,10 @@ const Dashboard: React.FC = () => {
             alignItems: "center",
             justifyContent: "space-between",
             boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+            position: "sticky",
+            top: 0,
+            zIndex: 1000,
+            backdropFilter: "blur(4px)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center" }}>

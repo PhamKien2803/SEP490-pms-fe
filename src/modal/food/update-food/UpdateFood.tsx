@@ -144,7 +144,7 @@ const UpdateFoodPage: React.FC = () => {
         },
       });
     } catch (error) {
-      toast.error("Lỗi khi gọi API Calo AI by ID.");
+      typeof error === "string" ? toast.info(error) : toast.error("Lỗi khi gọi API Calo AI by ID.");
     } finally {
       setLoading(false);
     }
@@ -221,7 +221,7 @@ const UpdateFoodPage: React.FC = () => {
 
       await fetchUpdatedFoodDetails();
     } catch (error) {
-      toast.error("Cập nhật món ăn thất bại. Vui lòng thử lại.");
+      typeof error === "string" ? toast.info(error) : toast.error("Cập nhật món ăn thất bại. Vui lòng thử lại.");
       setLoading(false);
     }
   };

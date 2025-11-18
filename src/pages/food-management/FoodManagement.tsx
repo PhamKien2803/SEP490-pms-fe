@@ -228,7 +228,6 @@ const FoodManagement: React.FC = () => {
                 selectedDateRange
             );
         } catch (error) {
-            // console.error("Lỗi xóa món ăn:", error);
             typeof error === "string" ? toast.info(error) : toast.error("Xóa món ăn thất bại. Vui lòng thử lại.");
         } finally {
             setIsDeleting(false);
@@ -245,18 +244,15 @@ const FoodManagement: React.FC = () => {
         });
     }
 
-    // Cấu hình Row Selection
-    const rowSelection = {
-        selectedRowKeys,
-        onChange: (newSelectedRowKeys: React.Key[]) => {
-            setSelectedRowKeys(newSelectedRowKeys);
-        },
-        getCheckboxProps: (_: FoodRecord) => ({
-            disabled: loading || isAITriggering,
-        }),
-    };
-
     const columns: ColumnsType<FoodRecord> = [
+        {
+            title: "STT",
+            key: "index",
+            width: 70,
+            align: "center",
+            render: (_text, _record, index) =>
+                (pagination.page - 1) * pagination.limit + index + 1,
+        },
         {
             title: "Tên Món Ăn",
             dataIndex: "foodName",
@@ -341,6 +337,7 @@ const FoodManagement: React.FC = () => {
                                 icon={<EditOutlined style={{ color: "#1890ff" }} />}
                                 size="small"
                                 onClick={() => navigateToEdit(record)}
+                                disabled={loading || isAITriggering}
                             />
                         </Tooltip>
                     )}
@@ -352,6 +349,7 @@ const FoodManagement: React.FC = () => {
                                 icon={<DeleteOutlined />}
                                 size="small"
                                 onClick={() => handleDeleteFood(record._id)}
+                                disabled={loading || isAITriggering}
                             />
                         </Tooltip>
                     )}
@@ -359,6 +357,7 @@ const FoodManagement: React.FC = () => {
             ),
         },
     ];
+
 
     const filteredFoods = useMemo(() => {
         const keyword = searchKeyword.trim().toLowerCase();
@@ -380,14 +379,6 @@ const FoodManagement: React.FC = () => {
 
                 {/* Nút Kích hoạt Tính Calo AI chung (Dùng API GET không tham số) */}
                 <Col xs={24} lg={12} style={{ textAlign: 'right' }}>
-                    <Card size="small" style={{ display: 'inline-block', border: '1px solid #d9d9d9', marginTop: 15 }}>
-                        <Text strong style={{ color: '#000', fontSize: '0.9em' }}>
-                            {selectedRowKeys.length > 0 ?
-                                `Đã chọn ${selectedRowKeys.length} món ăn.` :
-                                'Chưa chọn món ăn nào.'}
-                        </Text>
-                    </Card>
-
                     <Button
                         type="primary"
                         icon={<RobotOutlined />}
@@ -444,7 +435,7 @@ const FoodManagement: React.FC = () => {
                                     icon={<PlusOutlined />}
                                     onClick={navigateToCreate}
                                     loading={loading}
-                                    disabled={loading}
+                                    disabled={loading || isAITriggering}
                                 >
                                     Tạo mới
                                 </Button>
@@ -485,7 +476,6 @@ const FoodManagement: React.FC = () => {
                     loading={loading}
                     onChange={handlePaginationChange}
                     size="small"
-                    rowSelection={rowSelection}
                     pagination={{
                         current: pagination.page,
                         pageSize: pagination.limit,

@@ -30,6 +30,7 @@ export interface StudentDetailResponses {
       phoneNumber: string;
       email: string;
       IDCard: string;
+      dob: string;
       gender: string;
       job: string;
     };
@@ -40,6 +41,7 @@ export interface StudentDetailResponses {
       phoneNumber: string;
       email: string;
       IDCard: string;
+      dob: string;
       gender: string;
       job: string;
     };
@@ -57,7 +59,7 @@ export interface StudentResponse {
   page: PaginationInfo;
 }
 
-export interface CreateUserData {
+export interface UpdateUserData {
   fullName: string;
   dob: string;
   idCard: string;
@@ -71,4 +73,40 @@ export interface CreateUserData {
   imageStudent: string;
 }
 
-export type UpdateUserData = CreateUserData
+export interface CreateUserData {
+  studentName: string;
+  studentDob: string;
+  studentIdCard: string;
+  studentGender: "Nam" | "Nữ" | "Khác";
+  studentNation: string;
+  studentReligion: string;
+  address: string;
+
+  fatherName: string;
+  fatherPhoneNumber: string;
+  fatherEmail: string;
+  fatherIdCard: string;
+  fatherJob: string;
+  fatherDob: string;
+
+  motherName: string;
+  motherPhoneNumber: string;
+  motherEmail: string;
+  motherIdCard: string;
+  motherJob: string;
+  motherDob: string;
+
+  imageStudent: string | null;
+  birthCertId: string | null;
+  healthCertId: string | null;
+  relationship: string;
+  state?: string;
+  statePayment?: string;
+  reason?: string;
+  active?: boolean;
+  createdBy?: string;
+  updatedBy?: string;
+}
+
+
+// export type UpdateUserData = CreateUserData

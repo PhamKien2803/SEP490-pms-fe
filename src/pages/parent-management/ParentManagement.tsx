@@ -19,16 +19,16 @@ import {
     ReloadOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import { CreateParentDto, Parent, UpdateParentDto } from "../../types/auth";
+import { CreateParentDto, Parent } from "../../types/auth";
 import { parentsApis } from "../../services/apiServices";
 import CreateParent from "../../modal/create-parent/CreateParent";
-import UpdateParent from "../../modal/update-parents/UpdateParent";
 import DeleteModal from "../../modal/delete-modal/DeleteModal";
-import ViewParentDetails from "../../modal/view-parent/ViewParentDetail";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { toast } from "react-toastify";
 import { usePagePermission } from '../../hooks/usePagePermission';
 import { usePageTitle } from "../../hooks/usePageTitle";
+import { useNavigate } from "react-router-dom";
+import { constants } from "../../constants";
 
 const ParentManagement: React.FC = () => {
     usePageTitle('Quản lý phụ huynh - Cá Heo Xanh');
@@ -50,15 +50,10 @@ const ParentManagement: React.FC = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-    const [isUpdating, setIsUpdating] = useState(false);
-    const [editingParent, setEditingParent] = useState<Parent | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
-    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-    const [viewingParent, setViewingParent] = useState<Parent | null>(null);
-
+    const navigate = useNavigate();
     const fetchParents = useCallback(
         async (params: { page: number; limit: number }) => {
             setLoading(true);
@@ -72,7 +67,7 @@ const ParentManagement: React.FC = () => {
                     pageSize: response.page.limit,
                 }));
             } catch (error) {
-                setParents([]); // Tối ưu: Clear data cũ nếu có lỗi
+                setParents([]);
                 typeof error === "string" ? toast.info(error) : toast.info('Hiện tại không có phụ huynh nào trong hệ thống.');
             } finally {
                 setLoading(false);
@@ -131,32 +126,8 @@ const ParentManagement: React.FC = () => {
         }
     }, [user, fetchParents, pagination.current, pagination.pageSize]);
 
-    const handleOpenUpdateModal = useCallback((record: Parent) => {
-        setEditingParent(record);
-        setIsUpdateModalOpen(true);
-    }, []);
 
-    const handleUpdateParent = useCallback(async (values: UpdateParentDto) => {
-        if (!editingParent || !user) {
-            toast.error("Thiếu thông tin cần thiết để cập nhật.");
-            return;
-        }
-        setIsUpdating(true);
-        try {
-            const payload = { ...values, updatedBy: user.email };
-            await parentsApis.updateParents(editingParent._id, payload);
-            toast.success("Cập nhật phụ huynh thành công!");
-            setIsUpdateModalOpen(false);
-            fetchParents({
-                page: pagination.current!,
-                limit: pagination.pageSize!,
-            });
-        } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error('Cập nhật phụ huynh thất bại. Vui lòng thử lại!');
-        } finally {
-            setIsUpdating(false);
-        }
-    }, [editingParent, user, fetchParents, pagination.current, pagination.pageSize]);
+
 
     const handleOpenDeleteModal = useCallback((id: string) => {
         setDeletingId(id);
@@ -187,11 +158,6 @@ const ParentManagement: React.FC = () => {
         }
     }, [deletingId, parents.length, pagination.current, pagination.pageSize, fetchParents]);
 
-    // Tối ưu: Gói hàm trong useCallback
-    const handleOpenViewModal = useCallback((record: Parent) => {
-        setViewingParent(record);
-        setIsViewModalOpen(true);
-    }, []);
 
     // Tối ưu: Sửa mảng phụ thuộc cho useMemo
     const columns: ColumnsType<Parent> = useMemo(
@@ -238,7 +204,7 @@ const ParentManagement: React.FC = () => {
                             <Button
                                 type="text"
                                 icon={<EyeOutlined style={{ color: "#52c41a" }} />}
-                                onClick={() => handleOpenViewModal(record)}
+                                onClick={() => navigate(`${constants.APP_PREFIX}/parents/view/${record._id}`)}
                             />
                         </Tooltip>
                         <Tooltip title="Chỉnh sửa">
@@ -246,7 +212,7 @@ const ParentManagement: React.FC = () => {
                                 <Button
                                     type="text"
                                     icon={<EditOutlined style={{ color: "#1890ff" }} />}
-                                    onClick={() => handleOpenUpdateModal(record)}
+                                    onClick={() => navigate(`${constants.APP_PREFIX}/parents/edit/${record._id}`)}
                                 />
                             )}
                         </Tooltip>
@@ -264,15 +230,12 @@ const ParentManagement: React.FC = () => {
                 ),
             },
         ],
-        [canUpdate, canDelete, pagination.current, pagination.pageSize, handleOpenViewModal, handleOpenUpdateModal, handleOpenDeleteModal]
+        [canUpdate, canDelete, pagination.current, pagination.pageSize, handleOpenDeleteModal]
     );
 
-    // Tối ưu: Gói hàm reload trong useCallback
     const handleReload = useCallback(() => {
         fetchParents({ page: pagination.current!, limit: pagination.pageSize! });
     }, [fetchParents, pagination.current, pagination.pageSize]);
-
-    // Tối ưu: Sửa mảng phụ thuộc cho useMemo
     const cardHeader = useMemo(
         () => (
             <Row justify="space-between" align="middle">
@@ -286,7 +249,7 @@ const ParentManagement: React.FC = () => {
                         <Tooltip title="Làm mới danh sách">
                             <Button
                                 icon={<ReloadOutlined />}
-                                onClick={handleReload} // Sử dụng hàm đã gói
+                                onClick={handleReload}
                                 loading={loading}
                             />
                         </Tooltip>
@@ -306,37 +269,13 @@ const ParentManagement: React.FC = () => {
                 </Col>
             </Row>
         ),
-        [searchKeyword, canCreate, loading, handleReload] // Thêm loading và handleReload
+        [searchKeyword, canCreate, loading, handleReload]
     );
 
-    // Tối ưu: Gói initialUpdateData trong useMemo
-    const initialUpdateData = useMemo(() => {
-        if (!editingParent) return null;
-        return {
-            _id: editingParent._id,
-            parentCode: editingParent.parentCode,
-            fullName: editingParent.fullName,
-            dob: editingParent.dob,
-            phoneNumber: editingParent.phoneNumber,
-            email: editingParent.email,
-            IDCard: editingParent.IDCard,
-            gender: editingParent.gender,
-            address: editingParent.address,
-            nation: editingParent.nation,
-            religion: editingParent.religion,
-            students: editingParent.students,
-            updatedBy: user ? user.email : "",
-            createdBy: editingParent.createdBy,
-            createdAt: editingParent.createdAt,
-            updatedAt: editingParent.updatedAt,
-        };
-    }, [editingParent, user]);
 
-    // Tối ưu: Gói các hàm onClose vào useCallback để tránh re-render modal
+
     const handleCloseCreateModal = useCallback(() => setIsModalOpen(false), []);
-    const handleCloseUpdateModal = useCallback(() => setIsUpdateModalOpen(false), []);
     const handleCloseDeleteModal = useCallback(() => setIsDeleteModalOpen(false), []);
-    const handleCloseViewModal = useCallback(() => setIsViewModalOpen(false), []);
 
     return (
         <div style={{ padding: "22px" }}>
@@ -363,14 +302,6 @@ const ParentManagement: React.FC = () => {
                 onSubmit={handleCreateParent}
             />
 
-            <UpdateParent
-                open={isUpdateModalOpen}
-                loading={isUpdating}
-                initialData={initialUpdateData}
-                onClose={handleCloseUpdateModal}
-                onSubmit={handleUpdateParent}
-            />
-
             <DeleteModal
                 open={isDeleteModalOpen}
                 loading={isDeleting}
@@ -378,11 +309,6 @@ const ParentManagement: React.FC = () => {
                 onConfirm={handleConfirmDelete}
             />
 
-            <ViewParentDetails
-                open={isViewModalOpen}
-                onClose={handleCloseViewModal}
-                parentData={viewingParent}
-            />
         </div>
     );
 };
