@@ -131,6 +131,41 @@ export interface Parent {
   createdAt: string;
   updatedAt: string;
 }
+export interface StudentRecord {
+  _id: string;
+  studentCode: string;
+  fullName: string;
+  dob: string;
+  idCard: string;
+  gender: 'Nam' | 'Nữ' | 'Khác' | string;
+  address: string;
+  relationship: string;
+  nation: string;
+  religion: string;
+  active: boolean;
+  createdBy?: string;
+  updatedBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  birthCertId: string;
+  healthCertId: string;
+  imageStudent: string;
+}
+
+export interface ParentStudent {
+  _id: string;
+  parentCode: string;
+  fullName: string;
+  dob: string;
+  phoneNumber: string;
+  email: string;
+  IDCard: string;
+  gender: string;
+  job: string;
+  students: StudentRecord[];
+  active: boolean;
+}
+
 
 export interface Parent2 {
   fullName?: string;
@@ -150,6 +185,8 @@ export interface UpdateParentDto {
   dob?: string; // ISO date string
   phoneNumber?: string;
   email?: string;
+  IDCard?: string;
+  job?: string;
   gender?: "Nam" | "Nữ" | "Khác";
   students?: string[]; // mảng id của student
   address?: string;

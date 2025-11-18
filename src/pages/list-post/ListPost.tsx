@@ -17,11 +17,10 @@ import { Post } from "../../types/post";
 import CreatePost from "./create-post/CreatePost";
 import EditPost from "./update-post/UpdatePost";
 import { usePagePermission } from "../../hooks/usePagePermission";
-import "./ListPost.css"; // 👈 Nhập file CSS
+import "./ListPost.css";
 
 const { Title, Text, Link } = Typography;
 
-// (Hàm formatTimeAgo giữ nguyên, không thay đổi)
 const formatTimeAgo = (dateString: string | Date): string => {
   const date = new Date(dateString);
   const now = new Date();
@@ -113,7 +112,7 @@ const ListPost = (props: ListPostProps) => {
             size="middle"
             onClick={showCreateModal}
             className="list-post__action-btn list-post__action-btn--photo"
-            type="text" // 👈 Thay đổi để thân thiện hơn
+            type="text"
           >
             Ảnh/Video
           </Button>
@@ -125,7 +124,7 @@ const ListPost = (props: ListPostProps) => {
             size="middle"
             onClick={showCreateModal}
             className="list-post__action-btn list-post__action-btn--file"
-            type="text" // 👈 Thay đổi để thân thiện hơn
+            type="text"
           >
             Tài liệu
           </Button>

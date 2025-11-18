@@ -97,6 +97,8 @@ import TeacherNews from "../../pages/home-news/home-news-teacher/TeacherNews";
 import StudentCreate from "../../modal/student/create-student/StudentCreate";
 import StudentDetail from "../../modal/student/view-student/StudentDetail";
 import StudentEdit from "../../modal/student/update-student/StudentEdit";
+import ParentDetailView from "../../pages/parent-management/details-parent/ParentDetailView";
+import EditParent from "../../pages/parent-management/edit-parent/EditParent";
 
 export const routes: RouteObject[] = [
   {
@@ -224,6 +226,14 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 element: <ParentManagement />,
+              },
+              {
+                path: "view/:id",
+                element: <ParentDetailView />,
+              },
+              {
+                path: "edit/:id",
+                element: <EditParent />,
               },
             ],
           },

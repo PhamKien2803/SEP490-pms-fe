@@ -113,6 +113,18 @@ export const noSpecialCharactersRule = {
     message: "Không được nhập ký tự đặc biệt!",
 };
 
+export const noNegativeNumberRule = {
+    validator: (_: any, value: any) => {
+        if (value === undefined || value === null || value === "") {
+            return Promise.resolve();
+        }
+        if (typeof value === "number" && value < 0) {
+            return Promise.reject("Không được nhập số âm!");
+        }
+        return Promise.resolve();
+    },
+};
+
 
 export const allowOnlyNumbers = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (!/[0-9]/.test(event.key) && !['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete'].includes(event.key) && !event.ctrlKey) {

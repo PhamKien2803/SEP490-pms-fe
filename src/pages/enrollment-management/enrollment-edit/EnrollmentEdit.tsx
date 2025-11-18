@@ -71,6 +71,8 @@ const EnrollmentEdit: React.FC = () => {
                 ...data,
                 studentDob: data.studentDob ? dayjs(data.studentDob) : null,
             });
+            form.setFieldValue("fatherDob", data.fatherDob ? dayjs(data.fatherDob) : null);
+            form.setFieldValue("motherDob", data.motherDob ? dayjs(data.motherDob) : null);
 
             if (data.birthCertFiles) {
                 setBirthCertId(data.birthCertId);
@@ -185,7 +187,12 @@ const EnrollmentEdit: React.FC = () => {
 
     const handleCancelEdit = useCallback(() => {
         if (enrollmentData) {
-            form.setFieldsValue({ ...enrollmentData, studentDob: enrollmentData.studentDob ? dayjs(enrollmentData.studentDob) : null });
+            form.setFieldsValue({
+                ...enrollmentData,
+                studentDob: enrollmentData.studentDob ? dayjs(enrollmentData.studentDob) : null,
+                fatherDob: enrollmentData.fatherDob ? dayjs(enrollmentData.fatherDob) : null,
+                motherDob: enrollmentData.motherDob ? dayjs(enrollmentData.motherDob) : null,
+            });
             if (enrollmentData.birthCertFiles) {
                 setBirthCertId(enrollmentData.birthCertId);
                 setBirthCertFile([{ uid: enrollmentData.birthCertFiles._id, name: `${enrollmentData.birthCertFiles.filename} (tải lên lúc ${dayjs(enrollmentData.birthCertFiles.uploadDate).format('DD/MM/YYYY')})`, status: 'done', url: enrollmentData.birthCertFiles._id }]);
@@ -522,6 +529,47 @@ const EnrollmentEdit: React.FC = () => {
                                         <Form.Item name="fatherIdCard" label="CCCD Cha" rules={[{ required: true, message: 'Vui lòng nhập CCCD!' }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} /></Form.Item>
                                     </Col>
                                     <Col xs={24} md={8}>
+                                        <Form.Item
+                                            name="fatherDob"
+                                            label="Ngày sinh Cha"
+                                            rules={[
+                                                { required: true, message: "Vui lòng chọn ngày sinh Cha!" },
+                                                {
+                                                    validator: (_, value) => {
+                                                        if (!value || !dayjs.isDayjs(value)) {
+                                                            return Promise.resolve();
+                                                        }
+
+                                                        const today = dayjs();
+                                                        const age = today.diff(value, "year");
+
+                                                        if (value.isAfter(today, "day")) {
+                                                            return Promise.reject(
+                                                                new Error("Ngày sinh không được trong tương lai!")
+                                                            );
+                                                        }
+
+                                                        if (!value.isValid()) {
+                                                            return Promise.reject(new Error("Ngày sinh không hợp lệ!"));
+                                                        }
+
+                                                        if (age < 18) {
+                                                            return Promise.reject(
+                                                                new Error("Cha phải từ 18 tuổi trở lên!")
+                                                            );
+                                                        }
+
+                                                        return Promise.resolve();
+                                                    }
+                                                }
+                                            ]}
+                                        >
+                                            <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
+                                        </Form.Item>
+
+                                    </Col>
+
+                                    <Col xs={24} md={8}>
                                         <Form.Item name="fatherEmail" label="Email Cha" rules={[{ required: true, message: 'Vui lòng nhập email!' }, { type: 'email', message: 'Email không hợp lệ!' }]}><Input /></Form.Item>
                                     </Col>
                                 </Row>
@@ -540,6 +588,46 @@ const EnrollmentEdit: React.FC = () => {
                                     <Col xs={24} md={8}>
                                         <Form.Item name="motherIdCard" label="CCCD Mẹ" rules={[{ required: true, message: 'Vui lòng nhập CCCD!' }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} /></Form.Item>
                                     </Col>
+                                    <Col xs={24} md={8}>
+                                        <Form.Item
+                                            name="motherDob"
+                                            label="Ngày sinh Mẹ"
+                                            rules={[
+                                                { required: true, message: "Vui lòng chọn ngày sinh Mẹ!" },
+                                                {
+                                                    validator: (_, value) => {
+                                                        if (!value || !dayjs.isDayjs(value)) {
+                                                            return Promise.resolve();
+                                                        }
+
+                                                        const today = dayjs();
+                                                        const age = today.diff(value, "year");
+
+                                                        if (value.isAfter(today, "day")) {
+                                                            return Promise.reject(
+                                                                new Error("Ngày sinh không được trong tương lai!")
+                                                            );
+                                                        }
+
+                                                        if (!value.isValid()) {
+                                                            return Promise.reject(new Error("Ngày sinh không hợp lệ!"));
+                                                        }
+
+                                                        if (age < 18) {
+                                                            return Promise.reject(
+                                                                new Error("Mẹ phải từ 18 tuổi trở lên!")
+                                                            );
+                                                        }
+
+                                                        return Promise.resolve();
+                                                    }
+                                                }
+                                            ]}
+                                        >
+                                            <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
+                                        </Form.Item>
+                                    </Col>
+
                                     <Col xs={24} md={8}>
                                         <Form.Item name="motherEmail" label="Email Mẹ" rules={[{ required: true, message: 'Vui lòng nhập email!' }, { type: 'email', message: 'Email không hợp lệ!' }]}><Input /></Form.Item>
                                     </Col>

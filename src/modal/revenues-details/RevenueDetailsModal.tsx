@@ -20,8 +20,8 @@ const RevenueDetailsModal: React.FC<Props> = ({ open, onClose, revenueId }) => {
         try {
             const res = await revenuesApis.getRevenueById(revenueId);
             setRevenue(res);
-        } catch (err) {
-            toast.error("Không thể tải chi tiết khoản thu");
+        } catch (error) {
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải chi tiết khoản thu");
         } finally {
             setLoading(false);
         }
