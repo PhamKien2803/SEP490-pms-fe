@@ -170,13 +170,13 @@ const TimeTable = () => {
         if (!timetableData) return [];
         const { start, end } = totalWeeksInMonth[currentWeek - 1] || {};
         if (!start || !end) return [];
-        return timetableData.scheduleDays.filter((day) =>
+        return timetableData.scheduleDays?.filter((day) =>
             dayjs(day.date).isBetween(start, end, 'day', '[]')
         );
     }, [timetableData, currentWeek, totalWeeksInMonth]);
 
     const uniqueStartTimes = useMemo(() => {
-        if (!getDaysOfWeek.length) return [];
+        if (!getDaysOfWeek?.length) return [];
         const all = getDaysOfWeek.flatMap((d) => d.activities);
         const times = [...new Set(all.map((a) => a.startTime))];
         times.sort((a, b) => (a || 0) - (b || 0));
@@ -184,7 +184,7 @@ const TimeTable = () => {
     }, [getDaysOfWeek]);
 
     const columns = useMemo<ColumnsType<IScheduleRow>>(() => {
-        if (!getDaysOfWeek.length) return [];
+        if (!getDaysOfWeek?.length) return [];
 
         const base: ColumnsType<IScheduleRow> = [
             {
@@ -306,7 +306,7 @@ const TimeTable = () => {
 
 
     const dataSource = useMemo<IScheduleRow[]>(() => {
-        if (!getDaysOfWeek.length || uniqueStartTimes.length === 0) return [];
+        if (!getDaysOfWeek?.length || uniqueStartTimes?.length === 0) return [];
         return uniqueStartTimes.map((startTime) => {
             const time = formatMinutesToTime(startTime);
             const row: IScheduleRow = { key: time, time };
@@ -374,7 +374,7 @@ const TimeTable = () => {
             style={{ margin: 16 }}
         >
             <Spin spinning={loading}>
-                {!getDaysOfWeek.length && !loading ? (
+                {!getDaysOfWeek?.length && !loading ? (
                     <Empty description="Không có dữ liệu thời khóa biểu" />
                 ) : viewMode === 'week' ? (
                     <div
