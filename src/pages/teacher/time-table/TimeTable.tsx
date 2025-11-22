@@ -304,6 +304,26 @@ const TimeTable = () => {
         return [...base, ...dayColumns];
     }, [getDaysOfWeek, uniqueStartTimes]);
 
+    const updateDefaultWeek = (month: number, year: string) => {
+        const today = dayjs();
+        const schoolYearData = schoolYears.find(y => y.schoolYear === year);
+        if (!schoolYearData) return;
+
+        const schoolStartMonth = dayjs(schoolYearData.startDate).month() + 1;
+        const schoolStartYear = dayjs(schoolYearData.startDate).year();
+        const selectedYear = month >= schoolStartMonth ? schoolStartYear : schoolStartYear + 1;
+
+        if (month === today.month() + 1 && selectedYear === today.year()) {
+            const index = totalWeeksInMonth.findIndex(
+                (week) => today.isBetween(week.start, week.end, 'day', '[]')
+            );
+            setCurrentWeek(index >= 0 ? index + 1 : 1);
+        } else {
+            setCurrentWeek(1);
+        }
+    };
+
+
 
     const dataSource = useMemo<IScheduleRow[]>(() => {
         if (!getDaysOfWeek?.length || uniqueStartTimes?.length === 0) return [];
@@ -351,6 +371,7 @@ const TimeTable = () => {
                                 onChange={(val) => {
                                     setCurrentMonth(val);
                                     setCurrentWeek(1);
+                                    updateDefaultWeek(val, selectedYear!);
                                 }}
                                 options={Array.from({ length: 12 }, (_, i) => ({
                                     label: `Tháng ${i + 1}`,
