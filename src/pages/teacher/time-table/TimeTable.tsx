@@ -170,13 +170,13 @@ const TimeTable = () => {
         if (!timetableData) return [];
         const { start, end } = totalWeeksInMonth[currentWeek - 1] || {};
         if (!start || !end) return [];
-        return timetableData.scheduleDays.filter((day) =>
+        return timetableData.scheduleDays?.filter((day) =>
             dayjs(day.date).isBetween(start, end, 'day', '[]')
         );
     }, [timetableData, currentWeek, totalWeeksInMonth]);
 
     const uniqueStartTimes = useMemo(() => {
-        if (!getDaysOfWeek.length) return [];
+        if (!getDaysOfWeek?.length) return [];
         const all = getDaysOfWeek.flatMap((d) => d.activities);
         const times = [...new Set(all.map((a) => a.startTime))];
         times.sort((a, b) => (a || 0) - (b || 0));
@@ -184,7 +184,7 @@ const TimeTable = () => {
     }, [getDaysOfWeek]);
 
     const columns = useMemo<ColumnsType<IScheduleRow>>(() => {
-        if (!getDaysOfWeek.length) return [];
+        if (!getDaysOfWeek?.length) return [];
 
         const base: ColumnsType<IScheduleRow> = [
             {
@@ -304,9 +304,29 @@ const TimeTable = () => {
         return [...base, ...dayColumns];
     }, [getDaysOfWeek, uniqueStartTimes]);
 
+    const updateDefaultWeek = (month: number, year: string) => {
+        const today = dayjs();
+        const schoolYearData = schoolYears.find(y => y.schoolYear === year);
+        if (!schoolYearData) return;
+
+        const schoolStartMonth = dayjs(schoolYearData.startDate).month() + 1;
+        const schoolStartYear = dayjs(schoolYearData.startDate).year();
+        const selectedYear = month >= schoolStartMonth ? schoolStartYear : schoolStartYear + 1;
+
+        if (month === today.month() + 1 && selectedYear === today.year()) {
+            const index = totalWeeksInMonth.findIndex(
+                (week) => today.isBetween(week.start, week.end, 'day', '[]')
+            );
+            setCurrentWeek(index >= 0 ? index + 1 : 1);
+        } else {
+            setCurrentWeek(1);
+        }
+    };
+
+
 
     const dataSource = useMemo<IScheduleRow[]>(() => {
-        if (!getDaysOfWeek.length || uniqueStartTimes.length === 0) return [];
+        if (!getDaysOfWeek?.length || uniqueStartTimes?.length === 0) return [];
         return uniqueStartTimes.map((startTime) => {
             const time = formatMinutesToTime(startTime);
             const row: IScheduleRow = { key: time, time };
@@ -351,6 +371,7 @@ const TimeTable = () => {
                                 onChange={(val) => {
                                     setCurrentMonth(val);
                                     setCurrentWeek(1);
+                                    updateDefaultWeek(val, selectedYear!);
                                 }}
                                 options={Array.from({ length: 12 }, (_, i) => ({
                                     label: `Tháng ${i + 1}`,
@@ -374,7 +395,7 @@ const TimeTable = () => {
             style={{ margin: 16 }}
         >
             <Spin spinning={loading}>
-                {!getDaysOfWeek.length && !loading ? (
+                {!getDaysOfWeek?.length && !loading ? (
                     <Empty description="Không có dữ liệu thời khóa biểu" />
                 ) : viewMode === 'week' ? (
                     <div

@@ -10,6 +10,7 @@ import { rolesApis } from '../../../services/apiServices';
 import { constants } from '../../../constants';
 import { hardcodedActions } from '../../../components/hard-code-action';
 import { usePageTitle } from '../../../hooks/usePageTitle';
+import { noSpecialCharactersRule } from '../../../utils/format';
 
 
 const CreateRole: React.FC = () => {
@@ -136,7 +137,7 @@ const CreateRole: React.FC = () => {
                     <Form.Item
                         name="roleName"
                         label="Tên vai trò"
-                        rules={[{ required: true, message: 'Vui lòng nhập tên vai trò!' }]}
+                        rules={[{ required: true, message: 'Vui lòng nhập tên vai trò!' }, noSpecialCharactersRule]}
                         style={{ maxWidth: '400px' }}
                     >
                         <Input placeholder="Nhập tên vai trò" />
