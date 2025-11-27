@@ -99,6 +99,7 @@ import StudentDetail from "../../modal/student/view-student/StudentDetail";
 import StudentEdit from "../../modal/student/update-student/StudentEdit";
 import ParentDetailView from "../../pages/parent-management/details-parent/ParentDetailView";
 import EditParent from "../../pages/parent-management/edit-parent/EditParent";
+import ParentNews from "../../pages/home-news/home-news-parent/ParentNews";
 
 export const routes: RouteObject[] = [
   {
@@ -972,21 +973,21 @@ export const routes: RouteObject[] = [
               },
             ],
           },
-          // {
-          //   path: "dashboard-posts",
-          //   element: (
-          //     <PrivateRoute
-          //       requireFunction={`${constants.APP_PREFIX}/dashboard-posts`}
-          //       requireAction="view"
-          //     />
-          //   ),
-          //   children: [
-          //     {
-          //       index: true,
-          //       element: <ParentNews />,
-          //     },
-          //   ],
-          // },
+          {
+            path: "dashboard-posts",
+            element: (
+              <PrivateRoute
+                requireFunction={`${constants.APP_PREFIX}/dashboard-posts`}
+                requireAction="view"
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <ParentNews />,
+              },
+            ],
+          },
         ],
       },
     ],

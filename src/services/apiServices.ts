@@ -150,6 +150,8 @@ import {
   HealthCertUpdateData,
 } from "../types/medical-management";
 import {
+  ApiSuccessResponse,
+  ChangePasswordRequest,
   CheckInParams,
   CheckInResponse,
   ChildResponse,
@@ -164,6 +166,7 @@ import {
   ParentStudentsListResponse,
   ScheduleList,
   ScheduleParams,
+  UpdateParentInforRequest,
 } from "../types/parent";
 import {
   CreateRevenuePayload,
@@ -1755,6 +1758,28 @@ export const parentDashboardApis = {
       {
         responseType: "arraybuffer",
       }
+    );
+    return response.data;
+  },
+
+  changePasswordParent: async (
+    id: string,
+    data: ChangePasswordRequest
+  ): Promise<ApiSuccessResponse> => {
+    const response = await axiosAuth.put<ApiSuccessResponse>(
+      apiEndPoint.CHANGE_PASSWORD_PARENT(id),
+      data
+    );
+    return response.data;
+  },
+
+  updateParentInfor: async (
+    id: string,
+    data: UpdateParentInforRequest
+  ): Promise<ApiSuccessResponse> => {
+    const response = await axiosAuth.put<ApiSuccessResponse>(
+      apiEndPoint.UPDATE_PARENT_INFOR(id),
+      data
     );
     return response.data;
   },
