@@ -10,6 +10,8 @@ export interface ParentInfo {
   fullName: string;
   phoneNumber: string;
   email: string;
+  job: string;
+  idCard: string;
 }
 
 export interface StudentListItem {
@@ -441,3 +443,20 @@ export interface MenuResponse {
   __v?: number;
   reason?: string;
 }
+
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
+export interface ApiSuccessResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface UpdateParentInforRequest {
+  phoneNumber: string;
+  IDCard: string;
+  job: string;
+}
+
