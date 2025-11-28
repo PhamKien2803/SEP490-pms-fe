@@ -204,7 +204,9 @@ export const apiEndPoint = {
   GET_LIST_POST_BY_STUDENT: (studentId: string) =>
     `/dashboard-posts/getPostFileByStudent/${studentId}`,
   GET_PARENT_BY_ID: (id: string) => `/parents/getById/${id}`,
-  GET_ROOM_BY_TEACHER_ID: (id: string) => `/rooms/getByTeacher/${id}`
+  GET_ROOM_BY_TEACHER_ID: (id: string) => `/rooms/getByTeacher/${id}`,
+  CHANGE_PASSWORD_PARENT: (id: string) => `/dashboard-parent/changePassParent/${id}`,
+  UPDATE_PARENT_INFOR: (id: string) => `/dashboard-parent/updateParent/${id}`
 };
 
 export const apiConfig = {

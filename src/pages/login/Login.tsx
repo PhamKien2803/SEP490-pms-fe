@@ -1,4 +1,4 @@
-import { Form, Input, Button, Typography, Checkbox, Row, Col, Tooltip } from 'antd';
+import { Form, Input, Button, Typography, Checkbox, Row, Col, Tooltip, Modal, Divider } from 'antd';
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { getCurrentUser, login } from '../../redux/authSlice';
@@ -6,20 +6,23 @@ import { useNavigate } from 'react-router-dom';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { LocalStorageKey } from '../../types/local-storage';
 import { constants } from '../../constants';
-import { LockOutlined, UserOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { LockOutlined, UserOutlined, ArrowLeftOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import Paragraph from 'antd/lib/typography/Paragraph';
 import { toast } from 'react-toastify';
 
-const { Title, Link } = Typography;
+const { Title } = Typography;
 
 const Login = () => {
     const [form] = Form.useForm();
+    const [forgotForm] = Form.useForm();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
+
     const { isLoginPending } = useAppSelector((state) => state.auth);
     const [email, setEmail] = useLocalStorage<string>(LocalStorageKey.EMAIL, '');
     const [password, setPassword] = useState('');
     const [remember, setRemember] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleLogin = async (values: { email: string; password: string }) => {
         const result = await dispatch(login(values));
@@ -47,6 +50,13 @@ const Login = () => {
                 toast.error(error?.message || "Đăng nhập thất bại");
             }
         }
+    };
+
+    const handleSubmitPhone = (values: { phoneNumber: string }) => {
+        console.log('Số điện thoại cần hỗ trợ:', values.phoneNumber);
+        toast.success('Đã gửi yêu cầu! Chúng tôi sẽ liên hệ lại sớm.');
+        setIsModalOpen(false);
+        forgotForm.resetFields();
     };
 
     const animationsCSS = `
@@ -104,6 +114,7 @@ const Login = () => {
             zIndex: 1,
         }
     };
+
     return (
         <>
             <style>{animationsCSS}</style>
@@ -148,7 +159,12 @@ const Login = () => {
                                 <Form.Item name="remember" valuePropName="checked" noStyle>
                                     <Checkbox checked={remember} onChange={(e) => setRemember(e.target.checked)}>Ghi nhớ đăng nhập</Checkbox>
                                 </Form.Item>
-                                <Link href="#">Quên mật khẩu?</Link>
+                                <a
+                                    style={{ color: '#1890ff', cursor: 'pointer' }}
+                                    onClick={() => setIsModalOpen(true)}
+                                >
+                                    Quên mật khẩu?
+                                </a>
                             </Row>
 
                             <Form.Item>
@@ -163,15 +179,15 @@ const Login = () => {
                 <Col xs={0} lg={14} style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(160deg, #e6f7ff 0%, #d6e4ff 100%)' }}>
                     <style>
                         {`
-            @keyframes rotate {
-                from { transform: rotate(0deg) scale(1); }
-                to { transform: rotate(360deg) scale(1.05); }
-            }
-            .shape {
-                position: absolute;
-                animation: rotate 40s linear infinite alternate;
-            }
-        `}
+                        @keyframes rotate {
+                            from { transform: rotate(0deg) scale(1); }
+                            to { transform: rotate(360deg) scale(1.05); }
+                        }
+                        .shape {
+                            position: absolute;
+                            animation: rotate 40s linear infinite alternate;
+                        }
+                        `}
                     </style>
                     <div className="shape" style={{ width: '200px', height: '200px', background: 'rgba(9, 88, 217, 0.15)', borderRadius: '50%', top: '15%', left: '20%' }}></div>
                     <div className="shape" style={{ width: '150px', height: '150px', background: 'rgba(250, 140, 22, 0.25)', borderRadius: '15%', bottom: '20%', right: '25%', animationDuration: '30s', animationDirection: 'reverse' }}></div>
@@ -183,6 +199,48 @@ const Login = () => {
                     </div>
                 </Col>
             </Row>
+
+            <Modal
+                title="Hỗ trợ lấy lại mật khẩu"
+                open={isModalOpen}
+                onCancel={() => setIsModalOpen(false)}
+                footer={null}
+                centered
+            >
+                <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                    <InfoCircleOutlined style={{ fontSize: 40, color: '#1890ff', marginBottom: 10 }} />
+                    <Paragraph style={{ fontSize: '16px' }}>
+                        Vui lòng liên hệ <b>Giáo viên phụ trách</b> để được cấp lại mật khẩu.
+                    </Paragraph>
+                </div>
+
+                <Divider plain style={{ color: '#999', fontSize: '14px' }}>Hoặc</Divider>
+
+                <Paragraph style={{ textAlign: 'center', marginBottom: 15 }}>
+                    Để lại số điện thoại, chúng tôi sẽ liên hệ hỗ trợ bạn:
+                </Paragraph>
+
+                <Form form={forgotForm} onFinish={handleSubmitPhone} layout="vertical">
+                    <Form.Item
+                        name="phoneNumber"
+                        rules={[
+                            { required: true, message: 'Vui lòng nhập số điện thoại!' },
+                            { pattern: /^(0?)(3[2-9]|5[6|8|9]|7[0|6-9]|8[0-6|8|9]|9[0-4|6-9])[0-9]{7}$/, message: 'Số điện thoại không hợp lệ!' }
+                        ]}
+                    >
+                        <Input
+                            placeholder="Nhập số điện thoại của bạn"
+                            size="large"
+                        />
+                    </Form.Item>
+
+                    <Form.Item style={{ marginBottom: 0 }}>
+                        <Button type="primary" htmlType="submit" block size="large">
+                            Gửi yêu cầu hỗ trợ
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </Modal>
         </>
     );
 };
