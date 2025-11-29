@@ -62,12 +62,12 @@ function ClassManagement() {
         setSyncLoading(true);
         try {
             await classApis.asyncClass();
-            toast.success('Đồng bộ dữ liệu thành công!');
+            toast.success('Tự động xếp lớp thành công!');
             if (selectedSchoolYear) {
                 await fetchClassList(selectedSchoolYear);
             }
         } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error('Đồng bộ dữ liệu thất bại. Vui lòng thử lại.');
+            typeof error === "string" ? toast.info(error) : toast.error('Tự động xếp lớp thất bại. Vui lòng thử lại.');
         } finally {
             setSyncLoading(false);
         }
@@ -189,7 +189,7 @@ function ClassManagement() {
                                 loading={syncLoading}
                                 disabled={isCurrentYearExpired}
                             >
-                                Đồng bộ dữ liệu
+                                Tự động xếp lớp
                             </Button>)}
                             {canCreate && (<Button
                                 onClick={() => navigate(`${constants.APP_PREFIX}/classes/create`)}
