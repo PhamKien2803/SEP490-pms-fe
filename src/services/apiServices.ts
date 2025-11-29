@@ -316,7 +316,7 @@ export const parentsApis = {
   },
 
   deleteParents: async (id: string): Promise<void> => {
-    await axiosAuth.delete(apiEndPoint.DELETE_PARENT(id));
+    await axiosAuth.post(apiEndPoint.DELETE_PARENT(id));
   },
 
   getParentById: async (id: string): Promise<ParentStudent> => {
