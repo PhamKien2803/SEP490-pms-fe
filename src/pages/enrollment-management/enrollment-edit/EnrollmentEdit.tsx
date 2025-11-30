@@ -140,8 +140,8 @@ const EnrollmentEdit: React.FC = () => {
 
     const handleApprove = useCallback(async () => {
         if (!id) return;
-        if (!birthCertId || !healthCertId) {
-            toast.warn('Vui lòng tải đầy đủ Giấy khai sinh và Giấy khám sức khỏe.');
+        if (!birthCertId || !healthCertId || !studentImageId) {
+            toast.warn('Vui lòng tải đầy đủ Giấy khai sinh, Giấy khám sức khỏe và Ảnh học sinh.');
             return;
         }
 
@@ -660,23 +660,38 @@ const EnrollmentEdit: React.FC = () => {
                                         customRequest={customRequestImage}
                                         onChange={(info) => onFileChange(info, "image")}
                                         onRemove={() => onFileRemove("image")}
+                                        // onPreview={(file) => {
+                                        //     let previewUrl = file.url;
+
+                                        //     if (previewUrl && !previewUrl.startsWith("http")) {
+                                        //         previewUrl = `${constants.APP_PREFIX}/files/${previewUrl}`;
+                                        //     }
+
+                                        //     if (!previewUrl && file.thumbUrl) {
+                                        //         previewUrl = file.thumbUrl;
+                                        //     }
+
+                                        //     if (!previewUrl) {
+                                        //         toast.info("Không tìm thấy ảnh để mở!");
+                                        //         return;
+                                        //     }
+                                        //     window.open(previewUrl, "_blank");
+                                        // }}
                                         onPreview={(file) => {
-                                            let previewUrl = file.url;
-
-                                            if (previewUrl && !previewUrl.startsWith("http")) {
-                                                previewUrl = `${constants.APP_PREFIX}/files/${previewUrl}`;
-                                            }
-
-                                            if (!previewUrl && file.thumbUrl) {
-                                                previewUrl = file.thumbUrl;
-                                            }
+                                            let previewUrl = file.url || file.thumbUrl;
 
                                             if (!previewUrl) {
                                                 toast.info("Không tìm thấy ảnh để mở!");
                                                 return;
                                             }
+
+                                            if (!previewUrl.startsWith("http") && !previewUrl.startsWith("blob:")) {
+                                                previewUrl = `${constants.APP_PREFIX}/files/${previewUrl}`;
+                                            }
+
                                             window.open(previewUrl, "_blank");
                                         }}
+
                                         maxCount={1}
                                         style={{ width: 200, height: 200 }}
                                     >
