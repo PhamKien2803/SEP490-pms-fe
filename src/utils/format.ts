@@ -132,3 +132,12 @@ export const allowOnlyNumbers = (event: React.KeyboardEvent<HTMLInputElement>) =
         event.preventDefault();
     }
 };
+
+export const requiredTrimRule = (fieldName: string) => ({
+    validator(_: any, value: string) {
+        if (!value || value.trim() === '') {
+            return Promise.reject(new Error(`Vui lòng nhập ${fieldName}!`));
+        }
+        return Promise.resolve();
+    },
+});

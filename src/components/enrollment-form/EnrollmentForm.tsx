@@ -26,6 +26,7 @@ import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 import { enrollmentApis } from '../../services/apiServices';
 import { RegisterEnrollmentDto } from '../../types/enrollment';
+import { requiredTrimRule } from '../../utils/format';
 
 const { Title, Paragraph, Text } = Typography;
 const { Option } = Select;
@@ -146,8 +147,11 @@ const EnrollmentForm: React.FC = () => {
 
                     <Divider orientation="left"><UserOutlined /> Thông tin học sinh</Divider>
                     <Row gutter={24}>
-                        <Col xs={24} sm={12}><Form.Item name="studentName" label="Họ và tên" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }, noSpecialCharactersRule]}><Input
-                            onPaste={handlePasteName} prefix={<UserOutlined />} placeholder="Nguyễn Văn A" /></Form.Item></Col>
+                        <Col xs={24} sm={12}><Form.Item name="studentName" label="Họ và tên" rules={[
+                            requiredTrimRule("họ và tên"),
+                            noSpecialCharactersRule,
+                        ]}><Input
+                                onPaste={handlePasteName} prefix={<UserOutlined />} placeholder="Nguyễn Văn A" /></Form.Item></Col>
                         <Col xs={24} sm={12}>
                             <Form.Item
                                 name="studentDob"
@@ -207,7 +211,7 @@ const EnrollmentForm: React.FC = () => {
                                     {studentAge !== null && !dobError && (
                                         <Text type="secondary">→ {studentAge} tuổi</Text>
                                     )}
-                                    {dobError && <Text type="danger">{dobError}</Text>}
+                                    {/* {dobError && <Text type="danger">{dobError}</Text>} */}
                                 </Space>
                             </Form.Item>
                         </Col>
@@ -253,18 +257,18 @@ const EnrollmentForm: React.FC = () => {
                                 </Select>
                             </Form.Item>
                         </Col>
-                        <Col span={24}><Form.Item name="address" label="Địa chỉ thường trú" rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}><Input.TextArea rows={2} placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố" /></Form.Item></Col>
+                        <Col span={24}><Form.Item name="address" label="Địa chỉ thường trú" rules={[requiredTrimRule("địa chỉ")]}><Input.TextArea rows={2} placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố" /></Form.Item></Col>
                     </Row>
 
                     <Divider orientation="left"><ManOutlined /> Thông tin Cha</Divider>
                     <Row gutter={24}>
                         {!isExistingParent && (
                             <>
-                                <Col xs={24} sm={12}><Form.Item name="fatherName" label="Họ và tên Cha" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }, noSpecialCharactersRule]}><Input
+                                <Col xs={24} sm={12}><Form.Item name="fatherName" label="Họ và tên Cha" rules={[requiredTrimRule("họ tên Cha"), noSpecialCharactersRule]}><Input
                                     onPaste={handlePasteName} placeholder="Nguyễn Văn B" /></Form.Item></Col>
-                                <Col xs={24} sm={12}><Form.Item name="fatherJob" label="Nghề nghiệp" rules={[{ required: true }]}><Input placeholder="Kỹ sư" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="fatherJob" label="Nghề nghiệp" rules={[requiredTrimRule("nghề nghiệp Cha")]}><Input placeholder="Kỹ sư" /></Form.Item></Col>
                                 <Col xs={24} sm={12}><Form.Item name="fatherPhoneNumber" label="Số điện thoại Cha" rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<PhoneOutlined />} placeholder="09xxxxxxxx" /></Form.Item></Col>
-                                <Col xs={24} sm={12}><Form.Item name="fatherEmail" label="Email Cha" rules={[{ required: true, type: 'email', message: "Email không hợp lệ!" }]}><Input placeholder="example@email.com" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="fatherEmail" label="Email Cha" rules={[requiredTrimRule("email Cha"), { type: 'email', message: "Email không hợp lệ!" }]}><Input placeholder="example@email.com" /></Form.Item></Col>
                             </>
                         )}
                         <Col xs={24} sm={12}><Form.Item name="fatherIdCard" label="CCCD Cha" rules={[{ required: true, message: "Vui lòng nhập CCCD!" }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<IdcardOutlined />} placeholder="012345678901" /></Form.Item></Col>
@@ -299,11 +303,11 @@ const EnrollmentForm: React.FC = () => {
                     <Row gutter={24}>
                         {!isExistingParent && (
                             <>
-                                <Col xs={24} sm={12}><Form.Item name="motherName" label="Họ và tên Mẹ" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }, noSpecialCharactersRule]}><Input
+                                <Col xs={24} sm={12}><Form.Item name="motherName" label="Họ và tên Mẹ" rules={[requiredTrimRule("họ tên Mẹ"), noSpecialCharactersRule]}><Input
                                     onPaste={handlePasteName} placeholder="Lê Thị C" /></Form.Item></Col>
-                                <Col xs={24} sm={12}><Form.Item name="motherJob" label="Nghề nghiệp" rules={[{ required: true }]}><Input placeholder="Giáo viên" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="motherJob" label="Nghề nghiệp" rules={[requiredTrimRule("nghề nghiệp Mẹ")]}><Input placeholder="Giáo viên" /></Form.Item></Col>
                                 <Col xs={24} sm={12}><Form.Item name="motherPhoneNumber" label="Số điện thoại Mẹ" rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<PhoneOutlined />} placeholder="09xxxxxxxx" /></Form.Item></Col>
-                                <Col xs={24} sm={12}><Form.Item name="motherEmail" label="Email Mẹ" rules={[{ required: true, type: 'email', message: "Email không hợp lệ!" }]}><Input placeholder="example@email.com" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="motherEmail" label="Email Mẹ" rules={[requiredTrimRule("email Mẹ"), { type: 'email', message: "Email không hợp lệ!" }]}><Input placeholder="example@email.com" /></Form.Item></Col>
                             </>
                         )}
                         <Col xs={24} sm={12}><Form.Item name="motherIdCard" label="CCCD Mẹ" rules={[{ required: true, message: "Vui lòng nhập CCCD!" }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<IdcardOutlined />} placeholder="012345678901" /></Form.Item></Col>

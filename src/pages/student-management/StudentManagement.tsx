@@ -102,10 +102,6 @@ const StudentManagement: React.FC = () => {
   );
 
 
-
-
-
-
   const handleOpenDeleteModal = (id: string) => {
     setDeletingId(id);
     setIsDeleteModalOpen(true);
