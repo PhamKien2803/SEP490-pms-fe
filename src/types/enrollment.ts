@@ -29,6 +29,25 @@ interface EnrollmentFile {
     filename: string;
 }
 
+interface RevenueList {
+    amount: string;
+    revenueCode: number;
+    revenueId: number;
+    revenueName: string;
+    source: string;
+}
+
+interface TuitionDetail {
+    createdAt: string;
+    month: string;
+    receiptCode: number;
+    receiptName: number;
+    state: string;
+    schoolYear: string;
+    totalAmount: number;
+    tuitionName: number;
+    revenueList: RevenueList[];
+}
 
 export interface EnrollmentListItem {
     _id: string;
@@ -64,6 +83,8 @@ export interface EnrollmentListItem {
     birthCertFiles: EnrollmentFile;
     healthCertFiles: EnrollmentFile;
     createdBy: string;
+    tuitionDetails: TuitionDetail[];
+    totalAmountDue: number;
     updatedBy: string
 }
 

@@ -23,6 +23,7 @@ import {
     QuestionCircleOutlined,
     FileTextOutlined,
     TeamOutlined,
+    FilePdfOutlined,
     ManOutlined,
     WomanOutlined,
     SolutionOutlined,
@@ -89,6 +90,21 @@ const EnrollmentDetail: React.FC = () => {
                 return { color: "green", icon: <CheckCircleOutlined />, text: "Hoàn thành" };
             default:
                 return { color: "default", icon: <QuestionCircleOutlined />, text: s };
+        }
+    };
+
+    const handleViewPDF = async (fileId?: string) => {
+        if (!fileId) {
+            toast.warn("Không tìm thấy file đính kèm.");
+            return;
+        }
+        try {
+            const arrayBuffer = await enrollmentApis.getPDFById(fileId);
+            const blob = new Blob([arrayBuffer], { type: "application/pdf" });
+            const fileURL = URL.createObjectURL(blob);
+            window.open(fileURL, "_blank");
+        } catch (error) {
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể mở file PDF.");
         }
     };
 
@@ -249,6 +265,7 @@ const EnrollmentDetail: React.FC = () => {
                 </Col>
 
                 <Col xs={24} lg={8}>
+
                     <Card
                         bordered={false}
                         style={{
@@ -277,6 +294,7 @@ const EnrollmentDetail: React.FC = () => {
                                     {statusInfo.text}
                                 </Tag>
                             </Descriptions.Item>
+
                             <Descriptions.Item label="Ngày nộp đơn">
                                 <Text strong>
                                     {dayjs(data.createdAt).format("DD/MM/YYYY HH:mm")}
@@ -286,6 +304,7 @@ const EnrollmentDetail: React.FC = () => {
                                     ({dayjs(data.createdAt).fromNow()})
                                 </Text>
                             </Descriptions.Item>
+
                             {data.state === "Từ chối" && (
                                 <Descriptions.Item label="Lý do từ chối">
                                     <Text type="danger" italic>
@@ -293,8 +312,98 @@ const EnrollmentDetail: React.FC = () => {
                                     </Text>
                                 </Descriptions.Item>
                             )}
+
+                            <Descriptions.Item label="Tổng tiền cần thanh toán">
+                                <Text strong style={{ fontSize: 18, color: "red" }}>
+                                    {data.totalAmountDue?.toLocaleString("vi-VN")} đ
+                                </Text>
+                            </Descriptions.Item>
+
+                            <Descriptions.Item label="Chi tiết học phí">
+                                {data.tuitionDetails?.length === 0 ? (
+                                    <Text type="secondary">Không có dữ liệu học phí.</Text>
+                                ) : (
+                                    data.tuitionDetails.map((t, index) => (
+                                        <Card
+                                            key={index}
+                                            size="small"
+                                            style={{
+                                                marginBottom: 12,
+                                                background: "#fafafa",
+                                                borderRadius: 8,
+                                            }}
+                                        >
+                                            <Space direction="vertical" size={4} style={{ width: "100%" }}>
+                                                <Text strong>
+                                                    {t.receiptName} ({t.receiptCode})
+                                                </Text>
+
+                                                <Text>
+                                                    <b>Tháng:</b> {t.month}
+                                                </Text>
+
+                                                <Text>
+                                                    <b>Tổng tiền:</b>{" "}
+                                                    {t.totalAmount.toLocaleString("vi-VN")} đ
+                                                </Text>
+
+                                                <Tag color="blue">{t.state}</Tag>
+
+                                                <Text type="secondary">
+                                                    Ngày tạo: {dayjs(t.createdAt).format("DD/MM/YYYY HH:mm")}
+                                                </Text>
+
+                                                {t.revenueList?.length > 0 && (
+                                                    <div style={{ marginTop: 8 }}>
+                                                        <Text strong>Chi tiết khoản thu:</Text>
+                                                        {t.revenueList.map((r, idx) => (
+                                                            <div key={idx} style={{ marginTop: 4 }}>
+                                                                <Text>- {r.revenueName}: </Text>
+                                                                <Text strong>
+                                                                    {r.amount}
+                                                                </Text>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </Space>
+                                        </Card>
+                                    ))
+                                )}
+                            </Descriptions.Item>
                         </Descriptions>
                     </Card>
+
+                    <Card
+                        bordered={false}
+                        style={{ marginTop: 24, boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)" }}
+                        title={
+                            <Title level={4} style={{ margin: 0 }}>
+                                <FileTextOutlined style={{ marginRight: 8 }} />
+                                Tài Liệu Đính Kèm
+                            </Title>
+                        }
+                    >
+                        <Button
+                            type="link"
+                            icon={<FilePdfOutlined />}
+                            onClick={() => handleViewPDF(data.birthCertId)}
+                            disabled={!data.birthCertId}
+                            style={{ paddingLeft: 0, display: "block" }}
+                        >
+                            Giấy khai sinh
+                        </Button>
+                        <Button
+                            type="link"
+                            icon={<FilePdfOutlined />}
+                            onClick={() => handleViewPDF(data.healthCertId)}
+                            disabled={!data.healthCertId}
+                            style={{ paddingLeft: 0, display: "block" }}
+                        >
+                            Giấy khám sức khỏe
+                        </Button>
+                    </Card>
+
                 </Col>
             </Row>
         </div>
