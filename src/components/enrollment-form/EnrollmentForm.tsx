@@ -79,7 +79,7 @@ const EnrollmentForm: React.FC = () => {
             form.resetFields();
             setIsExistingParent(false);
         } catch (error) {
-            typeof error === "string" ? toast.warn(error) : toast.error('Có lỗi xảy ra. Vui lòng thử lại!');
+            typeof error === "string" ? toast.info(error) : toast.error('Có lỗi xảy ra. Vui lòng thử lại!');
         } finally {
             setLoading(false);
             setFormData(null);
@@ -150,6 +150,18 @@ const EnrollmentForm: React.FC = () => {
                         <Col xs={24} sm={12}><Form.Item name="studentName" label="Họ và tên" rules={[
                             requiredTrimRule("họ và tên"),
                             noSpecialCharactersRule,
+                            {
+                                validator: (_, value) => {
+                                    if (!value) return Promise.resolve();
+                                    if (/^\s|\s$/.test(value)) {
+                                        return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                    }
+                                    if (/\s{2,}/.test(value)) {
+                                        return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                    }
+                                    return Promise.resolve();
+                                },
+                            },
                         ]}><Input
                                 onPaste={handlePasteName} prefix={<UserOutlined />} placeholder="Nguyễn Văn A" /></Form.Item></Col>
                         <Col xs={24} sm={12}>
@@ -257,18 +269,63 @@ const EnrollmentForm: React.FC = () => {
                                 </Select>
                             </Form.Item>
                         </Col>
-                        <Col span={24}><Form.Item name="address" label="Địa chỉ thường trú" rules={[requiredTrimRule("địa chỉ")]}><Input.TextArea rows={2} placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố" /></Form.Item></Col>
+                        <Col span={24}><Form.Item name="address" label="Địa chỉ thường trú" rules={[requiredTrimRule("địa chỉ"), {
+                            validator: (_, value) => {
+                                if (!value) return Promise.resolve();
+                                if (/^\s|\s$/.test(value)) {
+                                    return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                }
+                                if (/\s{2,}/.test(value)) {
+                                    return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                }
+                                return Promise.resolve();
+                            },
+                        }]}><Input.TextArea rows={2} placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố" /></Form.Item></Col>
                     </Row>
 
                     <Divider orientation="left"><ManOutlined /> Thông tin Cha</Divider>
                     <Row gutter={24}>
                         {!isExistingParent && (
                             <>
-                                <Col xs={24} sm={12}><Form.Item name="fatherName" label="Họ và tên Cha" rules={[requiredTrimRule("họ tên Cha"), noSpecialCharactersRule]}><Input
-                                    onPaste={handlePasteName} placeholder="Nguyễn Văn B" /></Form.Item></Col>
-                                <Col xs={24} sm={12}><Form.Item name="fatherJob" label="Nghề nghiệp" rules={[requiredTrimRule("nghề nghiệp Cha")]}><Input placeholder="Kỹ sư" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="fatherName" label="Họ và tên Cha" rules={[requiredTrimRule("họ tên Cha"), noSpecialCharactersRule,
+                                {
+                                    validator: (_, value) => {
+                                        if (!value) return Promise.resolve();
+                                        if (/^\s|\s$/.test(value)) {
+                                            return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                        }
+                                        if (/\s{2,}/.test(value)) {
+                                            return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                },]}><Input
+                                        onPaste={handlePasteName} placeholder="Nguyễn Văn B" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="fatherJob" label="Nghề nghiệp" rules={[requiredTrimRule("nghề nghiệp Cha"), {
+                                    validator: (_, value) => {
+                                        if (!value) return Promise.resolve();
+                                        if (/^\s|\s$/.test(value)) {
+                                            return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                        }
+                                        if (/\s{2,}/.test(value)) {
+                                            return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                }]}><Input placeholder="Kỹ sư" /></Form.Item></Col>
                                 <Col xs={24} sm={12}><Form.Item name="fatherPhoneNumber" label="Số điện thoại Cha" rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<PhoneOutlined />} placeholder="09xxxxxxxx" /></Form.Item></Col>
-                                <Col xs={24} sm={12}><Form.Item name="fatherEmail" label="Email Cha" rules={[requiredTrimRule("email Cha"), { type: 'email', message: "Email không hợp lệ!" }]}><Input placeholder="example@email.com" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="fatherEmail" label="Email Cha" rules={[requiredTrimRule("email Cha"), { type: 'email', message: "Email không hợp lệ!" }, {
+                                    validator: (_, value) => {
+                                        if (!value) return Promise.resolve();
+                                        if (/^\s|\s$/.test(value)) {
+                                            return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                        }
+                                        if (/\s{2,}/.test(value)) {
+                                            return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                }]}><Input placeholder="example@email.com" /></Form.Item></Col>
                             </>
                         )}
                         <Col xs={24} sm={12}><Form.Item name="fatherIdCard" label="CCCD Cha" rules={[{ required: true, message: "Vui lòng nhập CCCD!" }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<IdcardOutlined />} placeholder="012345678901" /></Form.Item></Col>
@@ -303,11 +360,44 @@ const EnrollmentForm: React.FC = () => {
                     <Row gutter={24}>
                         {!isExistingParent && (
                             <>
-                                <Col xs={24} sm={12}><Form.Item name="motherName" label="Họ và tên Mẹ" rules={[requiredTrimRule("họ tên Mẹ"), noSpecialCharactersRule]}><Input
-                                    onPaste={handlePasteName} placeholder="Lê Thị C" /></Form.Item></Col>
-                                <Col xs={24} sm={12}><Form.Item name="motherJob" label="Nghề nghiệp" rules={[requiredTrimRule("nghề nghiệp Mẹ")]}><Input placeholder="Giáo viên" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="motherName" label="Họ và tên Mẹ" rules={[requiredTrimRule("họ tên Mẹ"), noSpecialCharactersRule, {
+                                    validator: (_, value) => {
+                                        if (!value) return Promise.resolve();
+                                        if (/^\s|\s$/.test(value)) {
+                                            return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                        }
+                                        if (/\s{2,}/.test(value)) {
+                                            return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                },]}><Input
+                                        onPaste={handlePasteName} placeholder="Lê Thị C" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="motherJob" label="Nghề nghiệp" rules={[requiredTrimRule("nghề nghiệp Mẹ"), {
+                                    validator: (_, value) => {
+                                        if (!value) return Promise.resolve();
+                                        if (/^\s|\s$/.test(value)) {
+                                            return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                        }
+                                        if (/\s{2,}/.test(value)) {
+                                            return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                }]}><Input placeholder="Giáo viên" /></Form.Item></Col>
                                 <Col xs={24} sm={12}><Form.Item name="motherPhoneNumber" label="Số điện thoại Mẹ" rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }, phoneValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<PhoneOutlined />} placeholder="09xxxxxxxx" /></Form.Item></Col>
-                                <Col xs={24} sm={12}><Form.Item name="motherEmail" label="Email Mẹ" rules={[requiredTrimRule("email Mẹ"), { type: 'email', message: "Email không hợp lệ!" }]}><Input placeholder="example@email.com" /></Form.Item></Col>
+                                <Col xs={24} sm={12}><Form.Item name="motherEmail" label="Email Mẹ" rules={[requiredTrimRule("email Mẹ"), { type: 'email', message: "Email không hợp lệ!" }, {
+                                    validator: (_, value) => {
+                                        if (!value) return Promise.resolve();
+                                        if (/^\s|\s$/.test(value)) {
+                                            return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                        }
+                                        if (/\s{2,}/.test(value)) {
+                                            return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                }]}><Input placeholder="example@email.com" /></Form.Item></Col>
                             </>
                         )}
                         <Col xs={24} sm={12}><Form.Item name="motherIdCard" label="CCCD Mẹ" rules={[{ required: true, message: "Vui lòng nhập CCCD!" }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<IdcardOutlined />} placeholder="012345678901" /></Form.Item></Col>

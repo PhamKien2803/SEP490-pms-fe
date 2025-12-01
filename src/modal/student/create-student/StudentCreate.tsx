@@ -286,7 +286,18 @@ const StudentCreate: React.FC = () => {
                                 <Form.Item
                                     name="studentName"
                                     label="Họ và tên"
-                                    rules={[requiredRule("Vui lòng nhập họ tên học sinh!"), nameValidationRule]}
+                                    rules={[requiredRule("Vui lòng nhập họ tên học sinh!"), nameValidationRule, {
+                                        validator: (_, value) => {
+                                            if (!value) return Promise.resolve();
+                                            if (/^\s|\s$/.test(value)) {
+                                                return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                            }
+                                            if (/\s{2,}/.test(value)) {
+                                                return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    }]}
                                 >
                                     <Input prefix={<UserOutlined />} placeholder="Nhập họ và tên học sinh" />
                                 </Form.Item>
@@ -373,7 +384,18 @@ const StudentCreate: React.FC = () => {
                                 <Form.Item
                                     name="address"
                                     label="Địa chỉ"
-                                    rules={[requiredRule("Vui lòng nhập địa chỉ!")]}
+                                    rules={[requiredRule("Vui lòng nhập địa chỉ!"), {
+                                        validator: (_, value) => {
+                                            if (!value) return Promise.resolve();
+                                            if (/^\s|\s$/.test(value)) {
+                                                return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                            }
+                                            if (/\s{2,}/.test(value)) {
+                                                return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    }]}
                                 >
                                     <Input.TextArea rows={2} placeholder="Nhập địa chỉ (số nhà, đường, phường/xã, quận/huyện, tỉnh/TP)" />
                                 </Form.Item>
@@ -476,7 +498,18 @@ const StudentCreate: React.FC = () => {
                                 <Form.Item
                                     name="fatherName"
                                     label="Họ và tên Cha"
-                                    rules={[requiredRule("Vui lòng nhập họ tên Cha!"), nameValidationRule]}
+                                    rules={[requiredRule("Vui lòng nhập họ tên Cha!"), nameValidationRule, {
+                                        validator: (_, value) => {
+                                            if (!value) return Promise.resolve();
+                                            if (/^\s|\s$/.test(value)) {
+                                                return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                            }
+                                            if (/\s{2,}/.test(value)) {
+                                                return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    }]}
                                 >
                                     <Input placeholder="Nhập họ và tên Cha" />
                                 </Form.Item>
@@ -499,7 +532,18 @@ const StudentCreate: React.FC = () => {
                                 <Form.Item
                                     name="fatherJob"
                                     label="Nghề nghiệp Cha"
-                                    rules={[requiredRule("Vui lòng nhập nghề nghiệp Cha!"), jobValidationRule]}
+                                    rules={[requiredRule("Vui lòng nhập nghề nghiệp Cha!"), jobValidationRule, {
+                                        validator: (_, value) => {
+                                            if (!value) return Promise.resolve();
+                                            if (/^\s|\s$/.test(value)) {
+                                                return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                            }
+                                            if (/\s{2,}/.test(value)) {
+                                                return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    }]}
                                 >
                                     <Input placeholder="Nhập nghề nghiệp Cha" />
                                 </Form.Item>
@@ -529,7 +573,18 @@ const StudentCreate: React.FC = () => {
                                 <Form.Item
                                     name="fatherEmail"
                                     label="Email Cha"
-                                    rules={[emailValidationRule]}
+                                    rules={[emailValidationRule, {
+                                        validator: (_, value) => {
+                                            if (!value) return Promise.resolve();
+                                            if (/^\s|\s$/.test(value)) {
+                                                return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                            }
+                                            if (/\s{2,}/.test(value)) {
+                                                return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    }]}
                                 >
                                     <Input placeholder="Nhập email Cha" />
                                 </Form.Item>
@@ -543,7 +598,18 @@ const StudentCreate: React.FC = () => {
                                 <Form.Item
                                     name="motherName"
                                     label="Họ và tên Mẹ"
-                                    rules={[requiredRule("Vui lòng nhập họ tên Mẹ!"), nameValidationRule]}
+                                    rules={[requiredRule("Vui lòng nhập họ tên Mẹ!"), nameValidationRule, {
+                                        validator: (_, value) => {
+                                            if (!value) return Promise.resolve();
+                                            if (/^\s|\s$/.test(value)) {
+                                                return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                            }
+                                            if (/\s{2,}/.test(value)) {
+                                                return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    }]}
                                 >
                                     <Input placeholder="Nhập họ và tên Mẹ" />
                                 </Form.Item>
@@ -566,7 +632,18 @@ const StudentCreate: React.FC = () => {
                                 <Form.Item
                                     name="motherJob"
                                     label="Nghề nghiệp Mẹ"
-                                    rules={[requiredRule("Vui lòng nhập nghề nghiệp Mẹ!"), jobValidationRule]}
+                                    rules={[requiredRule("Vui lòng nhập nghề nghiệp Mẹ!"), jobValidationRule, {
+                                        validator: (_, value) => {
+                                            if (!value) return Promise.resolve();
+                                            if (/^\s|\s$/.test(value)) {
+                                                return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                            }
+                                            if (/\s{2,}/.test(value)) {
+                                                return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    }]}
                                 >
                                     <Input placeholder="Nhập nghề nghiệp Mẹ" />
                                 </Form.Item>
@@ -576,7 +653,18 @@ const StudentCreate: React.FC = () => {
                                 <Form.Item
                                     name="motherIdCard"
                                     label="CCCD Mẹ"
-                                    rules={[requiredRule("Vui lòng nhập CCCD Mẹ!"), idCardValidationRule]}
+                                    rules={[requiredRule("Vui lòng nhập CCCD Mẹ!"), idCardValidationRule, {
+                                        validator: (_, value) => {
+                                            if (!value) return Promise.resolve();
+                                            if (/^\s|\s$/.test(value)) {
+                                                return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                            }
+                                            if (/\s{2,}/.test(value)) {
+                                                return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    }]}
                                 >
                                     <Input onKeyPress={allowOnlyNumbers} placeholder="Nhập 12 số CCCD Mẹ" />
                                 </Form.Item>
@@ -596,7 +684,18 @@ const StudentCreate: React.FC = () => {
                                 <Form.Item
                                     name="motherEmail"
                                     label="Email Mẹ"
-                                    rules={[emailValidationRule]}
+                                    rules={[emailValidationRule, {
+                                        validator: (_, value) => {
+                                            if (!value) return Promise.resolve();
+                                            if (/^\s|\s$/.test(value)) {
+                                                return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                            }
+                                            if (/\s{2,}/.test(value)) {
+                                                return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    }]}
                                 >
                                     <Input placeholder="Nhập email Mẹ" />
                                 </Form.Item>

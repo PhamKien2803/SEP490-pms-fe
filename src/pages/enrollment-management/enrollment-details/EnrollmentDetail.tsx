@@ -323,7 +323,7 @@ const EnrollmentDetail: React.FC = () => {
                                 {data.tuitionDetails?.length === 0 ? (
                                     <Text type="secondary">Không có dữ liệu học phí.</Text>
                                 ) : (
-                                    data.tuitionDetails.map((t, index) => (
+                                    data.tuitionDetails?.map((t, index) => (
                                         <Card
                                             key={index}
                                             size="small"
