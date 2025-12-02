@@ -328,6 +328,7 @@ const FoodManagement: React.FC = () => {
                                     state: { foodDetail: record }
                                 })
                             }
+                            disabled={loading || isAITriggering}
                         />
                     </Tooltip>
                     {canUpdate && (

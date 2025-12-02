@@ -12,7 +12,7 @@ import {
   Row,
   Col,
   Divider,
-  Flex,
+  // Flex,
   Modal,
 } from "antd";
 import {
@@ -37,6 +37,7 @@ import {
 } from "../../../types/food-management";
 import { foodApis } from "../../../services/apiServices";
 import { noSpecialCharactersandNumberRule } from "../../../utils/format";
+import CaloAICalculating from "../../../components/CaloAl/CaloAICalculating";
 const { Title, Text } = Typography;
 const { Option } = Select;
 
@@ -261,15 +262,7 @@ const UpdateFoodPage: React.FC = () => {
     );
   }
   if (loading) {
-    return (
-      <Flex
-        align="center"
-        justify="center"
-        style={{ minHeight: "calc(100vh - 150px)" }}
-      >
-        <Spin size="large" />
-      </Flex>
-    );
+    return <CaloAICalculating />;
   }
 
   return (
