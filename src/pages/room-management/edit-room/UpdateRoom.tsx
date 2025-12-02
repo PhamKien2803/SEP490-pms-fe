@@ -20,7 +20,7 @@ import {
   PlusOutlined,
   MinusCircleOutlined,
   HomeOutlined,
-  UsergroupAddOutlined,
+  // UsergroupAddOutlined,
   ReadOutlined,
   ToolOutlined,
   TagOutlined,
@@ -714,7 +714,7 @@ const UpdateRoom: React.FC = () => {
                 <Input disabled={!isEditing || !isRoomInfoEditable} />
               </Form.Item>
             </Col>
-            <Col xs={24} md={6}>
+            {/* <Col xs={24} md={6}>
               <Form.Item
                 label={
                   <Space>
@@ -731,7 +731,7 @@ const UpdateRoom: React.FC = () => {
                   disabled={!isEditing || !isRoomInfoEditable}
                 />
               </Form.Item>
-            </Col>
+            </Col> */}
             <Col xs={24} md={6}>
               <Form.Item
                 label={

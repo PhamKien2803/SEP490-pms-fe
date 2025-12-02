@@ -18,7 +18,7 @@ import {
     PlusOutlined,
     MinusCircleOutlined,
     HomeOutlined,
-    UsergroupAddOutlined,
+    // UsergroupAddOutlined,
     ReadOutlined,
     ToolOutlined,
     TagOutlined,
@@ -267,7 +267,7 @@ const CreateRoom: React.FC = () => {
                                 <Input placeholder="Ví dụ: Phòng học, Phòng chức năng" />
                             </Form.Item>
                         </Col>
-                        <Col xs={24} md={6}>
+                        {/* <Col xs={24} md={6}>
                             <Form.Item
                                 label={
                                     <Space>
@@ -284,7 +284,7 @@ const CreateRoom: React.FC = () => {
                                     placeholder="25"
                                 />
                             </Form.Item>
-                        </Col>
+                        </Col> */}
                         <Col xs={24} md={6}>
                             <Form.Item
                                 label={

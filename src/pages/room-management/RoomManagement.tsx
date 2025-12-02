@@ -86,20 +86,25 @@ const RoomManagement: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    console.log("User info:", user?.isTeacher);
+    console.log("teacherId",teacherId);
+
     if (user?.isTeacher && teacherId) {
       const fetchRoomByTeacher = async () => {
         try {
           setLoading(true);
           const room = await roomApis.getRoomByTeacherId(teacherId);
           setTeacherRoom(room);
-        } catch {
+        } catch (error){
+          typeof error === "string" ? toast.info(error) :
           toast.error("Không thể tải phòng học của giáo viên.");
         } finally {
           setLoading(false);
         }
       };
       fetchRoomByTeacher();
-    } else {
+    } 
+    else {
       fetchListRooms({ page: pagination.current!, limit: pagination.pageSize! });
     }
   }, [user?.isTeacher, teacherId, fetchListRooms, pagination.current, pagination.pageSize]);
@@ -170,13 +175,13 @@ const RoomManagement: React.FC = () => {
       key: "roomType",
       width: 150
     },
-    {
-      title: "Sức chứa",
-      dataIndex: "capacity",
-      key: "capacity",
-      width: 80,
-      align: "center"
-    },
+    // {
+    //   title: "Sức chứa",
+    //   dataIndex: "capacity",
+    //   key: "capacity",
+    //   width: 80,
+    //   align: "center"
+    // },
     {
       title: "Trạng thái",
       dataIndex: "state",
