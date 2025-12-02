@@ -37,7 +37,7 @@ const categoryOptions = [
     "Phát triển tình cảm",
     "Phát triển thẩm mỹ",
     "Phát triển kỹ năng xã hội",
-    "Hoạt động sự kiện"
+    // "Hoạt động sự kiện"
 ];
 
 const EATING_OPTIONS = toOptions(['hết', 'gần hết', 'một nửa', 'ít', 'không ăn', '']);
