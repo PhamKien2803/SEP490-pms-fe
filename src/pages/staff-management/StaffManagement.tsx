@@ -135,7 +135,7 @@ const StaffManagement: React.FC = () => {
         });
       }
     } catch (error) {
-      toast.error(typeof error === "string" ? error : "Tạo nhân viên thất bại.");
+      toast.info(typeof error === "string" ? error : "Tạo nhân viên thất bại.");
     } finally {
       setIsSubmitting(false);
     }
@@ -162,7 +162,7 @@ const StaffManagement: React.FC = () => {
         limit: pagination.pageSize!,
       });
     } catch (error) {
-      toast.error(typeof error === "string" ? error : "Cập nhật nhân viên thất bại.");
+      toast.info(typeof error === "string" ? error : "Cập nhật nhân viên thất bại.");
     } finally {
       setIsUpdating(false);
     }
@@ -190,7 +190,7 @@ const StaffManagement: React.FC = () => {
         });
       }
     } catch (error) {
-      toast.error(typeof error === "string" ? error : "Xóa học sinh thất bại.");
+      toast.info(typeof error === "string" ? error : "Xóa học sinh thất bại.");
     } finally {
       setIsDeleting(false);
       setDeletingId(null);
