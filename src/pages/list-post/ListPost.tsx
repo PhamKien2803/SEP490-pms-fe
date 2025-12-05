@@ -61,14 +61,12 @@ type ModalState =
   | { mode: "edit"; post: Post };
 
 const ListPost = (props: ListPostProps) => {
-  const { dataPosts, loading, fetchApi } = props;
+  const { dataPosts = [], loading, fetchApi } = props;
   const { canCreate } = usePagePermission();
 
   const [modalState, setModalState] = useState<ModalState>({ mode: "closed" });
 
-  const recentPosts = useMemo(() => {
-    return dataPosts.slice(0, 5);
-  }, [dataPosts]);
+  const recentPosts = useMemo(() => dataPosts.slice(0, 5), [dataPosts]);
 
   const handleSuccess = () => {
     setModalState({ mode: "closed" });
