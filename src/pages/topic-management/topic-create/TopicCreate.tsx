@@ -39,6 +39,7 @@ import { toast } from 'react-toastify';
 import MergedActivityTable from '../../../components/table/MergedActivityTable';
 import { useCurrentUser } from '../../../hooks/useCurrentUser';
 import { usePageTitle } from '../../../hooks/usePageTitle';
+import { requiredTrimRule } from '../../../utils/format';
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -211,11 +212,23 @@ function TopicCreate() {
 
     const onFinish = async (values: any) => {
         if (!suggestedData) {
-            toast.warn('Vui lòng nhấn "Gợi ý hoạt động" trước khi lưu.');
+            toast.info('Vui lòng nhấn "Gợi ý hoạt động" trước khi lưu.');
             return;
         }
 
         setLoading(true);
+
+        const missingActivities = [
+            ...fixActivities,
+            ...coreActivities,
+            ...eventActivities,
+        ].filter((row) => !row.activityId);
+
+        if (missingActivities.length > 0) {
+            toast.info('Vui lòng chọn đầy đủ tên hoạt động cho tất cả các dòng.');
+            setLoading(false);
+            return;
+        }
 
         const formatFixRows = (rows: UnifiedActivityRow[]): ActivityInput[] => {
             return rows
@@ -244,7 +257,7 @@ function TopicCreate() {
             finalCore.length === 0 &&
             finalEvent.length === 0
         ) {
-            toast.warn(
+            toast.info(
                 'Vui lòng chọn ít nhất một hoạt động (và nhập số buổi nếu cần).'
             );
             setLoading(false);
@@ -301,7 +314,22 @@ function TopicCreate() {
                                 <Form.Item
                                     name="topicName"
                                     label="Tên chủ đề"
-                                    rules={[{ required: true, message: 'Vui lòng nhập tên chủ đề' }]}
+                                    rules={[
+                                        requiredTrimRule("Tên chủ đề"),
+                                        // noSpecialCharactersRule,
+                                        {
+                                            validator: (_, value) => {
+                                                if (!value) return Promise.resolve();
+                                                if (/^\s|\s$/.test(value)) {
+                                                    return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                                }
+                                                if (/\s{2,}/.test(value)) {
+                                                    return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                                }
+                                                return Promise.resolve();
+                                            },
+                                        },
+                                    ]}
                                 >
                                     <Input placeholder="Ví dụ: Chủ đề Gia đình" />
                                 </Form.Item>

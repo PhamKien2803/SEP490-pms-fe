@@ -113,6 +113,11 @@ export const noSpecialCharactersRule = {
     message: "Không được nhập ký tự đặc biệt!",
 };
 
+export const noNumberRule = {
+    pattern: /^[\p{L}\s]+$/u,
+    message: "Không được nhập số!",
+};
+
 
 export const noNegativeNumberRule = {
     validator: (_: any, value: any) => {

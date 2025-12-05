@@ -17,6 +17,7 @@ import { StudentInClass, TeacherInClass, CreateClassDto, AvailableRoom } from '.
 import { classApis } from '../../../services/apiServices';
 import { ageOptions } from '../../../components/hard-code-action';
 import { usePageTitle } from '../../../hooks/usePageTitle';
+import { requiredTrimRule } from '../../../utils/format';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -25,11 +26,12 @@ function CreateClass() {
     const navigate = useNavigate();
     const [form] = Form.useForm();
     usePageTitle('Tạo mới lớp học - Cá Heo Xanh');
+
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    // const [error, setError] = useState<string | null>(null);
     const [isDirty, setIsDirty] = useState(false);
     const [isBackConfirmVisible, setIsBackConfirmVisible] = useState(false);
+
     const [students, setStudents] = useState<StudentInClass[]>([]);
     const [allAvailableStudents, setAllAvailableStudents] = useState<StudentInClass[]>([]);
     const [allAvailableTeachers, setAllAvailableTeachers] = useState<TeacherInClass[]>([]);
@@ -37,15 +39,13 @@ function CreateClass() {
     const [isStudentModalVisible, setIsStudentModalVisible] = useState(false);
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchInitialData = async () => {
             setLoading(true);
             try {
-                const [allStudents, allTeachers, allRooms] = await Promise.all([
-                    classApis.getAllAvailableStudents(),
+                const [allTeachers, allRooms] = await Promise.all([
                     classApis.getAllAvailableTeachers(),
                     classApis.getAllAvailableRoom()
                 ]);
-                setAllAvailableStudents(allStudents);
                 setAllAvailableTeachers(allTeachers);
                 setAvailableRooms(allRooms);
             } catch (error) {
@@ -54,8 +54,17 @@ function CreateClass() {
                 setLoading(false);
             }
         };
-        fetchData();
+        fetchInitialData();
     }, []);
+
+    const fetchStudentsByAge = async (age?: number) => {
+        try {
+            const students = await classApis.getAllAvailableStudents(age);
+            setAllAvailableStudents(students);
+        } catch (error) {
+            typeof error === "string" ? toast.info(error) : toast.error('Không thể tải danh sách học sinh.');
+        }
+    };
 
     const handleBackNavigation = () => {
         if (isDirty) {
@@ -89,6 +98,14 @@ function CreateClass() {
             form.setFieldsValue({ teachers: limitedSelection });
         }
         setIsDirty(true);
+    };
+
+    const handleValuesChange = (changed: any) => {
+        setIsDirty(true);
+        if ('age' in changed) {
+            fetchStudentsByAge(changed.age);
+            setStudents([]);
+        }
     };
 
     const onFinish = async (values: { className: string; age: number; room?: string; teachers?: string[] }) => {
@@ -142,7 +159,12 @@ function CreateClass() {
                 </Col>
             </Row>
 
-            <Form form={form} layout="vertical" onFinish={onFinish} onValuesChange={() => setIsDirty(true)}>
+            <Form
+                form={form}
+                layout="vertical"
+                onFinish={onFinish}
+                onValuesChange={handleValuesChange}
+            >
                 <Card
                     title={<><TeamOutlined style={{ marginRight: 8 }} />Thông tin chung</>}
                     style={{ marginBottom: 24 }}
@@ -150,7 +172,22 @@ function CreateClass() {
                 >
                     <Row gutter={24}>
                         <Col xs={24} sm={12} md={8}>
-                            <Form.Item name="className" label="Tên Lớp" rules={[{ required: true, message: 'Vui lòng nhập tên lớp!' }]}>
+                            <Form.Item name="className" label="Tên Lớp" rules={[
+                                requiredTrimRule("Tên lớp"),
+                                // noSpecialCharactersRule,
+                                {
+                                    validator: (_, value) => {
+                                        if (!value) return Promise.resolve();
+                                        if (/^\s|\s$/.test(value)) {
+                                            return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                        }
+                                        if (/\s{2,}/.test(value)) {
+                                            return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                },
+                            ]}>
                                 <Input placeholder="Ví dụ: Lớp Mầm 1" prefix={<TeamOutlined />} />
                             </Form.Item>
                         </Col>

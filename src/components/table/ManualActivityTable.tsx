@@ -172,7 +172,7 @@ const ManualActivityTable: React.FC<ManualActivityTableProps> = ({
         },
     });
 
-    if (tableType !== 'fix') {
+    if (tableType !== 'fix' && tableType !== 'event') {
         columns.push({
             title: 'Số buổi / tuần',
             key: 'sessions',

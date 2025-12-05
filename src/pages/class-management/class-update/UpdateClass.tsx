@@ -22,6 +22,7 @@ import AddMemberTableModal from '../../../modal/class-modal/AddMemberTableModal'
 import TransferModal from '../../../modal/class-modal/TransferModal';
 import { ageOptions } from '../../../components/hard-code-action';
 import { usePageTitle } from '../../../hooks/usePageTitle';
+import { requiredTrimRule } from '../../../utils/format';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -57,9 +58,11 @@ function UpdateClass() {
         }
         setLoading(true);
         try {
-            const [classDetails, allStudents, allTeachers, allRooms] = await Promise.all([
-                classApis.getClassById(id),
-                classApis.getAllAvailableStudents(),
+            const classDetails = await classApis.getClassById(id);
+            const age = parseInt(classDetails.age, 10);
+
+            const [allStudents, allTeachers, allRooms] = await Promise.all([
+                classApis.getAllAvailableStudents(age),
                 classApis.getAllAvailableTeachers(),
                 classApis.getAllAvailableRoom(),
             ]);
@@ -68,9 +71,10 @@ function UpdateClass() {
             if (currentRoom && !allRooms.some(room => room._id === currentRoom._id)) {
                 allRooms.unshift(currentRoom);
             }
+
             form.setFieldsValue({
                 className: classDetails.className,
-                age: parseInt(classDetails.age, 10),
+                age: age,
                 room: currentRoom?._id,
             });
 
@@ -80,11 +84,23 @@ function UpdateClass() {
             setAllAvailableTeachers(allTeachers);
             setAvailableRooms(allRooms);
         } catch (err) {
-            typeof error === "string" ? toast.info(error) : toast.error("Không tải được thông tin")
+            typeof error === "string" ? toast.info(error) : toast.error("Không tải được thông tin");
         } finally {
             setLoading(false);
         }
     }, [id, form]);
+
+
+    const fetchStudentsByAge = async (age?: number) => {
+        if (!age) return;
+        try {
+            const students = await classApis.getAllAvailableStudents(age);
+            setAllAvailableStudents(students);
+        } catch (error) {
+            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách học sinh theo độ tuổi.");
+        }
+    };
+
 
     useEffect(() => {
         fetchData();
@@ -273,7 +289,14 @@ function UpdateClass() {
 
     return (
         <div style={{ padding: '24px', background: '#f0f2f5' }}>
-            <Form form={form} layout="vertical" onFinish={onFinish} onValuesChange={() => setIsDirty(true)}>
+            <Form form={form} layout="vertical" onFinish={onFinish} onValuesChange={(changed) => {
+                setIsDirty(true);
+                if ('age' in changed) {
+                    fetchStudentsByAge(changed.age);
+                    setStudents([]);
+                }
+            }}
+            >
                 <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
                     <Col>
                         <Space align="center">
@@ -295,7 +318,22 @@ function UpdateClass() {
                 <Card title={<><SlidersOutlined style={{ marginRight: 8 }} />Thông tin chung</>} style={{ marginBottom: 24 }}>
                     <Row gutter={16}>
                         <Col span={8}>
-                            <Form.Item name="className" label="Tên Lớp" rules={[{ required: true, message: 'Vui lòng nhập tên lớp!' }]}>
+                            <Form.Item name="className" label="Tên Lớp" rules={[
+                                requiredTrimRule("Tên lớp"),
+                                // noSpecialCharactersRule,
+                                {
+                                    validator: (_, value) => {
+                                        if (!value) return Promise.resolve();
+                                        if (/^\s|\s$/.test(value)) {
+                                            return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                        }
+                                        if (/\s{2,}/.test(value)) {
+                                            return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                },
+                            ]}>
                                 <Input placeholder="Ví dụ: Lớp Mầm 1" />
                             </Form.Item>
                         </Col>
@@ -344,7 +382,16 @@ function UpdateClass() {
                 <Card title={<><UsergroupDeleteOutlined style={{ marginRight: 8 }} />Danh sách Học sinh</>} extra={
                     <Space>
                         <Button style={{ color: '#1D6F42', fontWeight: 500 }} type="link" icon={<FileExcelOutlined />} onClick={handleDownloadStudentTemplate}>Tải mẫu Excel</Button>
-                        <Upload customRequest={(options) => uploadStudentHandler(options, { classId: id!, students, allAvailableStudents, handleAddStudents })} showUploadList={false}>
+                        {/* <Upload customRequest={(options) => uploadStudentHandler(options, { classId: id!, students, allAvailableStudents, handleAddStudents })} showUploadList={false}>
+                            <Button icon={<UploadOutlined />} style={{ backgroundColor: '#1D6F42', color: '#fff', borderColor: '#1D6F42' }}>Upload Excel</Button>
+                        </Upload> */}
+                        <Upload customRequest={(options) =>
+                            uploadStudentHandler(options, {
+                                classId: id!,
+                                students,
+                                handleAddStudents
+                            })
+                        } showUploadList={false}>
                             <Button icon={<UploadOutlined />} style={{ backgroundColor: '#1D6F42', color: '#fff', borderColor: '#1D6F42' }}>Upload Excel</Button>
                         </Upload>
                         <Button style={{ backgroundColor: '#e6f4ff', color: '#1677ff', borderColor: '#91caff' }} icon={<UserAddOutlined />} onClick={() => setIsStudentModalVisible(true)}>Thêm Học sinh</Button>

@@ -150,7 +150,7 @@ const MergedActivityTable: React.FC<MergedActivityTableProps> = ({
         }
     );
 
-    if (tableType !== 'fix') {
+    if (tableType !== 'fix' && tableType !== 'event') {
         columns.push({
             title: 'Số buổi / tuần',
             key: 'sessions',

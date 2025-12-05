@@ -121,19 +121,62 @@ const excelUploadHandler = <T extends { _id: string }>(
     });
 };
 
+// export const handleStudentExcelUpload = async (
+//     options: Parameters<NonNullable<UploadProps['customRequest']>>[0],
+//     context: {
+//         classId: string;
+//         students: StudentInClass[];
+//         allAvailableStudents: StudentInClass[];
+//         handleAddStudents: (s: StudentInClass[]) => void;
+//     }
+// ) => {
+//     const { classId, students, allAvailableStudents, handleAddStudents } = context;
+//     try {
+//         const classDetails = await classApis.getClassById(classId);
+//         const classAge = parseInt(classDetails.age, 10);
+//         await excelUploadHandler(options, {
+//             entityName: 'học sinh',
+//             keyField: 'studentCode',
+//             expectedHeaders: ['studentCode', 'fullName', 'gender'],
+//             currentItems: students,
+//             allItems: allAvailableStudents,
+//             onAddItems: handleAddStudents,
+//             limitCheck: (itemsToAddCount: number) => {
+//                 const studentLimitKey = `CLASS_${classAge}` as keyof typeof MAXIMUM_CLASS;
+//                 const studentLimit = MAXIMUM_CLASS[studentLimitKey] || 999;
+//                 if (students.length + itemsToAddCount > studentLimit) {
+//                     return {
+//                         valid: false,
+//                         message: `Lớp ${classAge} tuổi chỉ có tối đa ${studentLimit} học sinh. Hiện tại đã có ${students.length}.`
+//                     };
+//                 }
+//                 return { valid: true };
+//             },
+//         });
+//     } catch (apiError) {
+//         toast.error('Không thể xác thực thông tin lớp học để upload.');
+//         options.onError?.(new Error('Failed to fetch class details'));
+//     }
+// };
+
 export const handleStudentExcelUpload = async (
     options: Parameters<NonNullable<UploadProps['customRequest']>>[0],
     context: {
         classId: string;
         students: StudentInClass[];
-        allAvailableStudents: StudentInClass[];
         handleAddStudents: (s: StudentInClass[]) => void;
     }
 ) => {
-    const { classId, students, allAvailableStudents, handleAddStudents } = context;
+    const { classId, students, handleAddStudents } = context;
+
     try {
+        // Lấy thông tin lớp để lấy tuổi
         const classDetails = await classApis.getClassById(classId);
         const classAge = parseInt(classDetails.age, 10);
+
+        //Load lại danh sách học sinh theo độ tuổi
+        const allAvailableStudents = await classApis.getAllAvailableStudents(classAge);
+
         await excelUploadHandler(options, {
             entityName: 'học sinh',
             keyField: 'studentCode',
@@ -144,6 +187,7 @@ export const handleStudentExcelUpload = async (
             limitCheck: (itemsToAddCount: number) => {
                 const studentLimitKey = `CLASS_${classAge}` as keyof typeof MAXIMUM_CLASS;
                 const studentLimit = MAXIMUM_CLASS[studentLimitKey] || 999;
+
                 if (students.length + itemsToAddCount > studentLimit) {
                     return {
                         valid: false,
@@ -154,10 +198,11 @@ export const handleStudentExcelUpload = async (
             },
         });
     } catch (apiError) {
-        toast.error('Không thể xác thực thông tin lớp học để upload.');
-        options.onError?.(new Error('Failed to fetch class details'));
+        toast.error('Không thể xác thực thông tin lớp học hoặc danh sách học sinh.');
+        options.onError?.(new Error('Failed to fetch class details or students'));
     }
 };
+
 
 export const handleTeacherExcelUpload = (
     options: Parameters<NonNullable<UploadProps['customRequest']>>[0],

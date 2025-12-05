@@ -712,8 +712,15 @@ export const classApis = {
     await axiosAuth.post(apiEndPoint.CREATE_CLASS, body);
   },
 
-  getAllAvailableStudents: async (): Promise<StudentInClass[]> => {
-    const response = await axiosAuth.get(apiEndPoint.GET_AVAILABEL_STUDENT);
+  // getAllAvailableStudents: async (): Promise<StudentInClass[]> => {
+  //   const response = await axiosAuth.get(apiEndPoint.GET_AVAILABEL_STUDENT);
+  //   return response.data;
+  // },
+
+  getAllAvailableStudents: async (age?: number): Promise<StudentInClass[]> => {
+    const response = await axiosAuth.get(apiEndPoint.GET_AVAILABEL_STUDENT, {
+      params: age ? { age } : {},
+    });
     return response.data;
   },
 

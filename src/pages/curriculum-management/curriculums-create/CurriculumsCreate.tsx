@@ -38,6 +38,7 @@ import { useCurrentUser } from '../../../hooks/useCurrentUser';
 import { ageOptions, categoryOptions } from '../../../components/hard-code-action';
 import { EventItem } from '../../../types/event';
 import { usePageTitle } from '../../../hooks/usePageTitle';
+import { requiredTrimRule } from '../../../utils/format';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -140,18 +141,26 @@ function CurriculumsCreate() {
                 };
 
                 const [start, end]: [Dayjs, Dayjs] = values.timeRange;
+                const SCHOOL_START_HOUR = 7; // 7h sáng
+
+                if (start.hour() < SCHOOL_START_HOUR) {
+                    toast.info(`Thời gian bắt đầu không được trước ${SCHOOL_START_HOUR}:00 sáng.`);
+                    setIsSubmitting(false);
+                    return;
+                }
+
                 payload.startTime = start.hour() * 60 + start.minute();
                 payload.endTime = end.hour() * 60 + end.minute();
 
                 if (payload.endTime <= payload.startTime) {
-                    toast.warn('Giờ kết thúc phải sau giờ bắt đầu.');
+                    toast.info('Giờ kết thúc phải sau giờ bắt đầu.');
                     setIsSubmitting(false);
                     return;
                 }
 
                 await curriculumsApis.createCurriculum(payload);
-
-            } else if (values.type === 'Bình thường') {
+            }
+            else if (values.type === 'Bình thường') {
                 const basePayload = {
                     activityName: values.activityName,
                     type: values.type,
@@ -252,7 +261,21 @@ function CurriculumsCreate() {
                                             Tên Hoạt động
                                         </Space>
                                     }
-                                    rules={[{ required: true, message: 'Vui lòng nhập tên hoạt động!' }]}
+                                    rules={[
+                                        requiredTrimRule("Tên hoạt động"),
+                                        {
+                                            validator: (_, value) => {
+                                                if (!value) return Promise.resolve();
+                                                if (/^\s|\s$/.test(value)) {
+                                                    return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                                }
+                                                if (/\s{2,}/.test(value)) {
+                                                    return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                                }
+                                                return Promise.resolve();
+                                            },
+                                        },
+                                    ]}
                                 >
                                     <Input placeholder="Ví dụ: Đón trẻ, Thể dục sáng..." />
                                 </Form.Item>
