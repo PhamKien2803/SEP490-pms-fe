@@ -110,7 +110,7 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
             </Text>
           }
         >
-          {student.fullName}
+          {student?.fullName}
         </Descriptions.Item>
         <Descriptions.Item
           label={
@@ -119,7 +119,7 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
             </Text>
           }
         >
-          {student.studentCode}
+          {student?.studentCode}
         </Descriptions.Item>
         <Descriptions.Item
           label={
@@ -137,7 +137,7 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
             </Text>
           }
         >
-          {classInfo.className}
+          {classInfo?.className}
         </Descriptions.Item>
         <Descriptions.Item
           label={
@@ -146,7 +146,7 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
             </Text>
           }
         >
-          {schoolYear.schoolYear}
+          {schoolYear?.schoolYear}
         </Descriptions.Item>
         <Descriptions.Item
           label={
@@ -155,7 +155,7 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
             </Text>
           }
         >
-          {formatDate(data.createdAt)}
+          {formatDate(data?.createdAt)}
         </Descriptions.Item>
       </Descriptions>
     </Card>
@@ -171,7 +171,7 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
         }
       >
         <Text strong style={{ color: "#52c41a", fontSize: "1.2em" }}>
-          {pd.height} cm
+          {pd?.height} cm
         </Text>
       </Descriptions.Item>
       <Descriptions.Item
@@ -182,14 +182,14 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
         }
       >
         <Text strong style={{ color: "#faad14", fontSize: "1.2em" }}>
-          {pd.weight} kg
+          {pd?.weight} kg
         </Text>
       </Descriptions.Item>
       <Descriptions.Item label="Chỉ số BMI" span={2}>
-        <Text strong>{pd.bodyMassIndex.toFixed(1)}</Text>
+        <Text strong>{pd?.bodyMassIndex.toFixed(1)}</Text>
       </Descriptions.Item>
       <Descriptions.Item label="Đánh giá chung" span={2}>
-        <Paragraph italic>{pd.evaluation}</Paragraph>
+        <Paragraph italic>{pd?.evaluation}</Paragraph>
       </Descriptions.Item>
     </Descriptions>
   );
@@ -197,14 +197,14 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
   const renderComprehensiveExamination = (ce: ComprehensiveExamination) => (
     <Descriptions column={1} layout="vertical" size="middle" bordered>
       <Descriptions.Item label="Phát triển tinh thần">
-        <Text>{ce.mentalDevelopment}</Text>
+        <Text>{ce?.mentalDevelopment}</Text>
       </Descriptions.Item>
       <Descriptions.Item label="Phát triển vận động">
-        <Text>{ce.motorDevelopment}</Text>
+        <Text>{ce?.motorDevelopment}</Text>
       </Descriptions.Item>
       <Descriptions.Item label="Bệnh lý đã phát hiện">
-        {ce.diseasesDetected.length > 0 ? (
-          ce.diseasesDetected.map((item, index) => (
+        {ce?.diseasesDetected.length > 0 ? (
+          ce?.diseasesDetected.map((item, index) => (
             <Tag color="error" key={index} style={{ marginBottom: 4 }}>
               {item}
             </Tag>
@@ -214,8 +214,8 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
         )}
       </Descriptions.Item>
       <Descriptions.Item label="Dấu hiệu bất thường">
-        {ce.abnormalSigns.length > 0 ? (
-          ce.abnormalSigns.map((item, index) => (
+        {ce?.abnormalSigns.length > 0 ? (
+          ce?.abnormalSigns.map((item, index) => (
             <Tag color="warning" key={index} style={{ marginBottom: 4 }}>
               {item}
             </Tag>
@@ -226,7 +226,7 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
       </Descriptions.Item>
       <Descriptions.Item label="Ghi chú thêm từ bác sĩ">
         <Text italic type="secondary">
-          {ce.notes || "Không có."}
+          {ce?.notes || "Không có."}
         </Text>
       </Descriptions.Item>
     </Descriptions>
@@ -237,7 +237,7 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
       <Descriptions.Item label="Tình trạng sức khỏe tổng quát">
         <Tag
           icon={<CheckCircleOutlined />}
-          color={getHealthTagColor(conclusion.healthStatus)}
+          color={getHealthTagColor(conclusion?.healthStatus)}
           style={{
             fontSize: "1.1em",
             padding: "5px 10px",
@@ -245,11 +245,11 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
             fontWeight: "bold",
           }}
         >
-          {conclusion.healthStatus.toUpperCase()}
+          {conclusion?.healthStatus.toUpperCase()}
         </Tag>
       </Descriptions.Item>
       <Descriptions.Item label="Lời khuyên từ chuyên gia">
-        <Paragraph mark>{conclusion.advice}</Paragraph>
+        <Paragraph mark>{conclusion?.advice}</Paragraph>
       </Descriptions.Item>
     </Descriptions>
   );
@@ -290,11 +290,11 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
       </Title>
       <Text type="secondary">
         Cập nhật lần cuối: {dayjs(data.updatedAt).fromNow()} (
-        {formatDate(data.updatedAt)})
+        {formatDate(data?.updatedAt)})
       </Text>
       <Divider style={{ margin: "16px 0" }} />
 
-      {renderStudentInfo(data.student, data.class, data.schoolYear)}
+      {renderStudentInfo(data?.student, data?.class, data?.schoolYear)}
 
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={14}>
@@ -312,7 +312,7 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
                 }
                 key="1"
               >
-                {renderPhysicalDevelopment(data.physicalDevelopment)}
+                {renderPhysicalDevelopment(data?.physicalDevelopment)}
               </TabPane>
               <TabPane
                 tab={
@@ -323,7 +323,7 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
                 }
                 key="2"
               >
-                {renderComprehensiveExamination(data.comprehensiveExamination)}
+                {renderComprehensiveExamination(data?.comprehensiveExamination)}
               </TabPane>
             </Tabs>
           </Card>
@@ -343,7 +343,7 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
             }}
           >
-            {renderConclusion(data.conclusion)}
+            {renderConclusion(data?.conclusion)}
           </Card>
 
           <Card
@@ -361,10 +361,10 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
           >
             <Descriptions column={1} size="small">
               <Descriptions.Item label="Tên file">
-                <Text code>{data.healthCertFiles.filename}</Text>
+                <Text code>{data?.healthCertFiles?.filename}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="Ngày tải lên">
-                <Text>{formatDate(data.healthCertFiles.uploadDate)}</Text>
+                <Text>{formatDate(data?.healthCertFiles?.uploadDate)}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="Hành động">
                 <Button
@@ -383,8 +383,8 @@ const HealthCheckDetail: React.FC<HealthCheckDetailProps> = ({
 
       <Divider />
       <Text type="secondary" style={{ fontSize: "0.85em" }}>
-        <CalendarOutlined /> Tạo lúc: {formatDate(data.createdAt)} | Người tạo:{" "}
-        {data.createdBy}
+        <CalendarOutlined /> Tạo lúc: {formatDate(data?.createdAt)} | Người tạo:{" "}
+        {data?.createdBy}
       </Text>
     </div>
   );
@@ -451,7 +451,9 @@ const Medical: React.FC = () => {
         page: response.page.page,
       });
     } catch (error) {
-      typeof error === "string" ? toast.info(error) : toast.error("Lỗi khi tải danh sách hồ sơ")
+      typeof error === "string"
+        ? toast.info(error)
+        : toast.info("Hiện chưa có hồ sơ khám sức khỏe nào.");
       setListData([]);
       setPagination((prev) => ({ ...prev, totalCount: 0 }));
     } finally {
@@ -594,12 +596,12 @@ const Medical: React.FC = () => {
                   onChange={(value) => setSelectedStudentId(value)}
                   placeholder="Chọn con của bạn"
                   size="large"
-                  loading={listChild.length === 0 && isLoading}
-                  disabled={listChild.length === 0}
+                  loading={listChild?.length === 0 && isLoading}
+                  disabled={listChild?.length === 0}
                 >
-                  {listChild.map((student) => (
-                    <Option key={student._id} value={student._id}>
-                      {student.fullName} ({student.studentCode})
+                  {listChild?.map((student) => (
+                    <Option key={student?._id} value={student?._id}>
+                      {student?.fullName} ({student?.studentCode})
                     </Option>
                   ))}
                 </Select>
@@ -641,9 +643,9 @@ const Medical: React.FC = () => {
               }}
             >
               <Pagination
-                current={pagination.page}
-                pageSize={pagination.limit}
-                total={pagination.totalCount}
+                current={pagination?.page}
+                pageSize={pagination?.limit}
+                total={pagination?.totalCount}
                 onChange={(page, pageSize) =>
                   setPagination((prev) => ({ ...prev, page, limit: pageSize }))
                 }

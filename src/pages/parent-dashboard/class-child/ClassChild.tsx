@@ -104,7 +104,7 @@ const ClassChild: React.FC = () => {
     null
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isError, setIsError] = useState<boolean>(false);
+  const [_, setIsError] = useState<boolean>(false);
   const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
   const [selectedSchoolYear, setSelectedSchoolYear] = useState<
     string | undefined
@@ -141,7 +141,7 @@ const ClassChild: React.FC = () => {
         }
       } catch (error) {
         typeof error === "string"
-          ? toast.warn(error)
+          ? toast.info(error)
           : toast.error("Không thể tải danh sách năm học.");
       }
     };
@@ -314,7 +314,7 @@ const ClassChild: React.FC = () => {
       </Card>
 
       <Spin spinning={isLoading}>
-        {isError && !classData && (
+        {/* {isError && !classData && (
           <div style={{ textAlign: "center", padding: "50px" }}>
             <Empty
               description={
@@ -324,9 +324,9 @@ const ClassChild: React.FC = () => {
               }
             />
           </div>
-        )}
+        )} */}
 
-        {!classData && !isError && selectedStudentId && (
+        {!classData && selectedStudentId && (
           <div style={{ textAlign: "center", padding: "50px" }}>
             <Empty
               description={
@@ -370,7 +370,7 @@ const ClassChild: React.FC = () => {
                     }
                   >
                     <Text>
-                      {classData.className} ({classData.classCode})
+                      {classData?.className} ({classData?.classCode})
                     </Text>
                   </Descriptions.Item>
                   <Descriptions.Item
@@ -380,7 +380,7 @@ const ClassChild: React.FC = () => {
                       </Text>
                     }
                   >
-                    <Text>{classData.room?.roomName || "N/A"}</Text>
+                    <Text>{classData?.room?.roomName || "N/A"}</Text>
                   </Descriptions.Item>
                   <Descriptions.Item
                     label={
@@ -389,7 +389,7 @@ const ClassChild: React.FC = () => {
                       </Text>
                     }
                   >
-                    <Text>{classData.students?.length || 0} học sinh</Text>
+                    <Text>{classData?.students?.length || 0} học sinh</Text>
                   </Descriptions.Item>
                   <Descriptions.Item
                     label={
@@ -398,7 +398,7 @@ const ClassChild: React.FC = () => {
                       </Text>
                     }
                   >
-                    <Text>{classData.schoolYear?.schoolYear || "N/A"}</Text>
+                    <Text>{classData?.schoolYear?.schoolYear || "N/A"}</Text>
                   </Descriptions.Item>
                   <Descriptions.Item
                     label={
@@ -407,7 +407,7 @@ const ClassChild: React.FC = () => {
                       </Text>
                     }
                   >
-                    <Text>{classData.age || "N/A"}</Text>
+                    <Text>{classData?.age || "N/A"}</Text>
                   </Descriptions.Item>
                   <Descriptions.Item
                     label={
@@ -416,8 +416,8 @@ const ClassChild: React.FC = () => {
                       </Text>
                     }
                   >
-                    <Tag color={classData.active ? "success" : "red"}>
-                      {classData.active ? "Đang hoạt động" : "Đã kết thúc"}
+                    <Tag color={classData?.active ? "success" : "red"}>
+                      {classData?.active ? "Đang hoạt động" : "Đã kết thúc"}
                     </Tag>
                   </Descriptions.Item>
                 </Descriptions>
@@ -434,14 +434,14 @@ const ClassChild: React.FC = () => {
                     tab={
                       <span>
                         <TeamOutlined />
-                        Giáo Viên ({classData.teachers?.length || 0})
+                        Giáo Viên ({classData?.teachers?.length || 0})
                       </span>
                     }
                     key="1"
                   >
                     <Table
                       columns={teacherColumns}
-                      dataSource={classData.teachers ?? []}
+                      dataSource={classData?.teachers ?? []}
                       rowKey="_id"
                       pagination={false}
                       size="middle"
@@ -454,14 +454,14 @@ const ClassChild: React.FC = () => {
                     tab={
                       <span>
                         <UserOutlined />
-                        Học Sinh ({classData.students?.length || 0})
+                        Học Sinh ({classData?.students?.length || 0})
                       </span>
                     }
                     key="2"
                   >
                     <Table
                       columns={studentColumns}
-                      dataSource={classData.students ?? []}
+                      dataSource={classData?.students ?? []}
                       rowKey="_id"
                       pagination={{ pageSize: 10, hideOnSinglePage: true }}
                       size="middle"

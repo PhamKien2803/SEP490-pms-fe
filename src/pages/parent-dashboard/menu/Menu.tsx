@@ -267,7 +267,7 @@ const Menu: React.FC = () => {
   const renderMealCard = (meal: Meal) => {
     return (
       <Card
-        key={meal.mealType}
+        key={meal?.mealType}
         title={
           <Text
             strong
@@ -300,10 +300,10 @@ const Menu: React.FC = () => {
           Tóm tắt Dinh dưỡng Bữa ăn:
         </Text>
         <NutritionSummary
-          calo={meal.totalCalo}
-          protein={meal.totalProtein}
-          lipid={meal.totalLipid}
-          carb={meal.totalCarb}
+          calo={meal?.totalCalo}
+          protein={meal?.totalProtein}
+          lipid={meal?.totalLipid}
+          carb={meal?.totalCarb}
         />
         <Divider style={{ margin: "20px 0 12px 0" }} />
         <Text
@@ -312,26 +312,26 @@ const Menu: React.FC = () => {
         >
           <ForkOutlined style={{ marginRight: 5 }} /> Danh sách Món ăn:
         </Text>
-        {meal.foods.length > 0 ? (
-          meal.foods.map((foodWrapper, index) => (
+        {meal?.foods?.length > 0 ? (
+          meal?.foods.map((foodWrapper, index) => (
             <Card
-              key={foodWrapper.food._id || index}
+              key={foodWrapper?.food._id || index}
               size="small"
               type="inner"
               title={
                 <Text strong style={{ color: "#2f54eb", fontSize: 16 }}>
                   <ForkOutlined style={{ marginRight: 5 }} />
-                  {foodWrapper.food.foodName}
+                  {foodWrapper?.food.foodName}
                 </Text>
               }
               style={{ marginBottom: 15, borderLeft: "3px solid #adc6ff" }}
               extra={
                 <Tag color="volcano" style={{ fontSize: 13 }}>
-                  {foodWrapper.food.totalCalories.toFixed(0)} kcal
+                  {foodWrapper?.food.totalCalories.toFixed(0)} kcal
                 </Tag>
               }
             >
-              {renderIngredientTable(foodWrapper.food.ingredients)}
+              {renderIngredientTable(foodWrapper?.food?.ingredients)}
             </Card>
           ))
         ) : (
@@ -394,7 +394,7 @@ const Menu: React.FC = () => {
               size="large"
             >
               {listChild.map((student) => (
-                <Option key={student._id} value={student._id}>
+                <Option key={student?._id} value={student._id}>
                   {student?.fullName} ({student?.studentCode})
                 </Option>
               ))}
@@ -482,7 +482,7 @@ const Menu: React.FC = () => {
                   }
                 >
                   <Text strong style={{ color: "#fa8c16", fontSize: 15 }}>
-                    {formatDayDisplay(currentDayMenu.date)}
+                    {formatDayDisplay(currentDayMenu?.date)}
                   </Text>
                 </Descriptions.Item>
                 <Descriptions.Item
@@ -505,7 +505,7 @@ const Menu: React.FC = () => {
                     color="volcano"
                     style={{ fontSize: 15, padding: "4px 8px" }}
                   >
-                    {currentDayMenu.totalCalo.toFixed(0)} kcal
+                    {currentDayMenu?.totalCalo.toFixed(0)} kcal
                   </Tag>
                 </Descriptions.Item>
                 <Descriptions.Item
@@ -519,7 +519,7 @@ const Menu: React.FC = () => {
                     color="success"
                     style={{ fontSize: 15, padding: "4px 8px" }}
                   >
-                    {currentDayMenu.totalProtein.toFixed(1)} g
+                    {currentDayMenu?.totalProtein.toFixed(1)} g
                   </Tag>
                 </Descriptions.Item>
                 <Descriptions.Item
@@ -533,7 +533,7 @@ const Menu: React.FC = () => {
                     color="blue"
                     style={{ fontSize: 15, padding: "4px 8px" }}
                   >
-                    {currentDayMenu.totalLipid.toFixed(1)} g
+                    {currentDayMenu?.totalLipid.toFixed(1)} g
                   </Tag>
                 </Descriptions.Item>
                 <Descriptions.Item
@@ -547,7 +547,7 @@ const Menu: React.FC = () => {
                     color="purple"
                     style={{ fontSize: 15, padding: "4px 8px" }}
                   >
-                    {currentDayMenu.totalCarb.toFixed(1)} g
+                    {currentDayMenu?.totalCarb.toFixed(1)} g
                   </Tag>
                 </Descriptions.Item>
               </Descriptions>
@@ -559,7 +559,7 @@ const Menu: React.FC = () => {
                     </Text>
                   }
                   description={
-                    <Text style={{ fontSize: 14 }}>{menuData.notes}</Text>
+                    <Text style={{ fontSize: 14 }}>{menuData?.notes}</Text>
                   }
                   type="info"
                   showIcon={false}
@@ -572,10 +572,10 @@ const Menu: React.FC = () => {
               <ClockCircleOutlined /> Chi Tiết Các Bữa Ăn Trong Ngày
             </Title>
             <Row gutter={[24, 24]}>
-              {currentDayMenu.meals
-                .sort((a, b) => a.mealType.localeCompare(b.mealType))
+              {currentDayMenu?.meals
+                .sort((a, b) => a.mealType.localeCompare(b?.mealType))
                 .map((meal) => (
-                  <Col xs={24} md={12} lg={12} key={meal.mealType}>
+                  <Col xs={24} md={12} lg={12} key={meal?.mealType}>
                     {renderMealCard(meal)}
                   </Col>
                 ))}

@@ -226,10 +226,10 @@ function EditAttendance() {
                 }
             >
                 <Space wrap size="small" style={{ marginBottom: 16 }}>
-                    <Tag color="default" style={{ fontSize: 14, padding: '4px 8px' }}>Sĩ số: {summary.total}</Tag>
-                    <Tag color="green" style={{ fontSize: 14, padding: '4px 8px' }}>Có mặt: {summary.present}</Tag>
-                    <Tag color="orange" style={{ fontSize: 14, padding: '4px 8px' }}>Đã đón trẻ: {summary.pickedUpChild}</Tag>
-                    <Tag color="red" style={{ fontSize: 14, padding: '4px 8px' }}>Vắng mặt: {summary.absent}</Tag>
+                    <Tag color="default" style={{ fontSize: 14, padding: '4px 8px' }}>Sĩ số: {summary?.total}</Tag>
+                    <Tag color="green" style={{ fontSize: 14, padding: '4px 8px' }}>Có mặt: {summary?.present}</Tag>
+                    <Tag color="orange" style={{ fontSize: 14, padding: '4px 8px' }}>Đã đón trẻ: {summary?.pickedUpChild}</Tag>
+                    <Tag color="red" style={{ fontSize: 14, padding: '4px 8px' }}>Vắng mặt: {summary?.absent}</Tag>
                 </Space>
 
                 <Divider style={{ margin: '8px 0 16px' }} />

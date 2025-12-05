@@ -223,7 +223,7 @@ const Feedback: React.FC = () => {
       </Card>
 
       <Spin spinning={isLoading}>
-        {isError && !feedbackData && (
+        {/* {isError && !feedbackData && (
           <Alert
             message={<Title level={4} style={{ margin: 0 }}>Lỗi Tải thông tin</Title>}
             description="Không thể tải thông tin báo cáo. Vui lòng kiểm tra kết nối và thử lại."
@@ -236,9 +236,9 @@ const Feedback: React.FC = () => {
             }
             style={{ padding: "24px" }}
           />
-        )}
+        )} */}
 
-        {!feedbackData && !isError && selectedStudentId && (
+        {!feedbackData && selectedStudentId && (
           <Alert
             message={<Title level={4} style={{ margin: 0 }}>Chưa Có Đánh Giá</Title>}
             description={
@@ -287,23 +287,23 @@ const Feedback: React.FC = () => {
                   >
                     <Descriptions column={2} bordered size="middle">
                       <Descriptions.Item label={<Text strong>Bữa sáng</Text>}>
-                        <Text>{feedbackData.eating.breakfast}</Text>
+                        <Text>{feedbackData?.eating?.breakfast}</Text>
                       </Descriptions.Item>
                       <Descriptions.Item label={<Text strong>Bữa trưa</Text>}>
-                        <Text>{feedbackData.eating.lunch}</Text>
+                        <Text>{feedbackData?.eating?.lunch}</Text>
                       </Descriptions.Item>
                       <Descriptions.Item
                         label={<Text strong>Bữa xế</Text>}
                         span={2}
                       >
-                        <Text>{feedbackData.eating.snack}</Text>
+                        <Text>{feedbackData?.eating?.snack}</Text>
                       </Descriptions.Item>
                       <Descriptions.Item
                         label={<Text strong>Ghi chú</Text>}
                         span={2}
                       >
                         <Text type="secondary">
-                          {feedbackData.eating.note || "Không có."}
+                          {feedbackData?.eating?.note || "Không có."}
                         </Text>
                       </Descriptions.Item>
                     </Descriptions>
@@ -320,17 +320,17 @@ const Feedback: React.FC = () => {
                   >
                     <Descriptions column={2} bordered size="middle">
                       <Descriptions.Item label={<Text strong>Thời gian</Text>}>
-                        <Text>{feedbackData.sleeping.duration}</Text>
+                        <Text>{feedbackData?.sleeping?.duration}</Text>
                       </Descriptions.Item>
                       <Descriptions.Item label={<Text strong>Chất lượng</Text>}>
-                        <Text>{feedbackData.sleeping.quality}</Text>
+                        <Text>{feedbackData?.sleeping?.quality}</Text>
                       </Descriptions.Item>
                       <Descriptions.Item
                         label={<Text strong>Ghi chú</Text>}
                         span={2}
                       >
                         <Text type="secondary">
-                          {feedbackData.sleeping.note || "Không có."}
+                          {feedbackData?.sleeping?.note || "Không có."}
                         </Text>
                       </Descriptions.Item>
                     </Descriptions>
@@ -347,17 +347,17 @@ const Feedback: React.FC = () => {
                   >
                     <Descriptions column={2} bordered size="middle">
                       <Descriptions.Item label={<Text strong>Đi vệ sinh</Text>}>
-                        <Text>{feedbackData.hygiene.toilet}</Text>
+                        <Text>{feedbackData?.hygiene?.toilet}</Text>
                       </Descriptions.Item>
                       <Descriptions.Item label={<Text strong>Rửa tay</Text>}>
-                        <Text>{feedbackData.hygiene.handwash}</Text>
+                        <Text>{feedbackData?.hygiene?.handwash}</Text>
                       </Descriptions.Item>
                       <Descriptions.Item
                         label={<Text strong>Ghi chú</Text>}
                         span={2}
                       >
                         <Text type="secondary">
-                          {feedbackData.hygiene.note || "Không có."}
+                          {feedbackData?.hygiene?.note || "Không có."}
                         </Text>
                       </Descriptions.Item>
                     </Descriptions>
@@ -374,17 +374,17 @@ const Feedback: React.FC = () => {
                   >
                     <Descriptions column={2} bordered size="middle">
                       <Descriptions.Item label={<Text strong>Tập trung</Text>}>
-                        <Text>{feedbackData.learning.focus}</Text>
+                        <Text>{feedbackData?.learning?.focus}</Text>
                       </Descriptions.Item>
                       <Descriptions.Item label={<Text strong>Tham gia</Text>}>
-                        <Text>{feedbackData.learning.participation}</Text>
+                        <Text>{feedbackData?.learning?.participation}</Text>
                       </Descriptions.Item>
                       <Descriptions.Item
                         label={<Text strong>Ghi chú</Text>}
                         span={2}
                       >
                         <Text type="secondary">
-                          {feedbackData.learning.note || "Không có."}
+                          {feedbackData?.learning?.note || "Không có."}
                         </Text>
                       </Descriptions.Item>
                     </Descriptions>
@@ -401,23 +401,23 @@ const Feedback: React.FC = () => {
                   >
                     <Descriptions column={2} bordered size="middle">
                       <Descriptions.Item label={<Text strong>Bạn bè</Text>}>
-                        <Text>{feedbackData.social.friendInteraction}</Text>
+                        <Text>{feedbackData?.social?.friendInteraction}</Text>
                       </Descriptions.Item>
                       <Descriptions.Item label={<Text strong>Cảm xúc</Text>}>
-                        <Text>{feedbackData.social.emotionalState}</Text>
+                        <Text>{feedbackData?.social?.emotionalState}</Text>
                       </Descriptions.Item>
                       <Descriptions.Item
                         label={<Text strong>Hành vi</Text>}
                         span={2}
                       >
-                        <Text>{feedbackData.social.behavior}</Text>
+                        <Text>{feedbackData?.social?.behavior}</Text>
                       </Descriptions.Item>
                       <Descriptions.Item
                         label={<Text strong>Ghi chú</Text>}
                         span={2}
                       >
                         <Text type="secondary">
-                          {feedbackData.social.note || "Không có."}
+                          {feedbackData?.social?.note || "Không có."}
                         </Text>
                       </Descriptions.Item>
                     </Descriptions>
@@ -442,9 +442,9 @@ const Feedback: React.FC = () => {
               >
                 <Paragraph
                   style={{ fontSize: "1em" }}
-                  italic={!feedbackData.teacherNote}
+                  italic={!feedbackData?.teacherNote}
                 >
-                  {feedbackData.teacherNote ||
+                  {feedbackData?.teacherNote ||
                     "Giáo viên không có nhận xét chung nào."}
                 </Paragraph>
                 <Divider style={{ margin: "16px 0" }} />
@@ -454,9 +454,9 @@ const Feedback: React.FC = () => {
                 </Title>
                 <Paragraph
                   style={{ fontSize: "1em" }}
-                  italic={!feedbackData.health.note}
+                  italic={!feedbackData?.health?.note}
                 >
-                  {feedbackData.health.note || "Không có ghi chú sức khỏe."}
+                  {feedbackData?.health?.note || "Không có ghi chú sức khỏe."}
                 </Paragraph>
               </Card>
             </Col>
@@ -481,13 +481,13 @@ const Feedback: React.FC = () => {
                   <Descriptions.Item
                     label={<Text strong>Giáo viên phụ trách</Text>}
                   >
-                    <Text>{feedbackData.teacherId.fullName}</Text>
+                    <Text>{feedbackData?.teacherId?.fullName}</Text>
                   </Descriptions.Item>
                   <Descriptions.Item
                     label={<Text strong>Điểm nhấn trong ngày</Text>}
                   >
                     <Text type="secondary">
-                      {feedbackData.dailyHighlight ||
+                      {feedbackData?.dailyHighlight ||
                         "Không có điểm nhấn đặc biệt."}
                     </Text>
                   </Descriptions.Item>
@@ -509,9 +509,9 @@ const Feedback: React.FC = () => {
                   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
                 }}
               >
-                {feedbackData.reminders.length > 0 ? (
+                {feedbackData?.reminders?.length > 0 ? (
                   <List
-                    dataSource={feedbackData.reminders}
+                    dataSource={feedbackData?.reminders}
                     renderItem={(item, _) => (
                       <List.Item style={{ padding: "8px 0", border: "none" }}>
                         <Tag

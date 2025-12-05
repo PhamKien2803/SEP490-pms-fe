@@ -154,14 +154,14 @@ const ListPost = (props: ListPostProps) => {
               }
               title={
                 <Link href="#" className="list-post__recent-title">
-                  {post.title || "Bài viết không có tiêu đề"}
+                  {post?.title || "Bài viết không có tiêu đề"}
                 </Link>
               }
               description={
                 <Text type="secondary" className="list-post__recent-meta">
                   <strong style={{ color: "#555" }}>{"Ban biên tập"}</strong>
                   {" • "}
-                  {formatTimeAgo(post.createdAt)}
+                  {formatTimeAgo(post?.createdAt)}
                 </Text>
               }
             />

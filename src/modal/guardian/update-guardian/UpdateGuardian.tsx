@@ -17,7 +17,6 @@ import {
   CloseCircleOutlined,
   SaveOutlined,
   UserOutlined,
-  PhoneOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
@@ -29,6 +28,7 @@ import {
 } from "../../../types/guardians";
 import { guardianApis } from "../../../services/apiServices";
 import dayjs from "dayjs";
+import { noSpecialCharactersRule, requiredTrimRule } from "../../../utils/format";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -127,6 +127,11 @@ const UpdateGuardian: React.FC<UpdateGuardianProps> = ({
     }
   }, [open, guardianRecord, form]);
 
+  const phoneValidationRule = {
+    pattern: /^\d{10}$/,
+    message: 'Số điện thoại phải có đúng 10 chữ số!',
+  };
+
   return (
     <>
       <Modal
@@ -154,9 +159,19 @@ const UpdateGuardian: React.FC<UpdateGuardianProps> = ({
             name="fullName"
             label="Họ và Tên"
             rules={[
+              requiredTrimRule("họ và tên người đưa đón"),
+              noSpecialCharactersRule,
               {
-                required: true,
-                message: "Vui lòng nhập họ tên người đưa đón!",
+                validator: (_, value) => {
+                  if (!value) return Promise.resolve();
+                  if (/^\s|\s$/.test(value)) {
+                    return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                  }
+                  if (/\s{2,}/.test(value)) {
+                    return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                  }
+                  return Promise.resolve();
+                },
               },
             ]}
             tooltip="Nhập họ và tên đầy đủ của người được ủy quyền đưa đón"
@@ -175,6 +190,19 @@ const UpdateGuardian: React.FC<UpdateGuardianProps> = ({
                 label="Ngày sinh"
                 rules={[
                   { required: true, message: "Vui lòng chọn ngày sinh!" },
+                  {
+                    validator: (_, value) => {
+                      if (!value) return Promise.resolve();
+                      const date = dayjs(value);
+                      const today = dayjs();
+                      const age = today.diff(date, "year");
+                      if (date.isAfter(today, "day"))
+                        return Promise.reject(new Error("Ngày sinh không được trong tương lai!"));
+                      if (age < 18)
+                        return Promise.reject(new Error("Phải từ 18 tuổi trở lên!"));
+                      return Promise.resolve();
+                    },
+                  },
                 ]}
               >
                 <DatePicker
@@ -190,11 +218,11 @@ const UpdateGuardian: React.FC<UpdateGuardianProps> = ({
                 name="phoneNumber"
                 label="Số điện thoại"
                 rules={[
-                  { required: true, message: "Vui lòng nhập số điện thoại!" },
+                  { required: true, message: "Vui lòng nhập số điện thoại!" }, phoneValidationRule
                 ]}
               >
                 <Input
-                  prefix={<PhoneOutlined />}
+                  type="number"
                   placeholder="09xxxxxxxx"
                   size="large"
                 />

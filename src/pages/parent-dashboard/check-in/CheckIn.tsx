@@ -98,7 +98,7 @@ const CheckIn: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Dayjs>(defaultDate);
   const [checkIn, setCheckIn] = useState<CheckInResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isError, setIsError] = useState<boolean>(false);
+  const [_, setIsError] = useState<boolean>(false);
 
   const params: CheckInParams = useMemo(
     () => ({
@@ -270,7 +270,7 @@ const CheckIn: React.FC = () => {
       </Card>
 
       <Spin spinning={isLoading}>
-        {isError && !checkIn && (
+        {/* {isError && !checkIn && (
           <div style={{ textAlign: "center", padding: "50px" }}>
             <Empty
               description={
@@ -283,9 +283,9 @@ const CheckIn: React.FC = () => {
               Thử lại
             </Button>
           </div>
-        )}
+        )} */}
 
-        {!checkIn && !isError && selectedStudentId && (
+        {!checkIn && selectedStudentId && (
           <div style={{ textAlign: "center", padding: "50px" }}>
             <Empty
               description={
@@ -296,7 +296,7 @@ const CheckIn: React.FC = () => {
                 </Title>
               }
             />
-            <Button onClick={fetchCheckIn}>Tải lại dữ liệu</Button>
+            <Button onClick={fetchCheckIn}>Tải lại</Button>
           </div>
         )}
 
@@ -314,7 +314,7 @@ const CheckIn: React.FC = () => {
                 style={{
                   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
                   borderTop: `5px solid ${getStatusBorderColor(
-                    checkIn.student.status
+                    checkIn?.student?.status
                   )}`,
                 }}
               >
@@ -324,8 +324,8 @@ const CheckIn: React.FC = () => {
                     style={{ paddingBottom: 16 }}
                   >
                     <Text strong style={{ fontSize: "1.1em", color: "#1890ff" }}>
-                      {checkIn.student.student.fullName} (
-                      {checkIn.student.student.studentCode})
+                      {checkIn?.student?.student?.fullName} (
+                      {checkIn?.student?.student?.studentCode})
                     </Text>
                   </Descriptions.Item>
 
@@ -334,7 +334,7 @@ const CheckIn: React.FC = () => {
                     style={{ paddingBottom: 16 }}
                   >
                     <Text>
-                      {checkIn.class.className} ({checkIn.class.classCode})
+                      {checkIn?.class?.className} ({checkIn?.class?.classCode})
                     </Text>
                   </Descriptions.Item>
 
@@ -342,7 +342,7 @@ const CheckIn: React.FC = () => {
                     label={<Text strong>Trạng thái ngày học</Text>}
                   >
                     <StatusTag
-                      status={checkIn.student.status || "Chưa điểm danh"}
+                      status={checkIn?.student?.status || "Chưa điểm danh"}
                     />
                   </Descriptions.Item>
                 </Descriptions>
@@ -371,10 +371,10 @@ const CheckIn: React.FC = () => {
                       />
                       <div>
                         <Text strong style={{ display: "block" }}>
-                          {checkIn.teacher.fullName}
+                          {checkIn?.teacher?.fullName}
                         </Text>
                         <Text type="secondary">
-                          {checkIn.teacher.phoneNumber || "Không có SĐT"}
+                          {checkIn?.teacher?.phoneNumber || "Không có SĐT"}
                         </Text>
                       </div>
                     </div>
@@ -390,7 +390,7 @@ const CheckIn: React.FC = () => {
                   >
                     {checkIn.generalNote ? (
                       <Text italic style={{ fontSize: "1em" }}>
-                        "{checkIn.generalNote}"
+                        "{checkIn?.generalNote}"
                       </Text>
                     ) : (
                       <Text italic type="secondary">

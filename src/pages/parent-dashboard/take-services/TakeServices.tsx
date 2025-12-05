@@ -247,7 +247,7 @@ function TakeServices() {
                                 <Select placeholder="Chọn năm học">
                                     {schoolYears.map((item) => (
                                         <Select.Option key={item._id} value={item._id}>
-                                            {item.schoolYear}
+                                            {item?.schoolYear}
                                         </Select.Option>
                                     ))}
                                 </Select>
@@ -262,8 +262,8 @@ function TakeServices() {
                             >
                                 <Select placeholder="Chọn học sinh">
                                     {students.map((stu) => (
-                                        <Select.Option key={stu._id} value={stu._id}>
-                                            {stu.fullName}
+                                        <Select.Option key={stu?._id} value={stu._id}>
+                                            {stu?.fullName}
                                         </Select.Option>
                                     ))}
                                 </Select>

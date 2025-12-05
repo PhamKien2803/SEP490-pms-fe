@@ -63,8 +63,10 @@ const ParentNews = () => {
         selectedStudentId || ""
       );
       setDataPosts(response?.posts);
-    } catch (error: any) {
-      toast.error(error?.message || "Lỗi khi tải danh sách");
+    } catch (error) {
+      typeof error === "string"
+        ? toast.info(error)
+        : toast.error("Lỗi khi tải danh sách tin tức");
       setDataPosts([]);
     } finally {
       setIsLoadingPosts(false);

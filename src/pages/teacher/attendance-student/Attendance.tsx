@@ -270,9 +270,9 @@ function AttendanceHistory() {
                         columns={columns}
                         dataSource={attendanceList}
                         pagination={{
-                            current: pagination.current,
-                            pageSize: pagination.pageSize,
-                            total: pagination.total,
+                            current: pagination?.current,
+                            pageSize: pagination?.pageSize,
+                            total: pagination?.total,
                             showSizeChanger: true,
                             pageSizeOptions: ['10', '20', '50'],
                             showTotal: (total, range) =>

@@ -320,35 +320,35 @@ const StudentInfoSection: React.FC<{
             <Col xs={24} md={8}>
               <ParentCard
                 label="Họ tên Phụ huynh"
-                value={parent.fullName}
+                value={parent?.fullName}
                 icon={<UserOutlined style={{ color: ACCENT_COLOR }} />}
               />
             </Col>
             <Col xs={24} md={8}>
               <ParentCard
                 label="Số điện thoại"
-                value={parent.phoneNumber}
+                value={parent?.phoneNumber}
                 icon={<PhoneOutlined style={{ color: ACCENT_COLOR }} />}
               />
             </Col>
             <Col xs={24} md={8}>
               <ParentCard
                 label="Số CCCD/CMND"
-                value={parent.idCard}
+                value={parent?.idCard}
                 icon={<IdcardOutlined style={{ color: ACCENT_COLOR }} />}
               />
             </Col>
             <Col xs={24} md={9}>
               <ParentCard
                 label="Email"
-                value={parent.email}
+                value={parent?.email}
                 icon={<MailOutlined style={{ color: ACCENT_COLOR }} />}
               />
             </Col>
             <Col xs={24} md={8}>
               <ParentCard
                 label="Nghề Nghiệp"
-                value={parent.job}
+                value={parent?.job}
                 icon={<SolutionOutlined style={{ color: ACCENT_COLOR }} />}
               />
             </Col>
@@ -427,7 +427,7 @@ const StudentInfoSection: React.FC<{
                 color: TEXT_COLOR,
               }}
             >
-              {student.fullName}
+              {student?.fullName}
             </Title>
           </div>
           <Text
@@ -441,7 +441,7 @@ const StudentInfoSection: React.FC<{
           >
             Mã HS:{" "}
             <Text strong style={{ color: ACCENT_COLOR }}>
-              {student.studentCode}
+              {student?.studentCode}
             </Text>
           </Text>
           <Divider
@@ -471,7 +471,7 @@ const StudentInfoSection: React.FC<{
                 </Space>
               }
             >
-              {getDisplayDate(student.dob)}
+              {getDisplayDate(student?.dob)}
             </Descriptions.Item>
             <Descriptions.Item
               label={
@@ -480,7 +480,7 @@ const StudentInfoSection: React.FC<{
                 </Space>
               }
             >
-              {student.gender}
+              {student?.gender}
             </Descriptions.Item>
             <Descriptions.Item
               label={
@@ -489,7 +489,7 @@ const StudentInfoSection: React.FC<{
                 </Space>
               }
             >
-              {student.idCard}
+              {student?.idCard}
             </Descriptions.Item>
           </Descriptions>
         </Col>
@@ -591,7 +591,7 @@ const StudentInfo: React.FC = () => {
                 style={{ color: TEXT_COLOR }}
               />
             </Tooltip>
-            {data && data.students.length > 1 && (
+            {data && data?.students?.length > 1 && (
               <Select
                 value={selectedStudentId}
                 onChange={setSelectedStudentId}
@@ -601,7 +601,7 @@ const StudentInfo: React.FC = () => {
                 dropdownStyle={{ borderRadius: 8 }}
                 suffixIcon={<UserOutlined style={{ color: ACCENT_COLOR }} />}
               >
-                {data.students.map((student) => (
+                {data?.students.map((student) => (
                   <Option key={student._id} value={student._id}>
                     <Space>
                       <Avatar
@@ -609,7 +609,7 @@ const StudentInfo: React.FC = () => {
                         style={{ backgroundColor: ACCENT_COLOR }}
                         icon={<UserOutlined />}
                       />
-                      {student.fullName}
+                      {student?.fullName}
                     </Space>
                   </Option>
                 ))}

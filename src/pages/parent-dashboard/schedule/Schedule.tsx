@@ -164,7 +164,7 @@ const Schedule: React.FC = () => {
   const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
   const [isClassLoading, setIsClassLoading] = useState<boolean>(true);
   const [isScheduleLoading, setIsScheduleLoading] = useState<boolean>(false);
-  const [isClassError, setIsClassError] = useState<boolean>(false);
+  const [_, setIsClassError] = useState<boolean>(false);
   const [isScheduleError, setIsScheduleError] = useState<boolean>(false);
 
   const classData = classDetail?.class;
@@ -370,12 +370,12 @@ const Schedule: React.FC = () => {
               }}
             >
               <ReadOutlined style={{ marginRight: 8, color: uiProps.color }} />
-              {activity.tittle}
+              {activity?.tittle}
             </Text>
           )}
 
           <Row gutter={8} style={{ marginTop: 10 }}>
-            {!!activity.type && (
+            {!!activity?.type && (
               <Col>
                 <Tag color={uiProps.color}>{uiProps.tag}</Tag>
               </Col>
@@ -446,7 +446,7 @@ const Schedule: React.FC = () => {
             }}
             bodyStyle={{ padding: "12px" }}
           >
-            {day.isHoliday ? (
+            {day?.isHoliday ? (
               <div style={{ textAlign: "center", padding: "30px 0" }}>
                 <RestOutlined
                   style={{ color: "#cf1322", fontSize: 32, marginBottom: 15 }}
@@ -454,16 +454,16 @@ const Schedule: React.FC = () => {
                 <Title level={5} type="danger" style={{ margin: 0 }}>
                   NGHỈ HỌC TRONG NGÀY
                 </Title>
-                {day.notes && (
+                {day?.notes && (
                   <Text
                     type="secondary"
                     style={{ display: "block", marginTop: 8 }}
                   >
-                    {day.notes}
+                    {day?.notes}
                   </Text>
                 )}
               </div>
-            ) : day.activities.length > 0 ? (
+            ) : day?.activities?.length > 0 ? (
               <Collapse
                 defaultActiveKey={["morning", "afternoon"]}
                 bordered={false}
@@ -473,7 +473,7 @@ const Schedule: React.FC = () => {
                   header={
                     <Text strong style={{ fontSize: 15, color: "#0050b3" }}>
                       <CoffeeOutlined style={{ marginRight: 8 }} />
-                      Buổi Sáng ({morningActivities.length})
+                      Buổi Sáng ({morningActivities?.length})
                     </Text>
                   }
                   key="morning"
@@ -484,7 +484,7 @@ const Schedule: React.FC = () => {
                     border: "1px solid #d6e4ff",
                   }}
                 >
-                  {morningActivities.length > 0 ? (
+                  {morningActivities?.length > 0 ? (
                     morningActivities.map(renderActivityBlock)
                   ) : (
                     <Text italic type="secondary">
@@ -507,7 +507,7 @@ const Schedule: React.FC = () => {
                     border: "1px solid #ffe7ba",
                   }}
                 >
-                  {afternoonActivities.length > 0 ? (
+                  {afternoonActivities?.length > 0 ? (
                     afternoonActivities.map(renderActivityBlock)
                   ) : (
                     <Text italic type="secondary">
@@ -533,14 +533,14 @@ const Schedule: React.FC = () => {
                 </Text>
               </div>
             )}
-            {day.notes && !day.isHoliday && (
+            {day?.notes && !day.isHoliday && (
               <Alert
                 message={
                   <Text strong style={{ color: "#08979c" }}>
                     <FileTextOutlined style={{ marginRight: 5 }} /> Ghi chú
                   </Text>
                 }
-                description={<Text type="secondary">{day.notes}</Text>}
+                description={<Text type="secondary">{day?.notes}</Text>}
                 type="info"
                 style={{ marginTop: 15, borderLeft: "4px solid #08979c" }}
                 showIcon={false}
@@ -609,7 +609,7 @@ const Schedule: React.FC = () => {
             message={
               <Text strong style={{ color: "#1890ff" }}>
                 <HomeOutlined style={{ marginRight: 5 }} /> Lớp Học:{" "}
-                {classData.className} ({classData.classCode})
+                {classData?.className} ({classData?.classCode})
               </Text>
             }
             description={`Thời khóa biểu của bé ${selectedStudent?.fullName} trong ${selectedMonthName} (${selectedSchoolYear}).`}
@@ -629,20 +629,12 @@ const Schedule: React.FC = () => {
             showIcon
             style={{ marginBottom: 24 }}
           />
-        ) : isClassError ? (
-          <Alert
-            message="Lỗi tải dữ liệu lớp học"
-            description="Không thể tải thông tin lớp học. Vui lòng kiểm tra lại kết nối hoặc thử lại."
-            type="error"
-            showIcon
-            style={{ marginBottom: 24 }}
-          />
         ) : !classData && !isClassLoading ? (
           <div style={{ textAlign: "center", padding: "50px" }}>
             <Empty
               description={
                 <Title level={4}>
-                  Không tìm thấy thông tin lớp học của bé{" "}
+                  Hiện chưa có thông tin lịch học của bé{" "}
                   {selectedStudent?.fullName} trong năm {selectedSchoolYear}.
                 </Title>
               }
@@ -665,7 +657,7 @@ const Schedule: React.FC = () => {
               description={
                 <Title level={4}>
                   Chưa có Thời khóa biểu chính thức cho lớp{" "}
-                  {classData.className} trong {selectedMonthName}.
+                  {classData?.className} trong {selectedMonthName}.
                 </Title>
               }
             />
@@ -708,7 +700,7 @@ const Schedule: React.FC = () => {
                           flexWrap: "nowrap",
                         }}
                       >
-                        {week.days.map(renderDayColumn)}
+                        {week?.days.map(renderDayColumn)}
                       </Row>
                     </DraggableRow>
                   </TabPane>
