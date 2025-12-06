@@ -144,12 +144,12 @@ function ReportDetails() {
       }
     >
       <Descriptions bordered column={2} size="middle">
-        <Descriptions.Item label="Lớp">{lesson.className}</Descriptions.Item>
-        <Descriptions.Item label="Năm học">{lesson.schoolYear}</Descriptions.Item>
-        <Descriptions.Item label="Tháng">{`Tháng ${lesson.month}`}</Descriptions.Item>
-        <Descriptions.Item label="Tuần">{`Tuần ${lesson.weekNumber}`}</Descriptions.Item>
+        <Descriptions.Item label="Lớp">{lesson?.className}</Descriptions.Item>
+        <Descriptions.Item label="Năm học">{lesson?.schoolYear}</Descriptions.Item>
+        <Descriptions.Item label="Tháng">{`Tháng ${lesson?.month}`}</Descriptions.Item>
+        <Descriptions.Item label="Tuần">{`Tuần ${lesson?.weekNumber}`}</Descriptions.Item>
         <Descriptions.Item label="Chủ đề" span={2}>
-          {lesson.topicName || '—'}
+          {lesson?.topicName || '—'}
         </Descriptions.Item>
         <Descriptions.Item label="Trạng thái">
           <Tag
@@ -161,7 +161,7 @@ function ReportDetails() {
                   : 'green'
             }
           >
-            {lesson.status}
+            {lesson?.status}
           </Tag>
         </Descriptions.Item>
       </Descriptions>
@@ -178,28 +178,28 @@ function ReportDetails() {
               />
             </Col>
             <Col>
-              {day.dayName} ({dayjs(day.date).format('DD/MM/YYYY')})
+              {day?.dayName} ({dayjs(day.date).format('DD/MM/YYYY')})
             </Col>
             <Col>
               <Button
                 icon={<RightOutlined />}
-                disabled={currentDayIndex === lesson.scheduleDays.length - 1}
+                disabled={currentDayIndex === lesson?.scheduleDays?.length - 1}
                 onClick={() => setCurrentDayIndex((prev) => prev + 1)}
               />
             </Col>
           </Row>
         }
       >
-        {day.isHoliday ? (
+        {day?.isHoliday ? (
           <Tag color="default">Ngày nghỉ</Tag>
-        ) : day.activities.length === 0 ? (
+        ) : day?.activities?.length === 0 ? (
           <Text type="secondary">Không có hoạt động</Text>
         ) : (
           <Table
             size="small"
             bordered
             pagination={false}
-            dataSource={day.activities.map((act, i) => ({
+            dataSource={day?.activities.map((act, i) => ({
               ...act,
               key: i,
             }))}
@@ -207,8 +207,8 @@ function ReportDetails() {
               {
                 title: 'Thời gian',
                 render: (_, record) =>
-                  `${formatMinutesToTime(record.startTime)} - ${formatMinutesToTime(
-                    record.endTime
+                  `${formatMinutesToTime(record?.startTime)} - ${formatMinutesToTime(
+                    record?.endTime
                   )}`,
               },
               {

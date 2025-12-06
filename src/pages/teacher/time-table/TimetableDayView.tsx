@@ -90,7 +90,7 @@ const TimetableDayView: React.FC<Props> = ({ getDaysOfWeek }) => {
                     disabled={currentIndex === 0}
                 />
                 <Title level={5} style={{ margin: 0 }}>
-                    {currentDay.dayName} - {dayjs(currentDay.date).format('DD/MM/YYYY')}
+                    {currentDay?.dayName} - {dayjs(currentDay?.date).format('DD/MM/YYYY')}
                 </Title>
                 <Button
                     icon={<RightOutlined />}
@@ -100,7 +100,7 @@ const TimetableDayView: React.FC<Props> = ({ getDaysOfWeek }) => {
             </Row>
 
             <div style={{ padding: '24px' }}>
-                {currentDay.activities.length === 0 ? (
+                {currentDay?.activities?.length === 0 ? (
                     <Tag
                         icon={<CalendarOutlined />}
                         color="default"
@@ -114,24 +114,24 @@ const TimetableDayView: React.FC<Props> = ({ getDaysOfWeek }) => {
                             const { color, icon } = getActivityProps(act);
                             return (
                                 <Timeline.Item
-                                    key={act.activity}
+                                    key={act?.activity}
                                     color={color}
                                     dot={icon}
                                 >
                                     <Row gutter={8} style={{ width: '100%' }} align="top">
                                         <Col flex="60px">
                                             <Text strong style={{ fontSize: 16 }}>
-                                                {formatMinutesToTime(act.startTime)}
+                                                {formatMinutesToTime(act?.startTime)}
                                             </Text>
                                         </Col>
                                         <Col flex="auto">
                                             <Title level={5} style={{ margin: 0 }}>
-                                                {act.activityName}
+                                                {act?.activityName}
                                             </Title>
                                             <Text type="secondary" style={{ fontSize: 12 }}>
-                                                Kết thúc: {formatMinutesToTime(act.endTime)}
+                                                Kết thúc: {formatMinutesToTime(act?.endTime)}
                                             </Text>
-                                            {act.type === 'Bình thường' && act.tittle && (
+                                            {act?.type === 'Bình thường' && act?.tittle && (
                                                 <ul
                                                     style={{
                                                         fontSize: 14,
@@ -142,7 +142,7 @@ const TimetableDayView: React.FC<Props> = ({ getDaysOfWeek }) => {
                                                         color: 'rgba(0, 0, 0, 0.65)',
                                                     }}
                                                 >
-                                                    {act.tittle
+                                                    {act?.tittle
                                                         .split('\n')
                                                         .map((line, i) => (
                                                             <li key={i} style={{ lineHeight: 1.5 }}>

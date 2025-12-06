@@ -338,7 +338,7 @@ const TimeTable = () => {
         });
     }, [getDaysOfWeek, uniqueStartTimes]);
 
-    const classInfo = timetableData ? `${timetableData.className || ''} (${timetableData.schoolYear || ''})` : '';
+    const classInfo = timetableData ? `${timetableData?.className || ''} (${timetableData?.schoolYear || ''})` : '';
 
     return (
         <Card
@@ -363,7 +363,7 @@ const TimeTable = () => {
                             <Select
                                 value={selectedYear}
                                 onChange={setSelectedYear}
-                                options={schoolYears.map((y) => ({ label: y.schoolYear, value: y.schoolYear }))}
+                                options={schoolYears.map((y) => ({ label: y?.schoolYear, value: y?.schoolYear }))}
                                 style={{ width: 150 }}
                             />
                             <Select

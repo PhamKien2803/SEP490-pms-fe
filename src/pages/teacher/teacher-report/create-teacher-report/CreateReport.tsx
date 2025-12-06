@@ -421,15 +421,15 @@ function CreateReport() {
                     setEditingCell(null);
                   } else {
                     const initText =
-                      activity.tittle && activity.tittle.trim().length > 0
-                        ? activity.tittle
+                      activity?.tittle && activity?.tittle.trim().length > 0
+                        ? activity?.tittle
                         : "";
                     setEditingCell({ dayIndex, rowIndex });
                     setUnsavedText(initText);
                   }
                 }}
               >
-                {activity.activityName || "Trống"}
+                {activity?.activityName || "Trống"}
               </Tag>
 
               {isEditable && (
@@ -456,7 +456,7 @@ function CreateReport() {
                       onClick={(e) => e.stopPropagation()}
                     />
                   ) : (
-                    activity.tittle && (
+                    activity?.tittle && (
                       <Text
                         style={{
                           whiteSpace: "pre-wrap",
@@ -464,7 +464,7 @@ function CreateReport() {
                           padding: "4px 8px",
                         }}
                       >
-                        {activity.tittle}
+                        {activity?.tittle}
                       </Text>
                     )
                   )}
@@ -568,9 +568,9 @@ function CreateReport() {
             {(scheduleData?.scheduleDays?.length ?? 0) > 0 && (
               <Text type="secondary" style={{ marginLeft: 8 }}>
                 {scheduleData &&
-                  scheduleData.scheduleDays.length > 0 &&
+                  scheduleData?.scheduleDays?.length > 0 &&
                   `(Tuần ${getWeekOfMonth(
-                    scheduleData.scheduleDays[0].date
+                    scheduleData?.scheduleDays[0].date
                   )} trong tháng)`}
               </Text>
             )}

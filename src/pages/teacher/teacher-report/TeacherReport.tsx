@@ -186,8 +186,8 @@ function TeacherReport() {
           value={selectedYear}
           onChange={setSelectedYear}
           options={schoolYears.map((item) => ({
-            label: item.schoolYear,
-            value: item.schoolYear,
+            label: item?.schoolYear,
+            value: item?.schoolYear,
           }))}
           style={{ minWidth: 220 }}
         />

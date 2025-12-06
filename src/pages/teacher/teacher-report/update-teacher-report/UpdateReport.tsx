@@ -260,8 +260,8 @@ function UpdateReport() {
                             <th>Thời gian</th>
                             {lessonData?.scheduleDays.map((day) => (
                                 <th key={day._id}>
-                                    <div>{day.dayName}</div>
-                                    <div className="header-date">{dayjs(day.date).format('DD/MM')}</div>
+                                    <div>{day?.dayName}</div>
+                                    <div className="header-date">{dayjs(day?.date).format('DD/MM')}</div>
                                 </th>
                             ))}
                         </tr>

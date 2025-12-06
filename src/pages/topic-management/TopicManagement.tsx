@@ -158,7 +158,7 @@ function TopicManagement() {
                                 loading={loading && schoolYears.length === 0}
                             >
                                 {schoolYears.map(year => (
-                                    <Option key={year._id} value={year.schoolYear}>{year.schoolYear}</Option>
+                                    <Option key={year?._id} value={year?.schoolYear}>{year?.schoolYear}</Option>
                                 ))}
                             </Select>
                             <Tooltip title="Làm mới danh sách">

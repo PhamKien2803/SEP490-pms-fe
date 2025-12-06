@@ -164,7 +164,7 @@ function ClassInfor() {
             );
         }
 
-        if (!classData || classData.classes.length === 0) {
+        if (!classData || classData?.classes.length === 0) {
             return (
                 <Card bordered={false} style={{ textAlign: 'center', padding: '40px 0' }}>
                     <Empty
@@ -190,7 +190,7 @@ function ClassInfor() {
                         </Col>
                         <Col>
                             <Tag color="cyan" style={{ padding: '5px 10px', fontSize: '14px' }}>
-                                Năm học: {schoolYear.schoolYear}
+                                Năm học: {schoolYear?.schoolYear}
                             </Tag>
                         </Col>
                     </Row>
@@ -214,38 +214,38 @@ function ClassInfor() {
                                 tab={
                                     <Space>
                                         <TeamOutlined style={{ color: token.colorPrimary }} />
-                                        <Text strong>{classInfo.className}</Text>
+                                        <Text strong>{classInfo?.className}</Text>
                                     </Space>
                                 }
-                                key={classInfo._id}
+                                key={classInfo?._id}
                                 style={{ padding: token.paddingLG }}
                             >
                                 <Row gutter={[24, 24]} style={{ marginBottom: token.marginLG }}>
                                     <Col xs={24} sm={12} md={6}>
                                         <Statistic
                                             title="Mã lớp"
-                                            value={classInfo.classCode}
+                                            value={classInfo?.classCode}
                                             prefix={<BarcodeOutlined style={{ color: token.colorTextSecondary }} />}
                                         />
                                     </Col>
                                     <Col xs={24} sm={12} md={6}>
                                         <Statistic
                                             title="Phòng học"
-                                            value={classInfo.room?.roomName || '--'}
+                                            value={classInfo?.room?.roomName || '--'}
                                             prefix={<HomeOutlined style={{ color: token.colorSuccess }} />}
                                         />
                                     </Col>
                                     <Col xs={24} sm={12} md={6}>
                                         <Statistic
                                             title="Độ tuổi"
-                                            value={`${classInfo.age || '--'} tuổi`}
+                                            value={`${classInfo?.age || '--'} tuổi`}
                                             prefix={<SmileOutlined style={{ color: token.colorWarning }} />}
                                         />
                                     </Col>
                                     <Col xs={24} sm={12} md={6}>
                                         <Statistic
                                             title="Sĩ số"
-                                            value={classInfo.students?.length || 0}
+                                            value={classInfo?.students?.length || 0}
                                             suffix="học sinh"
                                             prefix={<UsergroupAddOutlined style={{ color: token.colorPrimary }} />}
                                         />
@@ -257,7 +257,7 @@ function ClassInfor() {
                                 <Title level={5} style={{ marginBottom: token.margin }}>Danh sách học sinh</Title>
                                 <Table
                                     columns={studentColumns}
-                                    dataSource={classInfo.students}
+                                    dataSource={classInfo?.students}
                                     rowKey="_id"
                                     pagination={{ pageSize: 10, showSizeChanger: true, size: 'small' }}
                                     bordered

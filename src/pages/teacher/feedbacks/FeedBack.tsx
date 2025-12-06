@@ -173,7 +173,7 @@ function FeedBack() {
                                 onClick={() =>
                                     navigate(`${constants.APP_PREFIX}/feedbacks/edit/${record._id}`, {
                                         state: {
-                                            studentName: record.studentId.fullName,
+                                            studentName: record?.studentId?.fullName,
                                         },
                                     })
                                 }
@@ -213,13 +213,13 @@ function FeedBack() {
                                 return;
                             }
 
-                            const filtered = feedbacks.filter(f => f.studentId?._id === studentId);
+                            const filtered = feedbacks.filter(f => f?.studentId?._id === studentId);
                             setFeedbacks(filtered);
                         }}
                     >
                         {feedbacks.map((f) => (
-                            <Option key={f.studentId._id} value={f.studentId._id}>
-                                {f.studentId.fullName}
+                            <Option key={f?.studentId?._id} value={f.studentId._id}>
+                                {f?.studentId?.fullName}
                             </Option>
                         ))}
                     </Select>
@@ -241,8 +241,8 @@ function FeedBack() {
                             placeholder="Chọn lớp"
                         >
                             {teacherData?.classes?.map((c: IClassInfo) => (
-                                <Option key={c._id} value={c._id}>
-                                    {c.className}
+                                <Option key={c?._id} value={c._id}>
+                                    {c?.className}
                                 </Option>
                             ))}
                         </Select>
