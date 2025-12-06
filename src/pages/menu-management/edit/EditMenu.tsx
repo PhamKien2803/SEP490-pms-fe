@@ -17,6 +17,7 @@ import {
   Skeleton,
   Popconfirm,
   Modal,
+  Tag,
 } from "antd";
 import {
   SaveOutlined,
@@ -730,6 +731,18 @@ const EditMenu: React.FC = () => {
 
   const currentAgeGroupValue = Form.useWatch("ageGroup", form);
 
+  const renderStatusTag = useCallback((state: string) => {
+    let color = "processing";
+    if (state === "Đã duyệt") color = "success";
+    if (state === "Dự thảo") color = "processing";
+    if (state === "Chờ xử lý") color = "error";
+    return <Tag color={color}>{state.toUpperCase()}</Tag>;
+  }, []);
+
+  const isDraft = menuStatus === "Dự thảo";
+  const isReviewing = menuStatus === "Chờ xử lý";
+
+
   const currentAgeGroupLabel = useMemo(() => {
     const group = AGE_GROUPS.find((g) => g.value === currentAgeGroupValue);
     return group ? group.label : "";
@@ -819,6 +832,7 @@ const EditMenu: React.FC = () => {
       dateRange: [startDayjs, endDayjs],
       ageGroup: ageGroup,
       notes: menu.notes,
+      reason: menu.reason || "",
       days: formDays,
     });
 
@@ -866,6 +880,21 @@ const EditMenu: React.FC = () => {
       setActiveTabKey("0");
     } else {
       setCurrentWeekDays([]);
+    }
+  };
+
+  const handleSendPending = async () => {
+    if (!id) return toast.info("Thiếu ID thực đơn.");
+    setLoading(true);
+    try {
+      await menuApis.pendingMenu(id);
+      toast.success("Đã gửi thực đơn chờ phê duyệt!");
+      // navigate(`${constants.APP_PREFIX}/menus`);
+    } catch (error: any) {
+      const message = error?.response?.data?.message || "Gửi thực đơn thất bại.";
+      toast.error(message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -929,7 +958,7 @@ const EditMenu: React.FC = () => {
 
       await menuApis.editMenu(id, payload);
       toast.success("Cập nhật thực đơn tuần thành công!");
-      navigate(`${constants.APP_PREFIX}/menus`);
+      // navigate(`${constants.APP_PREFIX}/menus`);
     } catch (error: any) {
       const errorMessage =
         error ||
@@ -949,7 +978,7 @@ const EditMenu: React.FC = () => {
     try {
       await menuApis.approveMenu(id);
       toast.success("Đã duyệt thực đơn thành công!");
-      navigate(`${constants.APP_PREFIX}/menus`);
+      // navigate(`${constants.APP_PREFIX}/menus`);
     } catch (error: any) {
       const errorMessage =
         error?.response?.data?.message || "Duyệt thực đơn thất bại.";
@@ -986,7 +1015,7 @@ const EditMenu: React.FC = () => {
     isEditing,
   ]);
 
-  const isPending = menuStatus === "Chờ xử lý";
+  // const isPending = menuStatus === "Dự thảo";
 
   if (initialLoading) {
     return (
@@ -1019,13 +1048,15 @@ const EditMenu: React.FC = () => {
       setLoading(true);
       await menuApis.rejectMenu(id, { reason: rejectReason?.trim() });
       toast.success("Từ chối tạo menu thành công");
-      navigate(`${constants.APP_PREFIX}/menus`);
+      // navigate(`${constants.APP_PREFIX}/menus`);
     } catch (error) {
       toast.error("Lỗi reject menu. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
   };
+
+
 
   return (
     <div style={{ padding: "16px 24px" }}>
@@ -1047,13 +1078,12 @@ const EditMenu: React.FC = () => {
                 style={{ marginRight: 16, cursor: "pointer", color: "#0050b3" }}
               />
               Chi Tiết Thực Đơn Tuần
-              {isPending && (
-                <span
-                  style={{ fontSize: 14, marginLeft: 16, color: "#faad14" }}
-                >
-                  (Trạng thái: Đang xử lý)
+              {menuStatus && (
+                <span style={{ marginLeft: 16 }}>
+                  {renderStatusTag(menuStatus)}
                 </span>
               )}
+
             </Title>
           }
           bordered={false}
@@ -1117,14 +1147,30 @@ const EditMenu: React.FC = () => {
               </Form.Item>
             </Col>
             <Col xs={24} md={14}>
-              <Form.Item label="Ghi chú" name="notes">
-                <Input.TextArea
-                  disabled={!isEditing}
-                  rows={1}
-                  placeholder="Thêm ghi chú về thực đơn này (Ví dụ: Thực đơn mùa đông)"
-                />
-              </Form.Item>
+              <Row gutter={12}>
+                <Col span={12}>
+                  <Form.Item label="Ghi chú" name="notes">
+                    <Input.TextArea
+                      disabled={!isEditing}
+                      rows={3}
+                      placeholder="Thêm ghi chú về thực đơn này"
+                    />
+                  </Form.Item>
+                </Col>
+
+                <Col span={12}>
+                  <Form.Item label="Lý do từ chối">
+                    <Input.TextArea
+                      disabled
+                      rows={3}
+                      value={form.getFieldValue("reason") || "Không có lý do"}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
             </Col>
+
+
           </Row>
 
           <Row gutter={24}>
@@ -1190,7 +1236,7 @@ const EditMenu: React.FC = () => {
                 </Space>
               ) : (
                 <Space size="middle">
-                  {isPending && (
+                  {/* {isPending && (
                     <>
                       <Button
                         danger
@@ -1215,14 +1261,66 @@ const EditMenu: React.FC = () => {
                         </Button>
                       </Popconfirm>
                     </>
+                  )} */}
+                  {isDraft && (
+                    <>
+                      <Button
+                        type="primary"
+                        icon={<CheckCircleOutlined />}
+                        loading={loading}
+                        onClick={handleSendPending}
+                      >
+                        Gửi phê duyệt
+                      </Button>
+                      <Button
+                        icon={<EditOutlined />}
+                        onClick={() => setIsEditing(true)}
+                      >
+                        Chỉnh sửa thông tin
+                      </Button>
+                    </>
                   )}
 
-                  <Button
+                  {isReviewing && (
+                    <>
+                      <Button
+                        danger
+                        icon={<CloseCircleOutlined />}
+                        onClick={() => setIsRejectModalVisible(true)}
+                      >
+                        Từ chối
+                      </Button>
+                      <Popconfirm
+                        title="Xác nhận duyệt đơn?"
+                        description="Bạn chắc chắn muốn duyệt thực đơn này?"
+                        onConfirm={handleApprove}
+                        okText="Đồng ý"
+                        cancelText="Không"
+                      >
+                        <Button
+                          type="primary"
+                          icon={<CheckCircleOutlined />}
+                          loading={loading}
+                        >
+                          Duyệt thực đơn
+                        </Button>
+                      </Popconfirm>
+                      <Button
+                        icon={<EditOutlined />}
+                        onClick={() => setIsEditing(true)}
+                      >
+                        Chỉnh sửa thông tin
+                      </Button>
+                    </>
+                  )}
+
+
+                  {/* <Button
                     icon={<EditOutlined />}
                     onClick={() => setIsEditing(true)}
                   >
                     Chỉnh sửa thông tin
-                  </Button>
+                  </Button> */}
                 </Space>
               )}
             </Space>

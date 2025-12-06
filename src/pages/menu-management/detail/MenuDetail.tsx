@@ -4,7 +4,6 @@ import {
   Row,
   Col,
   Card,
-  Button,
   Space,
   Collapse,
   Table,
@@ -13,7 +12,6 @@ import {
 } from "antd";
 import {
   ArrowLeftOutlined,
-  EditOutlined,
   CalendarOutlined,
   ReadOutlined,
 } from "@ant-design/icons";
@@ -395,7 +393,7 @@ const MenuDetailPage: React.FC = () => {
                 </Tag>
               </Space>
             </Col>
-            <Col>
+            {/* <Col>
               <Button
                 icon={<EditOutlined />}
                 type="primary"
@@ -405,7 +403,7 @@ const MenuDetailPage: React.FC = () => {
               >
                 Sửa Thực Đơn
               </Button>
-            </Col>
+            </Col> */}
           </Row>
         }
         bordered={false}

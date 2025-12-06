@@ -61,6 +61,7 @@ export const apiEndPoint = {
   EDIT_MENU: (menuId: string) => `/menus/update/${menuId}`,
   APPROVE_MENU: (menuId: string) => `/menus/approve-menu/${menuId}`,
   REJECT_MENU: (menuId: string) => `/menus/reject-menu/${menuId}`,
+  PENDING_MENU: (menuId: string) => `/menus/pending-menu/${menuId}`,
   GET_CLASS_LIST: "/classes/list",
   GET_CLASS_BY_ID: (id: string) => `/classes/getById/${id}`,
   UPDATE_CLASS: (id: string) => `/classes/update/${id}`,

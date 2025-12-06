@@ -229,19 +229,28 @@ function TakeAttendance() {
             toast.warning('Buổi học hôm nay đã được điểm danh.');
             return;
         }
+        const guardianMap = new Map(
+            teacherData.classes[0].students.map((s) => [
+                s._id,
+                s.guardianToday?._id || null
+            ])
+        );
 
         setIsSaving(true);
-        const studentsPayload: IAttendanceStudentPayload[] = Array.from(attendanceState.entries()).map(
-            ([studentId, data]) => ({
-                student: studentId,
-                status: data.status,
-                note: data.note || undefined,
-                noteCheckout: undefined,
-                timeCheckIn: data.timeCheckIn || null,
-                timeCheckOut: null,
-                guardian: null,
-            })
-        );
+        const studentsPayload: IAttendanceStudentPayload[] =
+            Array.from(attendanceState.entries()).map(([studentId, data]) => {
+                const guardianId = guardianMap.get(studentId) || null;
+
+                return {
+                    student: studentId,
+                    status: data.status,
+                    note: data.note || undefined,
+                    noteCheckout: undefined,
+                    timeCheckIn: data.timeCheckIn || null,
+                    timeCheckOut: null,
+                    guardian: guardianId,
+                };
+            });
 
         const payload: IAttendanceCreatePayload = {
             class: currentClass._id,

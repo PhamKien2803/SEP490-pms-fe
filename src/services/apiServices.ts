@@ -615,7 +615,13 @@ export const menuApis = {
     menuId: string,
     body: { reason: string }
   ): Promise<void> => {
-    await axiosAuth.post(apiEndPoint.APPROVE_MENU(menuId), body);
+    await axiosAuth.post(apiEndPoint.REJECT_MENU(menuId), body);
+  },
+
+  pendingMenu: async (
+    menuId: string,
+  ): Promise<void> => {
+    await axiosAuth.post(apiEndPoint.PENDING_MENU(menuId));
   },
 
   getListFood: async (params: ListFoodParams): Promise<FoodListResponse> => {

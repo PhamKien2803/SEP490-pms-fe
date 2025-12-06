@@ -210,4 +210,5 @@ export interface MenuDetail {
   weekStart: string;
   weekEnd: string;
   days: DayDetail[];
+  reason?: string
 }
