@@ -22,6 +22,7 @@ import {
     EyeOutlined,
     FilterOutlined,
     RobotOutlined,
+    ReloadOutlined,
 } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
 import { toast } from "react-toastify";
@@ -430,18 +431,37 @@ const FoodManagement: React.FC = () => {
                         </Col>
 
                         <Col style={{ marginTop: 16 }}>
-                            {canCreate && (
+                            <Space wrap size="middle">
                                 <Button
-                                    type="primary"
-                                    icon={<PlusOutlined />}
-                                    onClick={navigateToCreate}
+                                    icon={<ReloadOutlined />}
+                                    onClick={() =>
+                                        fetchFoodList(
+                                            pagination.page,
+                                            pagination.limit,
+                                            selectedAgeGroup,
+                                            searchKeyword,
+                                            selectedDateRange
+                                        )
+                                    }
                                     loading={loading}
-                                    disabled={loading || isAITriggering}
                                 >
-                                    Tạo mới
+                                    Làm mới
                                 </Button>
-                            )}
+
+                                {canCreate && (
+                                    <Button
+                                        type="primary"
+                                        icon={<PlusOutlined />}
+                                        onClick={navigateToCreate}
+                                        loading={loading || isAITriggering}
+                                        disabled={loading || isAITriggering}
+                                    >
+                                        Tạo mới
+                                    </Button>
+                                )}
+                            </Space>
                         </Col>
+
                     </Row>
                 </Col>
             </Row>

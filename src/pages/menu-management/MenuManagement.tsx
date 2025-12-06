@@ -20,6 +20,7 @@ import {
   AppstoreOutlined,
   EyeOutlined,
   FilterOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
 import weekOfYear from "dayjs/plugin/weekOfYear";
@@ -359,6 +360,21 @@ const MenuManagement: React.FC = () => {
 
             <Col style={{ marginTop: 16 }}>
               <Space wrap size="middle">
+                <Button
+                  icon={<ReloadOutlined />}
+                  onClick={() =>
+                    fetchMenuList(
+                      pagination.page,
+                      pagination.limit,
+                      selectedAgeGroup,
+                      selectedDateRange
+                    )
+                  }
+                  loading={loading}
+                >
+                  Làm mới
+                </Button>
+
                 {canCreate && (
                   <Button
                     type="primary"
@@ -374,6 +390,7 @@ const MenuManagement: React.FC = () => {
                 )}
               </Space>
             </Col>
+
           </Row>
         </Col>
       </Row>
