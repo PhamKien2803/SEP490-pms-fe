@@ -25,6 +25,7 @@ export interface UserProfile {
   staff?: string;
   isAdmin: boolean;
   isTeacher: boolean;
+  isPreview: boolean;
   parent?: string;
 }
 

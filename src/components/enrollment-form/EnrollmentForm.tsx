@@ -329,30 +329,34 @@ const EnrollmentForm: React.FC = () => {
                             </>
                         )}
                         <Col xs={24} sm={12}><Form.Item name="fatherIdCard" label="CCCD Cha" rules={[{ required: true, message: "Vui lòng nhập CCCD!" }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<IdcardOutlined />} placeholder="012345678901" /></Form.Item></Col>
-                        <Col xs={24} sm={12}>
-                            <Form.Item
-                                name="fatherDob"
-                                label="Ngày sinh Cha"
-                                rules={[
-                                    { required: true, message: "Vui lòng chọn ngày sinh Cha!" },
-                                    {
-                                        validator: (_, value) => {
-                                            if (!value) return Promise.resolve();
-                                            const date = dayjs(value);
-                                            const today = dayjs();
-                                            const age = today.diff(date, "year");
-                                            if (date.isAfter(today, "day"))
-                                                return Promise.reject(new Error("Ngày sinh không được trong tương lai!"));
-                                            if (age < 18)
-                                                return Promise.reject(new Error("Cha phải từ 18 tuổi trở lên!"));
-                                            return Promise.resolve();
-                                        },
-                                    },
-                                ]}
-                            >
-                                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" placeholder="Chọn ngày sinh" />
-                            </Form.Item>
-                        </Col>
+                        {!isExistingParent && (
+                            <>
+                                <Col xs={24} sm={12}>
+                                    <Form.Item
+                                        name="fatherDob"
+                                        label="Ngày sinh Cha"
+                                        rules={[
+                                            { required: true, message: "Vui lòng chọn ngày sinh Cha!" },
+                                            {
+                                                validator: (_, value) => {
+                                                    if (!value) return Promise.resolve();
+                                                    const date = dayjs(value);
+                                                    const today = dayjs();
+                                                    const age = today.diff(date, "year");
+                                                    if (date.isAfter(today, "day"))
+                                                        return Promise.reject(new Error("Ngày sinh không được trong tương lai!"));
+                                                    if (age < 18)
+                                                        return Promise.reject(new Error("Cha phải từ 18 tuổi trở lên!"));
+                                                    return Promise.resolve();
+                                                },
+                                            },
+                                        ]}
+                                    >
+                                        <DatePicker inputReadOnly style={{ width: "100%" }} format="DD/MM/YYYY" placeholder="Chọn ngày sinh" />
+                                    </Form.Item>
+                                </Col>
+                            </>
+                        )}
 
                     </Row>
 
@@ -401,30 +405,35 @@ const EnrollmentForm: React.FC = () => {
                             </>
                         )}
                         <Col xs={24} sm={12}><Form.Item name="motherIdCard" label="CCCD Mẹ" rules={[{ required: true, message: "Vui lòng nhập CCCD!" }, idCardValidationRule]}><Input onKeyPress={allowOnlyNumbers} prefix={<IdcardOutlined />} placeholder="012345678901" /></Form.Item></Col>
-                        <Col xs={24} sm={12}>
-                            <Form.Item
-                                name="motherDob"
-                                label="Ngày sinh Mẹ"
-                                rules={[
-                                    { required: true, message: "Vui lòng chọn ngày sinh Mẹ!" },
-                                    {
-                                        validator: (_, value) => {
-                                            if (!value) return Promise.resolve();
-                                            const date = dayjs(value);
-                                            const today = dayjs();
-                                            const age = today.diff(date, "year");
-                                            if (date.isAfter(today, "day"))
-                                                return Promise.reject(new Error("Ngày sinh không được trong tương lai!"));
-                                            if (age < 18)
-                                                return Promise.reject(new Error("Mẹ phải từ 18 tuổi trở lên!"));
-                                            return Promise.resolve();
-                                        },
-                                    },
-                                ]}
-                            >
-                                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" placeholder="Chọn ngày sinh" />
-                            </Form.Item>
-                        </Col>
+                        {!isExistingParent && (
+                            <>
+                                <Col xs={24} sm={12}>
+                                    <Form.Item
+                                        name="motherDob"
+                                        label="Ngày sinh Mẹ"
+                                        rules={[
+                                            { required: true, message: "Vui lòng chọn ngày sinh Mẹ!" },
+                                            {
+                                                validator: (_, value) => {
+                                                    if (!value) return Promise.resolve();
+                                                    const date = dayjs(value);
+                                                    const today = dayjs();
+                                                    const age = today.diff(date, "year");
+                                                    if (date.isAfter(today, "day"))
+                                                        return Promise.reject(new Error("Ngày sinh không được trong tương lai!"));
+                                                    if (age < 18)
+                                                        return Promise.reject(new Error("Mẹ phải từ 18 tuổi trở lên!"));
+                                                    return Promise.resolve();
+                                                },
+                                            },
+                                        ]}
+                                    >
+                                        <DatePicker inputReadOnly style={{ width: "100%" }} format="DD/MM/YYYY" placeholder="Chọn ngày sinh" />
+                                    </Form.Item>
+                                </Col>
+                            </>
+                        )}
+
 
                     </Row>
 

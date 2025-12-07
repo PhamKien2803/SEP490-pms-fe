@@ -26,6 +26,7 @@ import { useCurrentUser } from "../../../hooks/useCurrentUser";
 import { IDocumentDetailResponse } from "../../../types/documents";
 import { toast } from "react-toastify";
 import { BANK_OPTIONS } from "../../../components/hard-code-action";
+import { noSpecialCharactersRule, requiredTrimRule } from "../../../utils/format";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -36,10 +37,17 @@ function DocumentEdit() {
     const { id } = useParams();
     const currentUser = useCurrentUser();
     const [loading, setLoading] = useState(true);
-    const [documentData, setDocumentData] =
-        useState<IDocumentDetailResponse | null>(null);
+    const [documentData, setDocumentData] = useState<IDocumentDetailResponse | null>(null);
 
     const method = Form.useWatch("method", form);
+    const documentList = Form.useWatch("documentList", form);
+
+    useEffect(() => {
+        if (documentList && Array.isArray(documentList)) {
+            const total = documentList.reduce((sum, item) => sum + (item?.amount || 0), 0);
+            form.setFieldsValue({ amount: total });
+        }
+    }, [documentList, form]);
 
     const fetchDocument = async () => {
         try {
@@ -49,8 +57,8 @@ function DocumentEdit() {
                 ...res,
                 documentDate: dayjs(res.documentDate),
             });
-        } catch (err) {
-            typeof err === "string" ? toast.info(err) : toast.error("Không thể tải dữ liệu chứng từ");
+        } catch {
+            toast.error("Không thể tải dữ liệu chứng từ");
         } finally {
             setLoading(false);
         }
@@ -62,22 +70,25 @@ function DocumentEdit() {
             documentDate: values.documentDate.toISOString(),
             createdBy: currentUser?.email || "admin",
         };
+        setLoading(true);
         try {
             await documentsApis.updateDocument(id as string, payload);
             toast.success("Cập nhật thành công");
-            // navigate(-1);
-        } catch (err) {
-            typeof err === "string" ? toast.info(err) : toast.error("Cập nhật thất bại");
+        } catch {
+            toast.error("Cập nhật thất bại");
+        } finally {
+            setLoading(false);
         }
     };
+
 
     const handleConfirm = async () => {
         try {
             await documentsApis.confirmDocument(id as string);
             toast.success("Đã xác nhận thanh toán");
             fetchDocument();
-        } catch (err) {
-            typeof err === "string" ? toast.info(err) : toast.error("Xác nhận thất bại");
+        } catch {
+            toast.error("Xác nhận thất bại");
         }
     };
 
@@ -98,6 +109,7 @@ function DocumentEdit() {
             event.preventDefault();
         }
     };
+
     const isPaid = documentData?.status === "Đã thanh toán";
 
     return (
@@ -106,102 +118,99 @@ function DocumentEdit() {
                 <Row justify="space-between" align="middle">
                     <Col>
                         <Space align="center">
-                            <Button
-                                type="text"
-                                icon={<ArrowLeftOutlined />}
-                                onClick={() => navigate(-1)}
-                            />
-                            <Title level={3} style={{ margin: 0 }}>
-                                Chỉnh sửa chứng từ
-                            </Title>
+                            <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} />
+                            <Title level={3} style={{ margin: 0 }}>Chỉnh sửa chứng từ</Title>
                         </Space>
                     </Col>
                     {!isPaid && (
                         <Col>
-                            <Button type="primary" onClick={handleConfirm}>
-                                Xác nhận thanh toán
-                            </Button>
+                            <Button type="primary" onClick={handleConfirm}>Xác nhận thanh toán</Button>
                         </Col>
                     )}
                 </Row>
 
-                <Form
-                    layout="vertical"
-                    form={form}
-                    onFinish={handleSubmit}
-                    disabled={isPaid}
-                >
+                <Form layout="vertical" form={form} onFinish={handleSubmit} disabled={isPaid}>
                     <Row gutter={[16, 0]}>
                         <Col xs={24} md={12}>
-                            <Form.Item
-                                name="documentName"
-                                label="Tên chứng từ"
-                                rules={[{ required: true }]}
-                            >
+                            <Form.Item name="documentName" label="Tên chứng từ" rules={[
+                                requiredTrimRule("tên chứng từ"),
+                                {
+                                    validator: (_, value) => {
+                                        if (!value) return Promise.resolve();
+                                        if (/^\s|\s$/.test(value)) {
+                                            return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                        }
+                                        if (/\s{2,}/.test(value)) {
+                                            return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                },
+                            ]}>
                                 <Input />
                             </Form.Item>
                         </Col>
+
                         <Col xs={24} md={12}>
-                            <Form.Item
-                                name="documentDate"
-                                label="Ngày lập"
-                                rules={[{ required: true }]}
-                            >
-                                <DatePicker
-                                    style={{ width: "100%" }}
-                                    format="DD/MM/YYYY"
-                                />
+                            <Form.Item name="documentDate" label="Ngày lập" rules={[{ required: true }]}>
+                                <DatePicker inputReadOnly style={{ width: "100%" }} format="DD/MM/YYYY" />
                             </Form.Item>
                         </Col>
+
                         <Col xs={24} md={12}>
-                            <Form.Item
-                                name="receiver"
-                                label="Người nhận"
-                                rules={[{ required: true }]}
-                            >
+                            <Form.Item name="receiver" label="Người nhận" rules={[
+                                requiredTrimRule("tên người nhận"),
+                                noSpecialCharactersRule,
+                                {
+                                    validator: (_, value) => {
+                                        if (!value) return Promise.resolve();
+                                        if (/^\s|\s$/.test(value)) {
+                                            return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                        }
+                                        if (/\s{2,}/.test(value)) {
+                                            return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                },
+                            ]}>
                                 <Input />
                             </Form.Item>
                         </Col>
+
                         <Col xs={24} md={12}>
-                            <Form.Item
-                                name="amount"
-                                label="Tổng số tiền"
-                                rules={[{ required: true }]}
-                            >
+                            <Form.Item name="amount" label="Tổng số tiền" rules={[{ required: true }]}>
                                 <InputNumber<number>
-                                    onKeyPress={allowOnlyNumbers}
-                                    min={0}
-                                    max={9999999}
-                                    style={{ width: "100%" }}
+                                    readOnly
+                                    style={{
+                                        width: "100%",
+                                        color: "black",
+                                        backgroundColor: "#f5f5f5",
+                                        cursor: "default",
+                                        fontWeight: 600
+                                    }}
                                     formatter={(value) =>
                                         value !== undefined
-                                            ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " VNĐ"
+                                            ? value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                                             : ""
                                     }
-                                    parser={(value) =>
-                                        parseFloat(value?.replace(/,/g, "") || "")
-                                    }
+                                    parser={(value) => parseFloat(value?.replace(/,/g, "") || "")}
+                                    addonAfter="VNĐ"
                                 />
                             </Form.Item>
                         </Col>
+
                         <Col xs={24} md={12}>
-                            <Form.Item
-                                name="method"
-                                label="Hình thức thanh toán"
-                                rules={[{ required: true }]}
-                            >
+                            <Form.Item name="method" label="Hình thức thanh toán" rules={[{ required: true }]}>
                                 <Select>
                                     <Option value="Chuyển khoản">Chuyển khoản</Option>
                                     <Option value="Tiền mặt">Tiền mặt</Option>
                                 </Select>
                             </Form.Item>
                         </Col>
+
                         <Col xs={24} md={12}>
-                            <Form.Item
-                                name="status"
-                                label="Trạng thái"
-                                rules={[{ required: true }]}
-                            >
+                            <Form.Item name="status" label="Trạng thái" rules={[{ required: true }]}>
                                 <Select>
                                     <Option value="Chưa thanh toán">Chưa thanh toán</Option>
                                     <Option value="Đã thanh toán">Đã thanh toán</Option>
@@ -212,21 +221,14 @@ function DocumentEdit() {
                         {method === "Chuyển khoản" && (
                             <>
                                 <Col xs={24} md={12}>
-                                    <Form.Item
-                                        name="numberBank"
-                                        label="Số tài khoản"
-                                        rules={[{ required: true }]}
-                                    >
+                                    <Form.Item name="numberBank" label="Số tài khoản" rules={[{ required: true }]}>
                                         <Input onKeyPress={allowOnlyNumbers} />
                                     </Form.Item>
                                 </Col>
+
                                 <Col xs={24} md={12}>
-                                    <Form.Item
-                                        name="bank"
-                                        label="Ngân hàng"
-                                        rules={[{ required: true }]}
-                                    >
-                                        <Select placeholder="Chọn ngân hàng" style={{ width: "100%" }}>
+                                    <Form.Item name="bank" label="Ngân hàng" rules={[{ required: true }]}>
+                                        <Select placeholder="Chọn ngân hàng">
                                             {BANK_OPTIONS.map((bank) => (
                                                 <Option key={bank.value} value={bank.value}>
                                                     {bank.label}
@@ -239,11 +241,7 @@ function DocumentEdit() {
                         )}
 
                         <Col span={24}>
-                            <Form.Item
-                                name="reason"
-                                label="Lý do"
-                                rules={[{ required: true }]}
-                            >
+                            <Form.Item name="reason" label="Lý do" rules={[{ required: true }]}>
                                 <Input.TextArea rows={3} />
                             </Form.Item>
                         </Col>
@@ -255,54 +253,45 @@ function DocumentEdit() {
                         {(fields, { add, remove }) => (
                             <>
                                 {fields.map(({ key, name }) => (
-                                    <Row key={key} gutter={[16, 8]} align="top">
+                                    <Row key={key} gutter={[16, 8]}>
                                         <Col xs={24} sm={12}>
-                                            <Form.Item
-                                                name={[name, "document"]}
-                                                rules={[{ required: true }]}
-                                            >
+                                            <Form.Item label={`Tài liệu ${name + 1}`} name={[name, "document"]} rules={[{ required: true }]}>
                                                 <Input placeholder="Tên tài liệu" />
                                             </Form.Item>
                                         </Col>
+
                                         <Col xs={20} sm={10}>
-                                            <Form.Item
-                                                name={[name, "amount"]}
-                                                rules={[{ required: true }]}
-                                            >
+                                            <Form.Item label={`Đơn giá ${name + 1}`} name={[name, "amount"]} rules={[{ required: true }]}>
                                                 <InputNumber<number>
                                                     onKeyPress={allowOnlyNumbers}
                                                     min={0}
+                                                    style={{ width: "100%" }}
                                                     formatter={(val) =>
                                                         val !== undefined
-                                                            ? `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " VNĐ"
+                                                            ? `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                                                             : ""
                                                     }
-                                                    parser={(val) =>
-                                                        parseFloat(val?.replace(/[^0-9]/g, "") || "")
-                                                    }
+                                                    parser={(val) => parseFloat(val?.replace(/[^0-9]/g, "") || "")}
                                                     placeholder="Số tiền"
-                                                    style={{ width: "100%" }}
+                                                    addonAfter="VNĐ"
                                                 />
                                             </Form.Item>
                                         </Col>
+
                                         <Col xs={4} sm={2}>
                                             {!isPaid && (
                                                 <MinusCircleOutlined
-                                                    style={{ fontSize: "16px", color: "red" }}
+                                                    style={{ fontSize: 16, color: "red" }}
                                                     onClick={() => remove(name)}
                                                 />
                                             )}
                                         </Col>
                                     </Row>
                                 ))}
+
                                 {!isPaid && (
                                     <Form.Item>
-                                        <Button
-                                            type="dashed"
-                                            onClick={() => add()}
-                                            icon={<PlusOutlined />}
-                                            block
-                                        >
+                                        <Button type="dashed" onClick={() => add()} icon={<PlusOutlined />} block>
                                             Thêm dòng
                                         </Button>
                                     </Form.Item>
@@ -317,17 +306,11 @@ function DocumentEdit() {
                         <Space>
                             {!isPaid && (
                                 <>
-                                    <Button type="primary" htmlType="submit">
-                                        Lưu thay đổi
-                                    </Button>
-                                    <Button htmlType="button" onClick={() => form.resetFields()}>
-                                        Đặt lại
-                                    </Button>
+                                    <Button type="primary" htmlType="submit">Lưu thay đổi</Button>
+                                    <Button onClick={() => form.resetFields()}>Đặt lại</Button>
                                 </>
                             )}
-                            <Button htmlType="button" onClick={() => navigate(-1)}>
-                                Quay lại
-                            </Button>
+                            <Button onClick={() => navigate(-1)}>Quay lại</Button>
                         </Space>
                     </Form.Item>
                 </Form>

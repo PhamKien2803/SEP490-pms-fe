@@ -206,8 +206,8 @@ function DocumentList() {
                         style={{ width: "100%" }}
                     >
                         {schoolYears.map((sy) => (
-                            <Option key={sy.schoolYear} value={sy.schoolYear}>
-                                {sy.schoolYear}
+                            <Option key={sy?.schoolYear} value={sy?.schoolYear}>
+                                {sy?.schoolYear}
                             </Option>
                         ))}
                     </Select>

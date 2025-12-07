@@ -215,6 +215,7 @@ import {
   CreatePostResponse,
   PostsResponse,
 } from "../types/post";
+import { GetClassStatisticsResponse } from "../types/statistics";
 
 export const authApis = {
   login: async (body: LoginRequest): Promise<LoginResponse> => {
@@ -1927,3 +1928,11 @@ export const postApis = {
     return response.data;
   },
 };
+
+export const statisticsApis = {
+  getClassStatistics: async (): Promise<GetClassStatisticsResponse> => {
+    const response = await axiosAuth.get<GetClassStatisticsResponse>(apiEndPoint.STATISTICS_CLASS)
+      ;
+    return response.data;
+  },
+}

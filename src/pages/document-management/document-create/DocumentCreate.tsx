@@ -23,6 +23,8 @@ import { documentsApis } from "../../../services/apiServices";
 import { toast } from "react-toastify";
 import { BANK_OPTIONS } from "../../../components/hard-code-action";
 import { usePageTitle } from "../../../hooks/usePageTitle";
+import { useEffect } from "react";
+import { noSpecialCharactersRule, requiredTrimRule } from "../../../utils/format";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -33,6 +35,14 @@ function DocumentCreate() {
     const navigate = useNavigate();
     const currentUser = useCurrentUser();
     const method = Form.useWatch("method", form);
+    const documentList = Form.useWatch("documentList", form);
+
+    useEffect(() => {
+        if (documentList && Array.isArray(documentList)) {
+            const total = documentList.reduce((sum, item) => sum + (item?.amount || 0), 0);
+            form.setFieldsValue({ amount: total });
+        }
+    }, [documentList, form]);
 
     const handleSubmit = async (values: any) => {
         const payload = {
@@ -89,7 +99,21 @@ function DocumentCreate() {
                             <Form.Item
                                 name="documentName"
                                 label="Tên chứng từ"
-                                rules={[{ required: true, message: "Vui lòng nhập tên chứng từ" }]}
+                                rules={[
+                                    requiredTrimRule("tên chứng từ"),
+                                    {
+                                        validator: (_, value) => {
+                                            if (!value) return Promise.resolve();
+                                            if (/^\s|\s$/.test(value)) {
+                                                return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                            }
+                                            if (/\s{2,}/.test(value)) {
+                                                return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    },
+                                ]}
                             >
                                 <Input placeholder="Ví dụ: Phiếu chi tiền điện" style={{ width: "100%" }} />
                             </Form.Item>
@@ -100,14 +124,29 @@ function DocumentCreate() {
                                 label="Ngày lập"
                                 rules={[{ required: true, message: "Vui lòng chọn ngày" }]}
                             >
-                                <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
+                                <DatePicker inputReadOnly format="DD/MM/YYYY" style={{ width: "100%" }} />
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={12}>
                             <Form.Item
                                 name="receiver"
                                 label="Người nhận"
-                                rules={[{ required: true, message: "Vui lòng nhập người nhận" }]}
+                                rules={[
+                                    requiredTrimRule("tên người nhận"),
+                                    noSpecialCharactersRule,
+                                    {
+                                        validator: (_, value) => {
+                                            if (!value) return Promise.resolve();
+                                            if (/^\s|\s$/.test(value)) {
+                                                return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                            }
+                                            if (/\s{2,}/.test(value)) {
+                                                return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    },
+                                ]}
                             >
                                 <Input placeholder="Ví dụ: Nguyễn Văn A" style={{ width: "100%" }} />
                             </Form.Item>
@@ -119,10 +158,14 @@ function DocumentCreate() {
                                 rules={[{ required: true, message: "Vui lòng nhập số tiền" }]}
                             >
                                 <InputNumber<number>
-                                    onKeyPress={allowOnlyNumbers}
+                                    readOnly
                                     min={0}
                                     max={999999999}
-                                    style={{ width: "100%" }}
+                                    style={{
+                                        width: "100%",
+                                        color: "black",
+                                        cursor: "default",
+                                    }}
                                     formatter={(value) => (value !== undefined ? value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "")}
                                     parser={(value) => parseFloat(value?.replace(/,/g, "") || "")}
                                     placeholder="0"
@@ -170,7 +213,6 @@ function DocumentCreate() {
                                                     {bank.label}
                                                 </Option>
                                             ))}
-
                                         </Select>
                                     </Form.Item>
                                 </Col>
@@ -197,6 +239,7 @@ function DocumentCreate() {
                                     <Row key={key} gutter={[16, 0]} align="top">
                                         <Col xs={24} sm={12}>
                                             <Form.Item
+                                                label={`Tài liệu ${name + 1}`}
                                                 name={[name, "document"]}
                                                 rules={[{ required: true, message: "Tên tài liệu" }]}
                                             >
@@ -205,6 +248,7 @@ function DocumentCreate() {
                                         </Col>
                                         <Col xs={20} sm={10}>
                                             <Form.Item
+                                                label={`Đơn giá ${name + 1}`}
                                                 name={[name, "amount"]}
                                                 rules={[{ required: true, message: "Số tiền" }]}
                                             >
