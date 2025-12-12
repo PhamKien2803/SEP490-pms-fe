@@ -23,7 +23,7 @@ const { Search } = Input;
 function ClassManagement() {
     usePageTitle('Quản lý lớp học - Cá Heo Xanh');
     const navigate = useNavigate();
-    const { canSyncData, canCreate } = usePagePermission();
+    const { canSyncData, canCreate, canUpdate } = usePagePermission();
     const [originalClassList, setOriginalClassList] = useState<ClassListItem[]>([]);
     const [filteredClassList, setFilteredClassList] = useState<ClassListItem[]>([]);
     const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
@@ -144,9 +144,11 @@ function ClassManagement() {
                     </Tooltip>
                     {!isCurrentYearExpired && (
                         <>
-                            <Tooltip title="Chỉnh sửa">
-                                <Button type="text" icon={<EditOutlined style={{ color: '#1890ff' }} />} onClick={() => navigate(`${constants.APP_PREFIX}/classes/update/${record._id}`)} />
-                            </Tooltip>
+                            {canUpdate && (
+                                <Tooltip title="Chỉnh sửa">
+                                    <Button type="text" icon={<EditOutlined style={{ color: '#1890ff' }} />} onClick={() => navigate(`${constants.APP_PREFIX}/classes/update/${record._id}`)} />
+                                </Tooltip>
+                            )}
                         </>
                     )}
                 </Space>

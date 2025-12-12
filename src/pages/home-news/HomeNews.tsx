@@ -6,6 +6,7 @@ import ParentNews from "./home-news-parent/ParentNews";
 import { Button, Result } from "antd";
 import { FrownOutlined } from "@ant-design/icons";
 import ParentPreviewLanding from "./home-news-parentPreview/ParentPreviewLanding";
+import StaffNews from "./home-news-staff/StaffNews";
 
 function HomeNews() {
     const user = useCurrentUser();
@@ -13,11 +14,13 @@ function HomeNews() {
     const isAdmin = user?.isAdmin;
     const teacherId = useMemo(() => user?.staff, [user]);
     const parentId = useMemo(() => user?.parent, [user]);
+    const isStaff = user?.isTeacher;
     const isPreview = useMemo(() => user?.isPreview === true, [user]);
 
     if (isAdmin) return <AdminNews />;
-    if (teacherId) return <TeacherNews />;
-
+    // if (teacherId) return <TeacherNews />;
+    if (teacherId && isStaff === true) return <TeacherNews />;
+    if (teacherId && isStaff === false) return <StaffNews />;
     if (parentId) {
         if (isPreview) {
             return <ParentPreviewLanding />;
