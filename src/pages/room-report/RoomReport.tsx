@@ -33,16 +33,16 @@ import {
 import { usePageTitle } from "../../hooks/usePageTitle";
 const { Title, Text } = Typography;
 
-const PENDING_STATE: RoomState = "Chờ xử lý" as RoomState;
-const APPROVED_STATE: RoomState = "Hoàn thành" as RoomState;
+const PENDING_STATE: RoomState = "Chờ xử lý";
+const APPROVED_STATE: RoomState = "Hoàn thành";
 
 const RoomReportComponent: React.FC = () => {
-  usePageTitle('Báo cáo CSVC Phòng học - Cá Heo Xanh');
+  usePageTitle("Báo cáo CSVC Phòng học - Cá Heo Xanh");
   const { canExportfile } = usePagePermission();
   const [allRooms, setAllRooms] = useState<RoomRecord[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [selectedYear, setSelectedYear] = useState<number>(dayjs().year());
-
+  const [selectedState, setSelectedState] = useState<RoomState | undefined>();
   const [isProcessing, setIsProcessing] = useState(false);
   const [modal, contextHolder] = Modal.useModal();
 
@@ -52,7 +52,9 @@ const RoomReportComponent: React.FC = () => {
       const response = await roomApis.getListRoom({ page: 1, limit: 1000 });
       setAllRooms(response.data);
     } catch (error) {
-      typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách phòng học cho báo cáo.");
+      typeof error === "string"
+        ? toast.info(error)
+        : toast.error("Không thể tải danh sách phòng học cho báo cáo.");
       setAllRooms([]);
     } finally {
       setLoading(false);
@@ -71,8 +73,12 @@ const RoomReportComponent: React.FC = () => {
       .filter((item) => {
         if (!selectedYear) return true;
         return dayjs(item.createdAt).year() === selectedYear;
+      })
+      .filter((item) => {
+        if (!selectedState) return true;
+        return item.state === selectedState;
       });
-  }, [allRooms, selectedYear]);
+  }, [allRooms, selectedYear, selectedState]);
 
   const updateRoomData = async (roomData: RoomRecord, newState: RoomState) => {
     if (roomData.state !== PENDING_STATE) {
@@ -103,11 +109,12 @@ const RoomReportComponent: React.FC = () => {
       };
 
       await roomApis.updateRoom(roomData._id, payload);
-
       toast.success(`Phòng học ${roomData.roomName} đã được duyệt!`);
       await fetchAllRooms();
     } catch (error) {
-      typeof error === "string" ? toast.info(error) : toast.error(`Cập nhật trạng thái thất bại.`);
+      typeof error === "string"
+        ? toast.info(error)
+        : toast.error(`Cập nhật trạng thái thất bại.`);
     } finally {
       setIsProcessing(false);
     }
@@ -190,7 +197,6 @@ const RoomReportComponent: React.FC = () => {
       "YYYYMMDD"
     )}`,
   });
-
 
   const handleExportRoomDetails = (record: RoomRecord) => {
     const dataToExport = getExportDataForRoom(record);
@@ -284,7 +290,6 @@ const RoomReportComponent: React.FC = () => {
                 Duyệt
               </Button>
             )}
-
             <Button
               icon={<DownloadOutlined />}
               size="small"
@@ -311,18 +316,20 @@ const RoomReportComponent: React.FC = () => {
   };
 
   const yearOptions = useMemo(generateYearOptions, []);
+  const stateOptions = [
+    { label: "Tất cả", value: undefined },
+    { label: "Dự thảo", value: "Dự thảo" },
+    { label: "Chờ giáo viên duyệt", value: "Chờ giáo viên duyệt" },
+    { label: "Chờ nhân sự xác nhận", value: "Chờ nhân sự xác nhận" },
+    { label: "Chờ xử lý", value: "Chờ xử lý" },
+    { label: "Hoàn thành", value: "Hoàn thành" },
+  ];
 
   return (
     <div style={{ padding: "24px" }}>
       {contextHolder}
-      <Card
-        style={{ borderRadius: 8, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
-      >
-        <Row
-          justify="space-between"
-          align="middle"
-          style={{ marginBottom: 24 }}
-        >
+      <Card style={{ borderRadius: 8, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
+        <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
           <Col>
             <Title level={2} style={{ margin: 0 }}>
               Báo cáo CSVC Phòng học
@@ -338,12 +345,21 @@ const RoomReportComponent: React.FC = () => {
                 options={yearOptions}
                 placeholder="Chọn năm"
               />
+              <Text strong>Lọc theo trạng thái:</Text>
+              <Select
+                value={selectedState}
+                style={{ width: 180 }}
+                onChange={(value) => setSelectedState(value)}
+                options={stateOptions}
+                placeholder="Chọn trạng thái"
+                allowClear
+              />
               <Tooltip title="Làm mới danh sách">
                 <Button
                   icon={<ReloadOutlined />}
                   onClick={fetchAllRooms}
                   loading={loading}
-                ></Button>
+                />
               </Tooltip>
               {canExportfile && (
                 <Button

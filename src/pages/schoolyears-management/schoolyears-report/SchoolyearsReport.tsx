@@ -55,7 +55,7 @@ function SchoolyearsReport() {
             setReportData(response.data || []);
             setPagination(prev => ({ ...prev, total: response.page.totalCount }));
         } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error('Hiện năm học chưa kết thúc hoặc không có học sinh tốt nghiệp.');
+            typeof error === "string" ? toast.info("Hiện năm học chưa kết thúc hoặc không có học sinh tốt nghiệp.") : toast.error('Hiện năm học chưa kết thúc hoặc không có học sinh tốt nghiệp.');
             setReportData([]);
         } finally {
             setLoading(false);
@@ -67,19 +67,32 @@ function SchoolyearsReport() {
             setLoading(true);
             try {
                 const response = await schoolYearApis.getSchoolYearList({ page: 1, limit: 100 });
-                setSchoolYears(response.data);
-                const activeOrLatestYear = response.data.find(y => y.state === 'Đang hoạt động') || response.data[0];
-                if (activeOrLatestYear) {
-                    setSelectedYearId(activeOrLatestYear._id);
+                const sorted = [...response.data].sort(
+                    (a, b) => dayjs(b.startDate).valueOf() - dayjs(a.startDate).valueOf()
+                );
+
+                setSchoolYears(sorted);
+
+                const activeYear = sorted.find(y => y.state === 'Đang hoạt động');
+                const fallbackYear = sorted[0];
+
+                if (activeYear) {
+                    setSelectedYearId(activeYear._id);
+                } else if (fallbackYear) {
+                    setSelectedYearId(fallbackYear._id);
                 }
             } catch (error) {
-                typeof error === "string" ? toast.info(error) : toast.error('Không thể tải danh sách năm học.');
+                typeof error === "string"
+                    ? toast.info(error)
+                    : toast.error('Không thể tải danh sách năm học.');
             } finally {
                 setLoading(false);
             }
         };
+
         fetchSchoolYears();
     }, []);
+
 
     useEffect(() => {
         fetchReportData();

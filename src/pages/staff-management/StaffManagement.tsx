@@ -64,32 +64,23 @@ const StaffManagement: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const fetchListStaff = useCallback(
-    async (params: { page: number; limit: number }) => {
-      setLoading(true);
-      try {
-        const response = await staffApis.getListStaff(params);
-        setDataStaffs(response.data);
-        setPagination((prev) => ({
-          ...prev,
-          total: response.page.totalCount,
-          current: response.page.page,
-          pageSize: response.page.limit,
-        }));
-      } catch (error) {
-        typeof error === "string" ? toast.info(error) : toast.error('Không thể tải danh sách nhân viên.');
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
+  const fetchListStaff = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await staffApis.getListStaff({ page: 1, limit: 1000 });
+      setDataStaffs(response.data);
+    } catch (error) {
+      typeof error === "string"
+        ? toast.info(error)
+        : toast.error("Không thể tải danh sách nhân viên.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
 
   useEffect(() => {
-    fetchListStaff({
-      page: pagination.current!,
-      limit: pagination.pageSize!,
-    });
+    fetchListStaff();
   }, [fetchListStaff, pagination.current, pagination.pageSize]);
 
   const filteredStaff = useMemo(() => {
@@ -129,10 +120,7 @@ const StaffManagement: React.FC = () => {
       if (pagination.current !== 1) {
         setPagination((prev) => ({ ...prev, current: 1 }));
       } else {
-        fetchListStaff({
-          page: 1,
-          limit: pagination.pageSize!,
-        });
+        fetchListStaff();
       }
     } catch (error) {
       toast.info(typeof error === "string" ? error : "Tạo nhân viên thất bại.");
@@ -157,10 +145,7 @@ const StaffManagement: React.FC = () => {
       await staffApis.updateStaff(editingStaff._id, payload);
       toast.success("Cập nhật nhân viên thành công!");
       setIsUpdateModalOpen(false);
-      fetchListStaff({
-        page: pagination.current!,
-        limit: pagination.pageSize!,
-      });
+      fetchListStaff();
     } catch (error) {
       toast.info(typeof error === "string" ? error : "Cập nhật nhân viên thất bại.");
     } finally {
@@ -175,27 +160,37 @@ const StaffManagement: React.FC = () => {
 
   const handleConfirmDelete = useCallback(async () => {
     if (!deletingId) return;
+
     setIsDeleting(true);
     try {
       await staffApis.deleteStaff(deletingId);
       toast.success("Xóa nhân viên thành công!");
-      setIsDeleteModalOpen(false);
 
-      if (dataStaff.length === 1 && pagination.current! > 1) {
-        setPagination((prev) => ({ ...prev, current: prev.current! - 1 }));
-      } else {
-        fetchListStaff({
-          page: pagination.current!,
-          limit: pagination.pageSize!,
-        });
-      }
+      setDataStaffs(prev => {
+        const newData = prev.filter(item => item._id !== deletingId);
+
+        const totalAfterDelete = newData.length;
+        const pageSize = pagination.pageSize ?? 5;
+        const maxPage = Math.ceil(totalAfterDelete / pageSize);
+
+        setPagination(prevPag => ({
+          ...prevPag,
+          current: Math.min(prevPag.current ?? 1, maxPage || 1),
+          total: totalAfterDelete,
+        }));
+
+        return newData;
+      });
+
+      setIsDeleteModalOpen(false);
     } catch (error) {
-      toast.info(typeof error === "string" ? error : "Xóa học sinh thất bại.");
+      toast.info(typeof error === "string" ? error : "Xóa nhân viên thất bại.");
     } finally {
       setIsDeleting(false);
       setDeletingId(null);
     }
-  }, [deletingId, dataStaff.length, pagination.current, pagination.pageSize, fetchListStaff]);
+  }, [deletingId, pagination.pageSize]);
+
 
   const handleOpenViewModal = useCallback((record: StaffRecord) => {
     setViewingStaff(record);
@@ -310,10 +305,7 @@ const StaffManagement: React.FC = () => {
   );
 
   const handleReload = useCallback(() => {
-    fetchListStaff({
-      page: pagination.current!,
-      limit: pagination.pageSize!,
-    });
+    fetchListStaff();
   }, [fetchListStaff, pagination.current, pagination.pageSize]);
 
   const cardHeader = (

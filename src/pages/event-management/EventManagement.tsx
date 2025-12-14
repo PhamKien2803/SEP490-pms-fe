@@ -55,35 +55,36 @@ function EventManagement() {
     });
     const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
     const [selectedSchoolYear, setSelectedSchoolYear] = useState<string | undefined>(undefined);
-
     useEffect(() => {
         const fetchSchoolYears = async () => {
-            setLoading(true);
             try {
                 const response = await schoolYearApis.getSchoolYearList({ page: 1, limit: 100 });
                 if (response.data && response.data.length > 0) {
-                    const sortedYears = [...response.data].sort((a, b) => {
+                    const sorted = [...response.data].sort((a, b) => {
                         const startA = parseInt(a.schoolYear.split('-')[0]);
                         const startB = parseInt(b.schoolYear.split('-')[0]);
                         return startB - startA;
                     });
-                    setSchoolYears(sortedYears);
-                    if (!selectedSchoolYear) {
-                        setSelectedSchoolYear(sortedYears[0].schoolYear);
+
+                    const activeYear = sorted.find(y => y.state === 'Đang hoạt động');
+
+                    setSchoolYears(sorted);
+                    if (activeYear) {
+                        setSelectedSchoolYear(activeYear.schoolYear);
                     }
-                } else {
-                    toast.warn("Không tìm thấy dữ liệu năm học nào.");
-                    setLoading(false);
                 }
             } catch (error) {
-                typeof error === "string" ? toast.info(error) : toast.error('Không thể tải danh sách năm học.');
-                setLoading(false);
+                typeof error === "string"
+                    ? toast.info(error)
+                    : toast.error('Không thể tải danh sách năm học.');
             }
         };
+
         fetchSchoolYears();
     }, []);
 
-    const fetchEvents = async (year?: string, page = 1, limit = 10) => {
+
+    const fetchEvents = async (year?: string) => {
         if (!year) {
             setOriginalEvents([]);
             setFilteredEvents([]);
@@ -91,15 +92,19 @@ function EventManagement() {
             setLoading(false);
             return;
         }
+
         setLoading(true);
         try {
-            const params: GetEventsParams = { page, limit, schoolYear: year };
+            const params: GetEventsParams = { page: 1, limit: 1000, schoolYear: year };
             const response = await eventApis.getEventList(params);
             setOriginalEvents(response.data);
-            setFilteredEvents(response.data);
-            setPagination(prev => ({ ...prev, total: response.page.totalCount, current: page, pageSize: limit }));
+            setPagination(prev => ({
+                ...prev,
+                total: response.data.length,
+                current: 1,
+            }));
         } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error(`Không có sự kiện nào cho năm học ${year}.`);
+            typeof error === "string" ? toast.info("Không có sự kiện nào cho năm học này !") : toast.error(`Không có sự kiện nào cho năm học ${year}.`);
             setOriginalEvents([]);
             setFilteredEvents([]);
             setPagination(prev => ({ ...prev, total: 0, current: 1 }));
@@ -108,9 +113,10 @@ function EventManagement() {
         }
     };
 
+
     useEffect(() => {
         if (selectedSchoolYear) {
-            fetchEvents(selectedSchoolYear, pagination.current, pagination.pageSize);
+            fetchEvents(selectedSchoolYear);
         } else if (schoolYears.length > 0) {
             setOriginalEvents([]);
             setFilteredEvents([]);
@@ -133,21 +139,31 @@ function EventManagement() {
         try {
             await eventApis.deleteEvent(id);
             toast.success('Xóa sự kiện thành công!');
-            if (selectedSchoolYear) {
-                const newCurrentPage = (filteredEvents.length === 1 && pagination.current > 1)
-                    ? pagination.current - 1
-                    : pagination.current;
-                fetchEvents(selectedSchoolYear, newCurrentPage, pagination.pageSize);
-            }
+
+            const newEvents = originalEvents.filter(item => item._id !== id);
+            setOriginalEvents(newEvents);
+
+            const totalAfterDelete = newEvents.length;
+            const maxPage = Math.ceil(totalAfterDelete / pagination.pageSize);
+
+            setPagination(prev => ({
+                ...prev,
+                current: prev.current > maxPage ? maxPage : prev.current,
+                total: totalAfterDelete
+            }));
+
         } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error('Xóa sự kiện thất bại.');
+            typeof error === "string"
+                ? toast.info(error)
+                : toast.error('Xóa sự kiện thất bại.');
         }
     };
+
 
     const handleRefresh = () => {
         setSearchTerm('');
         if (selectedSchoolYear) {
-            fetchEvents(selectedSchoolYear, pagination.current, pagination.pageSize);
+            fetchEvents(selectedSchoolYear);
         }
     }
 

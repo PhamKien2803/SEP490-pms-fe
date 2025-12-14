@@ -87,31 +87,54 @@ function TakeFeedback() {
             if (!teacherId) return;
             setIsLoadingTeacherData(true);
             setLoading(true);
+
             try {
                 const res = await schoolYearApis.getSchoolYearList({ page: 1, limit: 100 });
-                const sorted = res.data.sort((a, b) => parseInt(b.schoolYear) - parseInt(a.schoolYear));
-                const latestYear = sorted[0]?._id;
-                setSchoolYears(sorted);
-                setSelectedSchoolYearId(latestYear);
 
-                if (latestYear) {
-                    const data: ITeacherData = await teacherApis.getClassAndStudentByTeacher(teacherId, latestYear);
+                const sorted = res.data.sort(
+                    (a, b) =>
+                        parseInt(b.schoolYear.split('-')[0]) -
+                        parseInt(a.schoolYear.split('-')[0])
+                );
+
+                setSchoolYears(sorted);
+
+                const activeYear =
+                    sorted.find((y) => y.state === 'Đang hoạt động')?._id ||
+                    sorted[0]?._id;
+
+                setSelectedSchoolYearId(activeYear);
+
+                if (activeYear) {
+                    const data: ITeacherData =
+                        await teacherApis.getClassAndStudentByTeacher(
+                            teacherId,
+                            activeYear
+                        );
+
                     if (data.classes?.length > 0) {
                         const firstClass = data.classes[0];
                         setCurrentClass(firstClass);
                         setCurrentStudents(firstClass.students || []);
                     } else {
+                        setCurrentClass(null);
+                        setCurrentStudents([]);
                         toast.warn('Giáo viên chưa được phân công lớp nào.');
                     }
                 }
             } catch (error) {
-                typeof error === "string" ? toast.info(error) : toast.error('Không thể tải thông tin lớp hoặc năm học.');
+                typeof error === 'string'
+                    ? toast.info(error)
+                    : toast.error('Không thể tải thông tin lớp hoặc năm học.');
             } finally {
                 setIsLoadingTeacherData(false);
+                setLoading(false);
             }
         };
+
         init();
     }, [teacherId]);
+
 
     const fetchExistingFeedbacks = async () => {
         if (!currentClass) {

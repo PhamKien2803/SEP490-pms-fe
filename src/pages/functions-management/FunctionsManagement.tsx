@@ -32,7 +32,7 @@ const FunctionsManagement: React.FC = () => {
         showSizeChanger: true,
         pageSizeOptions: ['5', '10', '20'],
         position: ['bottomCenter'],
-        showTotal: (total) => `Tổng số: ${total} bản ghi`,
+        showTotal: (total, range) => `${range[0]}–${range[1]} của ${total} bản ghi`,
     });
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,26 +44,27 @@ const FunctionsManagement: React.FC = () => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
-    const fetchFunctions = useCallback(async (params: { page: number; limit: number }) => {
+    const fetchFunctions = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await functionsApis.getFunctions(params);
+            const response = await functionsApis.getFunctions({ page: 1, limit: 1000 });
             setFunctions(response.data);
             setPagination(prev => ({
                 ...prev,
-                total: response.page.totalCount,
-                current: response.page.page,
-                pageSize: response.page.limit,
+                total: response.page.totalCount || response.data.length,
             }));
         } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error('Hiện chưa có chức năng nào. Vui lòng tạo mới!');
+            typeof error === "string"
+                ? toast.info(error)
+                : toast.error('Hiện chưa có chức năng nào. Vui lòng tạo mới!');
         } finally {
             setLoading(false);
         }
     }, []);
 
+
     useEffect(() => {
-        fetchFunctions({ page: pagination.current!, limit: pagination.pageSize! });
+        fetchFunctions();
     }, [fetchFunctions, pagination.current, pagination.pageSize]);
 
     const filteredFunctions = useMemo(() => {
@@ -98,7 +99,7 @@ const FunctionsManagement: React.FC = () => {
             if (pagination.current !== 1) {
                 setPagination(prev => ({ ...prev, current: 1 }));
             } else {
-                fetchFunctions({ page: 1, limit: pagination.pageSize! });
+                fetchFunctions();
             }
         } catch (error) {
             typeof error === "string" ? toast.info(error) : toast.error('Tạo chức năng thất bại. Vui lòng thử lại!');
@@ -124,7 +125,7 @@ const FunctionsManagement: React.FC = () => {
             toast.success('Cập nhật chức năng thành công!');
             dispatch(forceRefetchUser());
             setIsUpdateModalOpen(false);
-            fetchFunctions({ page: pagination.current!, limit: pagination.pageSize! });
+            fetchFunctions();
         } catch (error) {
             typeof error === "string" ? toast.info(error) : toast.error('Cập nhật chức năng thất bại. Vui lòng thử lại!');
         } finally {
@@ -144,19 +145,31 @@ const FunctionsManagement: React.FC = () => {
             await functionsApis.deleteFunction(deletingId);
             toast.success('Xóa chức năng thành công!');
             dispatch(forceRefetchUser());
+            setFunctions(prev => {
+                const newList = prev.filter(item => item._id !== deletingId);
+                const total = newList.length;
+                const pageSize = pagination.pageSize ?? 10;
+                const maxPage = Math.ceil(total / pageSize);
+
+                setPagination(prev => ({
+                    ...prev,
+                    current: Math.min(prev.current ?? 1, maxPage || 1),
+                    total: total,
+                }));
+
+                return newList;
+            });
             setIsDeleteModalOpen(false);
-            if (functions.length === 1 && pagination.current! > 1) {
-                setPagination(prev => ({ ...prev, current: prev.current! - 1 }));
-            } else {
-                fetchFunctions({ page: pagination.current!, limit: pagination.pageSize! });
-            }
         } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error('Xóa chức năng thất bại. Vui lòng thử lại!');
+            typeof error === "string"
+                ? toast.info(error)
+                : toast.error('Xóa chức năng thất bại. Vui lòng thử lại!');
         } finally {
             setIsDeleting(false);
             setDeletingId(null);
         }
     };
+
 
     const columns: ColumnsType<Functions> = useMemo(() => [
         { title: 'Mã chức năng', dataIndex: 'functionCode', key: 'functionCode', width: '20%' },
@@ -203,7 +216,7 @@ const FunctionsManagement: React.FC = () => {
                 <Space>
                     <Tooltip title="Làm mới danh sách">
                         <Button icon={<ReloadOutlined />}
-                            onClick={() => fetchFunctions({ page: pagination.current!, limit: pagination.pageSize! })}
+                            onClick={() => fetchFunctions()}
                             loading={loading}>Làm mới danh sách</Button>
                     </Tooltip>
                     <Input.Search

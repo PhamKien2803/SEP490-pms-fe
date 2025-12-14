@@ -1,23 +1,44 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Table, Button, Space, Typography, Row, Col, Card, Select, Tag, Tooltip } from 'antd';
-import { DownloadOutlined, ReloadOutlined } from '@ant-design/icons';
+import {
+    Table,
+    Button,
+    Space,
+    Typography,
+    Row,
+    Col,
+    Card,
+    Select,
+    Tag,
+    Tooltip,
+    Input,
+} from 'antd';
+import {
+    DownloadOutlined,
+    ReloadOutlined,
+} from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { toast } from 'react-toastify';
-import { enrollmentApis } from '../../services/apiServices';
+import { enrollmentApis, schoolYearApis } from '../../services/apiServices';
 import { EnrollmentListItem } from '../../types/enrollment';
+import { SchoolYearListItem } from '../../types/schoolYear';
 import { useExcelExport } from '../../hooks/useExcelExport';
-import { usePagePermission } from "../../hooks/usePagePermission";
+import { usePagePermission } from '../../hooks/usePagePermission';
 import dayjs from 'dayjs';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
 const { Title } = Typography;
+const { Option } = Select;
 
 const Admissions: React.FC = () => {
     usePageTitle('Báo cáo tuyển sinh - Cá Heo Xanh');
     const { canExportfile } = usePagePermission();
+
     const [allEnrollments, setAllEnrollments] = useState<EnrollmentListItem[]>([]);
+    const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
+    const [selectedYear, setSelectedYear] = useState<SchoolYearListItem | undefined>();
     const [loading, setLoading] = useState<boolean>(false);
-    const [selectedYear, setSelectedYear] = useState<number>(dayjs().year());
+    const [searchKeyword, setSearchKeyword] = useState('');
+    const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
 
     const fetchAllEnrollments = useCallback(async () => {
         setLoading(true);
@@ -25,25 +46,57 @@ const Admissions: React.FC = () => {
             const response = await enrollmentApis.getEnrollmentList({ page: 1, limit: 1000 });
             setAllEnrollments(response.data);
         } catch (error) {
-            // typeof error === "string" ? toast.warn(error) : toast.error('Không thể tải danh sách đơn tuyển sinh.');
-            typeof error === "string" ? toast.info(error) : toast.error('Hiện chưa có đơn tuyển sinh nào.');
+            typeof error === 'string'
+                ? toast.info(error)
+                : toast.error('Hiện chưa có đơn tuyển sinh nào.');
         } finally {
             setLoading(false);
         }
     }, []);
 
+    const fetchSchoolYears = useCallback(async () => {
+        try {
+            const res = await schoolYearApis.getSchoolYearList({ page: 1, limit: 100 });
+            const sorted = [...res.data].sort((a, b) => {
+                const aYear = parseInt(a.schoolYear.split('-')[0]);
+                const bYear = parseInt(b.schoolYear.split('-')[0]);
+                return bYear - aYear;
+            });
+
+            setSchoolYears(sorted);
+
+            const active = sorted.find(y => y.state === 'Đang hoạt động') || sorted[0];
+            if (active) setSelectedYear(active);
+        } catch {
+            toast.error('Không thể tải danh sách năm học');
+        }
+    }, []);
+
     useEffect(() => {
         fetchAllEnrollments();
-    }, [fetchAllEnrollments]);
+        fetchSchoolYears();
+    }, [fetchAllEnrollments, fetchSchoolYears]);
+
+    useEffect(() => {
+        setPagination(prev => ({ ...prev, current: 1 }));
+    }, [searchKeyword]);
 
     const filteredData = useMemo(() => {
+        const keyword = searchKeyword.toLowerCase().trim();
         return allEnrollments
             .filter(item => item.state === 'Hoàn thành')
             .filter(item => {
                 if (!selectedYear) return true;
-                return dayjs(item.createdAt).year() === selectedYear;
-            });
-    }, [allEnrollments, selectedYear]);
+                const createdYear = dayjs(item.createdAt).year();
+                const startYear = dayjs(selectedYear.startDate).year();
+                return createdYear === startYear;
+            })
+            .filter(item =>
+                item.studentName.toLowerCase().includes(keyword) ||
+                item.enrollmentCode.toLowerCase().includes(keyword) ||
+                item.fatherName?.toLowerCase().includes(keyword)
+            );
+    }, [allEnrollments, selectedYear, searchKeyword]);
 
     const exportData = useMemo(() => {
         return filteredData.map(record => ({
@@ -58,28 +111,44 @@ const Admissions: React.FC = () => {
 
     const { exportToExcel, isExporting: isExportingExcel } = useExcelExport({
         data: exportData,
-        fileName: `BaoCaoTuyenSinh_${selectedYear}`,
+        fileName: `BaoCaoTuyenSinh_${selectedYear?.schoolYear || 'NamHoc'}`,
     });
 
     const columns: ColumnsType<EnrollmentListItem> = useMemo(() => [
-        { title: 'Mã đơn', dataIndex: 'enrollmentCode', key: 'enrollmentCode' },
-        { title: 'Tên học sinh', dataIndex: 'studentName', key: 'studentName' },
-        { title: 'Ngày sinh', dataIndex: 'studentDob', key: 'studentDob', render: (text) => dayjs(text).format('DD/MM/YYYY') },
-        { title: 'Phụ huynh', dataIndex: 'fatherName', key: 'fatherName' },
-        { title: 'Trạng thái', dataIndex: 'state', key: 'state', render: (state) => <Tag color="success">{state.toUpperCase()}</Tag> },
-        { title: 'Ngày nộp', dataIndex: 'createdAt', key: 'createdAt', render: (text) => dayjs(text).format('DD/MM/YYYY HH:mm') },
+        {
+            title: 'Mã đơn',
+            dataIndex: 'enrollmentCode',
+            key: 'enrollmentCode',
+        },
+        {
+            title: 'Tên học sinh',
+            dataIndex: 'studentName',
+            key: 'studentName',
+        },
+        {
+            title: 'Ngày sinh',
+            dataIndex: 'studentDob',
+            key: 'studentDob',
+            render: text => dayjs(text).format('DD/MM/YYYY'),
+        },
+        {
+            title: 'Phụ huynh',
+            dataIndex: 'fatherName',
+            key: 'fatherName',
+        },
+        {
+            title: 'Trạng thái',
+            dataIndex: 'state',
+            key: 'state',
+            render: state => <Tag color="success">{state.toUpperCase()}</Tag>,
+        },
+        {
+            title: 'Ngày nộp',
+            dataIndex: 'createdAt',
+            key: 'createdAt',
+            render: text => dayjs(text).format('DD/MM/YYYY HH:mm'),
+        },
     ], []);
-
-    const generateYearOptions = () => {
-        const currentYear = dayjs().year();
-        const years = [];
-        for (let i = currentYear; i >= currentYear - 10; i--) {
-            years.push({ value: i, label: `Năm ${i}` });
-        }
-        return years;
-    };
-
-    const yearOptions = useMemo(generateYearOptions, []);
 
     return (
         <div style={{ padding: '24px' }}>
@@ -93,16 +162,30 @@ const Admissions: React.FC = () => {
                     <Col>
                         <Space>
                             <Select
-                                value={selectedYear}
-                                style={{ width: 150 }}
-                                onChange={(value) => setSelectedYear(value)}
-                                options={yearOptions}
-                                placeholder="Chọn năm"
+                                value={selectedYear?._id}
+                                style={{ width: 220 }}
+                                onChange={(id) => {
+                                    const found = schoolYears.find(y => y._id === id);
+                                    if (found) setSelectedYear(found);
+                                }}
+                                placeholder="Chọn năm học"
+                            >
+                                {schoolYears.map(y => (
+                                    <Option key={y._id} value={y._id}>
+                                        {y.schoolYear}{y.state === 'Đang hoạt động' ? '' : ''}
+                                    </Option>
+                                ))}
+                            </Select>
+
+                            <Input.Search
+                                placeholder="Tìm kiếm mã đơn, học sinh, phụ huynh"
+                                allowClear
+                                value={searchKeyword}
+                                onChange={e => setSearchKeyword(e.target.value)}
+                                style={{ width: 280 }}
                             />
                             <Tooltip title="Làm mới danh sách">
-                                <Button icon={<ReloadOutlined />}
-                                    onClick={fetchAllEnrollments}
-                                    loading={loading}></Button>
+                                <Button icon={<ReloadOutlined />} onClick={fetchAllEnrollments} loading={loading} />
                             </Tooltip>
                             {canExportfile && (
                                 <Button
@@ -124,6 +207,12 @@ const Admissions: React.FC = () => {
                     rowKey="_id"
                     bordered
                     pagination={{
+                        ...pagination,
+                        total: filteredData.length,
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50'],
+                        onChange: (page, pageSize) =>
+                            setPagination({ current: page, pageSize }),
                         showTotal: (total) => `Tổng số: ${total} bản ghi`,
                     }}
                 />

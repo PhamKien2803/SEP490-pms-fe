@@ -177,17 +177,22 @@ const Schedule: React.FC = () => {
           page: 1,
           limit: 100,
         });
+
         if (response.data && response.data.length > 0) {
-          const sorted = [...response.data].sort((a, b) => {
+          const filtered = response.data.filter((y) => y.state !== "Chưa hoạt động");
+
+          const sorted = [...filtered].sort((a, b) => {
             const startA = parseInt(a.schoolYear.split("-")[0]);
             const startB = parseInt(b.schoolYear.split("-")[0]);
             return startB - startA;
           });
 
-          const latestYear = sorted[0];
+          const activeYear =
+            sorted.find((y) => y.state === "Đang hoạt động")?.schoolYear ||
+            sorted[0]?.schoolYear;
 
           setSchoolYears(sorted);
-          setSelectedSchoolYear(latestYear.schoolYear);
+          setSelectedSchoolYear(activeYear);
         }
       } catch (error) {
         typeof error === "string"
@@ -198,6 +203,8 @@ const Schedule: React.FC = () => {
 
     fetchSchoolYears();
   }, []);
+
+
 
   useEffect(() => {
     const getDataListChild = async () => {

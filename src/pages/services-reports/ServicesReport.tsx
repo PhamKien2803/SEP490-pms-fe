@@ -20,8 +20,9 @@ const { Option } = Select;
 
 function ServicesReport() {
     usePageTitle("Báo cáo dịch vụ - Cá Heo Xanh");
+
     const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
-    const [schoolYear, setSchoolYear] = useState<string>("");
+    const [selectedYear, setSelectedYear] = useState<SchoolYearListItem | undefined>();
     const [data, setData] = useState<IServiceReportItem[]>([]);
     const [loading, setLoading] = useState(false);
 
@@ -32,8 +33,10 @@ function ServicesReport() {
                 (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
             );
             setSchoolYears(sorted);
-            if (!schoolYear && sorted.length > 0) {
-                setSchoolYear(sorted[0].schoolYear);
+
+            const activeYear = sorted.find(y => y.state === "Đang hoạt động") || sorted[0];
+            if (activeYear) {
+                setSelectedYear(activeYear);
             }
         } catch (err) {
             typeof err === "string" ? toast.info(err) : toast.error("Không thể tải danh sách năm học");
@@ -41,10 +44,10 @@ function ServicesReport() {
     };
 
     const fetchReports = async () => {
-        if (!schoolYear) return;
+        if (!selectedYear) return;
         try {
             setLoading(true);
-            const res = await reportsApis.getServiceReports({ schoolYear });
+            const res = await reportsApis.getServiceReports({ schoolYear: selectedYear.schoolYear });
             setData(res.data);
         } catch (err) {
             typeof err === "string" ? toast.info(err) : toast.error("Không thể tải dữ liệu báo cáo");
@@ -58,10 +61,10 @@ function ServicesReport() {
     }, []);
 
     useEffect(() => {
-        if (schoolYear) {
+        if (selectedYear) {
             fetchReports();
         }
-    }, [schoolYear]);
+    }, [selectedYear]);
 
     const columns = [
         {
@@ -106,14 +109,18 @@ function ServicesReport() {
                     <Space>
                         <span>Năm học:</span>
                         <Select
-                            value={schoolYear}
-                            onChange={setSchoolYear}
-                            style={{ width: 180 }}
+                            value={selectedYear?._id}
+                            onChange={(id) => {
+                                const found = schoolYears.find((y) => y._id === id);
+                                if (found) setSelectedYear(found);
+                            }}
+                            style={{ width: 200 }}
                             placeholder="Chọn năm học"
                         >
                             {schoolYears.map((year) => (
-                                <Option key={year._id} value={year.schoolYear}>
+                                <Option key={year._id} value={year._id}>
                                     {year.schoolYear}
+                                    {year.state === "Đang hoạt động" ? "" : ""}
                                 </Option>
                             ))}
                         </Select>

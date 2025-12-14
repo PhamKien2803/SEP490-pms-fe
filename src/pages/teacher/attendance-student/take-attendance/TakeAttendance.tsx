@@ -94,19 +94,21 @@ function TakeAttendance() {
                         parseInt(b.schoolYear.split('-')[0]) -
                         parseInt(a.schoolYear.split('-')[0])
                 );
-                const latestYear = sorted[0]?._id;
                 setSchoolYears(sorted);
-                setSelectedSchoolYearId(latestYear);
+                const activeYear = sorted.find((y) => y.state === 'Đang hoạt động')?._id || sorted[0]?._id;
+                setSelectedSchoolYearId(activeYear);
 
-                if (latestYear && !teacherData) {
-                    const data = await teacherApis.getClassAndStudentByTeacher(teacherId, latestYear);
+                if (activeYear && !teacherData) {
+                    const data = await teacherApis.getClassAndStudentByTeacher(teacherId, activeYear);
                     setTeacherData(data);
                     if (data.classes?.length > 0) {
                         setSelectedClassId(data.classes[0]._id);
                     }
                 }
             } catch (error) {
-                typeof error === "string" ? toast.info(error) : toast.error('Không thể tải thông tin giáo viên hoặc năm học.');
+                typeof error === "string"
+                    ? toast.info(error)
+                    : toast.error('Không thể tải thông tin giáo viên hoặc năm học.');
             } finally {
                 setIsLoadingTeacherData(false);
             }
@@ -114,6 +116,7 @@ function TakeAttendance() {
 
         init();
     }, [teacherId, teacherData]);
+
 
 
 

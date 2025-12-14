@@ -40,17 +40,22 @@ function AdminNews() {
     const fetchSchoolYears = async () => {
         try {
             const res = await schoolYearApis.getSchoolYearList({ page: 1, limit: 100 });
+
             const sorted = [...res.data].sort(
                 (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
             );
             setSchoolYears(sorted);
-            if (!schoolYear && sorted.length > 0) {
-                setSchoolYear(sorted[0].schoolYear);
+            if (!schoolYear) {
+                const activeYear = sorted.find((y) => y.state === "Đang hoạt động");
+                if (activeYear) {
+                    setSchoolYear(activeYear.schoolYear);
+                }
             }
         } catch {
             toast.error("Không thể tải danh sách năm học");
         }
     };
+
 
     const fetchStatistics = async () => {
         try {

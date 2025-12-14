@@ -54,31 +54,32 @@ const ParentManagement: React.FC = () => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const navigate = useNavigate();
-    const fetchParents = useCallback(
-        async (params: { page: number; limit: number }) => {
-            setLoading(true);
-            try {
-                const response = await parentsApis.getParents(params);
-                setParents(response.data);
-                setPagination((prev) => ({
-                    ...prev,
-                    total: response.page.totalCount,
-                    current: response.page.page,
-                    pageSize: response.page.limit,
-                }));
-            } catch (error) {
-                setParents([]);
-                typeof error === "string" ? toast.info(error) : toast.info('Hiện tại không có phụ huynh nào trong hệ thống.');
-            } finally {
-                setLoading(false);
-            }
-        },
-        []
-    );
+
+
+    const fetchParents = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await parentsApis.getParents({ page: 1, limit: 1000 });
+            setParents(response.data || []);
+            setPagination(prev => ({
+                ...prev,
+                total: response.data.length,
+                current: 1,
+            }));
+        } catch (error) {
+            setParents([]);
+            typeof error === "string"
+                ? toast.info(error)
+                : toast.error("Không thể tải danh sách phụ huynh.");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
 
     useEffect(() => {
-        fetchParents({ page: pagination.current!, limit: pagination.pageSize! });
-    }, [fetchParents, pagination.current, pagination.pageSize]);
+        fetchParents();
+    }, [fetchParents]);
 
     const filteredParents = useMemo(() => {
         const keyword = searchKeyword.trim().toLowerCase();
@@ -117,7 +118,7 @@ const ParentManagement: React.FC = () => {
             if (pagination.current !== 1) {
                 setPagination((prev) => ({ ...prev, current: 1 }));
             } else {
-                fetchParents({ page: 1, limit: pagination.pageSize! });
+                fetchParents();
             }
         } catch (error) {
             typeof error === "string" ? toast.info(error) : toast.error('Tạo phụ huynh thất bại. Vui lòng thử lại!');
@@ -140,26 +141,28 @@ const ParentManagement: React.FC = () => {
         try {
             await parentsApis.deleteParents(deletingId);
             toast.success("Xóa phụ huynh thành công!");
+            setParents(prev => {
+                const updated = prev.filter(p => p._id !== deletingId);
+                const maxPage = Math.ceil(updated.length / pagination.pageSize!);
+                setPagination(p => ({
+                    ...p,
+                    current: Math.min(p.current!, maxPage || 1),
+                }));
+                return updated;
+            });
             setIsDeleteModalOpen(false);
-
-            if (parents.length === 1 && pagination.current! > 1) {
-                setPagination((prev) => ({ ...prev, current: prev.current! - 1 }));
-            } else {
-                fetchParents({
-                    page: pagination.current!,
-                    limit: pagination.pageSize!,
-                });
-            }
         } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error('Xóa phụ huynh thất bại. Vui lòng thử lại!');
+            typeof error === "string"
+                ? toast.info(error)
+                : toast.error('Xóa phụ huynh thất bại. Vui lòng thử lại!');
         } finally {
             setIsDeleting(false);
             setDeletingId(null);
         }
-    }, [deletingId, parents.length, pagination.current, pagination.pageSize, fetchParents]);
+    }, [deletingId, pagination.pageSize]);
 
 
-    // Tối ưu: Sửa mảng phụ thuộc cho useMemo
+
     const columns: ColumnsType<Parent> = useMemo(
         () => [
             {
@@ -234,7 +237,7 @@ const ParentManagement: React.FC = () => {
     );
 
     const handleReload = useCallback(() => {
-        fetchParents({ page: pagination.current!, limit: pagination.pageSize! });
+        fetchParents();
     }, [fetchParents, pagination.current, pagination.pageSize]);
     const cardHeader = useMemo(
         () => (

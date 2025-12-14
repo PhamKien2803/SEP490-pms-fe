@@ -219,21 +219,30 @@ const FoodManagement: React.FC = () => {
             setIsDeleteModalOpen(false);
             setDeletingId(null);
 
-            setSelectedRowKeys(prev => prev.filter(key => key !== deletingId));
+            setFoodList((prev) => prev.filter((item) => item._id !== deletingId));
+            setSelectedRowKeys((prev) => prev.filter((key) => key !== deletingId));
 
-            fetchFoodList(
-                pagination.page,
-                pagination.limit,
-                selectedAgeGroup,
-                searchKeyword,
-                selectedDateRange
-            );
+            // Nếu đang ở trang cuối và chỉ còn 1 item, giảm trang hiện tại
+            if (foodList.length === 1 && pagination.page > 1) {
+                setPagination((prev) => ({
+                    ...prev,
+                    page: prev.page - 1,
+                    total: prev.total - 1,
+                }));
+            } else {
+                setPagination((prev) => ({
+                    ...prev,
+                    total: prev.total - 1,
+                }));
+            }
+
         } catch (error) {
             typeof error === "string" ? toast.info(error) : toast.error("Xóa món ăn thất bại. Vui lòng thử lại.");
         } finally {
             setIsDeleting(false);
         }
     };
+
 
     const navigateToCreate = () => {
         navigate(`${constants.APP_PREFIX}/foods/create`);

@@ -54,34 +54,30 @@ const MedicalManagement: React.FC = () => {
         showTotal: (total) => `Tổng số: ${total} bản ghi`,
     });
 
-    const fetchListMedical = useCallback(
-        async (params: { page: number; limit: number }) => {
-            setLoading(true);
-            try {
-                const response = await medicalApis.getListMedical(params);
-                setDataMedicals(response.data);
-                setPagination((prev) => ({
-                    ...prev,
-                    total: response.page.totalCount,
-                    current: response.page.page,
-                    pageSize: response.page.limit,
-                }));
-            } catch (error) {
-                typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách hồ sơ sức khỏe.");
-                setDataMedicals([]);
-            } finally {
-                setLoading(false);
-            }
-        },
-        []
-    );
+    const fetchListMedical = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await medicalApis.getListMedical({ page: 1, limit: 1000 });
+            const list = response?.data || [];
+            setDataMedicals(list);
+            setPagination((prev) => ({
+                ...prev,
+                total: list.length,
+                current: 1,
+            }));
+        } catch (error) {
+            typeof error === "string"
+                ? toast.info(error)
+                : toast.error("Không thể tải danh sách hồ sơ sức khỏe.");
+            setDataMedicals([]);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
-        fetchListMedical({
-            page: pagination.current!,
-            limit: pagination.pageSize!,
-        });
-    }, [fetchListMedical, pagination.current, pagination.pageSize]);
+        fetchListMedical();
+    }, [fetchListMedical]);
 
     const filteredMedicals = useMemo(() => {
         const keyword = searchKeyword.trim().toLowerCase();
@@ -116,17 +112,11 @@ const MedicalManagement: React.FC = () => {
             await medicalApis.deleteMedical(deletingId);
             toast.success("Xóa hồ sơ sức khỏe thành công!");
             setIsDeleteModalOpen(false);
-
-            if (dataMedicals.length === 1 && pagination.current! > 1) {
-                setPagination((prev) => ({ ...prev, current: prev.current! - 1 }));
-            } else {
-                fetchListMedical({
-                    page: pagination.current!,
-                    limit: pagination.pageSize!,
-                });
-            }
+            setDataMedicals(prev => prev.filter(item => item._id !== deletingId));
         } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error("Xóa hồ sơ sức khỏe thất bại.");
+            typeof error === "string"
+                ? toast.info(error)
+                : toast.error("Xóa hồ sơ sức khỏe thất bại.");
         } finally {
             setIsDeleting(false);
             setDeletingId(null);
@@ -284,10 +274,7 @@ const MedicalManagement: React.FC = () => {
                                 style={{ marginRight: 5 }}
                                 icon={<ReloadOutlined />}
                                 onClick={() =>
-                                    fetchListMedical({
-                                        page: pagination.current!,
-                                        limit: pagination.pageSize!,
-                                    })
+                                    fetchListMedical()
                                 }
                                 loading={loading}
                             />

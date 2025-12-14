@@ -9,7 +9,6 @@ import {
     ManOutlined, WomanOutlined
 } from '@ant-design/icons';
 import type { TableProps } from 'antd';
-import dayjs from 'dayjs';
 import { useCurrentUser } from '../../../hooks/useCurrentUser';
 import { IClassInfo, IStudent, ITeacherClassStudentResponse } from '../../../types/teacher';
 import { teacherApis, schoolYearApis } from '../../../services/apiServices';
@@ -28,6 +27,7 @@ function ClassInfor() {
     const { token } = useToken();
     usePageTitle('Thông tin lớp học - Cá Heo Xanh');
     const teacherId = user?.staff;
+
     const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
     const [selectedYear, setSelectedYear] = useState<string>();
     const [classData, setClassData] = useState<ITeacherClassStudentResponse | null>(null);
@@ -75,7 +75,7 @@ function ClassInfor() {
             dataIndex: 'dob',
             key: 'dob',
             width: 120,
-            render: (dob: string) => (dob ? dayjs(dob).format('DD/MM/YYYY') : '-'),
+            render: (dob: string) => (dob ? new Date(dob).toLocaleDateString('vi-VN') : '-'),
         },
         {
             title: 'Giới tính',
@@ -128,13 +128,16 @@ function ClassInfor() {
         schoolYearApis
             .getSchoolYearList({ page: 1, limit: 100 })
             .then((res) => {
-                const sorted = [...res.data].sort((a, b) => {
+                const sorted = res.data.sort((a, b) => {
                     const endYearA = parseInt(a.schoolYear.split('-')[1]);
                     const endYearB = parseInt(b.schoolYear.split('-')[1]);
                     return endYearB - endYearA;
                 });
                 setSchoolYears(sorted);
-                if (sorted.length > 0) {
+                const activeYear = sorted.find((item) => item.state === 'Đang hoạt động');
+                if (activeYear) {
+                    setSelectedYear(activeYear._id);
+                } else if (sorted.length > 0) {
                     setSelectedYear(sorted[0]._id);
                 }
             })
@@ -145,9 +148,7 @@ function ClassInfor() {
 
     useEffect(() => {
         if (!teacherId || !selectedYear) return;
-
         setIsLoadingData(true);
-
         teacherApis
             .getClassAndStudentByTeacher(teacherId, selectedYear)
             .then((response) => setClassData(response))
@@ -185,7 +186,7 @@ function ClassInfor() {
                             <Avatar size={64} icon={<UserOutlined />} style={{ backgroundColor: token.colorPrimary }} />
                         </Col>
                         <Col flex="auto">
-                            <Title level={4} style={{ marginBottom: 0 }}>{teacher?.fullName || user?.email || 'Giáo viên'}</Title>
+                            <Title level={4} style={{ marginBottom: 0 }}>{teacher?.fullName || user?.email}</Title>
                             <Text type="secondary">{teacher?.email || user?.email}</Text>
                         </Col>
                         <Col>
@@ -222,39 +223,22 @@ function ClassInfor() {
                             >
                                 <Row gutter={[24, 24]} style={{ marginBottom: token.marginLG }}>
                                     <Col xs={24} sm={12} md={6}>
-                                        <Statistic
-                                            title="Mã lớp"
-                                            value={classInfo?.classCode}
-                                            prefix={<BarcodeOutlined style={{ color: token.colorTextSecondary }} />}
-                                        />
+                                        <Statistic title="Mã lớp" value={classInfo?.classCode} prefix={<BarcodeOutlined />} />
                                     </Col>
                                     <Col xs={24} sm={12} md={6}>
-                                        <Statistic
-                                            title="Phòng học"
-                                            value={classInfo?.room?.roomName || '--'}
-                                            prefix={<HomeOutlined style={{ color: token.colorSuccess }} />}
-                                        />
+                                        <Statistic title="Phòng học" value={classInfo?.room?.roomName || '--'} prefix={<HomeOutlined />} />
                                     </Col>
                                     <Col xs={24} sm={12} md={6}>
-                                        <Statistic
-                                            title="Độ tuổi"
-                                            value={`${classInfo?.age || '--'} tuổi`}
-                                            prefix={<SmileOutlined style={{ color: token.colorWarning }} />}
-                                        />
+                                        <Statistic title="Độ tuổi" value={`${classInfo?.age || '--'} tuổi`} prefix={<SmileOutlined />} />
                                     </Col>
                                     <Col xs={24} sm={12} md={6}>
-                                        <Statistic
-                                            title="Sĩ số"
-                                            value={classInfo?.students?.length || 0}
-                                            suffix="học sinh"
-                                            prefix={<UsergroupAddOutlined style={{ color: token.colorPrimary }} />}
-                                        />
+                                        <Statistic title="Sĩ số" value={classInfo?.students?.length || 0} suffix="học sinh" prefix={<UsergroupAddOutlined />} />
                                     </Col>
                                 </Row>
 
                                 <Divider />
 
-                                <Title level={5} style={{ marginBottom: token.margin }}>Danh sách học sinh</Title>
+                                <Title level={5}>Danh sách học sinh</Title>
                                 <Table
                                     columns={studentColumns}
                                     dataSource={classInfo?.students}

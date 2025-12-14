@@ -154,22 +154,22 @@ function AttendanceHistory() {
         }
     }, [teacherId]);
 
-    // 3. useEffect này chỉ tải danh sách năm học
     useEffect(() => {
         const fetchSchoolYears = async () => {
-            setLoading(true); // Bật loading cho lần tải năm học
+            setLoading(true);
             try {
                 const res = await schoolYearApis.getSchoolYearList({ page: 1, limit: 100 });
-                const sorted = res.data.sort(
-                    (a, b) =>
-                        parseInt(b.schoolYear.split('-')[0]) - parseInt(a.schoolYear.split('-')[0])
-                );
+                const sorted = res.data.sort((a, b) => {
+                    const yearA = parseInt(a.schoolYear.split('-')[0]);
+                    const yearB = parseInt(b.schoolYear.split('-')[0]);
+                    return yearB - yearA;
+                });
                 setSchoolYears(sorted);
-
-                const firstYearId = sorted[0]?._id;
-                if (firstYearId) {
-                    setSelectedSchoolYearId(firstYearId);
+                const activeYear = sorted.find((y) => y.state === "Đang hoạt động");
+                if (activeYear) {
+                    setSelectedSchoolYearId(activeYear._id);
                 }
+
             } catch (error) {
                 typeof error === "string" ? toast.info(error) : toast.error('Không thể tải danh sách năm học.');
             } finally {
@@ -182,7 +182,6 @@ function AttendanceHistory() {
         }
     }, [teacherId]);
 
-    // 4. useEffect này theo dõi năm học và tải dữ liệu điểm danh
     useEffect(() => {
         if (selectedSchoolYearId && teacherId) {
             fetchAttendanceData(selectedSchoolYearId);

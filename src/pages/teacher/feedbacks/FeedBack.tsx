@@ -53,19 +53,25 @@ function FeedBack() {
 
             try {
                 const res = await schoolYearApis.getSchoolYearList({ page: 1, limit: 100 });
+
                 const sorted = res.data.sort(
                     (a, b) =>
                         parseInt(b.schoolYear.split('-')[0]) -
                         parseInt(a.schoolYear.split('-')[0])
                 );
-                const latestYear = sorted[0]?._id;
-                setSchoolYears(sorted);
-                setSelectedSchoolYearId(latestYear);
 
-                if (latestYear) {
+                setSchoolYears(sorted);
+
+                const activeYear =
+                    sorted.find((y) => y.state === 'Đang hoạt động')?._id ||
+                    sorted[0]?._id;
+
+                setSelectedSchoolYearId(activeYear);
+
+                if (activeYear) {
                     const data = await teacherApis.getClassAndStudentByTeacher(
                         teacherId,
-                        latestYear
+                        activeYear
                     );
                     setTeacherData(data);
                     if (data.classes?.length > 0) {
@@ -73,13 +79,17 @@ function FeedBack() {
                     }
                 }
             } catch (error) {
-                typeof error === "string" ? toast.info(error) : toast.error('Không thể tải thông tin lớp hoặc năm học.');
+                typeof error === 'string'
+                    ? toast.info(error)
+                    : toast.error('Không thể tải thông tin lớp hoặc năm học.');
             } finally {
                 setIsLoadingTeacherData(false);
             }
         };
+
         init();
     }, [teacherId]);
+
 
     const fetchFeedbacks = async () => {
         if (!selectedClassId) return;

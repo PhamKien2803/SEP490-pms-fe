@@ -58,16 +58,21 @@ function TeacherReport() {
 
   // Fetch school years
   useEffect(() => {
-    teacherApis.getSchoolYearList({ page: 0, limit: 10 }).then((res) => {
+    teacherApis.getSchoolYearList({ page: 0, limit: 100 }).then((res) => {
       const sorted = res.data.sort(
         (a, b) => dayjs(b.startDate).unix() - dayjs(a.startDate).unix()
       );
       setSchoolYears(sorted);
-      if (sorted.length > 0) {
-        setSelectedYear(sorted[0].schoolYear);
+
+      const activeYear = sorted.find(y => y.state === 'Đang hoạt động');
+      if (activeYear) {
+        setSelectedYear(activeYear.schoolYear);
       }
+    }).catch(() => {
+      setSchoolYears([]);
     });
   }, []);
+
 
   // Fetch lesson list
   const fetchLessonList = useCallback(() => {
@@ -184,13 +189,17 @@ function TeacherReport() {
       <div style={{ marginBottom: 16, display: 'flex', gap: 12 }}>
         <Select
           value={selectedYear}
-          onChange={setSelectedYear}
+          onChange={(value) => {
+            setSelectedYear(value);
+            setLessonData([]);
+          }}
           options={schoolYears.map((item) => ({
             label: item?.schoolYear,
             value: item?.schoolYear,
           }))}
           style={{ minWidth: 220 }}
         />
+
         <Tooltip title="Làm mới danh sách">
           <Button
             icon={<ReloadOutlined />}

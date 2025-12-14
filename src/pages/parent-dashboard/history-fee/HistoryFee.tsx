@@ -26,15 +26,32 @@ function HistoryFee() {
     const fetchSchoolYears = async () => {
         try {
             const res = await servicesApis.getSchoolYears();
-            setSchoolYears(res.data);
-            if (res.data.length > 0) {
-                const newestYear = res.data[0].schoolYear;
-                setSelectedYear(newestYear);
+
+            if (res.data && res.data.length > 0) {
+                const filtered = res.data.filter(
+                    (y) => y.state !== "Chưa hoạt động"
+                );
+
+                const sorted = [...filtered].sort((a, b) => {
+                    const startA = parseInt(a.schoolYear.split("-")[0]);
+                    const startB = parseInt(b.schoolYear.split("-")[0]);
+                    return startB - startA;
+                });
+
+                const activeYear =
+                    sorted.find((y) => y.state === "Đang hoạt động")?.schoolYear ||
+                    sorted[0]?.schoolYear;
+
+                setSchoolYears(sorted);
+                setSelectedYear(activeYear);
             }
         } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách năm học");
+            typeof error === "string"
+                ? toast.info(error)
+                : toast.error("Không thể tải danh sách năm học");
         }
     };
+
 
 
     const fetchHistoryFee = async () => {

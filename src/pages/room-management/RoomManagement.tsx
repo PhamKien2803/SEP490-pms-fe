@@ -67,16 +67,14 @@ const RoomManagement: React.FC = () => {
     showTotal: (total) => `Tổng số: ${total} bản ghi`
   });
 
-  const fetchListRooms = useCallback(async (params: { page: number; limit: number }) => {
+  const fetchListRooms = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await roomApis.getListRoom(params);
+      const response = await roomApis.getListRoom({ page: 1, limit: 1000 });
       setDataRooms(response.data);
       setPagination(prev => ({
         ...prev,
-        total: response.page.totalCount,
-        current: response.page.page,
-        pageSize: response.page.limit
+        total: response.page.totalCount || response.data.length
       }));
     } catch {
       toast.error("Không thể tải danh sách phòng học.");
@@ -85,9 +83,10 @@ const RoomManagement: React.FC = () => {
     }
   }, []);
 
+
   useEffect(() => {
     console.log("User info:", user?.isTeacher);
-    console.log("teacherId",teacherId);
+    console.log("teacherId", teacherId);
 
     if (user?.isTeacher && teacherId) {
       const fetchRoomByTeacher = async () => {
@@ -95,17 +94,17 @@ const RoomManagement: React.FC = () => {
           setLoading(true);
           const room = await roomApis.getRoomByTeacherId(teacherId);
           setTeacherRoom(room);
-        } catch (error){
+        } catch (error) {
           typeof error === "string" ? toast.info(error) :
-          toast.error("Không thể tải phòng học của giáo viên.");
+            toast.error("Không thể tải phòng học của giáo viên.");
         } finally {
           setLoading(false);
         }
       };
       fetchRoomByTeacher();
-    } 
+    }
     else {
-      fetchListRooms({ page: pagination.current!, limit: pagination.pageSize! });
+      fetchListRooms();
     }
   }, [user?.isTeacher, teacherId, fetchListRooms, pagination.current, pagination.pageSize]);
 
@@ -133,16 +132,29 @@ const RoomManagement: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (!deletingId) return;
+
     setIsDeleting(true);
     try {
       await roomApis.deleteRoom(deletingId);
       toast.success("Xóa phòng học thành công");
+
+      setDataRooms(prev => {
+        const newList = prev.filter(room => room._id !== deletingId);
+
+        const totalAfterDelete = newList.length;
+        const pageSize = pagination.pageSize ?? 5;
+        const maxPage = Math.ceil(totalAfterDelete / pageSize);
+
+        setPagination(prevPag => ({
+          ...prevPag,
+          current: Math.min(prevPag.current ?? 1, maxPage || 1),
+          total: totalAfterDelete,
+        }));
+
+        return newList;
+      });
+
       setIsDeleteModalOpen(false);
-      if (dataRooms.length === 1 && pagination.current! > 1) {
-        setPagination(prev => ({ ...prev, current: prev.current! - 1 }));
-      } else {
-        fetchListRooms({ page: pagination.current!, limit: pagination.pageSize! });
-      }
     } catch {
       toast.error("Xóa phòng học thất bại.");
     } finally {
@@ -150,6 +162,7 @@ const RoomManagement: React.FC = () => {
       setDeletingId(null);
     }
   };
+
 
   const columns: ColumnsType<RoomRecord> = useMemo(() => [
     {
@@ -175,13 +188,6 @@ const RoomManagement: React.FC = () => {
       key: "roomType",
       width: 150
     },
-    // {
-    //   title: "Sức chứa",
-    //   dataIndex: "capacity",
-    //   key: "capacity",
-    //   width: 80,
-    //   align: "center"
-    // },
     {
       title: "Trạng thái",
       dataIndex: "state",
@@ -251,7 +257,7 @@ const RoomManagement: React.FC = () => {
             allowClear
           />
           <Tooltip title="Làm mới danh sách">
-            <Button icon={<ReloadOutlined />} onClick={() => fetchListRooms({ page: pagination.current!, limit: pagination.pageSize! })} loading={loading} />
+            <Button icon={<ReloadOutlined />} onClick={() => fetchListRooms()} loading={loading} />
           </Tooltip>
           {canCreate && (
             <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate(`${constants.APP_PREFIX}/rooms/create`)}>

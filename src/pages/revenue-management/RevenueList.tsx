@@ -1,10 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
     Table,
     Button,
     Space,
     Input,
     Tooltip,
+    Typography,
+    Card,
 } from "antd";
 import {
     EyeOutlined,
@@ -16,7 +18,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import { IRevenueItem, RevenueListResponse } from "../../types/revenues";
+import { IRevenueItem } from "../../types/revenues";
 import { revenuesApis } from "../../services/apiServices";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { constants } from "../../constants";
@@ -24,136 +26,150 @@ import RevenueDetailsModal from "../../modal/revenues-details/RevenueDetailsModa
 import DeleteModal from "../../modal/delete-modal/DeleteModal";
 import { usePagePermission } from "../../hooks/usePagePermission";
 
+const { Title } = Typography;
+const { Search } = Input;
+
 const RevenueList: React.FC = () => {
     usePageTitle("Quản lý khoản thu - Cá Heo Xanh");
     const { canCreate, canUpdate, canDelete } = usePagePermission();
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [deletingId, setDeletingId] = useState<string | null>(null);
-    const [deletingLoading, setDeletingLoading] = useState(false);
-    const [data, setData] = useState<IRevenueItem[]>([]);
-    const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });
-    const [loading, setLoading] = useState(false);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [inputValue, setInputValue] = useState("");
-    const [showModal, setShowModal] = useState(false);
-    const [selectedRevenueId, setSelectedRevenueId] = useState<string | null>(null);
-    const debounceRef = useRef<number | null>(null);
     const navigate = useNavigate();
 
-    const fetchData = async () => {
+    const [revenues, setRevenues] = useState<IRevenueItem[]>([]);
+    const [searchKeyword, setSearchKeyword] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
+
+    const [showModal, setShowModal] = useState(false);
+    const [selectedRevenueId, setSelectedRevenueId] = useState<string | null>(null);
+
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const fetchRevenues = useCallback(async () => {
         setLoading(true);
         try {
-            const res: RevenueListResponse = await revenuesApis.getListRevenues({
-                page: pagination.page,
-                limit: pagination.limit,
+            const res = await revenuesApis.getListRevenues({
+                page: 1,
+                limit: 1000,
             });
-
-            const filtered = searchTerm
-                ? res.data.filter((item) =>
-                    item.revenueName.toLowerCase().includes(searchTerm.toLowerCase())
-                )
-                : res.data;
-
-            setData(filtered);
-            setPagination((prev) => ({
-                ...prev,
-                total: res.page.totalCount,
-            }));
-        } catch (err) {
-            typeof err === "string" ? toast.info(err) : toast.error("Không thể tải danh sách khoản thu");
+            setRevenues(res.data || []);
+        } catch (error) {
+            typeof error === "string"
+                ? toast.info(error)
+                : toast.error("Không thể tải danh sách khoản thu");
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
-        fetchData();
-    }, [pagination.page, pagination.limit, searchTerm]);
+        fetchRevenues();
+    }, [fetchRevenues]);
+
+    useEffect(() => {
+        setPagination(prev => ({ ...prev, current: 1 }));
+    }, [searchKeyword]);
+
+    const filteredRevenues = useMemo(() => {
+        const keyword = searchKeyword.trim().toLowerCase();
+        if (!keyword) return revenues;
+        return revenues.filter(r =>
+            r.revenueName.toLowerCase().includes(keyword) ||
+            r.revenueCode.toLowerCase().includes(keyword)
+        );
+    }, [revenues, searchKeyword]);
+
+    const paginatedRevenues = useMemo(() => {
+        const start = (pagination.current - 1) * pagination.pageSize;
+        return filteredRevenues.slice(start, start + pagination.pageSize);
+    }, [filteredRevenues, pagination]);
+
+    const handleTableChange = (p: any) => {
+        setPagination({ current: p.current, pageSize: p.pageSize });
+    };
 
     const handleDelete = async () => {
         if (!deletingId) return;
-
-        setDeletingLoading(true);
+        setIsDeleting(true);
         try {
             await revenuesApis.deleteRevenue(deletingId);
-            toast.success("Đã xóa khoản thu thành công");
-            fetchData();
+            toast.success("Xóa khoản thu thành công!");
+
+            setRevenues(prev => {
+                const newData = prev.filter(r => r._id !== deletingId);
+                const maxPage = Math.ceil(newData.length / pagination.pageSize);
+                setPagination(p => ({
+                    ...p,
+                    current: Math.min(p.current, maxPage || 1),
+                }));
+                return newData;
+            });
+
             setShowDeleteModal(false);
-            setDeletingId(null);
         } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error("Xóa thất bại");
+            typeof error === "string"
+                ? toast.info(error)
+                : toast.error("Xóa khoản thu thất bại");
         } finally {
-            setDeletingLoading(false);
+            setIsDeleting(false);
+            setDeletingId(null);
         }
-    };
-
-
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setInputValue(value);
-
-        if (debounceRef.current) {
-            clearTimeout(debounceRef.current);
-        }
-
-        debounceRef.current = setTimeout(() => {
-            setSearchTerm(value);
-        }, 500);
     };
 
     const columns = [
-        {
-            title: "Mã",
-            dataIndex: "revenueCode",
-        },
-        {
-            title: "Tên khoản thu",
-            dataIndex: "revenueName",
-        },
-        {
-            title: "Đơn vị",
-            dataIndex: "unit",
-        },
+        { title: "Mã", dataIndex: "revenueCode", width: 120 },
+        { title: "Tên khoản thu", dataIndex: "revenueName", width: 200 },
+        { title: "Đơn vị", dataIndex: "unit", width: 120 },
         {
             title: "Số tiền",
             dataIndex: "amount",
+            width: 150,
             render: (val: number) => val.toLocaleString("vi-VN") + "₫",
         },
-        {
-            title: "Người tạo",
-            dataIndex: "createdBy",
-        },
+        { title: "Người tạo", dataIndex: "createdBy", width: 150 },
         {
             title: "Ngày tạo",
             dataIndex: "createdAt",
+            width: 160,
             render: (val: string) => new Date(val).toLocaleString(),
         },
         {
             title: "Hành động",
+            width: 120,
             render: (_: any, record: IRevenueItem) => (
                 <Space>
-                    <Button
-                        icon={<EyeOutlined />}
-                        onClick={() => {
-                            setSelectedRevenueId(record._id);
-                            setShowModal(true);
-                        }}
-                    />
-                    {canUpdate && (
+                    <Tooltip title="Xem chi tiết">
                         <Button
-                            icon={<EditOutlined />}
-                            onClick={() => navigate(`${constants.APP_PREFIX}/revenues/edit/${record._id}`)}
-                        />
-                    )}
-                    {canDelete && (
-                        <Button
-                            icon={<DeleteOutlined />}
-                            danger
+                            icon={<EyeOutlined />}
                             onClick={() => {
-                                setDeletingId(record._id);
-                                setShowDeleteModal(true);
+                                setSelectedRevenueId(record._id);
+                                setShowModal(true);
                             }}
                         />
+                    </Tooltip>
+                    {canUpdate && (
+                        <Tooltip title="Chỉnh sửa">
+                            <Button
+                                icon={<EditOutlined />}
+                                onClick={() =>
+                                    navigate(`${constants.APP_PREFIX}/revenues/edit/${record._id}`)
+                                }
+                            />
+                        </Tooltip>
+                    )}
+                    {canDelete && (
+                        <Tooltip title="Xóa">
+                            <Button
+                                icon={<DeleteOutlined />}
+                                danger
+                                onClick={() => {
+                                    setDeletingId(record._id);
+                                    setShowDeleteModal(true);
+                                }}
+                            />
+                        </Tooltip>
                     )}
                 </Space>
             ),
@@ -162,51 +178,51 @@ const RevenueList: React.FC = () => {
 
     return (
         <div style={{ padding: 24 }}>
-            <Space
-                style={{
-                    marginBottom: 16,
-                    justifyContent: "space-between",
-                    width: "100%",
-                }}
+            <Card
+                title={
+                    <Space style={{ justifyContent: "space-between", width: "100%" }}>
+                        <Title level={3} style={{ margin: 0 }}>Quản lý khoản thu</Title>
+                        <Space>
+                            <Search
+                                placeholder="Tìm theo tên hoặc mã khoản thu"
+                                value={searchKeyword}
+                                onChange={(e) => setSearchKeyword(e.target.value)}
+                                allowClear
+                                style={{ width: 250 }}
+                            />
+                            <Tooltip title="Làm mới danh sách">
+                                <Button icon={<ReloadOutlined />} onClick={fetchRevenues} loading={loading} />
+                            </Tooltip>
+                            {canCreate && (
+                                <Button
+                                    type="primary"
+                                    icon={<PlusOutlined />}
+                                    onClick={() => navigate(`${constants.APP_PREFIX}/revenues/create`)}
+                                >
+                                    Tạo mới
+                                </Button>
+                            )}
+                        </Space>
+                    </Space>
+                }
             >
-                <h2>Quản lý khoản thu</h2>
-                {canCreate && (
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() => navigate(`${constants.APP_PREFIX}/revenues/create`)}
-                    >
-                        Tạo khoản thu
-                    </Button>
-                )}
-            </Space>
-            <Tooltip title="Làm mới danh sách">
-                <Button icon={<ReloadOutlined />}
-                    onClick={() => fetchData()}
-                    loading={loading}></Button>
-            </Tooltip>
-            <Input.Search
-                placeholder="Tìm theo tên khoản thu"
-                value={inputValue}
-                onChange={handleSearchChange}
-                allowClear
-                style={{ marginBottom: 16, maxWidth: 300 }}
-            />
+                <Table
+                    rowKey="_id"
+                    columns={columns}
+                    dataSource={paginatedRevenues}
+                    loading={loading}
+                    pagination={{
+                        current: pagination.current,
+                        pageSize: pagination.pageSize,
+                        total: filteredRevenues.length,
+                        showSizeChanger: true,
+                        pageSizeOptions: ["10", "20", "50"],
+                        showTotal: (t, r) => `${r[0]}–${r[1]} của ${t} khoản thu`,
+                    }}
+                    onChange={handleTableChange}
+                />
+            </Card>
 
-            <Table
-                rowKey="_id"
-                columns={columns}
-                dataSource={data}
-                loading={loading}
-                pagination={{
-                    current: pagination.page,
-                    pageSize: pagination.limit,
-                    total: pagination.total,
-                    showSizeChanger: true,
-                    onChange: (page, pageSize) =>
-                        setPagination({ ...pagination, page, limit: pageSize }),
-                }}
-            />
             <RevenueDetailsModal
                 open={showModal}
                 revenueId={selectedRevenueId}
@@ -218,16 +234,10 @@ const RevenueList: React.FC = () => {
 
             <DeleteModal
                 open={showDeleteModal}
-                loading={deletingLoading}
-                onClose={() => {
-                    if (!deletingLoading) {
-                        setShowDeleteModal(false);
-                        setDeletingId(null);
-                    }
-                }}
+                loading={isDeleting}
+                onClose={() => setShowDeleteModal(false)}
                 onConfirm={handleDelete}
             />
-
         </div>
     );
 };

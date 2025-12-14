@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     Table,
     Button,
@@ -10,6 +10,7 @@ import {
     Col,
     Input,
     Space,
+    Tooltip,
 } from "antd";
 import {
     EyeOutlined,
@@ -21,7 +22,7 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { IDocumentDetailResponse, IDocumentItem } from "../../types/documents";
-import { SchoolYearListItem, SchoolYearsListResponse } from "../../types/schoolYear";
+import { SchoolYearListItem } from "../../types/schoolYear";
 import { documentsApis, schoolYearApis } from "../../services/apiServices";
 import ViewDocumentModal from "../../modal/document-details/ViewDocumentModal";
 import { useNavigate } from "react-router-dom";
@@ -33,55 +34,112 @@ const { Title } = Typography;
 const { Option } = Select;
 const { Search } = Input;
 
+const STATUS_OPTIONS = ["Tất cả", "Đã thanh toán", "Chờ thanh toán"];
+
 function DocumentList() {
     usePageTitle("Quản lý chứng từ - Cá Heo Xanh");
     const { canCreate, canUpdate, canDelete } = usePagePermission();
     const navigate = useNavigate();
-    const [data, setData] = useState<IDocumentItem[]>([]);
-    const [filteredData, setFilteredData] = useState<IDocumentItem[]>([]);
-    const [page, setPage] = useState(1);
-    const [limit, setLimit] = useState(10);
-    const [total, setTotal] = useState(0);
-    const [searchKeyword, setSearchKeyword] = useState("");
+
+    const [documents, setDocuments] = useState<IDocumentItem[]>([]);
     const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
     const [schoolYear, setSchoolYear] = useState<string>("");
+
+    const [searchKeyword, setSearchKeyword] = useState("");
+    const [statusFilter, setStatusFilter] = useState("Tất cả");
+
+    const [pagination, setPagination] = useState({
+        current: 1,
+        pageSize: 10,
+    });
+
+    const [loading, setLoading] = useState(false);
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [viewData, setViewData] = useState<IDocumentDetailResponse | undefined>();
 
-    const fetchDocuments = async () => {
-        if (!schoolYear) return;
-        try {
-            const res = await documentsApis.getDocumentList({ schoolYear, page, limit });
-            setData(res.data);
-            setTotal(res.page.totalCount);
-        } catch (err) {
-            typeof err === "string" ? toast.info(err) : toast.error("Không thể tải danh sách chứng từ");
-        }
-    };
-
     const fetchSchoolYears = async () => {
         try {
-            const res: SchoolYearsListResponse = await schoolYearApis.getSchoolYearList({
-                page: 1,
-                limit: 100,
-            });
+            const res = await schoolYearApis.getSchoolYearList({ page: 1, limit: 100 });
             const sorted = [...res.data].sort(
                 (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
             );
             setSchoolYears(sorted);
-            if (!schoolYear && sorted.length > 0) {
+
+            const activeYear = sorted.find(y => y.state === "Đang hoạt động");
+            if (activeYear) {
+                setSchoolYear(activeYear.schoolYear);
+            } else if (sorted.length > 0) {
                 setSchoolYear(sorted[0].schoolYear);
             }
         } catch (err) {
-            typeof err === "string" ? toast.info(err) : toast.error("Không thể tải danh sách năm học");
+            typeof err === "string"
+                ? toast.info(err)
+                : toast.error("Không thể tải danh sách năm học");
         }
     };
+
+    const fetchDocuments = async () => {
+        if (!schoolYear) return;
+        setLoading(true);
+        try {
+            const res = await documentsApis.getDocumentList({
+                schoolYear,
+                page: 1,
+                limit: 1000,
+            });
+            setDocuments(res.data || []);
+        } catch (err) {
+            typeof err === "string"
+                ? toast.info(err)
+                : toast.error("Không thể tải danh sách chứng từ");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchSchoolYears();
+    }, []);
+
+    useEffect(() => {
+        if (schoolYear) {
+            fetchDocuments();
+            setPagination(p => ({ ...p, current: 1 }));
+        }
+    }, [schoolYear]);
+
+    const filteredDocuments = useMemo(() => {
+        return documents.filter(item => {
+            const matchKeyword = item.documentName
+                .toLowerCase()
+                .includes(searchKeyword.toLowerCase());
+
+            const matchStatus =
+                statusFilter === "Tất cả" || item.status === statusFilter;
+
+            return matchKeyword && matchStatus;
+        });
+    }, [documents, searchKeyword, statusFilter]);
+
+    const paginatedDocuments = useMemo(() => {
+        const start = (pagination.current - 1) * pagination.pageSize;
+        return filteredDocuments.slice(start, start + pagination.pageSize);
+    }, [filteredDocuments, pagination]);
 
     const handleDelete = async (id: string) => {
         try {
             await documentsApis.deleteDocument(id);
             toast.success("Đã xóa chứng từ");
-            fetchDocuments();
+
+            setDocuments(prev => {
+                const newData = prev.filter(item => item._id !== id);
+                const maxPage = Math.ceil(newData.length / pagination.pageSize);
+                setPagination(p => ({
+                    ...p,
+                    current: Math.min(p.current, maxPage || 1),
+                }));
+                return newData;
+            });
         } catch (err) {
             typeof err === "string" ? toast.info(err) : toast.error("Xóa thất bại");
         }
@@ -97,71 +155,51 @@ function DocumentList() {
         }
     };
 
-    useEffect(() => {
-        fetchSchoolYears();
-    }, []);
-
-    useEffect(() => {
-        if (schoolYear) fetchDocuments();
-    }, [schoolYear, page, limit]);
-
-    useEffect(() => {
-        const filtered = data.filter((item) =>
-            item.documentName.toLowerCase().includes(searchKeyword.toLowerCase())
-        );
-        setFilteredData(filtered);
-    }, [data, searchKeyword]);
-
     const columns: ColumnsType<IDocumentItem> = [
-        {
-            title: "Mã",
-            dataIndex: "documentCode",
-        },
-        {
-            title: "Tên chứng từ",
-            dataIndex: "documentName",
-        },
-        {
-            title: "Người nhận",
-            dataIndex: "receiver",
-        },
+        { title: "Mã", dataIndex: "documentCode" },
+        { title: "Tên chứng từ", dataIndex: "documentName" },
+        { title: "Người nhận", dataIndex: "receiver" },
         {
             title: "Số tiền",
             dataIndex: "amount",
-            render: (val) => `${val.toLocaleString("vi-VN")}₫`,
+            render: val => `${val.toLocaleString("vi-VN")} ₫`,
         },
         {
             title: "Ngày lập",
             dataIndex: "documentDate",
-            render: (val) =>
+            render: val =>
                 `${new Date(val).toLocaleTimeString("vi-VN")} ${new Date(val).toLocaleDateString("vi-VN")}`,
         },
         {
             title: "Trạng thái",
             dataIndex: "status",
-            render: (val) => (
+            render: val => (
                 <Tag color={val === "Đã thanh toán" ? "green" : "orange"}>{val}</Tag>
             ),
         },
         {
             title: "Hành động",
+            align: "center",
+            width: 150,
             render: (_, record) => (
                 <Space>
-                    <Button
-                        icon={<EyeOutlined />}
-                        onClick={() => handleView(record._id)}
-                    />
+                    <Button icon={<EyeOutlined />} onClick={() => handleView(record._id)} />
                     {canUpdate && (
-                        <Button icon={<EditOutlined />} onClick={() => navigate(`${constants.APP_PREFIX}/documents/edit/${record._id}`)} />
+                        <Button
+                            icon={<EditOutlined />}
+                            onClick={() =>
+                                navigate(`${constants.APP_PREFIX}/documents/edit/${record._id}`)
+                            }
+                        />
                     )}
-                    <Popconfirm
-                        title="Bạn chắc chắn muốn xóa?"
-                        onConfirm={() => handleDelete(record._id)}
-                    >
-                        {canDelete && (
-                            <Button icon={<DeleteOutlined />} danger />
-                        )}
-                    </Popconfirm>
+                    {canDelete && (
+                        <Popconfirm
+                            title="Bạn chắc chắn muốn xóa?"
+                            onConfirm={() => handleDelete(record._id)}
+                        >
+                            <Button danger icon={<DeleteOutlined />} />
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },
@@ -175,39 +213,64 @@ function DocumentList() {
                 </Col>
                 <Col>
                     {canCreate && (
-                        <Button onClick={() => navigate(`${constants.APP_PREFIX}/documents/create`)} type="primary" icon={<PlusOutlined />}>
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={() =>
+                                navigate(`${constants.APP_PREFIX}/documents/create`)
+                            }
+                        >
                             Tạo chứng từ
                         </Button>
                     )}
                 </Col>
             </Row>
+
             <Row gutter={16} style={{ marginBottom: 16 }}>
                 <Col>
-                    <Button
-                        icon={<ReloadOutlined />}
-                        onClick={() => fetchDocuments()}
-                    />
+                    <Tooltip title="Làm mới danh sách">
+                        <Button icon={<ReloadOutlined />} onClick={fetchDocuments} />
+                    </Tooltip>
                 </Col>
-                <Col flex="300px">
+
+                <Col flex="280px">
                     <Search
                         allowClear
                         placeholder="Tìm theo tên chứng từ"
-                        onSearch={(val) => setSearchKeyword(val)}
-                        onChange={(e) => setSearchKeyword(e.target.value)}
+                        value={searchKeyword}
+                        onChange={e => {
+                            setPagination(p => ({ ...p, current: 1 }));
+                            setSearchKeyword(e.target.value);
+                        }}
                     />
                 </Col>
+
                 <Col flex="200px">
                     <Select
-                        value={schoolYear}
-                        onChange={(val) => {
-                            setPage(1);
-                            setSchoolYear(val);
+                        value={statusFilter}
+                        onChange={val => {
+                            setPagination(p => ({ ...p, current: 1 }));
+                            setStatusFilter(val);
                         }}
                         style={{ width: "100%" }}
                     >
-                        {schoolYears.map((sy) => (
-                            <Option key={sy?.schoolYear} value={sy?.schoolYear}>
-                                {sy?.schoolYear}
+                        {STATUS_OPTIONS.map(st => (
+                            <Option key={st} value={st}>{st}</Option>
+                        ))}
+                    </Select>
+                </Col>
+
+                <Col flex="220px">
+                    <Select
+                        value={schoolYear}
+                        onChange={(val) => setSchoolYear(val)}
+                        style={{ width: "100%" }}
+                        placeholder="Chọn năm học"
+                    >
+                        {schoolYears.map(sy => (
+                            <Option key={sy._id} value={sy.schoolYear}>
+                                {sy.schoolYear}
+                                {sy.state === "Đang hoạt động" ? "" : ""}
                             </Option>
                         ))}
                     </Select>
@@ -217,18 +280,19 @@ function DocumentList() {
             <Table
                 rowKey="_id"
                 columns={columns}
-                dataSource={filteredData}
-                pagination={{
-                    current: page,
-                    pageSize: limit,
-                    total,
-                    onChange: setPage,
-                    showSizeChanger: true,
-                    onShowSizeChange: (_, size) => setLimit(size),
-                    pageSizeOptions: ["5", "10", "20", "50"],
-                    showTotal: (total) => `${total} chứng từ`,
-                }}
+                dataSource={paginatedDocuments}
+                loading={loading}
                 bordered
+                pagination={{
+                    current: pagination.current,
+                    pageSize: pagination.pageSize,
+                    total: filteredDocuments.length,
+                    showSizeChanger: true,
+                    pageSizeOptions: ["10", "20", "50"],
+                    showTotal: (t, r) => `${r[0]}–${r[1]} của ${t} chứng từ`,
+                    onChange: (page, pageSize) =>
+                        setPagination({ current: page, pageSize }),
+                }}
             />
 
             <ViewDocumentModal

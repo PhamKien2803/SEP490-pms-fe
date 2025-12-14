@@ -100,8 +100,16 @@ const AccountManagement: React.FC = () => {
         try {
             await accountsApis.deleteAccount(deletingId);
             toast.success('Xóa tài khoản thành công!');
+            setAllAccounts(prev => {
+                const newData = prev.filter(acc => acc._id !== deletingId);
+                const maxPage = Math.ceil(newData.length / (pagination.pageSize || 10));
+                setPagination(p => ({
+                    ...p,
+                    current: Math.min(p.current || 1, maxPage || 1),
+                }));
+                return newData;
+            });
             setIsDeleteModalOpen(false);
-            fetchAllAccounts();
         } catch (error) {
             typeof error === "string" ? toast.info(error) : toast.error('Xóa tài khoản thất bại.');
         } finally {
@@ -109,6 +117,7 @@ const AccountManagement: React.FC = () => {
             setDeletingId(null);
         }
     };
+
 
     const columns: ColumnsType<AccountListItem> = useMemo(() => [
         {

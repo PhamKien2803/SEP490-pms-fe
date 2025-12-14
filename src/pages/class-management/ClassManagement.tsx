@@ -84,10 +84,12 @@ function ClassManagement() {
                         return startB - startA;
                     });
 
-                    const latestYear = sorted[0];
+                    const activeYear = sorted.find(y => y.state === 'Đang hoạt động');
 
                     setSchoolYears(sorted);
-                    setSelectedSchoolYear(latestYear.schoolYear);
+                    if (activeYear) {
+                        setSelectedSchoolYear(activeYear.schoolYear);
+                    }
                 }
             } catch (error) {
                 typeof error === "string"
@@ -98,6 +100,7 @@ function ClassManagement() {
 
         fetchSchoolYears();
     }, []);
+
 
     useEffect(() => {
         if (selectedSchoolYear) {

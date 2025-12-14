@@ -79,12 +79,16 @@ function TuitionList() {
             setSchoolYears(sorted);
 
             if (!selectedSchoolYear && sorted.length > 0) {
-                setSelectedSchoolYear(sorted[0].schoolYear);
+                const activeSchoolYear = sorted.find((sy) => sy.state === "Đang hoạt động");
+                setSelectedSchoolYear(activeSchoolYear?.schoolYear || sorted[0].schoolYear);
             }
         } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách năm học");
+            typeof error === "string"
+                ? toast.info(error)
+                : toast.error("Không thể tải danh sách năm học");
         }
     }, [selectedSchoolYear]);
+
 
     useEffect(() => {
         fetchSchoolYears();
@@ -105,7 +109,7 @@ function TuitionList() {
                 await tuitionApis.getTuitionList(params);
             setData(response.data);
         } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải danh sách học phí");
+            typeof error === "string" ? toast.info("Hiện năm học này chưa có thông tin học phí") : toast.error("Không thể tải danh sách học phí");
         } finally {
             setLoading(false);
         }
@@ -199,6 +203,7 @@ function TuitionList() {
                             onChange={(value) => {
                                 setSelectedSchoolYear(value);
                                 setSelectedStatus(undefined);
+                                setData([]);
                             }}
                             style={{ width: "100%" }}
                             loading={schoolYears.length === 0}

@@ -67,12 +67,20 @@ const TimeTable = () => {
     const [viewMode, setViewMode] = useState<'week' | 'day'>('week');
 
     useEffect(() => {
-        teacherApis.getSchoolYearList({ page: 0, limit: 10 }).then((res) => {
-            const sorted = res.data.sort((a, b) => dayjs(b.startDate).unix() - dayjs(a.startDate).unix());
-            setSchoolYears(sorted);
-            if (sorted.length > 0) setSelectedYear(sorted[0].schoolYear);
-        });
+        teacherApis.getSchoolYearList({ page: 1, limit: 100 })
+            .then((res) => {
+                const sorted = res.data.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+                setSchoolYears(sorted);
+                const active = sorted.find((y) => y.state === "Đang hoạt động");
+                if (active) {
+                    setSelectedYear(active.schoolYear);
+                } else if (sorted.length > 0) {
+                    setSelectedYear(sorted[0].schoolYear);
+                }
+            })
+            .catch(() => toast.error("Không thể tải danh sách năm học"));
     }, []);
+
 
     const totalWeeksInMonth = useMemo(() => {
         if (!selectedYear || !schoolYears.length || !currentMonth) return [];
