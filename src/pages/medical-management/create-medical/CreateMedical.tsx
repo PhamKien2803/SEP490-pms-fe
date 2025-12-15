@@ -527,27 +527,16 @@ const CreateMedical: React.FC = () => {
               <Form.Item
                 label="Chiều Cao (cm)"
                 name={["physicalDevelopment", "height"]}
-                rules={[
-                  { required: true, message: "Nhập chiều cao" },
-                ]}
+                rules={[{ required: true, message: "Nhập chiều cao" }]}
               >
                 <InputNumber
+                  type="number"
                   min={0}
-                  formatter={(value) => `${value} cm`}
-                  parser={(value) => {
-                    const parsed = parseFloat(
-                      (value || "")
-                        .replace("cm", "")
-                        .replace(",", ".")
-                        .replace(/\s/g, "")
-                    );
-                    return isNaN(parsed) ? 0 : (Math.max(parsed, 0) as 0);
-                  }}
-
                   style={{ width: "100%" }}
                   placeholder="Ví dụ: 98.5 hoặc 98,5"
                 />
               </Form.Item>
+
             </Col>
 
             <Col xs={24} md={6}>
@@ -557,20 +546,13 @@ const CreateMedical: React.FC = () => {
                 rules={[{ required: true, message: "Nhập cân nặng" }]}
               >
                 <InputNumber
-                  formatter={(value) => `${value} kg`}
-                  parser={(value) => {
-                    const parsed = parseFloat(
-                      (value || "")
-                        .replace("cm", "")
-                        .replace(",", ".")
-                        .replace(/\s/g, "")
-                    );
-                    return isNaN(parsed) ? 0 : (Math.max(parsed, 0) as 0);
-                  }}
+                  type="number"
+                  min={0}
                   style={{ width: "100%" }}
                   placeholder="Ví dụ: 14.2 hoặc 14,2"
                 />
               </Form.Item>
+
             </Col>
             <Col xs={24} md={6}>
               <Form.Item
