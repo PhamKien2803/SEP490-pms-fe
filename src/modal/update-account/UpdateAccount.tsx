@@ -67,7 +67,7 @@ const UpdateAccount: React.FC<UpdateAccountProps> = ({ open, loading, initialDat
     };
 
     const handleFinishFailed = () => {
-        toast.error('Vui lòng điền đầy đủ thông tin hoặc sửa lỗi cho đúng!');
+        toast.error('Vui lòng điền đầy đủ thông tin!');
     };
 
     const handleCancel = () => {
@@ -120,13 +120,18 @@ const UpdateAccount: React.FC<UpdateAccountProps> = ({ open, loading, initialDat
                         rules={[
                             ({ getFieldValue }) => ({
                                 validator(_, value) {
-                                    if (!getFieldValue('password') || getFieldValue('password') === value) {
-                                        return Promise.resolve();
+                                    const password = getFieldValue('password');
+                                    if (!password && value) {
+                                        return Promise.reject(new Error('Vui lòng nhập mật khẩu trước!'));
                                     }
-                                    return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
+                                    if (password && password !== value) {
+                                        return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
+                                    }
+                                    return Promise.resolve();
                                 },
                             }),
                         ]}
+
                     >
                         <Input.Password placeholder="Nhập lại mật khẩu mới" />
                     </Form.Item>

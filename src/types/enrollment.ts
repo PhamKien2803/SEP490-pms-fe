@@ -5,6 +5,7 @@ export interface RegisterEnrollmentDto {
     studentIdCard: string;
     studentNation: string;
     studentReligion: string;
+    nickName: string;
     address: string;
     fatherName: string;
     fatherPhoneNumber: string;

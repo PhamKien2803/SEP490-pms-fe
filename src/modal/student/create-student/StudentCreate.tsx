@@ -247,7 +247,7 @@ const StudentCreate: React.FC = () => {
             setDesignImageFile([]);
             navigate(-1);
         } catch (error) {
-            toast.error("Tạo hồ sơ thất bại");
+            typeof error === "string" ? toast.info(error) : toast.error('Tạo hồ sơ học sinh thất bại.');
         } finally {
             setLoading(false);
         }
