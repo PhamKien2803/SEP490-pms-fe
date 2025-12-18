@@ -5,7 +5,7 @@ export interface RegisterEnrollmentDto {
     studentIdCard: string;
     studentNation: string;
     studentReligion: string;
-    nickName: string;
+    nickname?: string;
     address: string;
     fatherName: string;
     fatherPhoneNumber: string;
@@ -86,6 +86,7 @@ export interface EnrollmentListItem {
     createdBy: string;
     tuitionDetails: TuitionDetail[];
     totalAmountDue: number;
+    nickname?: string;
     updatedBy: string
 }
 

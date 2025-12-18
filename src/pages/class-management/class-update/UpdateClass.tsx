@@ -402,7 +402,7 @@ function UpdateClass() {
             </Form>
 
             <AddMemberTableModal
-                title="Thêm Giáo viên"
+                title="Thêm Giáo viên vào lớp"
                 open={isTeacherModalVisible}
                 onCancel={() => setIsTeacherModalVisible(false)}
                 onOk={handleAddTeachers}
@@ -411,7 +411,7 @@ function UpdateClass() {
             />
 
             <AddMemberTableModal
-                title="Thêm Học sinh"
+                title="Thêm Học sinh vào lớp"
                 open={isStudentModalVisible}
                 onCancel={() => setIsStudentModalVisible(false)}
                 onOk={handleAddStudents}

@@ -256,7 +256,8 @@ function CreateClass() {
                 open={isStudentModalVisible}
                 onCancel={() => setIsStudentModalVisible(false)}
                 onOk={handleAddStudents}
-                dataSource={allAvailableStudents.filter(s => !students.some(existing => existing._id === s._id))}
+                // dataSource={allAvailableStudents.filter(s => !students.some(existing => existing._id === s._id))}
+                originalData={allAvailableStudents.filter(s => !students.some(existing => existing._id === s._id))}
             />
 
             <Modal
@@ -279,8 +280,78 @@ function CreateClass() {
     );
 }
 
-const AddMemberTableModal = ({ open, onCancel, onOk, dataSource, title }: any) => {
+// const AddMemberTableModal = ({ open, onCancel, onOk, dataSource, title }: any) => {
+//     const [selectedRows, setSelectedRows] = useState<any[]>([]);
+
+//     const columns = [
+//         { title: 'Mã', dataIndex: 'studentCode', key: 'code' },
+//         { title: 'Họ tên', dataIndex: 'fullName', key: 'fullName' },
+//     ];
+
+//     const rowSelection = {
+//         onChange: (_: React.Key[], selectedRows: any[]) => {
+//             setSelectedRows(selectedRows);
+//         },
+//     };
+
+//     const handleOk = () => {
+//         if (selectedRows.length > 0) {
+//             onOk(selectedRows);
+//         }
+//         onCancel();
+//         setSelectedRows([]);
+//     };
+
+//     const handleCancel = () => {
+//         onCancel();
+//         setSelectedRows([]);
+//     };
+
+//     return (
+//         <Modal
+//             title={title}
+//             open={open}
+//             onCancel={handleCancel}
+//             onOk={handleOk}
+//             width={600}
+//             okText="Thêm"
+//             cancelText="Hủy"
+//             okButtonProps={{ icon: <PlusOutlined /> }}
+//             cancelButtonProps={{ icon: <CloseCircleOutlined /> }}
+//             destroyOnClose
+//         >
+//             <Table
+//                 rowSelection={{
+//                     type: 'checkbox',
+//                     ...rowSelection,
+//                 }}
+//                 columns={columns}
+//                 dataSource={dataSource}
+//                 rowKey="_id"
+//                 pagination={{ pageSize: 5 }}
+//             />
+//         </Modal>
+//     );
+// };
+
+const AddMemberTableModal = ({ open, onCancel, onOk, originalData, title }: any) => {
     const [selectedRows, setSelectedRows] = useState<any[]>([]);
+    const [searchKeyword, setSearchKeyword] = useState('');
+    const [filteredData, setFilteredData] = useState<any[]>([]);
+
+    useEffect(() => {
+        setFilteredData(originalData);
+    }, [originalData]);
+
+    const handleSearch = (value: string) => {
+        const lowerKeyword = value.toLowerCase();
+        setSearchKeyword(value);
+        const filtered = originalData.filter((student: { fullName: string; studentCode: string; }) =>
+            student.fullName.toLowerCase().includes(lowerKeyword) ||
+            student.studentCode?.toLowerCase().includes(lowerKeyword)
+        );
+        setFilteredData(filtered);
+    };
 
     const columns = [
         { title: 'Mã', dataIndex: 'studentCode', key: 'code' },
@@ -288,8 +359,8 @@ const AddMemberTableModal = ({ open, onCancel, onOk, dataSource, title }: any) =
     ];
 
     const rowSelection = {
-        onChange: (_: React.Key[], selectedRows: any[]) => {
-            setSelectedRows(selectedRows);
+        onChange: (_: React.Key[], selected: any[]) => {
+            setSelectedRows(selected);
         },
     };
 
@@ -299,11 +370,13 @@ const AddMemberTableModal = ({ open, onCancel, onOk, dataSource, title }: any) =
         }
         onCancel();
         setSelectedRows([]);
+        setSearchKeyword('');
     };
 
     const handleCancel = () => {
         onCancel();
         setSelectedRows([]);
+        setSearchKeyword('');
     };
 
     return (
@@ -319,18 +392,30 @@ const AddMemberTableModal = ({ open, onCancel, onOk, dataSource, title }: any) =
             cancelButtonProps={{ icon: <CloseCircleOutlined /> }}
             destroyOnClose
         >
+            <Input.Search
+                placeholder="Tìm theo tên hoặc mã học sinh..."
+                onSearch={handleSearch}
+                value={searchKeyword}
+                onChange={e => handleSearch(e.target.value)}
+                allowClear
+                style={{ marginBottom: 16 }}
+            />
+
             <Table
                 rowSelection={{
                     type: 'checkbox',
                     ...rowSelection,
                 }}
                 columns={columns}
-                dataSource={dataSource}
+                dataSource={filteredData}
                 rowKey="_id"
                 pagination={{ pageSize: 5 }}
             />
         </Modal>
     );
 };
+
+
+
 
 export default CreateClass;

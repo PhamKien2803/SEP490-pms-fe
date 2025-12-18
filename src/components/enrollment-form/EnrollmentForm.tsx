@@ -56,10 +56,12 @@ const EnrollmentForm: React.FC = () => {
                 address: values.address,
                 fatherIdCard: values.fatherIdCard,
                 motherIdCard: values.motherIdCard,
+                nickname: values.nickname,
             };
         } else {
             payload = {
                 ...restValues,
+                nickname: values.nickname,
                 isCheck: false,
                 studentDob: values.studentDob ? dayjs(values.studentDob).toISOString() : '',
             };
@@ -164,6 +166,35 @@ const EnrollmentForm: React.FC = () => {
                             },
                         ]}><Input
                                 onPaste={handlePasteName} prefix={<UserOutlined />} placeholder="Nguyễn Văn A" /></Form.Item></Col>
+                        <Col xs={24} sm={12}>
+                            <Form.Item
+                                name="nickName"
+                                label="Tên ở nhà"
+                                rules={[
+                                    requiredTrimRule("tên ở nhà"),
+                                    noSpecialCharactersRule,
+                                    {
+                                        validator: (_, value) => {
+                                            if (!value) return Promise.resolve();
+                                            if (/^\s|\s$/.test(value)) {
+                                                return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                            }
+                                            if (/\s{2,}/.test(value)) {
+                                                return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    placeholder="Bin, Bon, Na, Bi..."
+                                    onPaste={handlePasteName}
+                                    prefix={<UserOutlined />}
+                                />
+                            </Form.Item>
+                        </Col>
+
                         <Col xs={24} sm={12}>
                             <Form.Item
                                 name="studentDob"
