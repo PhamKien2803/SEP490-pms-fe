@@ -176,7 +176,7 @@ const StudentEdit: React.FC = () => {
         try {
             await studentApis.updateStudent(id, payload);
             toast.success("Cập nhật học sinh thành công!");
-            navigate(-1);
+            // navigate(-1);
         } catch (error) {
             typeof error === "string"
                 ? toast.info(error)

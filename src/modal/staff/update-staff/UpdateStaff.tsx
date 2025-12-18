@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { StaffRecord, UpdateStaffData, GenderType } from '../../../types/staff-management';
-import { noSpecialCharactersandNumberRule } from '../../../utils/format';
+import { noSpecialCharactersRule, requiredTrimRule } from '../../../utils/format';
 
 dayjs.extend(customParseFormat);
 
@@ -88,6 +88,22 @@ const UpdateStaff: React.FC<UpdateStaffProps> = ({ open, loading, initialData, o
         onClose();
     }
 
+    const phoneValidationRule = {
+        pattern: /^\d{10}$/,
+        message: 'Số điện thoại phải có đúng 10 chữ số!',
+    };
+
+    const idCardValidationRule = {
+        pattern: /^\d{12}$/,
+        message: 'CCCD phải có đúng 12 chữ số!',
+    };
+
+    const allowOnlyNumbers = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (!/[0-9]/.test(event.key) && !['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete'].includes(event.key) && !event.ctrlKey) {
+            event.preventDefault();
+        }
+    };
+
     return (
         <>
             <Modal
@@ -122,7 +138,19 @@ const UpdateStaff: React.FC<UpdateStaffProps> = ({ open, loading, initialData, o
                                     <Form.Item
                                         name="fullName"
                                         label="Họ và Tên"
-                                        rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }, noSpecialCharactersandNumberRule]}
+                                        rules={[requiredTrimRule("họ và tên"), noSpecialCharactersRule,
+                                        {
+                                            validator: (_, value) => {
+                                                if (!value) return Promise.resolve();
+                                                if (/^\s|\s$/.test(value)) {
+                                                    return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                                }
+                                                if (/\s{2,}/.test(value)) {
+                                                    return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                                }
+                                                return Promise.resolve();
+                                            },
+                                        },]}
                                     >
                                         <Input placeholder="Nguyễn Văn A" />
                                     </Form.Item>
@@ -131,7 +159,22 @@ const UpdateStaff: React.FC<UpdateStaffProps> = ({ open, loading, initialData, o
                                     <Form.Item
                                         name="dob"
                                         label="Ngày sinh"
-                                        rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}
+                                        rules={[
+                                            { required: true, message: "Vui lòng chọn ngày sinh" },
+                                            {
+                                                validator: (_, value) => {
+                                                    if (!value) return Promise.resolve();
+                                                    const date = dayjs(value);
+                                                    const today = dayjs();
+                                                    const age = today.diff(date, "year");
+                                                    if (date.isAfter(today, "day"))
+                                                        return Promise.reject(new Error("Ngày sinh không được trong tương lai!"));
+                                                    if (age < 18)
+                                                        return Promise.reject(new Error("Nhân viên phải từ 18 tuổi trở lên!"));
+                                                    return Promise.resolve();
+                                                },
+                                            },
+                                        ]}
                                     >
                                         <DatePicker
                                             style={{ width: '100%' }}
@@ -143,8 +186,8 @@ const UpdateStaff: React.FC<UpdateStaffProps> = ({ open, loading, initialData, o
                                 <Col span={12}>
                                     <Form.Item
                                         name="IDCard"
-                                        label="CMND/CCCD/Hộ chiếu"
-                                        rules={[{ required: true, message: 'Vui lòng nhập số định danh!' }]}
+                                        label="CMND/CCCD"
+                                        rules={[{ required: true, message: "Vui lòng nhập CCCD!" }, idCardValidationRule]}
                                     >
                                         <Input type='number' placeholder="012345678901" />
                                     </Form.Item>
@@ -173,7 +216,18 @@ const UpdateStaff: React.FC<UpdateStaffProps> = ({ open, loading, initialData, o
                                     <Form.Item
                                         name="email"
                                         label="Email"
-                                        rules={[{ type: 'email', message: 'Email không hợp lệ!' }, { required: true, message: 'Vui lòng nhập email!' }]}
+                                        rules={[requiredTrimRule("email"), { type: 'email', message: "Email không hợp lệ!" }, {
+                                            validator: (_, value) => {
+                                                if (!value) return Promise.resolve();
+                                                if (/^\s|\s$/.test(value)) {
+                                                    return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                                }
+                                                if (/\s{2,}/.test(value)) {
+                                                    return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                                }
+                                                return Promise.resolve();
+                                            },
+                                        }]}
                                     >
                                         <Input placeholder="abc@gmail.com" />
                                     </Form.Item>
@@ -182,9 +236,9 @@ const UpdateStaff: React.FC<UpdateStaffProps> = ({ open, loading, initialData, o
                                     <Form.Item
                                         name="phoneNumber"
                                         label="Số điện thoại"
-                                        rules={[{ pattern: /^[0-9]{9,11}$/, message: 'SĐT phải từ 9-11 chữ số!' }, { required: true, message: 'Vui lòng nhập SĐT!' }]}
+                                        rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }, phoneValidationRule]}
                                     >
-                                        <Input type='number' placeholder="0912345678" />
+                                        <Input onKeyPress={allowOnlyNumbers} placeholder="0912345678" />
                                     </Form.Item>
                                 </Col>
                                 <Col span={8}>

@@ -67,7 +67,7 @@ const MedicalManagement: React.FC = () => {
             }));
         } catch (error) {
             typeof error === "string"
-                ? toast.info(error)
+                ? toast.info("Hiện chưa có hồ sơ sức khỏe nào cho năm học này.")
                 : toast.error("Không thể tải danh sách hồ sơ sức khỏe.");
             setDataMedicals([]);
         } finally {

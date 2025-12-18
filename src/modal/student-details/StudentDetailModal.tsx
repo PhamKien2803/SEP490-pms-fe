@@ -84,7 +84,7 @@ function StudentDetailModal({ studentId, open, onClose }: Props) {
                 <List.Item.Meta
                     avatar={<FilePdfOutlined style={{ fontSize: 24, color: '#f5222d' }} />}
                     title={title}
-                    description={<Text underline>{file.filename}</Text>}
+                    description={<Text underline>{file?.filename}</Text>}
                 />
             </List.Item>
         );
@@ -111,16 +111,16 @@ function StudentDetailModal({ studentId, open, onClose }: Props) {
                                 color: '#fff',
                             }}
                         >
-                            {!student?.imageStudent && getAvatarLetter(student.fullName)}
+                            {!student?.imageStudent && (getAvatarLetter(student?.fullName))}
                         </Avatar>
 
                     </Col>
                     <Col flex="auto">
-                        <Title level={4} style={{ margin: 0 }}>{student.fullName}</Title>
-                        <Text type="secondary">{student.studentCode}</Text>
+                        <Title level={4} style={{ margin: 0 }}>{student?.fullName} - {student?.nickname}</Title>
+                        <Text type="secondary">{student?.studentCode}</Text>
                     </Col>
                     <Col>
-                        {student.active ? (
+                        {student?.active ? (
                             <Tag color="green" style={{ fontSize: 14, padding: '4px 8px' }}>Đang học</Tag>
                         ) : (
                             <Tag color="red" style={{ fontSize: 14, padding: '4px 8px' }}>Ngưng học</Tag>
@@ -135,22 +135,19 @@ function StudentDetailModal({ studentId, open, onClose }: Props) {
                     >
                         <Descriptions layout="vertical" bordered size="small" column={2}>
                             <Descriptions.Item label="Ngày sinh">
-                                {dayjs(student.dob).format('DD/MM/YYYY')}
+                                {dayjs(student?.dob).format('DD/MM/YYYY')}
                             </Descriptions.Item>
                             <Descriptions.Item label="Giới tính">
-                                {student.gender}
+                                {student?.gender}
                             </Descriptions.Item>
                             <Descriptions.Item label="Dân tộc">
-                                {student.nation}
+                                {student?.nation}
                             </Descriptions.Item>
                             <Descriptions.Item label="Tôn giáo">
-                                {student.religion}
+                                {student?.religion}
                             </Descriptions.Item>
                             <Descriptions.Item label="Địa chỉ" span={2}>
-                                {student.address}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Nhóm lớp">
-                                {student.classGroup}
+                                {student?.address}
                             </Descriptions.Item>
                         </Descriptions>
                     </TabPane>
@@ -160,10 +157,10 @@ function StudentDetailModal({ studentId, open, onClose }: Props) {
                         key="2"
                     >
                         <List>
-                            {renderFileLink(student.birthCertFile, 'Giấy khai sinh')}
-                            {renderFileLink(student.healthCertFile, 'Giấy khám sức khỏe')}
+                            {renderFileLink(student?.birthCertFile, 'Giấy khai sinh')}
+                            {renderFileLink(student?.healthCertFile, 'Giấy khám sức khỏe')}
                         </List>
-                        {!student.birthCertFile && !student.healthCertFile && (
+                        {!student?.birthCertFile && !student?.healthCertFile && (
                             <Empty
                                 image={Empty.PRESENTED_IMAGE_SIMPLE}
                                 description="Không có hồ sơ nào"
@@ -176,13 +173,13 @@ function StudentDetailModal({ studentId, open, onClose }: Props) {
                         key="3"
                     >
                         <Descriptions bordered column={2} size="small">
-                            <Descriptions.Item label="Người tạo">{student.createdBy}</Descriptions.Item>
+                            <Descriptions.Item label="Người tạo">{student?.createdBy}</Descriptions.Item>
                             <Descriptions.Item label="Ngày tạo">
-                                {dayjs(student.createdAt).format('DD/MM/YYYY HH:mm')}
+                                {dayjs(student?.createdAt).format('DD/MM/YYYY HH:mm')}
                             </Descriptions.Item>
-                            <Descriptions.Item label="Người cập nhật">{student.updatedBy}</Descriptions.Item>
+                            <Descriptions.Item label="Người cập nhật">{student?.updatedBy}</Descriptions.Item>
                             <Descriptions.Item label="Ngày cập nhật">
-                                {dayjs(student.updatedAt).format('DD/MM/YYYY HH:mm')}
+                                {dayjs(student?.updatedAt).format('DD/MM/YYYY HH:mm')}
                             </Descriptions.Item>
                         </Descriptions>
                     </TabPane>

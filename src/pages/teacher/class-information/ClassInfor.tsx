@@ -5,7 +5,6 @@ import {
 } from 'antd';
 import {
     UserOutlined, TeamOutlined, EyeOutlined, ReadOutlined, CalendarOutlined,
-    HomeOutlined, BarcodeOutlined, SmileOutlined, UsergroupAddOutlined,
     ManOutlined, WomanOutlined
 } from '@ant-design/icons';
 import type { TableProps } from 'antd';
@@ -223,16 +222,16 @@ function ClassInfor() {
                             >
                                 <Row gutter={[24, 24]} style={{ marginBottom: token.marginLG }}>
                                     <Col xs={24} sm={12} md={6}>
-                                        <Statistic title="Mã lớp" value={classInfo?.classCode} prefix={<BarcodeOutlined />} />
+                                        <Statistic title="Mã lớp" value={classInfo?.classCode} />
                                     </Col>
                                     <Col xs={24} sm={12} md={6}>
-                                        <Statistic title="Phòng học" value={classInfo?.room?.roomName || '--'} prefix={<HomeOutlined />} />
+                                        <Statistic title="Phòng học" value={classInfo?.room?.roomName || '--'} />
                                     </Col>
                                     <Col xs={24} sm={12} md={6}>
-                                        <Statistic title="Độ tuổi" value={`${classInfo?.age || '--'} tuổi`} prefix={<SmileOutlined />} />
+                                        <Statistic title="Độ tuổi" value={`${classInfo?.age || '--'} tuổi`} />
                                     </Col>
                                     <Col xs={24} sm={12} md={6}>
-                                        <Statistic title="Sĩ số" value={classInfo?.students?.length || 0} suffix="học sinh" prefix={<UsergroupAddOutlined />} />
+                                        <Statistic title="Sĩ số" value={classInfo?.students?.length || 0} suffix="học sinh" />
                                     </Col>
                                 </Row>
 

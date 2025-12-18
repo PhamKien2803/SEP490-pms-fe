@@ -165,7 +165,7 @@ function AttendanceDetails() {
                                             />
                                             <div>
                                                 <Text strong style={{ fontSize: 16 }}>
-                                                    {item?.student?.fullName}
+                                                    {item?.student?.fullName} - {item?.student?.nickname}
                                                 </Text>
                                                 <Text type="secondary" style={{ display: 'block' }}>
                                                     {item?.student?.studentCode}

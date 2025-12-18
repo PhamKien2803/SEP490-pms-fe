@@ -3,6 +3,7 @@ export interface StudentRecord {
   _id: string;
   studentCode: string;
   fullName: string;
+  nickname?: string;
   dob: string;
   idCard: string;
   gender: 'Nam' | 'Nữ' | 'Khác' | string;

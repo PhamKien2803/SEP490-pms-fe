@@ -142,7 +142,7 @@ const EnrollmentDetail: React.FC = () => {
                             Chi tiết đơn tuyển sinh
                         </Title>
                         <Title level={4} style={{ margin: 0, color: "#595959" }}>
-                            ({data.enrollmentCode})
+                            ({data?.enrollmentCode})
                         </Title>
                     </Space>
                 </Col>
@@ -157,34 +157,48 @@ const EnrollmentDetail: React.FC = () => {
                             <Title level={4} style={{ margin: 0, color: THEME_COLOR }}>
                                 <SolutionOutlined style={{ marginRight: 8 }} />
                                 Thông Tin Học Sinh
+                                {/* <Descriptions.Item label="Mã học sinh" style={{ marginLeft: 16 }}>
+                                    <Text strong>{data?.studentCode}</Text>
+                                </Descriptions.Item> */}
                             </Title>
                         }
                     >
                         <Descriptions bordered column={{ xs: 1, sm: 2, md: 3 }} size="middle">
                             <Descriptions.Item label="Họ và tên">
-                                <Text strong>{data.studentName}</Text>
+                                <Text strong>{data?.studentName}</Text>
                             </Descriptions.Item>
-                            <Descriptions.Item label="Ngày sinh">
-                                {dayjs(data.studentDob).format("DD/MM/YYYY")}
+
+                            <Descriptions.Item label="Tên ở nhà">
+                                <Text>{data?.nickname || "—"}</Text>
                             </Descriptions.Item>
+
                             <Descriptions.Item label="Giới tính">
-                                <Tag color={data.studentGender === "Nam" ? "blue" : "pink"}>
-                                    {data.studentGender}
+                                <Tag color={data?.studentGender === "Nam" ? "blue" : "pink"}>
+                                    {data?.studentGender}
                                 </Tag>
                             </Descriptions.Item>
+
+                            <Descriptions.Item label="Ngày sinh">
+                                {dayjs(data?.studentDob).format("DD/MM/YYYY")}
+                            </Descriptions.Item>
+
                             <Descriptions.Item label="Mã định danh">
-                                {data.studentIdCard}
+                                {data?.studentIdCard}
                             </Descriptions.Item>
+
                             <Descriptions.Item label="Dân tộc">
-                                {data.studentNation}
+                                {data?.studentNation}
                             </Descriptions.Item>
+
                             <Descriptions.Item label="Tôn giáo">
-                                {data.studentReligion}
+                                {data?.studentReligion}
                             </Descriptions.Item>
+
                             <Descriptions.Item label="Địa chỉ" span={3}>
-                                {data.address}
+                                {data?.address}
                             </Descriptions.Item>
                         </Descriptions>
+
                     </Card>
 
                     <Card
@@ -211,22 +225,22 @@ const EnrollmentDetail: React.FC = () => {
                             >
                                 <Descriptions column={1} bordered size="middle">
                                     <Descriptions.Item label="Họ và tên">
-                                        {data.fatherName}
+                                        {data?.fatherName}
                                     </Descriptions.Item>
                                     <Descriptions.Item label="Nghề nghiệp">
-                                        {data.fatherJob}
+                                        {data?.fatherJob}
                                     </Descriptions.Item>
                                     <Descriptions.Item label="Số điện thoại">
-                                        {data.fatherPhoneNumber}
+                                        {data?.fatherPhoneNumber}
                                     </Descriptions.Item>
                                     <Descriptions.Item label="Ngày sinh">
-                                        {data.fatherDob ? dayjs(data.fatherDob).format("DD/MM/YYYY") : "—"}
+                                        {data?.fatherDob ? dayjs(data?.fatherDob).format("DD/MM/YYYY") : "—"}
                                     </Descriptions.Item>
                                     <Descriptions.Item label="Email">
-                                        {data.fatherEmail}
+                                        {data?.fatherEmail}
                                     </Descriptions.Item>
                                     <Descriptions.Item label="CCCD">
-                                        {data.fatherIdCard}
+                                        {data?.fatherIdCard}
                                     </Descriptions.Item>
                                 </Descriptions>
                             </TabPane>
@@ -240,23 +254,23 @@ const EnrollmentDetail: React.FC = () => {
                             >
                                 <Descriptions column={1} bordered size="middle">
                                     <Descriptions.Item label="Họ và tên">
-                                        {data.motherName}
+                                        {data?.motherName}
                                     </Descriptions.Item>
                                     <Descriptions.Item label="Nghề nghiệp">
-                                        {data.motherJob}
+                                        {data?.motherJob}
                                     </Descriptions.Item>
                                     <Descriptions.Item label="Số điện thoại">
-                                        {data.motherPhoneNumber}
+                                        {data?.motherPhoneNumber}
                                     </Descriptions.Item>
                                     <Descriptions.Item label="Ngày sinh">
-                                        {data.motherDob ? dayjs(data.motherDob).format("DD/MM/YYYY") : "—"}
+                                        {data?.motherDob ? dayjs(data?.motherDob).format("DD/MM/YYYY") : "—"}
                                     </Descriptions.Item>
 
                                     <Descriptions.Item label="Email">
-                                        {data.motherEmail}
+                                        {data?.motherEmail}
                                     </Descriptions.Item>
                                     <Descriptions.Item label="CCCD">
-                                        {data.motherIdCard}
+                                        {data?.motherIdCard}
                                     </Descriptions.Item>
                                 </Descriptions>
                             </TabPane>
@@ -297,33 +311,33 @@ const EnrollmentDetail: React.FC = () => {
 
                             <Descriptions.Item label="Ngày nộp đơn">
                                 <Text strong>
-                                    {dayjs(data.createdAt).format("DD/MM/YYYY HH:mm")}
+                                    {dayjs(data?.createdAt).format("DD/MM/YYYY HH:mm")}
                                 </Text>
                                 <br />
                                 <Text type="secondary">
-                                    ({dayjs(data.createdAt).fromNow()})
+                                    ({dayjs(data?.createdAt).fromNow()})
                                 </Text>
                             </Descriptions.Item>
 
-                            {data.state === "Từ chối" && (
+                            {data?.state === "Từ chối" && (
                                 <Descriptions.Item label="Lý do từ chối">
                                     <Text type="danger" italic>
-                                        {data.reason || "Không có lý do."}
+                                        {data?.reason || "Không có lý do."}
                                     </Text>
                                 </Descriptions.Item>
                             )}
 
                             <Descriptions.Item label="Tổng tiền cần thanh toán">
                                 <Text strong style={{ fontSize: 18, color: "red" }}>
-                                    {data.totalAmountDue?.toLocaleString("vi-VN")} đ
+                                    {data?.totalAmountDue?.toLocaleString("vi-VN")} đ
                                 </Text>
                             </Descriptions.Item>
 
                             <Descriptions.Item label="Chi tiết học phí">
-                                {data.tuitionDetails?.length === 0 ? (
+                                {data?.tuitionDetails?.length === 0 ? (
                                     <Text type="secondary">Không có dữ liệu học phí.</Text>
                                 ) : (
-                                    data.tuitionDetails?.map((t, index) => (
+                                    data?.tuitionDetails?.map((t, index) => (
                                         <Card
                                             key={index}
                                             size="small"
@@ -335,16 +349,16 @@ const EnrollmentDetail: React.FC = () => {
                                         >
                                             <Space direction="vertical" size={4} style={{ width: "100%" }}>
                                                 <Text strong>
-                                                    {t.receiptName} ({t.receiptCode})
+                                                    {t?.receiptName} ({t?.receiptCode})
                                                 </Text>
 
                                                 <Text>
-                                                    <b>Tháng:</b> {t.month}
+                                                    <b>Tháng:</b> {t?.month}
                                                 </Text>
 
                                                 <Text>
                                                     <b>Tổng tiền:</b>{" "}
-                                                    {t.totalAmount.toLocaleString("vi-VN")} đ
+                                                    {t?.totalAmount.toLocaleString("vi-VN")} đ
                                                 </Text>
 
                                                 <Tag color="blue">{t.state}</Tag>
@@ -353,14 +367,14 @@ const EnrollmentDetail: React.FC = () => {
                                                     Ngày tạo: {dayjs(t.createdAt).format("DD/MM/YYYY HH:mm")}
                                                 </Text>
 
-                                                {t.revenueList?.length > 0 && (
+                                                {t?.revenueList?.length > 0 && (
                                                     <div style={{ marginTop: 8 }}>
                                                         <Text strong>Chi tiết khoản thu:</Text>
-                                                        {t.revenueList.map((r, idx) => (
+                                                        {t?.revenueList.map((r, idx) => (
                                                             <div key={idx} style={{ marginTop: 4 }}>
-                                                                <Text>- {r.revenueName}: </Text>
+                                                                <Text>- {r?.revenueName}: </Text>
                                                                 <Text strong>
-                                                                    {r.amount}
+                                                                    {r?.amount}
                                                                 </Text>
                                                             </div>
                                                         ))}
@@ -387,8 +401,8 @@ const EnrollmentDetail: React.FC = () => {
                         <Button
                             type="link"
                             icon={<FilePdfOutlined />}
-                            onClick={() => handleViewPDF(data.birthCertId)}
-                            disabled={!data.birthCertId}
+                            onClick={() => handleViewPDF(data?.birthCertId)}
+                            disabled={!data?.birthCertId}
                             style={{ paddingLeft: 0, display: "block" }}
                         >
                             Giấy khai sinh
@@ -396,8 +410,8 @@ const EnrollmentDetail: React.FC = () => {
                         <Button
                             type="link"
                             icon={<FilePdfOutlined />}
-                            onClick={() => handleViewPDF(data.healthCertId)}
-                            disabled={!data.healthCertId}
+                            onClick={() => handleViewPDF(data?.healthCertId)}
+                            disabled={!data?.healthCertId}
                             style={{ paddingLeft: 0, display: "block" }}
                         >
                             Giấy khám sức khỏe

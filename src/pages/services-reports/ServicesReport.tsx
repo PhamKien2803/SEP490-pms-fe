@@ -50,7 +50,7 @@ function ServicesReport() {
             const res = await reportsApis.getServiceReports({ schoolYear: selectedYear.schoolYear });
             setData(res.data);
         } catch (err) {
-            typeof err === "string" ? toast.info(err) : toast.error("Không thể tải dữ liệu báo cáo");
+            typeof err === "string" ? toast.info("Hiện chưa có thông tin báo cáo") : toast.error("Không thể tải dữ liệu báo cáo");
         } finally {
             setLoading(false);
         }

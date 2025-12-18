@@ -153,7 +153,7 @@ const StudentDetail: React.FC = () => {
                             Chi tiết hồ sơ học sinh
                         </Title>
                         <Title level={4} style={{ margin: 0, color: "#595959" }}>
-                            ({studentData.fullName})
+                            ({studentData?.fullName})
                         </Title>
                     </Space>
                 </Col>
@@ -174,18 +174,18 @@ const StudentDetail: React.FC = () => {
                             }}
                         />
                         <Title level={3} style={{ margin: 0 }}>
-                            {studentData.fullName}
+                            {studentData?.fullName}
                         </Title>
                         <Tag color="blue" style={{ fontSize: 14, padding: "4px 8px", marginTop: 8 }}>
-                            {studentData.studentCode}
+                            {studentData?.studentCode}
                         </Tag>
                         <Divider />
                         <Descriptions column={1} size="small" layout="horizontal">
                             <Descriptions.Item label={<Text strong>Ngày sinh</Text>}>
-                                {formatDate(studentData.dob)}
+                                {formatDate(studentData?.dob)}
                             </Descriptions.Item>
                             <Descriptions.Item label={<Text strong>Giới tính</Text>}>
-                                {formatGender(studentData.gender)}
+                                {formatGender(studentData?.gender)}
                             </Descriptions.Item>
                         </Descriptions>
                     </Card>
@@ -229,17 +229,20 @@ const StudentDetail: React.FC = () => {
                                 key="personal"
                             >
                                 <Descriptions bordered layout="horizontal" column={1}>
+                                    <Descriptions.Item label={<><IdcardOutlined /> Tên ở nhà</>}>
+                                        {studentData?.nickname || "-"}
+                                    </Descriptions.Item>
                                     <Descriptions.Item label={<><IdcardOutlined /> CCCD</>}>
-                                        {studentData.idCard}
+                                        {studentData?.idCard}
                                     </Descriptions.Item>
                                     <Descriptions.Item label={<><FlagOutlined /> Quốc tịch</>}>
-                                        {studentData.nation}
+                                        {studentData?.nation}
                                     </Descriptions.Item>
                                     <Descriptions.Item label={<><SafetyOutlined /> Tôn giáo</>}>
-                                        {studentData.religion || "-"}
+                                        {studentData?.religion || "-"}
                                     </Descriptions.Item>
                                     <Descriptions.Item label={<><HomeOutlined /> Địa chỉ</>}>
-                                        {studentData.address}
+                                        {studentData?.address}
                                     </Descriptions.Item>
                                 </Descriptions>
                             </TabPane>
@@ -252,16 +255,16 @@ const StudentDetail: React.FC = () => {
                             <TabPane tab={<><InfoCircleOutlined /> Thông Tin Hệ Thống</>} key="system">
                                 <Descriptions bordered column={1} size="small">
                                     <Descriptions.Item label="Người tạo">
-                                        {studentData.createdBy}
+                                        {studentData?.createdBy}
                                     </Descriptions.Item>
                                     <Descriptions.Item label="Ngày tạo">
-                                        {formatDate(studentData.createdAt)}
+                                        {formatDate(studentData?.createdAt)}
                                     </Descriptions.Item>
                                     <Descriptions.Item label="Cập nhật lần cuối bởi">
-                                        {studentData.updatedBy || "-"}
+                                        {studentData?.updatedBy || "-"}
                                     </Descriptions.Item>
                                     <Descriptions.Item label="Ngày cập nhật">
-                                        {formatDate(studentData.updatedAt)}
+                                        {formatDate(studentData?.updatedAt)}
                                     </Descriptions.Item>
                                 </Descriptions>
                             </TabPane>

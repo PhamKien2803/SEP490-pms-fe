@@ -52,6 +52,7 @@ interface TuitionDetail {
 
 export interface EnrollmentListItem {
     _id: string;
+    studentCode: string;
     enrollmentCode: string;
     studentName: string;
     studentDob: string;

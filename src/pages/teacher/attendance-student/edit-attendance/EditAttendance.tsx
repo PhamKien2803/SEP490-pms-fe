@@ -215,10 +215,10 @@ function EditAttendance() {
                                     <TeamOutlined /> Cập nhật điểm danh
                                 </Title>
                                 <Tag color="blue">
-                                    Lớp: {attendanceData.class.className}
+                                    Lớp: {attendanceData?.class?.className}
                                 </Tag>
                                 <Tag color="cyan">
-                                    Ngày: {dayjs(attendanceData.date).format('DD/MM/YYYY')}
+                                    Ngày: {dayjs(attendanceData?.date).format('DD/MM/YYYY')}
                                 </Tag>
                             </Space>
                         </Col>
@@ -253,7 +253,7 @@ function EditAttendance() {
 
                                 return (
                                     <List.Item
-                                        key={item.student._id}
+                                        key={item?.student._id}
                                         style={{
                                             padding: '16px 24px',
                                             borderBottom: '1px solid #f0f0f0'
@@ -264,17 +264,17 @@ function EditAttendance() {
                                                 <Space>
                                                     <Avatar
                                                         size={48}
-                                                        src={item.student.imageStudent}
-                                                        icon={!item.student.imageStudent && <UserOutlined />}
+                                                        src={item?.student?.imageStudent}
+                                                        icon={!item?.student?.imageStudent && <UserOutlined />}
                                                         style={{ backgroundColor: '#f0f0f0' }}
                                                     />
 
                                                     <div>
                                                         <Text strong style={{ fontSize: '15px' }}>
-                                                            {item.student.fullName}
+                                                            {item?.student?.fullName} - {item?.student?.nickname}
                                                         </Text>
                                                         <Text type="secondary" style={{ display: 'block' }}>
-                                                            {item.student.studentCode}
+                                                            {item?.student?.studentCode}
                                                         </Text>
                                                     </div>
                                                 </Space>
@@ -283,7 +283,7 @@ function EditAttendance() {
                                             <Col xs={24} sm={16} md={8}>
                                                 <Radio.Group
                                                     value={state.status}
-                                                    onChange={(e) => handleAttendanceChange(item.student._id, 'status', e.target.value)}
+                                                    onChange={(e) => handleAttendanceChange(item?.student._id, 'status', e.target.value)}
                                                 >
                                                     <Space wrap>
                                                         {Object.keys(STATUS_CONFIG).map((key) => {
@@ -311,19 +311,19 @@ function EditAttendance() {
 
                                             <Col xs={24} sm={24} md={10}>
                                                 <Space direction="vertical" style={{ width: '100%' }}>
-                                                    {(state.status === 'Có mặt' || state.status === 'Đã đón trẻ') && state.timeCheckIn && (
+                                                    {(state?.status === 'Có mặt' || state?.status === 'Đã đón trẻ') && state?.timeCheckIn && (
                                                         <Text style={{ fontSize: '14px', color: '#595959' }}>
                                                             <ClockCircleOutlined style={{ marginRight: 8, color: '#52c41a' }} />
-                                                            Giờ vào: {dayjs(state.timeCheckIn).format('HH:mm')}
+                                                            Giờ vào: {dayjs(state?.timeCheckIn).format('HH:mm')}
                                                         </Text>
                                                     )}
 
-                                                    {state.status === 'Đã đón trẻ' && (
+                                                    {state?.status === 'Đã đón trẻ' && (
                                                         isEditingTime ? (
                                                             <DatePicker
                                                                 picker="time"
                                                                 format="HH:mm"
-                                                                value={state.timeCheckOut ? dayjs(state.timeCheckOut) : null}
+                                                                value={state?.timeCheckOut ? dayjs(state?.timeCheckOut) : null}
                                                                 onChange={(time) => handleAttendanceChange(item.student._id, 'timeCheckOut', time)}
                                                                 onBlur={() => setEditingTimeStudentId(null)}
                                                                 placeholder="Chọn giờ đón"
@@ -338,27 +338,27 @@ function EditAttendance() {
                                                             >
                                                                 <Tooltip title="Chỉnh sửa giờ ra">
                                                                     <EditOutlined style={{ marginRight: 8, color: '#fa8c16' }} />
-                                                                    Giờ ra: {state.timeCheckOut ? dayjs(state.timeCheckOut).format('HH:mm') : 'Chưa có'}
+                                                                    Giờ ra: {state?.timeCheckOut ? dayjs(state?.timeCheckOut).format('HH:mm') : 'Chưa có'}
                                                                 </Tooltip>
 
                                                             </Text>
                                                         )
                                                     )}
 
-                                                    {state.status === 'Đã đón trẻ' && (
+                                                    {state?.status === 'Đã đón trẻ' && (
                                                         <Input
                                                             prefix={<EditOutlined style={{ color: '#8c8c8c' }} />}
                                                             placeholder="Ghi chú khi đón"
-                                                            value={state.noteCheckout}
+                                                            value={state?.noteCheckout}
                                                             onChange={(e) => handleAttendanceChange(item.student._id, 'noteCheckout', e.target.value)}
                                                         />
                                                     )}
 
-                                                    {state.status === 'Vắng mặt' && (
+                                                    {state?.status === 'Vắng mặt' && (
                                                         <Input
                                                             prefix={<EditOutlined style={{ color: '#8c8c8c' }} />}
                                                             placeholder="Ghi chú (Bị ốm, ...)"
-                                                            value={state.note}
+                                                            value={state?.note}
                                                             onChange={(e) => handleAttendanceChange(item.student._id, 'note', e.target.value)}
                                                         />
                                                     )}
@@ -366,7 +366,7 @@ function EditAttendance() {
                                                     <div style={{ marginTop: 8 }}>
                                                         <Text strong>Người đón:</Text>{' '}
                                                         <Text>
-                                                            {state.guardian?.fullName || '-'} ({state.guardian?.relationship || '...'}) - ({state.guardian?.phoneNumber || '...'})
+                                                            {state?.guardian?.fullName || '-'} ({state?.guardian?.relationship || '...'}) - ({state.guardian?.phoneNumber || '...'})
                                                         </Text>
                                                     </div>
                                                 </Space>

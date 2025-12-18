@@ -10,6 +10,7 @@ export interface IStudent {
   _id: string;
   studentCode: string;
   fullName: string;
+  nickname?: string;
   dob: string;
   gender: string;
   address: string;
@@ -196,6 +197,7 @@ export interface IAttendanceDetailResponse {
       _id: string;
       studentCode: string;
       fullName: string;
+      nickname?: string;
       dob: string;
       gender: string;
       address: string;
@@ -241,6 +243,7 @@ export interface StudentDetailResponse {
   _id: string;
   studentCode: string;
   fullName: string;
+  nickname?: string;
   dob: string;
   idCard: string;
   gender: string;
@@ -371,6 +374,7 @@ export interface IPopulatedStudent {
   _id: string;
   studentCode: string;
   fullName: string;
+  nickname?: string;
   dob: string;
   gender: string;
   address: string;

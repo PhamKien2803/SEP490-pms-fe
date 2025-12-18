@@ -215,7 +215,7 @@ function CreateClass() {
                                     allowClear
                                 >
                                     {availableRooms.map(room => (
-                                        <Option key={room._id} value={room._id}><HomeOutlined /> {room.roomName} (Sức chứa: {room.capacity})</Option>
+                                        <Option key={room?._id} value={room?._id}><HomeOutlined /> {room?.roomName}</Option>
                                     ))}
                                 </Select>
                             </Form.Item>
@@ -229,7 +229,7 @@ function CreateClass() {
                             onChange={handleTeacherChange}
                         >
                             {allAvailableTeachers.map(teacher => (
-                                <Option key={teacher._id} value={teacher._id}><SolutionOutlined /> {teacher.fullName} ({teacher.staffCode})</Option>
+                                <Option key={teacher?._id} value={teacher?._id}><SolutionOutlined /> {teacher?.fullName} ({teacher?.staffCode})</Option>
                             ))}
                         </Select>
                     </Form.Item>
@@ -356,6 +356,7 @@ const AddMemberTableModal = ({ open, onCancel, onOk, originalData, title }: any)
     const columns = [
         { title: 'Mã', dataIndex: 'studentCode', key: 'code' },
         { title: 'Họ tên', dataIndex: 'fullName', key: 'fullName' },
+        { title: 'Giới tính', dataIndex: 'gender', key: 'gender' },
     ];
 
     const rowSelection = {
@@ -414,8 +415,6 @@ const AddMemberTableModal = ({ open, onCancel, onOk, originalData, title }: any)
         </Modal>
     );
 };
-
-
 
 
 export default CreateClass;

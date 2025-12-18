@@ -351,9 +351,9 @@ function TakeAttendance() {
                                     Ngày này đã qua, không thể điểm danh lại
                                 </Tag>
                             )}
-                            <Tag color="default">Sĩ số: {attendanceSummary.total}</Tag>
-                            <Tag color="green">Có mặt: {attendanceSummary.present}</Tag>
-                            <Tag color="red">Vắng mặt: {attendanceSummary.absent}</Tag>
+                            <Tag color="default">Sĩ số: {attendanceSummary?.total}</Tag>
+                            <Tag color="green">Có mặt: {attendanceSummary?.present}</Tag>
+                            <Tag color="red">Vắng mặt: {attendanceSummary?.absent}</Tag>
                         </Space>
                         <Divider style={{ margin: '8px 0 16px' }} />
                     </>
@@ -392,15 +392,15 @@ function TakeAttendance() {
                                                         <Space>
                                                             <Avatar
                                                                 size={48}
-                                                                src={student.imageStudent}
-                                                                icon={!student.imageStudent && <UserOutlined />}
+                                                                src={student?.imageStudent}
+                                                                icon={!student?.imageStudent && <UserOutlined />}
                                                                 style={{ backgroundColor: '#f0f0f0' }}
                                                             />
 
                                                             <div>
-                                                                <Text strong>{student.fullName}</Text>
+                                                                <Text strong>{student?.fullName} - {student?.nickname}</Text>
                                                                 <Text type="secondary" style={{ display: 'block' }}>
-                                                                    {student.studentCode}
+                                                                    {student?.studentCode}
                                                                 </Text>
                                                             </div>
                                                         </Space>
@@ -437,17 +437,17 @@ function TakeAttendance() {
                                                     </Col>
 
                                                     <Col xs={24} sm={24} md={8}>
-                                                        {state.status === 'Có mặt' && state.timeCheckIn && (
+                                                        {state?.status === 'Có mặt' && state?.timeCheckIn && (
                                                             <Text style={{ fontSize: '14px', color: '#595959' }}>
                                                                 <ClockCircleOutlined style={{ marginRight: 8, color: '#52c41a' }} />
-                                                                Giờ vào: {dayjs(state.timeCheckIn).format('HH:mm')}
+                                                                Giờ vào: {dayjs(state?.timeCheckIn).format('HH:mm')}
                                                             </Text>
                                                         )}
-                                                        {state.status === 'Vắng mặt' && (
+                                                        {state?.status === 'Vắng mặt' && (
                                                             <Input
                                                                 prefix={<EditOutlined style={{ color: '#8c8c8F' }} />}
                                                                 placeholder="Ghi chú (Bị ốm, ...)"
-                                                                value={state.note}
+                                                                value={state?.note}
                                                                 onChange={(e) =>
                                                                     handleAttendanceChange(
                                                                         student._id,

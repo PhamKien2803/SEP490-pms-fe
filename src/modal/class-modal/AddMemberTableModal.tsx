@@ -1,81 +1,3 @@
-// import React, { useState, useEffect } from 'react';
-// import { Modal, Table } from 'antd';
-// import { StudentInClass, TeacherInClass } from '../../types/class';
-
-// interface AddMemberTableModalProps {
-//     open: boolean;
-//     onCancel: () => void;
-//     onOk: (selectedMembers: any[]) => void;
-//     dataSource: (StudentInClass | TeacherInClass)[];
-//     title: string;
-//     selectionLimit?: number;
-// }
-
-// const AddMemberTableModal: React.FC<AddMemberTableModalProps> = ({
-//     open,
-//     onCancel,
-//     onOk,
-//     dataSource,
-//     title,
-//     selectionLimit,
-// }) => {
-//     const [selectedRows, setSelectedRows] = useState<any[]>([]);
-
-//     const columns = [
-//         { title: 'Mã', dataIndex: dataSource?.[0]?.hasOwnProperty('studentCode') ? 'studentCode' : 'staffCode', key: 'code' },
-//         { title: 'Họ tên', dataIndex: 'fullName', key: 'fullName' },
-//     ];
-
-//     const rowSelection = {
-//         onChange: (_: React.Key[], selectedRows: any[]) => {
-//             setSelectedRows(selectedRows);
-//         },
-//         getCheckboxProps: (record: any) => ({
-//             disabled: (selectionLimit !== undefined && selectionLimit <= 0) || (selectionLimit !== undefined && selectedRows.length >= selectionLimit && !selectedRows.some(row => row._id === record._id)),
-//             name: record.fullName,
-//         }),
-//     };
-
-//     const handleOk = () => {
-//         if (selectedRows.length > 0) {
-//             onOk(selectedRows);
-//         }
-//         // Đóng modal sau khi nhấn OK bất kể có chọn hay không
-//         onCancel();
-//     };
-
-//     // Reset selected rows khi modal được mở lại
-//     useEffect(() => {
-//         if (!open) {
-//             setSelectedRows([]);
-//         }
-//     }, [open]);
-
-//     return (
-//         <Modal
-//             title={title}
-//             open={open}
-//             onCancel={onCancel}
-//             onOk={handleOk}
-//             width={600}
-//             okText="Thêm"
-//             cancelText="Hủy"
-//         >
-//             <Table
-//                 rowSelection={{ type: 'checkbox', ...rowSelection }}
-//                 columns={columns}
-//                 dataSource={dataSource}
-//                 rowKey="_id"
-//                 pagination={{ pageSize: 5 }}
-//             />
-//         </Modal>
-//     );
-// };
-
-// export default AddMemberTableModal;
-
-
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Modal, Table, Input } from 'antd';
 import { StudentInClass, TeacherInClass } from '../../types/class';
@@ -87,6 +9,7 @@ interface AddMemberTableModalProps {
     dataSource: (StudentInClass | TeacherInClass)[];
     title: string;
     selectionLimit?: number;
+    isStudent: boolean;
 }
 
 const AddMemberTableModal: React.FC<AddMemberTableModalProps> = ({
@@ -100,10 +23,12 @@ const AddMemberTableModal: React.FC<AddMemberTableModalProps> = ({
     const [selectedRows, setSelectedRows] = useState<any[]>([]);
     const [keyword, setKeyword] = useState('');
 
-    const isStudent = useMemo(
-        () => dataSource?.[0] && 'studentCode' in dataSource[0],
-        [dataSource]
-    );
+
+    const isStudent = useMemo(() => {
+        if (!dataSource || dataSource.length === 0) return undefined;
+        return 'studentCode' in dataSource[0];
+    }, [dataSource]);
+
 
 
     const filteredData = useMemo(() => {
@@ -119,18 +44,37 @@ const AddMemberTableModal: React.FC<AddMemberTableModalProps> = ({
     }, [keyword, dataSource]);
 
 
-    const columns = [
-        {
-            title: 'Mã',
-            dataIndex: isStudent ? 'studentCode' : 'staffCode',
-            key: 'code',
-        },
-        {
-            title: 'Họ tên',
-            dataIndex: 'fullName',
-            key: 'fullName',
-        },
-    ];
+    const columns = useMemo(() => {
+        const baseColumns: any[] = [
+            {
+                title: 'Mã',
+                dataIndex: isStudent ? 'studentCode' : 'staffCode',
+                key: 'code',
+            },
+            {
+                title: 'Họ tên',
+                dataIndex: 'fullName',
+                key: 'fullName',
+            },
+        ];
+
+        if (isStudent) {
+            baseColumns.push({
+                title: 'Giới tính',
+                dataIndex: 'gender',
+                key: 'gender',
+            });
+        } else {
+            baseColumns.push({
+                title: 'Email',
+                dataIndex: 'email',
+                key: 'email',
+            });
+        }
+
+        return baseColumns;
+    }, [isStudent]);
+
 
 
     const rowSelection = {
@@ -145,7 +89,6 @@ const AddMemberTableModal: React.FC<AddMemberTableModalProps> = ({
                 !selectedRows.some(r => r._id === record._id),
         }),
     };
-
 
     const handleOk = () => {
         if (selectedRows.length > 0) {
@@ -176,6 +119,7 @@ const AddMemberTableModal: React.FC<AddMemberTableModalProps> = ({
             width={600}
             okText="Thêm"
             cancelText="Hủy"
+            destroyOnClose
         >
             <Input.Search
                 placeholder="Tìm theo tên hoặc mã..."
@@ -191,6 +135,7 @@ const AddMemberTableModal: React.FC<AddMemberTableModalProps> = ({
                 dataSource={filteredData}
                 rowKey="_id"
                 pagination={{ pageSize: 5 }}
+                locale={{ emptyText: 'Không có dữ liệu' }}
             />
         </Modal>
     );

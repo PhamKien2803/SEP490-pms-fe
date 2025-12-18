@@ -226,6 +226,7 @@ function UpdateClass() {
             toast.success('Cập nhật lớp học thành công!');
             setIsDirty(false);
             // navigate(-1);
+            fetchData();
         } catch (error) {
             typeof error === "string" ? toast.info(error) : toast.error('Cập nhật lớp học thất bại.');
         } finally {
@@ -359,7 +360,7 @@ function UpdateClass() {
                                     filterOption={(input, option) => (String(option?.children) ?? '').toLowerCase().includes(input.toLowerCase())}
                                 >
                                     {availableRooms.map(room => {
-                                        return <Option key={room?._id} value={room._id}>{room?.roomName} (Sức chứa: {room.capacity})</Option>;
+                                        return <Option key={room?._id} value={room._id}>{room?.roomName}</Option>;
                                     })}
                                 </Select>
                             </Form.Item>
@@ -408,6 +409,7 @@ function UpdateClass() {
                 onOk={handleAddTeachers}
                 dataSource={allAvailableTeachers.filter(t => !teachers.some(existing => existing._id === t._id))}
                 selectionLimit={2 - teachers.length}
+                isStudent={false}
             />
 
             <AddMemberTableModal
@@ -416,6 +418,7 @@ function UpdateClass() {
                 onCancel={() => setIsStudentModalVisible(false)}
                 onOk={handleAddStudents}
                 dataSource={allAvailableStudents.filter(s => !students.some(existing => existing._id === s._id))}
+                isStudent={true}
             />
 
             <Modal

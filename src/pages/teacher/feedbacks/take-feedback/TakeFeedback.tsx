@@ -354,9 +354,9 @@ function TakeFeedback() {
                                 />
                                 <BankOutlined style={{ fontSize: 24, color: '#1890ff' }} />
                                 <Title level={3} style={{ margin: 0 }}>
-                                    {currentClass ? currentClass.className : 'Đang tải lớp...'}
+                                    {currentClass ? currentClass?.className : 'Đang tải lớp...'}
                                 </Title>
-                                <Tag color="green">{currentStudents.length} học sinh</Tag>
+                                <Tag color="green">{currentStudents?.length} học sinh</Tag>
                             </Space>
                         </Col>
                         <Col>
@@ -414,10 +414,10 @@ function TakeFeedback() {
                                         >
                                             <List.Item.Meta avatar={<Avatar
                                                 size={48}
-                                                src={student.imageStudent}
-                                                icon={!student.imageStudent && <UserOutlined />}
+                                                src={student?.imageStudent}
+                                                icon={!student?.imageStudent && <UserOutlined />}
                                                 style={{ backgroundColor: '#f0f0f0' }}
-                                            />} title={<Text strong>{student.fullName}</Text>} />
+                                            />} title={<Text strong>{student?.fullName} - {student?.nickname}</Text>} />
                                         </List.Item>
                                     );
                                 }}

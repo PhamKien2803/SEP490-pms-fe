@@ -35,6 +35,7 @@ export interface IStudentInfo {
   _id: string;
   studentCode: string;
   fullName: string;
+  nickname?: string;
   dob: string;
   gender: string;
   imageStudent: string;
