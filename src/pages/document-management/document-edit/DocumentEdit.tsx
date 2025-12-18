@@ -57,8 +57,10 @@ function DocumentEdit() {
                 ...res,
                 documentDate: dayjs(res.documentDate),
             });
-        } catch {
-            toast.error("Không thể tải dữ liệu chứng từ");
+        } catch (error) {
+            typeof error === "string"
+                ? toast.info(error)
+                : toast.error("Không thể tải dữ liệu chứng từ");
         } finally {
             setLoading(false);
         }
@@ -74,8 +76,10 @@ function DocumentEdit() {
         try {
             await documentsApis.updateDocument(id as string, payload);
             toast.success("Cập nhật thành công");
-        } catch {
-            toast.error("Cập nhật thất bại");
+        } catch (error) {
+            typeof error === "string"
+                ? toast.info(error)
+                : toast.error("Cập nhật thất bại");
         } finally {
             setLoading(false);
         }
@@ -87,8 +91,10 @@ function DocumentEdit() {
             await documentsApis.confirmDocument(id as string);
             toast.success("Đã xác nhận thanh toán");
             fetchDocument();
-        } catch {
-            toast.error("Xác nhận thất bại");
+        } catch (error) {
+            typeof error === "string"
+                ? toast.info(error)
+                : toast.error("Không thể xác nhận thanh toán");
         }
     };
 
