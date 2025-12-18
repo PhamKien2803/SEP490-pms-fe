@@ -168,7 +168,7 @@ const EnrollmentForm: React.FC = () => {
                                 onPaste={handlePasteName} prefix={<UserOutlined />} placeholder="Nguyễn Văn A" /></Form.Item></Col>
                         <Col xs={24} sm={12}>
                             <Form.Item
-                                name="nickName"
+                                name="nickname"
                                 label="Tên ở nhà"
                                 rules={[
                                     requiredTrimRule("tên ở nhà"),
