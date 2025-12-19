@@ -136,7 +136,13 @@ function EditFeedback() {
                             <Select options={EATING_OPTIONS} />
                         </Form.Item>
                         <Form.Item name={['sleeping', 'duration']} label="Thời gian ngủ">
-                            <AutoComplete options={SLEEP_DURATION_OPTIONS} />
+                            <Select
+                                placeholder="Chọn thời gian ngủ"
+                                allowClear
+                                options={SLEEP_DURATION_OPTIONS}
+                                showSearch
+                                optionFilterProp="label"
+                            />
                         </Form.Item>
                         <Form.Item name={['hygiene', 'toilet']} label="Đi vệ sinh">
                             <Select options={TOILET_OPTIONS} />

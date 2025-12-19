@@ -50,12 +50,20 @@ const INTERACTION_OPTIONS = toOptions(['xuất sắc', 'tốt', 'trung bình', '
 const EMOTION_OPTIONS = toOptions(['ổn định', 'thay đổi thất thường', 'lo lắng', 'buồn', 'vui vẻ', '']);
 const BEHAVIOR_OPTIONS = toOptions(['xuất sắc', 'tốt', 'trung bình', 'khó bảo', '']);
 
-const SLEEP_DURATION_OPTIONS = [
-    { value: '60 phút' },
-    { value: '90 phút' },
-    { value: '120 phút' },
-    { value: '150 phút' },
-];
+// const SLEEP_DURATION_OPTIONS = [
+//     { value: '60 phút' },
+//     { value: '90 phút' },
+//     { value: '120 phút' },
+//     { value: '150 phút' },
+// ];
+
+const SLEEP_DURATION_OPTIONS = Array.from({ length: 24 }, (_, i) => {
+    const minutes = 5 * (i + 1);
+    return {
+        label: `${minutes} phút`,
+        value: minutes,
+    };
+});
 
 const GOOD_FEEDBACK_TEMPLATE: Partial<IFeedbackBasePayload> = {
     eating: {
