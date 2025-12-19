@@ -25,6 +25,7 @@ import type { RevenueForReceiptItem } from "../../../types/receipts";
 import { toast } from "react-toastify";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 import { useCurrentUser } from "../../../hooks/useCurrentUser";
+import { requiredTrimRule } from "../../../utils/format";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -45,17 +46,20 @@ function ReceiptsCreate() {
                 schoolYearApis.getSchoolYearList({ page: 1, limit: 100 }),
                 receiptsApis.getRevenuesForReceipt(),
             ]);
-
-            setSchoolYears(resSchoolYears.data);
+            const activeYears = resSchoolYears.data.filter(y => y.state === "Đang hoạt động");
+            setSchoolYears(activeYears);
             setRevenues(resRevenues);
 
-            if (resSchoolYears.data.length > 0) {
-                form.setFieldsValue({ schoolYear: resSchoolYears.data[0]._id });
+            if (activeYears.length > 0) {
+                form.setFieldsValue({ schoolYear: activeYears[0]._id });
             }
         } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error("Không thể tải dữ liệu khởi tạo");
+            typeof error === "string"
+                ? toast.info(error)
+                : toast.error("Không thể tải dữ liệu khởi tạo");
         }
     };
+
 
     useEffect(() => {
         fetchInitialData();
@@ -152,7 +156,19 @@ function ReceiptsCreate() {
                         <Form.Item
                             label="Tên biên lai"
                             name="receiptName"
-                            rules={[{ required: true, message: "Vui lòng nhập tên biên lai" }]}
+                            rules={[requiredTrimRule("tên biên lai"),
+                            {
+                                validator: (_, value) => {
+                                    if (!value) return Promise.resolve();
+                                    if (/^\s|\s$/.test(value)) {
+                                        return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                    }
+                                    if (/\s{2,}/.test(value)) {
+                                        return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                    }
+                                    return Promise.resolve();
+                                },
+                            },]}
                         >
                             <Input placeholder="Nhập tên biên lai" />
                         </Form.Item>

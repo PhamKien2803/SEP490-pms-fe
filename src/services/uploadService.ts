@@ -75,89 +75,106 @@ interface ExcelUploadConfig<T> {
 
 const excelUploadHandler = <T extends { _id: string }>(
     options: Parameters<NonNullable<UploadProps['customRequest']>>[0],
-    config: ExcelUploadConfig<T>
+    config: ExcelUploadConfig<T> & { currentItems: T[] }
 ) => {
     const { file, onSuccess, onError } = options;
-    const { entityName, keyField, expectedHeaders, allItems, onAddItems, limitCheck } = config;
+    const {
+        entityName,
+        keyField,
+        expectedHeaders,
+        allItems,
+        currentItems,
+        onAddItems,
+        limitCheck
+    } = config;
 
-    readExcelFile(file as File).then(async (jsonData) => {
-        if (!jsonData || jsonData.length === 0) {
-            toast.warn(`File Excel không có dữ liệu.`);
-            return onError?.(new Error('Empty file'));
-        }
-        const actualHeaders = Object.keys(jsonData[0]);
-        if (!expectedHeaders.every(header => actualHeaders.includes(header))) {
-            toast.error(`File Excel sai định dạng. Cần có các cột: ${expectedHeaders.join(', ')}`);
-            return onError?.(new Error('Invalid format'));
-        }
-        const codesFromExcel = new Set(jsonData.map(row => row[keyField as string]).filter(Boolean));
-        if (codesFromExcel.size === 0) {
-            toast.warn(`File không chứa mã ${entityName} hợp lệ nào.`);
-            return onError?.(new Error(`No valid codes`));
-        }
-        const itemsToAdd = allItems.filter(item => codesFromExcel.has(item[keyField] as any));
-        const availableCodes = new Set(allItems.map(item => item[keyField]));
-        const invalidCodes = [...codesFromExcel].filter(code => !availableCodes.has(code as any));
-        if (invalidCodes.length > 0) {
-            toast.info(`${invalidCodes.length} ${entityName} không tồn tại và sẽ được bỏ qua.`);
-        }
-        if (itemsToAdd.length === 0) {
-            toast.warn(`Không tìm thấy ${entityName} hợp lệ nào trong hệ thống từ file này.`);
-            return onError?.(new Error(`No valid ${entityName}`));
-        }
-        if (limitCheck) {
-            const { valid, message } = limitCheck(itemsToAdd.length);
-            if (!valid) {
-                toast.warn(message);
-                return onError?.(new Error('Limit exceeded'));
+    const normalize = (v?: string) => v?.trim().toUpperCase();
+
+    readExcelFile(file as File)
+        .then(async (jsonData) => {
+            if (!jsonData || jsonData.length === 0) {
+                toast.warn(`File Excel không có dữ liệu.`);
+                return onError?.(new Error('Empty file'));
             }
-        }
-        onAddItems(itemsToAdd);
-        toast.success(`Đã thêm thành công ${itemsToAdd.length} ${entityName} từ file.`);
-        onSuccess?.(file);
-    }).catch((error) => {
-        toast.error('Lỗi khi đọc file Excel.');
-        onError?.(error);
-    });
+
+            const actualHeaders = Object.keys(jsonData[0]);
+            if (!expectedHeaders.every(h => actualHeaders.includes(h))) {
+                toast.error(
+                    `File Excel sai định dạng. Cần có các cột: ${expectedHeaders.join(', ')}`
+                );
+                return onError?.(new Error('Invalid format'));
+            }
+
+            const excelCodes = new Set(
+                jsonData
+                    .map(row => normalize(row[keyField as string]))
+                    .filter(Boolean)
+            );
+
+            if (excelCodes.size === 0) {
+                toast.warn(`File không chứa mã ${entityName} hợp lệ nào.`);
+                return onError?.(new Error('No valid codes'));
+            }
+
+            const systemMap = new Map(
+                allItems.map(item => [normalize(item[keyField] as any), item])
+            );
+
+            const currentCodeSet = new Set(
+                currentItems.map(item => normalize(item[keyField] as any))
+            );
+
+            const validItems: T[] = [];
+            const existedCodes: string[] = [];
+            const invalidCodes: string[] = [];
+
+            excelCodes.forEach(code => {
+                const systemItem = systemMap.get(code);
+
+                if (!systemItem) {
+                    if (typeof code === 'string') {
+                        invalidCodes.push(code);
+                    }
+                } else if (currentCodeSet.has(code)) {
+                    if (typeof code === 'string') {
+                        existedCodes.push(code); // đã có => KHÔNG thêm
+                    }
+                } else {
+                    validItems.push(systemItem); // mới => thêm
+                }
+            });
+
+            if (invalidCodes.length > 0) {
+                // toast.info(`${invalidCodes.length} ${entityName} không tồn tại và đã bị bỏ qua.`);
+                console.warn('Không tồn tại:', invalidCodes);
+            }
+
+            if (existedCodes.length > 0) {
+                toast.info(`${existedCodes.length} ${entityName} đã tồn tại trong lớp.`);
+            }
+
+            if (validItems.length === 0) {
+                toast.warn(`Không có ${entityName} mới nào để thêm.`);
+                return onError?.(new Error('Nothing to add'));
+            }
+
+            if (limitCheck) {
+                const { valid, message } = limitCheck(validItems.length);
+                if (!valid) {
+                    toast.warn(message);
+                    return onError?.(new Error('Limit exceeded'));
+                }
+            }
+            onAddItems(validItems);
+            toast.success(`Đã thêm ${validItems.length} ${entityName} mới từ file.`);
+            onSuccess?.(file);
+        })
+        .catch((err) => {
+            toast.error('Lỗi khi đọc file Excel.');
+            onError?.(err);
+        });
 };
 
-// export const handleStudentExcelUpload = async (
-//     options: Parameters<NonNullable<UploadProps['customRequest']>>[0],
-//     context: {
-//         classId: string;
-//         students: StudentInClass[];
-//         allAvailableStudents: StudentInClass[];
-//         handleAddStudents: (s: StudentInClass[]) => void;
-//     }
-// ) => {
-//     const { classId, students, allAvailableStudents, handleAddStudents } = context;
-//     try {
-//         const classDetails = await classApis.getClassById(classId);
-//         const classAge = parseInt(classDetails.age, 10);
-//         await excelUploadHandler(options, {
-//             entityName: 'học sinh',
-//             keyField: 'studentCode',
-//             expectedHeaders: ['studentCode', 'fullName', 'gender'],
-//             currentItems: students,
-//             allItems: allAvailableStudents,
-//             onAddItems: handleAddStudents,
-//             limitCheck: (itemsToAddCount: number) => {
-//                 const studentLimitKey = `CLASS_${classAge}` as keyof typeof MAXIMUM_CLASS;
-//                 const studentLimit = MAXIMUM_CLASS[studentLimitKey] || 999;
-//                 if (students.length + itemsToAddCount > studentLimit) {
-//                     return {
-//                         valid: false,
-//                         message: `Lớp ${classAge} tuổi chỉ có tối đa ${studentLimit} học sinh. Hiện tại đã có ${students.length}.`
-//                     };
-//                 }
-//                 return { valid: true };
-//             },
-//         });
-//     } catch (apiError) {
-//         toast.error('Không thể xác thực thông tin lớp học để upload.');
-//         options.onError?.(new Error('Failed to fetch class details'));
-//     }
-// };
 
 export const handleStudentExcelUpload = async (
     options: Parameters<NonNullable<UploadProps['customRequest']>>[0],
@@ -170,19 +187,21 @@ export const handleStudentExcelUpload = async (
     const { classId, students, handleAddStudents } = context;
 
     try {
-        // Lấy thông tin lớp để lấy tuổi
+        //Lấy thông tin lớp để xác định độ tuổi
         const classDetails = await classApis.getClassById(classId);
         const classAge = parseInt(classDetails.age, 10);
-
-        //Load lại danh sách học sinh theo độ tuổi
         const allAvailableStudents = await classApis.getAllAvailableStudents(classAge);
+        const normalizedAvailable = allAvailableStudents.map((s) => ({
+            ...s,
+            studentCode: s.studentCode?.trim().toUpperCase(),
+        }));
 
-        await excelUploadHandler(options, {
+        excelUploadHandler(options, {
             entityName: 'học sinh',
             keyField: 'studentCode',
             expectedHeaders: ['studentCode', 'fullName', 'gender'],
             currentItems: students,
-            allItems: allAvailableStudents,
+            allItems: normalizedAvailable,
             onAddItems: handleAddStudents,
             limitCheck: (itemsToAddCount: number) => {
                 const studentLimitKey = `CLASS_${classAge}` as keyof typeof MAXIMUM_CLASS;
@@ -202,6 +221,7 @@ export const handleStudentExcelUpload = async (
         options.onError?.(new Error('Failed to fetch class details or students'));
     }
 };
+
 
 
 export const handleTeacherExcelUpload = (

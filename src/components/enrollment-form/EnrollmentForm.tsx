@@ -254,7 +254,6 @@ const EnrollmentForm: React.FC = () => {
                                     {studentAge !== null && !dobError && (
                                         <Text type="secondary">→ {studentAge} tuổi</Text>
                                     )}
-                                    {/* {dobError && <Text type="danger">{dobError}</Text>} */}
                                 </Space>
                             </Form.Item>
                         </Col>
@@ -383,7 +382,7 @@ const EnrollmentForm: React.FC = () => {
                                             },
                                         ]}
                                     >
-                                        <DatePicker inputReadOnly style={{ width: "100%" }} format="DD/MM/YYYY" placeholder="Chọn ngày sinh" />
+                                        <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" placeholder="Chọn ngày sinh" />
                                     </Form.Item>
                                 </Col>
                             </>
@@ -459,7 +458,7 @@ const EnrollmentForm: React.FC = () => {
                                             },
                                         ]}
                                     >
-                                        <DatePicker inputReadOnly style={{ width: "100%" }} format="DD/MM/YYYY" placeholder="Chọn ngày sinh" />
+                                        <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" placeholder="Chọn ngày sinh" />
                                     </Form.Item>
                                 </Col>
                             </>

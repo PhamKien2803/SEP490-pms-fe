@@ -121,7 +121,7 @@ function UpdateClass() {
         setIsStudentModalVisible(false);
         if (uniqueNewStudents.length > 0) {
             setIsDirty(true);
-            toast.success(`Đã thêm ${uniqueNewStudents.length} học sinh.`);
+            // toast.success(`Đã thêm ${uniqueNewStudents.length} học sinh.`);
         }
     };
 
@@ -142,7 +142,7 @@ function UpdateClass() {
         setIsTeacherModalVisible(false);
         if (uniqueNewTeachers.length > 0) {
             setIsDirty(true);
-            toast.success(`Đã thêm ${uniqueNewTeachers.length} giáo viên.`);
+            // toast.success(`Đã thêm ${uniqueNewTeachers.length} giáo viên.`);
         }
     };
 

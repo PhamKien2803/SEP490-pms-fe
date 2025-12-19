@@ -43,7 +43,7 @@ function DocumentList() {
 
     const [documents, setDocuments] = useState<IDocumentItem[]>([]);
     const [schoolYears, setSchoolYears] = useState<SchoolYearListItem[]>([]);
-    const [schoolYear, setSchoolYear] = useState<string>("");
+    const [schoolYear, setSchoolYear] = useState<SchoolYearListItem | undefined>();
 
     const [searchKeyword, setSearchKeyword] = useState("");
     const [statusFilter, setStatusFilter] = useState("Tất cả");
@@ -56,20 +56,31 @@ function DocumentList() {
     const [loading, setLoading] = useState(false);
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [viewData, setViewData] = useState<IDocumentDetailResponse | undefined>();
-
     const fetchSchoolYears = async () => {
         try {
-            const res = await schoolYearApis.getSchoolYearList({ page: 1, limit: 100 });
-            const sorted = [...res.data].sort(
-                (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+            const res = await schoolYearApis.getSchoolYearList({
+                page: 1,
+                limit: 100,
+            });
+            const sorted: SchoolYearListItem[] = [...res.data].sort(
+                (a, b) =>
+                    new Date(b.startDate).getTime() -
+                    new Date(a.startDate).getTime()
             );
-            setSchoolYears(sorted);
 
-            const activeYear = sorted.find(y => y.state === "Đang hoạt động");
+            setSchoolYears(sorted);
+            // Ưu tiên năm học đang hoạt động
+            const activeYear = sorted.find(
+                (y) => y.state === "Đang hoạt động"
+            );
+
             if (activeYear) {
-                setSchoolYear(activeYear.schoolYear);
+                setSchoolYear(activeYear);
             } else if (sorted.length > 0) {
-                setSchoolYear(sorted[0].schoolYear);
+                // fallback: lấy năm mới nhất
+                setSchoolYear(sorted[0]);
+            } else {
+                setSchoolYear(undefined);
             }
         } catch (err) {
             typeof err === "string"
@@ -79,14 +90,15 @@ function DocumentList() {
     };
 
     const fetchDocuments = async () => {
-        if (!schoolYear) return;
+        if (!schoolYear?._id) return;
         setLoading(true);
         try {
             const res = await documentsApis.getDocumentList({
-                schoolYear,
+                schoolYear: schoolYear.schoolYear,
                 page: 1,
                 limit: 1000,
             });
+
             setDocuments(res.data || []);
         } catch (err) {
             typeof err === "string"
@@ -184,7 +196,7 @@ function DocumentList() {
             render: (_, record) => (
                 <Space>
                     <Button icon={<EyeOutlined />} onClick={() => handleView(record._id)} />
-                    {canUpdate && (
+                    {canUpdate && schoolYear?.state !== "Hết thời hạn" && (
                         <Button
                             icon={<EditOutlined />}
                             onClick={() =>
@@ -192,6 +204,7 @@ function DocumentList() {
                             }
                         />
                     )}
+
                     {canDelete && (
                         <Popconfirm
                             title="Bạn chắc chắn muốn xóa?"
@@ -212,7 +225,7 @@ function DocumentList() {
                     <Title level={3} style={{ margin: 0 }}>Quản lý chứng từ</Title>
                 </Col>
                 <Col>
-                    {canCreate && (
+                    {canCreate && schoolYear?.state !== "Hết thời hạn" && (
                         <Button
                             type="primary"
                             icon={<PlusOutlined />}
@@ -223,6 +236,7 @@ function DocumentList() {
                             Tạo chứng từ
                         </Button>
                     )}
+
                 </Col>
             </Row>
 
@@ -262,18 +276,21 @@ function DocumentList() {
 
                 <Col flex="220px">
                     <Select
-                        value={schoolYear}
-                        onChange={(val) => setSchoolYear(val)}
-                        style={{ width: "100%" }}
+                        value={schoolYear?._id}
+                        onChange={(id) => {
+                            const found = schoolYears.find(sy => sy._id === id);
+                            if (found) setSchoolYear(found);
+                        }}
                         placeholder="Chọn năm học"
+                        style={{ width: "100%" }}
                     >
                         {schoolYears.map(sy => (
-                            <Option key={sy._id} value={sy.schoolYear}>
+                            <Option key={sy._id} value={sy._id}>
                                 {sy.schoolYear}
-                                {sy.state === "Đang hoạt động" ? "" : ""}
                             </Option>
                         ))}
                     </Select>
+
                 </Col>
             </Row>
 

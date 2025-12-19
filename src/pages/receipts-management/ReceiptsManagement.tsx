@@ -176,7 +176,7 @@ function ReceiptsManagement() {
                             }
                         />
                     </Tooltip>
-                    {canUpdate && (
+                    {canUpdate && schoolYear?.state !== "Hết thời hạn" && (
                         <Tooltip title="Chỉnh sửa">
                             <Button
                                 type="link"
@@ -248,7 +248,7 @@ function ReceiptsManagement() {
                     <Button icon={<ReloadOutlined />} onClick={() => fetchReceipts()} loading={loading} />
                 </Tooltip>
 
-                {canCreate && (
+                {canCreate && schoolYear?.state !== "Hết thời hạn" && (
                     <Button
                         type="primary"
                         icon={<PlusOutlined />}
@@ -257,6 +257,7 @@ function ReceiptsManagement() {
                         Tạo biên lai
                     </Button>
                 )}
+
             </Space>
 
             <Table
