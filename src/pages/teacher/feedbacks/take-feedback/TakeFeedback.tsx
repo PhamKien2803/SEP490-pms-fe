@@ -219,9 +219,19 @@ function TakeFeedback() {
                         <Form.Item name={['eating', 'breakfast']} label="Bữa sáng">
                             <Select options={EATING_OPTIONS} placeholder="Chọn..." />
                         </Form.Item>
-                        <Form.Item name={['sleeping', 'duration']} label="Thời gian ngủ">
+                        {/* <Form.Item name={['sleeping', 'duration']} label="Thời gian ngủ">
                             <AutoComplete options={SLEEP_DURATION_OPTIONS} placeholder="VD: 120 phút" allowClear />
+                        </Form.Item> */}
+                        <Form.Item name={['sleeping', 'duration']} label="Thời gian ngủ">
+                            <Select
+                                placeholder="Chọn thời gian ngủ"
+                                allowClear
+                                options={SLEEP_DURATION_OPTIONS}
+                                showSearch
+                                optionFilterProp="label"
+                            />
                         </Form.Item>
+
                         <Form.Item name={['hygiene', 'toilet']} label="Đi vệ sinh">
                             <Select options={TOILET_OPTIONS} placeholder="Chọn..." />
                         </Form.Item>
