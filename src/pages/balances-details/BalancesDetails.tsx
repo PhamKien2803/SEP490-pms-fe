@@ -36,7 +36,7 @@ function BalancesDetails() {
             setFilterType("all");
             form.setFieldsValue({ type: "all" });
         } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error("Lỗi không hiện số dư")
+            typeof error === "string" ? toast.info("Hiện chưa có thông tin số dư") : toast.error("Lỗi không hiện số dư")
         } finally {
             setLoading(false);
         }
