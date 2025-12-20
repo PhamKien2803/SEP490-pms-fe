@@ -378,7 +378,7 @@ const MealEditor: React.FC<MealEditorProps> = ({
     onWeightChange,
   }) => (
     <Col span={span}>
-      <Tooltip title={label}>
+      <Tooltip title={label} getPopupContainer={(triggerNode) => triggerNode.parentElement || document.body}>
         <Form.Item
           key={`nutrient-item-${foodField.fieldKey as number}-${name}`}
           name={[foodField.name, name]}
@@ -393,7 +393,8 @@ const MealEditor: React.FC<MealEditorProps> = ({
               color: name !== "weight" ? color : "inherit",
               padding: name !== "weight" ? "4px 7px" : undefined,
             }}
-            readOnly={name !== "weight"}
+            // readOnly={name !== "weight"}
+            readOnly={true}
             controls={false}
             placeholder={name !== "weight" ? "0" : "Nhập"}
             addonAfter={unit}
@@ -617,7 +618,6 @@ const MealEditor: React.FC<MealEditorProps> = ({
                                 color="#1890ff"
                                 foodField={foodField}
                                 span={4}
-                                readOnly={false}
                                 onWeightChange={(value) =>
                                   handleWeightChange(
                                     value,
@@ -959,6 +959,7 @@ const EditMenu: React.FC = () => {
 
       await menuApis.editMenu(id, payload);
       toast.success("Cập nhật thực đơn tuần thành công!");
+      setIsEditing(false);
       // navigate(`${constants.APP_PREFIX}/menus`);
     } catch (error: any) {
       const errorMessage =
