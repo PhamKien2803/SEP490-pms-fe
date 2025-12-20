@@ -36,7 +36,7 @@ import {
   UpdateFoodParams,
 } from "../../../types/food-management";
 import { foodApis } from "../../../services/apiServices";
-import { noSpecialCharactersandNumberRule } from "../../../utils/format";
+import { noSpecialCharactersandNumberRule, requiredTrimRule } from "../../../utils/format";
 import CaloAICalculating from "../../../components/CaloAl/CaloAICalculating";
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -90,17 +90,17 @@ const UpdateFoodPage: React.FC = () => {
       const total = ingredients.reduce(
         (acc, current, index) => {
           if (
-            !current.name ||
-            current.gram === undefined ||
-            current.gram === null
+            !current?.name ||
+            current?.gram === undefined ||
+            current?.gram === null
           )
             return acc;
 
           const calculated = current;
-          acc.calories += calculated.calories;
-          acc.protein += calculated.protein;
-          acc.lipid += calculated.lipid;
-          acc.carb += calculated.carb;
+          acc.calories += calculated?.calories;
+          acc.protein += calculated?.protein;
+          acc.lipid += calculated?.lipid;
+          acc.carb += calculated?.carb;
 
           const currentIngredients = form.getFieldValue("ingredients");
           if (currentIngredients && currentIngredients[index]) {
@@ -116,10 +116,10 @@ const UpdateFoodPage: React.FC = () => {
         { calories: 0, protein: 0, lipid: 0, carb: 0 }
       );
 
-      setCurrentTotalCalories(total.calories);
-      setCurrentTotalProtein(total.protein);
-      setCurrentTotalLipid(total.lipid);
-      setCurrentTotalCarb(total.carb);
+      setCurrentTotalCalories(total?.calories);
+      setCurrentTotalProtein(total?.protein);
+      setCurrentTotalLipid(total?.lipid);
+      setCurrentTotalCarb(total?.carb);
       return total;
     },
     [form]
@@ -200,18 +200,18 @@ const UpdateFoodPage: React.FC = () => {
     const totalNutrients = calculateAndSetTotalNutrients(updatedIngredients);
 
     const apiBody: UpdateFoodParams = {
-      foodName: values.foodName,
-      ageGroup: values.ageGroup,
-      active: values.active,
-      totalCalories: totalNutrients.calories,
+      foodName: values?.foodName,
+      ageGroup: values?.ageGroup,
+      active: values?.active,
+      totalCalories: totalNutrients?.calories,
       ingredients: updatedIngredients.map((ing: Ingredient) => ({
-        name: ing.name,
-        gram: ing.gram,
-        unit: ing.unit,
-        calories: ing.calories || 0,
-        protein: ing.protein || 0,
-        lipid: ing.lipid || 0,
-        carb: ing.carb || 0,
+        name: ing?.name,
+        gram: ing?.gram,
+        unit: ing?.unit,
+        calories: ing?.calories || 0,
+        protein: ing?.protein || 0,
+        lipid: ing?.lipid || 0,
+        carb: ing?.carb || 0,
       })),
       createdBy: foodDetail?.createdBy || "",
     };
@@ -269,15 +269,18 @@ const UpdateFoodPage: React.FC = () => {
     <div style={{ padding: "24px" }}>
       <Title level={3} style={{ margin: 0, marginBottom: 20 }}>
         <ArrowLeftOutlined
+          // onClick={() =>
+          //   navigate(`${constants.APP_PREFIX}/foods/view/${id}`, {
+          //     state: { foodDetail },
+          //   })
+          // }
           onClick={() =>
-            navigate(`${constants.APP_PREFIX}/foods/view/${id}`, {
-              state: { foodDetail },
-            })
+            navigate(-1)
           }
           style={{ marginRight: 16, cursor: "pointer" }}
         />
         <EditOutlined style={{ marginRight: 8 }} />
-        Chỉnh Sửa Món Ăn: {foodDetail.foodName}
+        Chỉnh Sửa Món Ăn: {foodDetail?.foodName}
       </Title>
 
       <Card
@@ -298,10 +301,10 @@ const UpdateFoodPage: React.FC = () => {
           onFinish={onFinish}
           onValuesChange={onFormValuesChange}
           initialValues={{
-            foodName: foodDetail.foodName,
-            ageGroup: foodDetail.ageGroup,
-            active: foodDetail.active,
-            ingredients: foodDetail.ingredients,
+            foodName: foodDetail?.foodName,
+            ageGroup: foodDetail?.ageGroup,
+            active: foodDetail?.active,
+            ingredients: foodDetail?.ingredients,
           }}
         >
           <Row gutter={24}>
@@ -309,9 +312,18 @@ const UpdateFoodPage: React.FC = () => {
               <Form.Item
                 name="foodName"
                 label={<Text strong>Tên Món Ăn</Text>}
-                rules={[
-                  { required: true, message: "Vui lòng nhập tên món ăn!" }, noSpecialCharactersandNumberRule
-                ]}
+                rules={[requiredTrimRule("tên món ăn"), noSpecialCharactersandNumberRule, {
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve();
+                    if (/^\s|\s$/.test(value)) {
+                      return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                    }
+                    if (/\s{2,}/.test(value)) {
+                      return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                    }
+                    return Promise.resolve();
+                  },
+                }]}
               >
                 <Input
                   prefix={<TagOutlined />}
@@ -435,12 +447,18 @@ const UpdateFoodPage: React.FC = () => {
                             name={[name, "name"]}
                             fieldKey={[name, "name"]}
                             label={<Text strong>Tên nguyên liệu</Text>}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Vui lòng nhập tên NL",
-                              }, noSpecialCharactersandNumberRule
-                            ]}
+                            rules={[requiredTrimRule("tên nguyên liệu"), noSpecialCharactersandNumberRule, {
+                              validator: (_, value) => {
+                                if (!value) return Promise.resolve();
+                                if (/^\s|\s$/.test(value)) {
+                                  return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                }
+                                if (/\s{2,}/.test(value)) {
+                                  return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                }
+                                return Promise.resolve();
+                              },
+                            }]}
                           >
                             <Input placeholder="Tên nguyên liệu" />
                           </Form.Item>

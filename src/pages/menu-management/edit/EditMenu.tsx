@@ -751,6 +751,7 @@ const EditMenu: React.FC = () => {
   const safeValue = (val: any) => Math.max(0, val || 0);
 
   const hydrateFormData = (menu: MenuDetail) => {
+    if (!menu) return;
     const startDayjs = dayjs(menu.weekStart);
     const endDayjs = dayjs(menu.weekEnd);
 
@@ -1015,7 +1016,6 @@ const EditMenu: React.FC = () => {
     isEditing,
   ]);
 
-  // const isPending = menuStatus === "Dự thảo";
 
   if (initialLoading) {
     return (
@@ -1023,8 +1023,8 @@ const EditMenu: React.FC = () => {
         <Card
           title={
             <Title level={3} style={{ margin: 0, padding: "10px 0" }}>
-              <EditOutlined style={{ marginRight: 8 }} /> **Đang tải Thực
-              đơn...**
+              <EditOutlined style={{ marginRight: 8 }} /> Đang tải Thực
+              đơn...
             </Title>
           }
           bordered={false}
@@ -1105,7 +1105,7 @@ const EditMenu: React.FC = () => {
               <Form.Item
                 label={
                   <Space>
-                    <CalendarOutlined /> **Tuần Áp Dụng**
+                    <CalendarOutlined /> Tuần Áp Dụng
                   </Space>
                 }
                 name="dateRange"
@@ -1130,7 +1130,7 @@ const EditMenu: React.FC = () => {
               <Form.Item
                 label={
                   <Space>
-                    <UsergroupAddOutlined /> **Nhóm Tuổi**
+                    <UsergroupAddOutlined /> Nhóm Tuổi
                   </Space>
                 }
                 name="ageGroup"
@@ -1196,7 +1196,7 @@ const EditMenu: React.FC = () => {
                   }}
                 >
                   <p style={{ color: "#8c8c8c", margin: 0 }}>
-                    Vui lòng **chọn Tuần Áp Dụng** để bắt đầu nhập thực đơn chi
+                    Vui lòng chọn Tuần Áp Dụng để bắt đầu nhập thực đơn chi
                     tiết cho 7 ngày.
                   </p>
                 </div>
@@ -1236,32 +1236,6 @@ const EditMenu: React.FC = () => {
                 </Space>
               ) : (
                 <Space size="middle">
-                  {/* {isPending && (
-                    <>
-                      <Button
-                        danger
-                        icon={<CloseCircleOutlined />}
-                        onClick={() => setIsRejectModalVisible(true)}
-                      >
-                        Từ chối
-                      </Button>
-                      <Popconfirm
-                        title="Xác nhận duyệt đơn?"
-                        description="Hành động này sẽ duyệt đơn đăng ký. Bạn chắc chắn chứ?"
-                        onConfirm={handleApprove}
-                        okText="Đồng ý"
-                        cancelText="Không"
-                      >
-                        <Button
-                          type="primary"
-                          icon={<CheckCircleOutlined />}
-                          loading={loading}
-                        >
-                          Duyệt thực đơn
-                        </Button>
-                      </Popconfirm>
-                    </>
-                  )} */}
                   {isDraft && (
                     <>
                       <Button

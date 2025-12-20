@@ -415,9 +415,9 @@ const MenuManagement: React.FC = () => {
           onChange={handleTableChange}
           size="small"
           pagination={{
-            current: pagination.page,
-            pageSize: pagination.limit,
-            total: pagination.total,
+            current: pagination?.page,
+            pageSize: pagination?.limit,
+            total: pagination?.total,
             pageSizeOptions: ["10", "20", "50"],
             showSizeChanger: true,
             showTotal: (total, range) =>

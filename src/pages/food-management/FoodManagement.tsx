@@ -25,6 +25,7 @@ import {
     ReloadOutlined,
 } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import ModalConfirm from "../../modal/common/ModalConfirm/ModalConfirm";
@@ -34,6 +35,8 @@ import { foodApis } from "../../services/apiServices";
 import type { ColumnsType } from "antd/es/table";
 import { FoodListParams, FoodListResponse, FoodRecord } from "../../types/food-management";
 import { usePageTitle } from "../../hooks/usePageTitle";
+
+dayjs.extend(isBetween);
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -46,12 +49,6 @@ const usePagePermission = () => ({
     canDelete: true,
 });
 
-interface Pagination {
-    page: number;
-    limit: number;
-    total: number;
-}
-
 const AGE_GROUPS = [
     { value: "2", label: "1-3 tuổi" },
     { value: "3", label: "4-5 tuổi" }
@@ -60,26 +57,18 @@ const AGE_GROUPS = [
 const FoodManagement: React.FC = () => {
     usePageTitle('Món ăn tuần - Cá Heo Xanh');
     const navigate = useNavigate();
-    const defaultDateRange = useMemo<[Dayjs, Dayjs]>(() => {
-        const now = dayjs();
-        const oneYearAgo = now.subtract(1, "year");
-        return [oneYearAgo, now];
-    }, []);
 
-    const [foodList, setFoodList] = useState<FoodRecord[]>([]);
-    const [pagination, setPagination] = useState<Pagination>({
+    const [allFoodList, setAllFoodList] = useState<FoodRecord[]>([]);
+
+    const [pagination, setPagination] = useState({
         page: 1,
         limit: 20,
-        total: 0,
     });
 
-    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-
+    const [_, setSelectedRowKeys] = useState<React.Key[]>([]);
     const [selectedAgeGroup, setSelectedAgeGroup] = useState<string>("");
     const [searchKeyword, setSearchKeyword] = useState<string>("");
-    const [selectedDateRange, setSelectedDateRange] = useState<
-        [Dayjs, Dayjs] | null
-    >(defaultDateRange);
+    const [selectedDateRange, setSelectedDateRange] = useState<[Dayjs, Dayjs] | null>(null);
 
     const [loading, setLoading] = useState<boolean>(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -90,99 +79,92 @@ const FoodManagement: React.FC = () => {
 
     const { canCreate, canUpdate, canDelete } = usePagePermission();
 
+    // Ngăn người dùng rời trang khi đang kích hoạt AI
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (isAITriggering) {
+                e.preventDefault();
+                e.returnValue = "";
+            }
+        };
+
+        if (isAITriggering) {
+            window.addEventListener("beforeunload", handleBeforeUnload);
+        }
+
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [isAITriggering]);
+
+    const fetchAllFoods = useCallback(async () => {
+        setLoading(true);
+        try {
+            //set limit lớn nhất để filter
+            const apiParams: FoodListParams = {
+                page: 1,
+                limit: 1000,
+                active: true,
+            } as unknown as FoodListParams;
+
+            const response: FoodListResponse = await foodApis.getListFood(apiParams);
+            const mappedData = response?.data || [];
+            setAllFoodList(mappedData);
+        } catch (error) {
+            typeof error === "string" ? toast.info(error) : toast.error("Tải danh sách món ăn thất bại.");
+            setAllFoodList([]);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchAllFoods();
+    }, [fetchAllFoods]);
+
     const handleTriggerAICalculation = async () => {
         setIsAITriggering(true);
         try {
             const response = await foodApis.triggerAICalculation();
-
             toast.success(response.message || "Kích hoạt tính toán Calo AI thành công!");
-
-            fetchFoodList(
-                pagination.page,
-                pagination.limit,
-                selectedAgeGroup,
-                searchKeyword,
-                selectedDateRange
-            );
+            await fetchAllFoods();
         } catch (error: any) {
-            typeof error === "string" ? toast.info(error) : toast.error("Kích hoạt tính toán thất bại. Vui lòng thử lại.");
+            typeof error === "string" ? toast.info(error) : toast.error("Kích hoạt tính toán thất bại.");
         } finally {
             setIsAITriggering(false);
         }
     };
 
-    const fetchFoodList = useCallback(
-        async (
-            page: number,
-            limit: number,
-            ageGroup: string,
-            keyword: string,
-            dateRange: [Dayjs, Dayjs] | null
-        ) => {
-            setLoading(true);
+    const processedData = useMemo(() => {
+        let data = [...allFoodList];
 
-            const weekStart = dateRange ? dateRange[0].format("YYYY-MM-DD") : "";
-            const weekEnd = dateRange ? dateRange[1].format("YYYY-MM-DD") : "";
+        if (searchKeyword.trim()) {
+            const lowerKeyword = searchKeyword.trim().toLowerCase();
+            data = data.filter(item =>
+                item.foodName?.toLowerCase().includes(lowerKeyword)
+            );
+        }
 
-            const params = {
-                page,
-                limit,
-                ageGroup: ageGroup || undefined,
-                weekStart: weekStart,
-                weekEnd: weekEnd,
-                keyword: keyword || undefined,
-                active: true,
-            };
+        if (selectedAgeGroup) {
+            data = data.filter(item => String(item.ageGroup) === selectedAgeGroup);
+        }
 
-            const apiParams: FoodListParams = {
-                page: params.page,
-                limit: params.limit,
-                ageGroup: params.ageGroup,
-                weekStart: params.weekStart,
-                weekEnd: params.weekEnd,
-                keyword: params.keyword,
-                active: params.active,
-            } as FoodListParams;
+        if (selectedDateRange) {
+            const [start, end] = selectedDateRange;
+            data = data.filter(item => {
+                const created = dayjs(item.createdAt);
+                return created.isBetween(start, end, 'day', '[]');
+            });
+        }
 
-            try {
-                const response: FoodListResponse = await foodApis.getListFood(apiParams);
+        return data;
+    }, [allFoodList, searchKeyword, selectedAgeGroup, selectedDateRange]);
 
-                const mappedData = response?.data || [];
-                setFoodList(mappedData);
-
-                setPagination((prev) => ({
-                    page: response?.page?.page || prev.page,
-                    limit: response?.page?.limit || prev.limit,
-                    total: response?.page?.totalCount || 0,
-                }));
-            } catch (error) {
-                // console.error("Lỗi tải danh sách món ăn:", error);
-                typeof error === "string" ? toast.info(error) : toast.error("Tải danh sách món ăn thất bại. Vui lòng thử lại.");
-                setFoodList([]);
-                setPagination((prev) => ({ ...prev, total: 0 }));
-            } finally {
-                setLoading(false);
-            }
-        },
-        []
-    );
-
-    useEffect(() => {
-        fetchFoodList(
-            pagination.page,
-            pagination.limit,
-            selectedAgeGroup,
-            searchKeyword,
-            selectedDateRange
-        );
-    }, [
-        fetchFoodList,
-        selectedAgeGroup,
-        searchKeyword,
-        selectedDateRange,
-        pagination.page,
-        pagination.limit,
-    ]);
+    const paginatedData = useMemo(() => {
+        const startIndex = (pagination.page - 1) * pagination.limit;
+        const endIndex = startIndex + pagination.limit;
+        return processedData.slice(startIndex, endIndex);
+    }, [processedData, pagination.page, pagination.limit]);
 
     const handlePaginationChange = (newPagination: any) => {
         setPagination((prev) => ({
@@ -194,15 +176,12 @@ const FoodManagement: React.FC = () => {
 
     const handleAgeGroupChange = (value: string) => {
         setSelectedAgeGroup(value);
-        setPagination((prev) => ({ ...prev, page: 1 }));
-        setSelectedRowKeys([]);
+        setPagination(prev => ({ ...prev, page: 1 }));
     };
 
-    const handleDateRangeChange = (
-        dates: [Dayjs | null, Dayjs | null] | null
-    ) => {
+    const handleDateRangeChange = (dates: [Dayjs | null, Dayjs | null] | null) => {
         setSelectedDateRange(dates as [Dayjs, Dayjs] | null);
-        setPagination((prev) => ({ ...prev, page: 1 }));
+        setPagination(prev => ({ ...prev, page: 1 }));
     };
 
     const handleDeleteFood = (foodId: string) => {
@@ -216,33 +195,19 @@ const FoodManagement: React.FC = () => {
         try {
             await foodApis.deleteFood(deletingId);
             toast.success("Xóa món ăn thành công!");
+
+            // Xóa trực tiếp khỏi state để không cần gọi lại API fetchAll
+            setAllFoodList(prev => prev.filter(item => item._id !== deletingId));
+            setSelectedRowKeys(prev => prev.filter(key => key !== deletingId));
+
             setIsDeleteModalOpen(false);
             setDeletingId(null);
-
-            setFoodList((prev) => prev.filter((item) => item._id !== deletingId));
-            setSelectedRowKeys((prev) => prev.filter((key) => key !== deletingId));
-
-            // Nếu đang ở trang cuối và chỉ còn 1 item, giảm trang hiện tại
-            if (foodList.length === 1 && pagination.page > 1) {
-                setPagination((prev) => ({
-                    ...prev,
-                    page: prev.page - 1,
-                    total: prev.total - 1,
-                }));
-            } else {
-                setPagination((prev) => ({
-                    ...prev,
-                    total: prev.total - 1,
-                }));
-            }
-
         } catch (error) {
-            typeof error === "string" ? toast.info(error) : toast.error("Xóa món ăn thất bại. Vui lòng thử lại.");
+            typeof error === "string" ? toast.info(error) : toast.error("Xóa món ăn thất bại.");
         } finally {
             setIsDeleting(false);
         }
     };
-
 
     const navigateToCreate = () => {
         navigate(`${constants.APP_PREFIX}/foods/create`);
@@ -369,16 +334,6 @@ const FoodManagement: React.FC = () => {
         },
     ];
 
-
-    const filteredFoods = useMemo(() => {
-        const keyword = searchKeyword.trim().toLowerCase();
-        if (!keyword) return foodList;
-        return foodList.filter(
-            (item) =>
-                item.foodName?.toLowerCase().includes(keyword)
-        );
-    }, [foodList, searchKeyword]);
-
     const cardHeader = useMemo(
         () => (
             <Row justify="space-between" align="middle" gutter={[16, 16]}>
@@ -388,7 +343,6 @@ const FoodManagement: React.FC = () => {
                     </Title>
                 </Col>
 
-                {/* Nút Kích hoạt Tính Calo AI chung (Dùng API GET không tham số) */}
                 <Col xs={24} lg={12} style={{ textAlign: 'right' }}>
                     <Button
                         type="primary"
@@ -425,7 +379,10 @@ const FoodManagement: React.FC = () => {
                                     placeholder="Tìm món ăn..."
                                     style={{ width: 250 }}
                                     value={searchKeyword}
-                                    onChange={(e) => setSearchKeyword(e.target.value)}
+                                    onChange={(e) => {
+                                        setSearchKeyword(e.target.value);
+                                        setPagination(prev => ({ ...prev, page: 1 }));
+                                    }}
                                     allowClear
                                 />
                                 <RangePicker
@@ -443,18 +400,11 @@ const FoodManagement: React.FC = () => {
                             <Space wrap size="middle">
                                 <Button
                                     icon={<ReloadOutlined />}
-                                    onClick={() =>
-                                        fetchFoodList(
-                                            pagination.page,
-                                            pagination.limit,
-                                            selectedAgeGroup,
-                                            searchKeyword,
-                                            selectedDateRange
-                                        )
-                                    }
+                                    onClick={fetchAllFoods}
                                     loading={loading}
+                                    disabled={isAITriggering}
                                 >
-                                    Làm mới
+                                    Làm mới Dữ liệu
                                 </Button>
 
                                 {canCreate && (
@@ -470,7 +420,6 @@ const FoodManagement: React.FC = () => {
                                 )}
                             </Space>
                         </Col>
-
                     </Row>
                 </Col>
             </Row>
@@ -481,12 +430,9 @@ const FoodManagement: React.FC = () => {
             canCreate,
             loading,
             navigateToCreate,
-            handleAgeGroupChange,
-            handleDateRangeChange,
             searchKeyword,
             isAITriggering,
-            handleTriggerAICalculation,
-            selectedRowKeys.length
+            fetchAllFoods
         ]
     );
 
@@ -501,7 +447,7 @@ const FoodManagement: React.FC = () => {
             >
                 <Table
                     columns={columns}
-                    dataSource={filteredFoods}
+                    dataSource={paginatedData}
                     rowKey="_id"
                     loading={loading}
                     onChange={handlePaginationChange}
@@ -509,8 +455,8 @@ const FoodManagement: React.FC = () => {
                     pagination={{
                         current: pagination.page,
                         pageSize: pagination.limit,
-                        total: pagination.total,
-                        pageSizeOptions: ["10", "20", "50"],
+                        total: processedData.length,
+                        pageSizeOptions: ["10", "20", "50", "100"],
                         showSizeChanger: true,
                         showTotal: (total, range) =>
                             `${range[0]}-${range[1]} của ${total} mục`,

@@ -35,7 +35,7 @@ import {
   IngredientParam,
   AICalculateResponse,
 } from "../../../types/food-management";
-import { noSpecialCharactersandNumberRule } from "../../../utils/format";
+import { noSpecialCharactersandNumberRule, requiredTrimRule } from "../../../utils/format";
 import { useCurrentUser } from "../../../hooks/useCurrentUser";
 import CaloAICalculating from "../../../components/CaloAl/CaloAICalculating";
 
@@ -91,13 +91,13 @@ const CreateFoodPage: React.FC = () => {
         totalLipid: totalLipid,
         totalCarb: totalCarb,
         ingredients: food.ingredients.map((ing) => ({
-          name: ing.name,
-          gram: ing.gram,
-          unit: ing.unit,
-          calories: ing.calories || 0,
-          protein: ing.protein || 0,
-          lipid: ing.lipid || 0,
-          carb: ing.carb || 0,
+          name: ing?.name,
+          gram: ing?.gram,
+          unit: ing?.unit,
+          calories: ing?.calories || 0,
+          protein: ing?.protein || 0,
+          lipid: ing?.lipid || 0,
+          carb: ing?.carb || 0,
         })),
       });
     },
@@ -133,7 +133,6 @@ const CreateFoodPage: React.FC = () => {
       toast.success(response.message || `Tính Calo AI thành công!`);
       return updatedFood;
     } catch (error: any) {
-      console.error("Lỗi Tính Calo AI:", error);
       const errorMessage =
         error ||
         "Tính Calo AI thất bại. Vui lòng kiểm tra API hoặc tên nguyên liệu.";
@@ -143,6 +142,23 @@ const CreateFoodPage: React.FC = () => {
       setIsAILoading(false);
     }
   }, [createdFood?._id]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (isAILoading) {
+        const message = "Quá trình tính toán AI đang diễn ra. Bạn chắc chắn muốn rời khỏi trang?";
+        event.returnValue = message;
+        return message;
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    // Cleanup khi component bị unmount
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isAILoading]);
 
   const handleCreateFood = async (values: any) => {
     if (hasFoodId) {
@@ -161,18 +177,18 @@ const CreateFoodPage: React.FC = () => {
     const cleanedIngredients: IngredientParam[] = values.ingredients
       .filter(
         (item: any) =>
-          item.name &&
-          item.name.trim() !== "" &&
-          item.gram !== undefined &&
-          item.gram !== null &&
-          item.gram > 0 &&
-          item.unit &&
-          item.unit.trim() !== ""
+          item?.name &&
+          item?.name.trim() !== "" &&
+          item?.gram !== undefined &&
+          item?.gram !== null &&
+          item?.gram > 0 &&
+          item?.unit &&
+          item?.unit.trim() !== ""
       )
       .map((item: any) => ({
-        name: item.name,
-        gram: item.gram,
-        unit: item.unit,
+        name: item?.name,
+        gram: item?.gram,
+        unit: item?.unit,
       })) as IngredientParam[];
 
     if (cleanedIngredients.length === 0) {
@@ -368,9 +384,18 @@ const CreateFoodPage: React.FC = () => {
               <Form.Item
                 label="Tên Món Ăn"
                 name="foodName"
-                rules={[
-                  { required: true, message: "Vui lòng nhập tên món ăn" }, noSpecialCharactersandNumberRule
-                ]}
+                rules={[requiredTrimRule("tên món ăn"), noSpecialCharactersandNumberRule, {
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve();
+                    if (/^\s|\s$/.test(value)) {
+                      return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                    }
+                    if (/\s{2,}/.test(value)) {
+                      return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                    }
+                    return Promise.resolve();
+                  },
+                }]}
               >
                 <Input
                   placeholder="Ví dụ: Canh Bí Đỏ Trứng"
@@ -476,7 +501,18 @@ const CreateFoodPage: React.FC = () => {
                               {...field}
                               label="Tên nguyên liệu"
                               name={[field.name, "name"]}
-                              rules={[{ required: true, message: "Tên" }, noSpecialCharactersandNumberRule]}
+                              rules={[requiredTrimRule("tên nguyên liệu"), noSpecialCharactersandNumberRule, {
+                                validator: (_, value) => {
+                                  if (!value) return Promise.resolve();
+                                  if (/^\s|\s$/.test(value)) {
+                                    return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                  }
+                                  if (/\s{2,}/.test(value)) {
+                                    return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                  }
+                                  return Promise.resolve();
+                                },
+                              }]}
                             >
                               <Input placeholder="Tên nguyên liệu" />
                             </Form.Item>
@@ -545,7 +581,7 @@ const CreateFoodPage: React.FC = () => {
                                   Calo (kcal)
                                 </span>
                               }
-                              name={[field.name, "calories"]}
+                              name={[field?.name, "calories"]}
                             >
                               <InputNumber
                                 readOnly
@@ -574,7 +610,7 @@ const CreateFoodPage: React.FC = () => {
                             <Form.Item
                               {...field}
                               label="Protein (g)"
-                              name={[field.name, "protein"]}
+                              name={[field?.name, "protein"]}
                             >
                               <InputNumber
                                 placeholder="0.00"
@@ -591,7 +627,7 @@ const CreateFoodPage: React.FC = () => {
                             <Form.Item
                               {...field}
                               label="Lipid (g)"
-                              name={[field.name, "lipid"]}
+                              name={[field?.name, "lipid"]}
                             >
                               <InputNumber
                                 readOnly
@@ -609,7 +645,7 @@ const CreateFoodPage: React.FC = () => {
                             <Form.Item
                               {...field}
                               label="Carb (g)"
-                              name={[field.name, "carb"]}
+                              name={[field?.name, "carb"]}
                             >
                               <InputNumber
                                 placeholder="0.00"
