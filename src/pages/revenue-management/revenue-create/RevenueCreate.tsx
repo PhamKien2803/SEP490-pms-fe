@@ -19,6 +19,7 @@ import { CreateRevenuePayload } from "../../../types/revenues";
 import { revenuesApis } from "../../../services/apiServices";
 import { useCurrentUser } from '../../../hooks/useCurrentUser';
 import { usePageTitle } from '../../../hooks/usePageTitle';
+import { requiredTrimRule } from "../../../utils/format";
 
 const { Title } = Typography;
 
@@ -124,9 +125,18 @@ const RevenueCreate: React.FC = () => {
                             <Form.Item
                                 label="Tên khoản thu"
                                 name="revenueName"
-                                rules={[
-                                    { required: true, message: "Vui lòng nhập tên khoản thu" },
-                                ]}
+                                rules={[requiredTrimRule("tên khoản thu"), {
+                                    validator: (_, value) => {
+                                        if (!value) return Promise.resolve();
+                                        if (/^\s|\s$/.test(value)) {
+                                            return Promise.reject(new Error("Không được để khoảng trắng ở đầu hoặc cuối!"));
+                                        }
+                                        if (/\s{2,}/.test(value)) {
+                                            return Promise.reject(new Error("Không được có nhiều khoảng trắng liên tiếp!"));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                }]}
                             >
                                 <Input placeholder="VD: Học phí tháng 11" />
                             </Form.Item>
