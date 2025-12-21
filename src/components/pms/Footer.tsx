@@ -83,9 +83,9 @@ export default function Footer() {
                     {/* --- Cột 3: Thông tin liên hệ --- */}
                     <Col xs={24} sm={12} lg={6}>
                         <Title level={5} style={styles.title}>Liên hệ</Title>
-                        <Text style={{ ...styles.text, display: 'block', marginBottom: '8px' }}><b>Địa chỉ:</b> 123 Đường Nguyễn Trãi, Thanh Xuân, Hà Nội</Text>
+                        <Text style={{ ...styles.text, display: 'block', marginBottom: '8px' }}><b>Địa chỉ:</b> Số 34A TT5 Khu Đô Thị Văn Quán, Hà Đông, Hà Nội</Text>
                         <Text style={{ ...styles.text, display: 'block', marginBottom: '8px' }}><b>Hotline:</b> 0987 654 321</Text>
-                        <Text style={{ ...styles.text, display: 'block', marginBottom: '8px' }}><b>Email:</b> lienhe@dolphinpreschool.edu.vn</Text>
+                        <Text style={{ ...styles.text, display: 'block', marginBottom: '8px' }}><b>Email:</b> info.littledolphins.preschool@gmail.com</Text>
                     </Col>
 
                     {/* --- Cột 4: Đăng ký nhận tin --- */}

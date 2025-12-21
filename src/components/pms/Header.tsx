@@ -32,7 +32,7 @@ export const Header = () => {
             setCurrent('home');
         } else if (path.startsWith('/enrollment')) {
             setCurrent('enrollment');
-        } else if (path.startsWith('/news')) {
+        } else if (path.startsWith('/')) {
             setCurrent('news');
         } else {
             setCurrent(''); // Không chọn item nào nếu không khớp
@@ -54,7 +54,7 @@ export const Header = () => {
     const menuItems = [
         { key: 'home', label: 'Trang chủ', onClick: () => navigate('/') },
         { key: 'enrollment', label: 'Nhập học', onClick: () => navigate('/enrollment') },
-        { key: 'news', label: 'Tin tức', onClick: () => navigate('/news') },
+        { key: 'news', label: 'Tin tức', onClick: () => navigate('/') },
     ];
 
     return (
@@ -121,7 +121,7 @@ export const Header = () => {
                                         borderColor: COLORS.secondary,
                                         fontWeight: 'bold',
                                     }}
-                                    onClick={() => navigate('/admissions')}
+                                    onClick={() => navigate('/enrollment')}
                                 >
                                     Tuyển sinh
                                 </Button>
@@ -157,7 +157,7 @@ export const Header = () => {
                         }
                     }}
                 />
-                 <Space direction="vertical" style={{ width: '100%', marginTop: '24px' }}>
+                <Space direction="vertical" style={{ width: '100%', marginTop: '24px' }}>
                     <Button
                         type="default"
                         block
