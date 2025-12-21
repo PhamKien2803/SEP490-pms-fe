@@ -80,7 +80,8 @@ function SchedulesManagement() {
     const [selectedMonth, setSelectedMonth] = useState<number>(dayjs().month() + 1);
     const [scheduleData, setScheduleData] = useState<TScheduleDetailResponse>([]);
     const [currentWeekIndex, setCurrentWeekIndex] = useState(0);
-    const currentSchoolYear = dayjs().year().toString();
+    // const currentSchoolYear = dayjs().year().toString();
+    const [currentSchoolYear, setCurrentSchoolYear] = useState<string>(dayjs().year().toString());
     const [scheduleStatus, setScheduleStatus] = useState<'Dự thảo' | 'Xác nhận' | null>(null);
     const [scheduleId, setScheduleId] = useState<string | null>(null)
     const [editMode, setEditMode] = useState(false);
@@ -109,6 +110,14 @@ function SchedulesManagement() {
         index: number;
     } | null>(null);
 
+    const yearOptions = useMemo(() => {
+        const year = dayjs().year();
+        return [
+            { value: (year - 1).toString(), label: `Năm ${year - 1}` },
+            { value: year.toString(), label: `Năm ${year}` },
+            { value: (year + 1).toString(), label: `Năm ${year + 1}` },
+        ];
+    }, []);
 
     const handleActivityClick = (date: string, index: number) => {
         if (!editMode) return;
@@ -551,7 +560,16 @@ function SchedulesManagement() {
                             <Space>
                                 <ScheduleOutlined />
                                 {id ? 'Chỉnh sửa Lịch trình Tháng' : 'Quản lý Lịch trình Tháng'}
-                                <Text type="secondary">(Năm {currentSchoolYear})</Text>
+                                {/* <Text type="secondary">(Năm {currentSchoolYear})</Text> */}
+                                <Select
+                                    value={currentSchoolYear}
+                                    onChange={setCurrentSchoolYear}
+                                    options={yearOptions}
+                                    style={{ width: 120 }}
+                                    disabled={loading || !!id}
+                                    variant="borderless"
+                                    className="year-select-custom"
+                                />
                                 {scheduleStatus === 'Xác nhận' && <Tag color="success">ĐÃ XÁC NHẬN</Tag>}
                                 {scheduleStatus === 'Dự thảo' && <Tag color="blue">DỰ THẢO</Tag>}
                             </Space>
