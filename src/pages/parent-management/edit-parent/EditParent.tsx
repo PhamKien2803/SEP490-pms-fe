@@ -253,11 +253,11 @@ const EditParent: React.FC = () => {
                         </Form.Item>
                     </Col>
 
-                    <Col span={24}>
+                    {/* <Col span={24}>
                         <Form.Item label="Địa chỉ" name="address">
                             <Input.TextArea rows={3} placeholder="Nhập địa chỉ" />
                         </Form.Item>
-                    </Col>
+                    </Col> */}
                 </Row>
 
                 <Form.Item style={{ textAlign: "right" }}>
