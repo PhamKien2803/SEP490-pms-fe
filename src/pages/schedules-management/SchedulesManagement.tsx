@@ -621,7 +621,10 @@ function SchedulesManagement() {
                                     <Button
                                         type="primary"
                                         icon={<PlusOutlined />}
-                                        onClick={() => navigate(`${constants.APP_PREFIX}/schedules/create`)}
+                                        // onClick={() => navigate(`${constants.APP_PREFIX}/schedules/create`)}
+                                        onClick={() => navigate(`${constants.APP_PREFIX}/schedules/create`, {
+                                            state: { schoolYear: currentSchoolYear }
+                                        })}
                                     >
                                         Tạo lịch học
                                     </Button>

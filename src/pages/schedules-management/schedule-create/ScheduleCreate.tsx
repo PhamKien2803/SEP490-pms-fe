@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import {
     Card, Typography, Row, Col, Select, Spin, Tag, Space, Button,
-    theme, Alert, Flex, Input,
+    theme, Flex,
     Tooltip,
     Popover,
     List
@@ -23,7 +23,7 @@ import {
     ICreateSchedulePayload,
     AvailableActivityItem
 } from '../../../types/timetable';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import './ScheduleCreate.css';
 import { usePageTitle } from '../../../hooks/usePageTitle';
@@ -45,13 +45,14 @@ const ScheduleCreate = () => {
     usePageTitle('Tạo lịch học - Cá Heo Xanh');
     const { token } = useToken();
     const navigate = useNavigate();
-    const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>();
+    const location = useLocation();
+    // const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>();
     const [selectedMonth, setSelectedMonth] = useState<number>(dayjs().month() + 1);
     const [classId, setClassId] = useState<string>();
     const [classOptions, setClassOptions] = useState<{ label: string; value: string }[]>([]);
     const [fixedActivities, setFixedActivities] = useState<FixActivityResponseItem[]>([]);
     const [isLoadingFix, setIsLoadingFix] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [_, setError] = useState<string | null>(null);
     const [weekIndex, setWeekIndex] = useState(0);
     const [availableActivities, setAvailableActivities] = useState<AvailableActivityItem[]>([]);
     const [isFetchingActivities, setIsFetchingActivities] = useState(false);
@@ -69,6 +70,22 @@ const ScheduleCreate = () => {
     const dragStartX = useRef<number>(0);
     const scrollLeftStart = useRef<number>(0);
     const [popoverSlot, setPopoverSlot] = useState<{ date: string; startTime: number } | null>(null);
+
+    const passedSchoolYear = location.state?.schoolYear;
+
+    const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>(
+        passedSchoolYear || dayjs().year().toString()
+    );
+
+    const yearOptions = useMemo(() => {
+        const year = dayjs().year();
+        return [
+            { value: (year - 1).toString(), label: `Năm ${year - 1}` },
+            { value: year.toString(), label: `Năm ${year}` },
+            { value: (year + 1).toString(), label: `Năm ${year + 1}` },
+        ];
+    }, []);
+
 
     const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!scrollRef.current) return;
@@ -117,10 +134,10 @@ const ScheduleCreate = () => {
                 classId,
             });
             setFixedActivities(data);
-        } catch (err: any) {
-            const errorMsg = err?.response?.data?.message || 'Không thể tải hoạt động cố định.';
+        } catch (error) {
+            // const errorMsg = err?.response?.data?.message || 'Không thể tải hoạt động cố định.';
             typeof error === "string" ? toast.info(error) : toast.error('Không thể tải hoạt động cố định.');
-            setError(errorMsg);
+            // setError(errorMsg);
         } finally {
             setIsLoadingFix(false);
         }
@@ -356,7 +373,19 @@ const ScheduleCreate = () => {
                 <Row gutter={[16, 16]}>
                     <Col xs={24} sm={8}>
                         <Text strong className="schedule-create-filter-label">Năm học</Text>
-                        <Input value={selectedSchoolYear} readOnly className="schedule-create-filter-input" />
+                        {/* <Input value={selectedSchoolYear} readOnly className="schedule-create-filter-input" /> */}
+                        <Select
+                            className="schedule-create-filter-input"
+                            value={selectedSchoolYear}
+                            onChange={(val) => {
+                                setSelectedSchoolYear(val);
+                                setSelectedMonth(1);
+                                setWeekIndex(0);
+                            }}
+                            options={yearOptions}
+                            disabled={isLoadingFix}
+                            style={{ width: '100%' }}
+                        />
                     </Col>
                     <Col xs={24} sm={8}>
                         <Text strong className="schedule-create-filter-label">Tháng</Text>
@@ -420,7 +449,7 @@ const ScheduleCreate = () => {
                 </Button>
             </Flex>
 
-            {error && <Alert message="Lỗi" description={error} type="error" showIcon style={{ marginBottom: 16 }} />}
+            {/* {error && <Alert message="Lỗi" description={error} type="error" showIcon style={{ marginBottom: 16 }} />} */}
             <Spin spinning={isLoadingFix && fixedActivities.length === 0}> {/* Show spinner only when loading initial data */}
                 <div
                     ref={scrollRef}
