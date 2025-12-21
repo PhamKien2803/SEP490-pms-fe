@@ -26,17 +26,17 @@ const SchoolInfo: React.FC = () => {
         {
             icon: <MailOutlined style={{ color: '#1890ff' }} />,
             title: 'Email hỗ trợ',
-            content: 'tuyensinh@dolphinpreschool.edu.vn',
+            content: 'info.littledolphins.preschool@gmail.com',
         },
         {
             icon: <GlobalOutlined style={{ color: '#1890ff' }} />,
             title: 'Website chính thức',
-            content: 'www.dolphinpreschool.edu.vn',
+            content: 'https://www.dolphin-pms.id.vn/',
         },
         {
             icon: <HomeOutlined style={{ color: '#1890ff' }} />,
             title: 'Địa chỉ',
-            content: 'Số 5, Văn quán - Hà Đông - Hà Nội',
+            content: 'Số 34A TT5 Khu Đô Thị Văn Quán, Hà Đông, Hà Nội',
         },
     ];
 
