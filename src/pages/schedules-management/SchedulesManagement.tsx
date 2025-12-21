@@ -565,7 +565,11 @@ function SchedulesManagement() {
                                 {/* <Text type="secondary">(Năm {currentSchoolYear})</Text> */}
                                 <Select
                                     value={currentSchoolYear}
-                                    onChange={setCurrentSchoolYear}
+                                    // onChange={setCurrentSchoolYear}
+                                    onChange={(yearValue) => {
+                                        setCurrentSchoolYear(yearValue);
+                                        setSelectedMonth(1);
+                                    }}
                                     options={yearOptions}
                                     style={{ width: 120 }}
                                     disabled={loading || !!id}
