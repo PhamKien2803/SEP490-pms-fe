@@ -93,7 +93,7 @@ function SchedulesManagement() {
     const [isConfirmVisible, setIsConfirmVisible] = useState(false);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [originalScheduleData, setOriginalScheduleData] = useState<TScheduleDetailResponse>([]);
-    const currentYear = dayjs().year();
+    // const currentYear = dayjs().year();
     const scrollRef = useRef<HTMLDivElement>(null);
     const dragStateRef = useRef({ isDragging: false, startX: 0, scrollLeftStart: 0 });
     const [isPreview, setIsPreview] = useState(false);
@@ -365,8 +365,6 @@ function SchedulesManagement() {
     };
 
 
-
-
     useEffect(() => {
         if (selectedClassId && selectedMonth && !id) {
             fetchScheduleData();
@@ -526,16 +524,20 @@ function SchedulesManagement() {
         // Set new auto-save timer
         autoSaveTimerRef.current = setTimeout(() => {
             handleSaveTemporarySchedule();
-        }, 3000); // ⏱️ Auto-save sau 3 giây không thay đổi
+        }, 3000); // Auto-save sau 3 giây không thay đổi
     }, [scheduleData, isPreview, editMode]);
 
 
-
+    // const weeklyGroupedDays = useMemo(() => {
+    //     if (!scheduleData.length) return [];
+    //     return groupDaysByWeek(scheduleData, currentYear, selectedMonth);
+    // }, [scheduleData, currentYear, selectedMonth]);
 
     const weeklyGroupedDays = useMemo(() => {
         if (!scheduleData.length) return [];
-        return groupDaysByWeek(scheduleData, currentYear, selectedMonth);
-    }, [scheduleData, currentYear, selectedMonth]);
+        const yearToFilter = parseInt(currentSchoolYear);
+        return groupDaysByWeek(scheduleData, yearToFilter, selectedMonth);
+    }, [scheduleData, currentSchoolYear, selectedMonth]); // Thêm currentSchoolYear vào dependency
 
     useEffect(() => {
         setCurrentWeekIndex(0);
@@ -588,12 +590,12 @@ function SchedulesManagement() {
                             >
                                 {classes.map(cls => (
                                     <Option
-                                        key={cls._id}
-                                        value={cls._id}
-                                        label={`${cls.className} - ${cls.age} tuổi`}
+                                        key={cls?._id}
+                                        value={cls?._id}
+                                        label={`${cls?.className} - ${cls?.age} tuổi`}
                                     >
                                         <div style={{ fontSize: 14, whiteSpace: "normal" }}>
-                                            {`${cls.className} - ${cls.age} tuổi`}
+                                            {`${cls?.className} - ${cls?.age} tuổi`}
                                         </div>
                                     </Option>
                                 ))}
@@ -772,41 +774,41 @@ function SchedulesManagement() {
                                     <div className="week-days-flex-row">
                                         {currentWeek.days.map(day => (
                                             <div
-                                                key={day.date}
+                                                key={day?.date}
                                                 className="day-column-card"
                                             >
                                                 <div
                                                     className="day-column-header"
                                                     style={{
-                                                        ...(day.isHoliday ? {
+                                                        ...(day?.isHoliday ? {
                                                             backgroundColor: '#fff1f0',
                                                             color: '#cf1322',
                                                             borderBottomColor: '#ffccc7'
                                                         } : {})
                                                     }}
                                                 >
-                                                    <Text strong>{dayjs(day.date).format('dddd, DD/MM')}</Text>
+                                                    <Text strong>{dayjs(day?.date).format('dddd, DD/MM')}</Text>
                                                 </div>
 
                                                 <div
                                                     className="day-activities-list"
                                                     style={{
-                                                        ...(day.isHoliday ? { backgroundColor: '#fff1f0' } : {})
+                                                        ...(day?.isHoliday ? { backgroundColor: '#fff1f0' } : {})
                                                     }}
                                                 >
-                                                    {day.isHoliday ? (
+                                                    {day?.isHoliday ? (
                                                         <Tag color="red" style={{ margin: '8px 0' }}>
-                                                            Ngày nghỉ lễ {day.notes ? `- ${day.notes}` : ''}
+                                                            Ngày nghỉ lễ {day?.notes ? `- ${day?.notes}` : ''}
                                                         </Tag>
-                                                    ) : day.activities.length === 0 ? (
+                                                    ) : day?.activities.length === 0 ? (
                                                         <Text type="secondary" italic>Chưa có hoạt động</Text>
                                                     ) : (
                                                         <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                                                            {day.activities.map((item, index) => {
+                                                            {day?.activities.map((item, index) => {
                                                                 const isFrozen = item.type === 'Cố định';
                                                                 const isSelected =
-                                                                    (selectedActivity1?.date === day.date && selectedActivity1.index === index) ||
-                                                                    (selectedActivity2?.date === day.date && selectedActivity2.index === index);
+                                                                    (selectedActivity1?.date === day.date && selectedActivity1?.index === index) ||
+                                                                    (selectedActivity2?.date === day.date && selectedActivity2?.index === index);
 
                                                                 const isSwappable = editMode && !isFrozen;
 
@@ -840,7 +842,7 @@ function SchedulesManagement() {
                                                                     >
                                                                         {/* Thời gian */}
                                                                         <Text strong style={{ fontSize: 13 }}>
-                                                                            {formatMinutesToTime(item.startTime)} - {formatMinutesToTime(item.endTime)}
+                                                                            {formatMinutesToTime(item?.startTime)} - {formatMinutesToTime(item?.endTime)}
                                                                         </Text>
 
                                                                         {/* Nội dung hoạt động */}
@@ -851,29 +853,29 @@ function SchedulesManagement() {
                                                                                 color: isFrozen ? '#888' : undefined,
                                                                             }}
                                                                         >
-                                                                            {item.activityName || <Text type="secondary" italic>Chưa có hoạt động</Text>}
+                                                                            {item?.activityName || <Text type="secondary" italic>Chưa có hoạt động</Text>}
                                                                         </Paragraph>
 
                                                                         {/* Tag */}
-                                                                        {item.type && (
+                                                                        {item?.type && (
                                                                             <Tag
                                                                                 className="activity-item-tag"
                                                                                 color={
-                                                                                    item.type === 'Cố định'
+                                                                                    item?.type === 'Cố định'
                                                                                         ? 'default'
-                                                                                        : item.type === 'Bình thường'
+                                                                                        : item?.type === 'Bình thường'
                                                                                             ? 'green'
-                                                                                            : item.type === 'Sự kiện'
+                                                                                            : item?.type === 'Sự kiện'
                                                                                                 ? 'purple'
                                                                                                 : 'blue'
                                                                                 }
                                                                             >
-                                                                                {item.type}
+                                                                                {item?.type}
                                                                             </Tag>
                                                                         )}
 
                                                                         {/* Nút Xóa */}
-                                                                        {editMode && item.type !== 'Cố định' && (
+                                                                        {editMode && item?.type !== 'Cố định' && (
                                                                             <Tooltip title="Xóa nội dung hoạt động">
                                                                                 <CloseCircleOutlined
                                                                                     className="activity-item-delete-btn"
@@ -901,7 +903,7 @@ function SchedulesManagement() {
                                                                                             dataSource={availableActivities}
                                                                                             renderItem={(act) => (
                                                                                                 <List.Item
-                                                                                                    key={act._id}
+                                                                                                    key={act?._id}
                                                                                                     className="popover-activity-item"
                                                                                                     onClick={() => {
                                                                                                         handleSelectActivity(act._id);
@@ -909,8 +911,8 @@ function SchedulesManagement() {
                                                                                                     }}
                                                                                                 >
                                                                                                     <div>
-                                                                                                        <strong>{act.activityName}</strong>
-                                                                                                        {act.type === 'Sự kiện' && act.eventName ? ` (${act.eventName})` : ''} - [{act.type}]
+                                                                                                        <strong>{act?.activityName}</strong>
+                                                                                                        {act?.type === 'Sự kiện' && act?.eventName ? ` (${act.eventName})` : ''} - [{act.type}]
                                                                                                     </div>
                                                                                                 </List.Item>
                                                                                             )}
