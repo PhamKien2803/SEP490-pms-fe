@@ -185,7 +185,7 @@ const DetailGuardian: React.FC<DetailGuardianProps> = ({
         kết & Ghi chú
       </Title>
       <Descriptions column={1} layout="vertical" size="small">
-        <Descriptions.Item label="Học sinh liên quan">
+        {/* <Descriptions.Item label="Học sinh liên quan">
           {renderValue(
             typeof guardianRecord.studentId !== "string" ? (
               <Text strong>{guardianRecord.studentId.fullName}</Text>
@@ -193,7 +193,7 @@ const DetailGuardian: React.FC<DetailGuardianProps> = ({
               <Text type="secondary">N/A</Text>
             )
           )}
-        </Descriptions.Item>
+        </Descriptions.Item> */}
         <Descriptions.Item label="Phụ huynh (Chủ quản)">
           {renderValue(
             typeof guardianRecord.parentId !== "string" &&

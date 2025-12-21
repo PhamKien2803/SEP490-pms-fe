@@ -236,7 +236,7 @@ const CheckIn: React.FC = () => {
                   loading={isLoading && listChild.length === 0}
                 >
                   {listChild.map((student) => (
-                    <Option key={student._id} value={student._id}>
+                    <Option key={student?._id} value={student?._id}>
                       {student?.fullName} ({student?.studentCode})
                     </Option>
                   ))}
@@ -388,7 +388,7 @@ const CheckIn: React.FC = () => {
                       </Text>
                     }
                   >
-                    {checkIn.generalNote ? (
+                    {checkIn?.generalNote ? (
                       <Text italic style={{ fontSize: "1em" }}>
                         "{checkIn?.generalNote}"
                       </Text>
