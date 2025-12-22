@@ -265,7 +265,7 @@ function Payment() {
                     </Col>
                 </Row>
 
-                <Button
+                {/* <Button
                     type="primary"
                     size="large"
                     href={paymentData.paymentUrl}
@@ -274,7 +274,7 @@ function Payment() {
                     style={{ marginTop: 40 }}
                 >
                     Chuyển đến trang thanh toán PayOS (Nếu không thể quét QR)
-                </Button>
+                </Button> */}
 
             </Card>
         </div>
